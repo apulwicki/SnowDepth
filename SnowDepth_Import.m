@@ -73,5 +73,12 @@ SD3 = [SD3(:,2),SD3(:,4),SD3(:,6),SD3(:,8),SD3(:,1)];
     ZZ_Date = categorical(ZZtext(:,7));                         %Date meaurement was taken
 ZZ = [zeros(length(ZZ),1),ZZ];                              %[zeros(will be WP#), distance data, depth, quality]
 %Depth data from SWE and snowpits
-ExtraSD_Glacier = categorical(ExtraSDtext(:,44));           %%Glacier (G13, G02, G04)
-                   
+    ExtraSD_Glacier = categorical(ExtraSDtext(:,44));           %%Glacier (G13, G02, G04)
+    C = cell(size(ExtraSD_Glacier));
+    C(:) = {'ZZ'};
+    ExtraSD_Pattern = categorical(C);
+    ExtraSD_Person = categorical(C);
+    ExtraSD_Book = categorical(C);
+    C(:) = {'1'};
+    ExtraSD_Q = categorical(C);
+        clear C

@@ -1,5 +1,9 @@
 function z = pulldata(data, book, glacier, person, pattern, quality, format)
 
+    %Note that you cannot get transect and zigzag data together, must run
+    %two pulldata function with transect and zigzagvalues separately
+
+
 % Set categories if 'all' is selected for glacier, person, or pattern
 if strcmp(glacier,'all')
     glacier = {'G13','G02','G04'};
@@ -15,24 +19,32 @@ end
 
 % Set which SD books to look through
 if strcmp(book,'all')
-    value = 1:size(data,2);
+    range = 1:size(data,2)-1;
 elseif strcmp(book,'SD1')
-    value = 1;
+    range = 1;
     data(2).depth = nan(size(data(2).depth));
     data(3).depth = nan(size(data(3).depth));
+    data(4).depth = nan(size(data(4).depth));
 elseif strcmp(book,'SD2') 
-    value = 2;
+    range = 2;
     data(1).depth = nan(size(data(1).depth));
     data(3).depth = nan(size(data(3).depth));
+    data(4).depth = nan(size(data(4).depth));
 elseif strcmp(book,'SD3')
-    value = 3;
+    range = 3;
     data(2).depth = nan(size(data(2).depth));
     data(1).depth = nan(size(data(1).depth));
+    data(4).depth = nan(size(data(4).depth));
+elseif strcmp(book,'ZZ')
+    range = 4;
+    data(2).depth = nan(size(data(2).depth));
+    data(1).depth = nan(size(data(1).depth));
+    data(3).depth = nan(size(data(3).depth));
 end
 
 % Make a new matrix with desired data
-for j = value;
-    for i = 1:length(data(1).depth)
+for j = range;
+    for i = 1:size(data(j).depth,1)
          if ~ismember(data(j).glacier(i,1),glacier) || ...
                     ~ismember(data(j).person(i,1),person) ||...
                     ~ismember(data(j).pattern(i,1),pattern); 
@@ -41,6 +53,8 @@ for j = value;
     end
     
     if strcmp(quality,'all')
+        continue
+    elseif size(data(j).Q,2) == 1
         continue
     elseif quality==1
         data(j).depth(data(j).Q(:,1)=='0',1)=nan; 
@@ -57,15 +71,16 @@ for j = value;
 end
 
 if strcmp(format,'fat')
-    filtered = [];
-    for j = value;
-        filterq = [isnan(data(j).depth(:,1)), isnan(data(j).depth(:,2)), ...
-                    isnan(data(j).depth(:,3)), isnan(data(j).depth(:,4))];
-        filterq(sum(filterq,2)==4,5) = 0; filterq(sum(filterq,2)<4,5) = 1;
-        filterq(:,1:4) = [];
-        filtered = [filtered; data(j).depth(filterq,:)];
+    if strcmp(book,'ZZ')
+            filtered = [data(4).depth(:,2:42), data(4).depth(:,46:47)];
+            filtered(all(isnan(filtered),2),:) = [];
+    elseif strcmp(book,'all')
+        filtered = [data(1).depth; data(2).depth; data(3).depth];
+    else 
+        filtered = data(range).depth;
     end
-    z = struct('depth',{data(1).depth, data(2).depth, data(3).depth, filtered});
+    filtered(all(isnan(filtered(:,1:4)),2),:) = [];
+    z = struct('depth',{data(1).depth, data(2).depth, data(3).depth, data(4).depth, filtered});
     
 elseif strcmp(format,'skinny') %Compile all data into vectors (nx1)
     f1 = 'depth';    v1 =  [data(1).depth(:,1); data(1).depth(:,2); data(1).depth(:,3); data(1).depth(:,4);

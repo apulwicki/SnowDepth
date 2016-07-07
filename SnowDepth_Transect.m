@@ -63,31 +63,25 @@ end
 clear i 
 
 
+field1 = 'raw';         value1 = {SD1raw, SD2raw, SD3raw, ExtraSDraw};
+field2 = 'depth';       value2 = {SD1, SD2, SD3, ExtraSD};
+field3 = 'glacier';     value3 = {SD1_Glacier, SD2_Glacier, SD3_Glacier, ExtraSD_Glacier};
+field4 = 'pattern';     value4 = {SD1_Pattern, SD2_Pattern, SD3_Pattern, ExtraSD_Pattern};
+field5 = 'person';      value5 = {SD1_Person, SD2_Person, SD3_Person, ExtraSD_Person};
+field6 = 'Q';           value6 = {SD1_Q, SD2_Q, SD3_Q, ExtraSD_Q};
+field7 = 'book';        value7 = {SD1_Book, SD2_Book, SD3_Book, ExtraSD_Book};
+
+SD = struct(field1,value1,field2,value2,field3,value3,field4,value4,...
+    field5,value5,field6,value6,field7,value7);
+clear value* field* SD1* SD2* SD3* ExtraSD*
 
 %% Basic Stats
 
 % Get mean of SD measurements in one spot
-SD1Mean = nanmean([SD(1).depth(:,1),SD(1).depth(:,2),SD(1).depth(:,3),SD(1).depth(:,4)],2);
-SD2Mean = nanmean([SD(2).depth(:,1),SD(2).depth(:,2),SD(2).depth(:,3),SD(2).depth(:,4)],2);
-SD3Mean = nanmean([SD(3).depth(:,1),SD(3).depth(:,2),SD(3).depth(:,3),SD(3).depth(:,4)],2);
 ExtraSDMean = nanmean(ExtraSD(:,2:43),2);
 
 % Standard deviation of three (or four) measurements
-SD1std = nanstd([SD(1).depth(:,1),SD(1).depth(:,2),SD(1).depth(:,3),SD(1).depth(:,4)],1,2); %std normalized by n
-SD2std = nanstd([SD(2).depth(:,1),SD(2).depth(:,2),SD(2).depth(:,3),SD(2).depth(:,4)],1,2);
-SD3std = nanstd([SD(3).depth(:,1),SD(3).depth(:,2),SD(3).depth(:,3),SD(3).depth(:,4)],1,2);
 ExtraSDstd = nanstd(ExtraSD(:,2:43),1,2);
-
-%Select only good quality (Q=1) data
-% SD1good = SD1; SD1good(SD1_Q(:,1)=='0',1)=nan; SD1good(SD1_Q(:,2)=='0',2)=nan;
-%     SD1good(SD1_Q(:,3)=='0',3)=nan; SD1good(SD1_Q(:,4)=='0',4)=nan; %make data where nans replace bad data
-% SD2good = SD2; SD2good(SD2_Q(:,1)=='0',1)=nan; SD2good(SD2_Q(:,2)=='0',2)=nan;
-%     SD2good(SD2_Q(:,3)=='0',3)=nan; SD2good(SD2_Q(:,4)=='0',4)=nan;
-% SD3good = SD3; SD3good(SD3_Q(:,1)=='0',1)=nan; SD3good(SD3_Q(:,2)=='0',2)=nan;
-%     SD3good(SD3_Q(:,3)=='0',3)=nan; SD3good(SD3_Q(:,4)=='0',4)=nan;
-% SD1std_good = nanstd([SD1good(:,1),SD1good(:,2),SD1good(:,3),SD1good(:,4)],1,2); %std normalized by n
-% SD2std_good = nanstd([SD2good(:,1),SD2good(:,2),SD2good(:,3),SD2good(:,4)],1,2);
-% SD3std_good = nanstd([SD3good(:,1),SD3good(:,2),SD3good(:,3),SD3good(:,4)],1,2);
 
 plot(SD3(:,5),SD3std_good)
 nanmean(SD3std_good)
@@ -96,33 +90,29 @@ nanmean(SD3std_good)
 
 %% function test
 
-field1 = 'raw';         value1 = {SD1raw,SD2raw,SD3raw};
-field2 = 'depth';       value2 = {SD1,SD2,SD3};
-field3 = 'glacier';     value3 = {SD1_Glacier,SD2_Glacier,SD3_Glacier};
-field4 = 'pattern';     value4 = {SD1_Pattern,SD2_Pattern,SD3_Pattern};
-field5 = 'person';      value5 = {SD1_Person,SD2_Person,SD3_Person};
-field6 = 'Q';           value6 = {SD1_Q,SD2_Q,SD3_Q};
-field7 = 'book';        value7 = {SD1_Book,SD2_Book,SD3_Book};
-field8 = 'mean';        value8 = {SD1Mean,SD2Mean,SD3,Mean};
-field9 = 'std';         
-SD = struct(field1,value1,field2,value2,field3,value3,field4,value4,...
-    field5,value5,field6,value6,field7,value7);
-clear value* field*
+    %pulldata(data, book, glacier, person, pattern, quality, format)
+%z = pulldata(SD,'ZZ','G04','ZZ','ZZ',1,'fat');
+z = pulldata(SD,'SD1','G04','AP','UT',1,'fat');
 
-z = pulldata(SD,'SD1','G04','AP','UT',1,'skinny');
-
-
+SDmean = nanmean(z(4).depth(:,1:4),2);
+SDstd = nanstd(z(4).depth(:,1:4),1,2);  %std normalized by n
 %% Variogram - transect
 
 glacier = 'G13'; %select data from chosen glacier
-x = [SD1(SD1_Glacier==glacier,6);   SD2(SD2_Glacier==glacier,6); ...
-        SD3(SD3_Glacier==glacier,6);    ExtraSD(ExtraSD_Glacier==glacier,46)]; %easting
-x2 = nanmax(x)-x; %convert easting to distance in m
-y = [SD1(SD1_Glacier==glacier,7);   SD2(SD2_Glacier==glacier,7);...
-        SD3(SD3_Glacier==glacier,7);    ExtraSD(ExtraSD_Glacier==glacier,47)]; %northing
-y2 = nanmax(y)-y; %convert easting to distance in m
-z = [SD1Mean(SD1_Glacier==glacier,1); SD2Mean(SD2_Glacier==glacier,1);...
-        SD3Mean(SD3_Glacier==glacier,1);    ExtraSDMean(ExtraSD_Glacier==glacier,1)]; %mean snow dpeth
+% x = [SD1(SD1_Glacier==glacier,6);   SD2(SD2_Glacier==glacier,6); ...
+%         SD3(SD3_Glacier==glacier,6);    ExtraSD(ExtraSD_Glacier==glacier,46)]; %easting
+% x2 = nanmax(x)-x; %convert easting to distance in m
+% y = [SD1(SD1_Glacier==glacier,7);   SD2(SD2_Glacier==glacier,7);...
+%         SD3(SD3_Glacier==glacier,7);    ExtraSD(ExtraSD_Glacier==glacier,47)]; %northing
+% y2 = nanmax(y)-y; %convert easting to distance in m
+% z = [SD1Mean(SD1_Glacier==glacier,1); SD2Mean(SD2_Glacier==glacier,1);...
+%         SD3Mean(SD3_Glacier==glacier,1);    ExtraSDMean(ExtraSD_Glacier==glacier,1)]; %mean snow dpeth
+
+%z = pulldata(data, book, glacier, person, pattern, quality, format)
+z = pulldata(SD,'all','G13','all','all','1','fat');    
+x = z(4).depth(:,6); x2 = nanmax(x)-x; %convert easting to distance in m
+y = z(4).depth(:,7); y2 = nanmax(y)-y; %convert easting to distance in m
+z = nanmean(z(4).depth(:,1:4),2);
 
 if ishandle(f1) %clears data from open plots
     clf(f1); clf(f2);
