@@ -77,25 +77,20 @@ clear value* field* SD1* SD2* SD3* ExtraSD*
 
 %% Basic Stats
 
-% Get mean of SD measurements in one spot
-ExtraSDMean = nanmean(ExtraSD(:,2:43),2);
-
-% Standard deviation of three (or four) measurements
-ExtraSDstd = nanstd(ExtraSD(:,2:43),1,2);
-
-plot(SD3(:,5),SD3std_good)
-nanmean(SD3std_good)
-    %mean std of all 4.4367
     
 
-%% function test
+%% Function test
 
     %pulldata(data, book, glacier, person, pattern, quality, format)
 %z = pulldata(SD,'ZZ','G04','ZZ','ZZ',1,'fat');
 z = pulldata(SD,'SD1','G04','AP','UT',1,'fat');
 
-SDmean = nanmean(z(4).depth(:,1:4),2);
-SDstd = nanstd(z(4).depth(:,1:4),1,2);  %std normalized by n
+SDmean = nanmean(z(5).depth(:,1:4),2);
+SDstd = nanstd(z(5).depth(:,1:4),1,2);  %std normalized by n
+
+errorbar(z(5).depth(:,5), SDmean, SDstd)
+xlabel('Waypoint number')
+ylabel('Mean snowdepth (cm)')
 %% Variogram - transect
 
 glacier = 'G13'; %select data from chosen glacier
@@ -110,13 +105,13 @@ glacier = 'G13'; %select data from chosen glacier
 
 %z = pulldata(data, book, glacier, person, pattern, quality, format)
 z = pulldata(SD,'all','G13','all','all','1','fat');    
-x = z(4).depth(:,6); x2 = nanmax(x)-x; %convert easting to distance in m
-y = z(4).depth(:,7); y2 = nanmax(y)-y; %convert easting to distance in m
-z = nanmean(z(4).depth(:,1:4),2);
+x = z(5).depth(:,6); x2 = nanmax(x)-x; %convert easting to distance in m
+y = z(5).depth(:,7); y2 = nanmax(y)-y; %convert easting to distance in m
+z = nanmean(z(5).depth(:,1:4),2);
 
-if ishandle(f1) %clears data from open plots
-    clf(f1); clf(f2);
-end
+% if ishandle(f1) %clears data from open plots
+%     clf(f1); clf(f2);
+% end
 
 %Variogram
 f1 = figure(1); 

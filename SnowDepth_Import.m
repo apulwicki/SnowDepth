@@ -12,25 +12,31 @@ run MeasurementLocations.m  %This program determines the easting and northing of
 
 %Import data from excel sheet (change path based on computer)
     %[SD1, SD1text, SD1raw] = xlsread('/Volumes/GlacierAlex/Data/FieldDataRevisedAP.xlsx','SD#1','A1:O833'); %Import values, text, and raw data from first sheet
-    [SD1, SD1text, SD1raw] = xlsread('/media/glaciology1/GlacierAlex/Data/FieldDataRevisedAP.xlsx','SD#1','A1:O833'); %Import values, text, and raw data from first sheet
+    %[SD1, SD1text, SD1raw] = xlsread('/media/glaciology1/GlacierAlex/Data/FieldDataRevisedAP.xlsx','SD#1','A1:O833'); %Import values, text, and raw data from first sheet
+    [SD1, SD1text, SD1raw] = xlsread('FieldDataRevisedAP.xlsx','SD#1','A1:O833'); %Import values, text, and raw data from first sheet
     SD1text(1,:) = []; %Remaining text in sheet 1
     SD1(:,10) = []; %Remove comments column (not sure why it imports here)
     %[SD2, SD2text, SD2raw] = xlsread('/Volumes/GlacierAlex/Data/FieldDataRevisedAP.xlsx','SD#2','A1:O832');
-    [SD2, SD2text, SD2raw] = xlsread('/media/glaciology1/GlacierAlex/Data/FieldDataRevisedAP.xlsx','SD#2','A1:O832');
+    %[SD2, SD2text, SD2raw] = xlsread('/media/glaciology1/GlacierAlex/Data/FieldDataRevisedAP.xlsx','SD#2','A1:O832');
+    [SD2, SD2text, SD2raw] = xlsread('FieldDataRevisedAP.xlsx','SD#2','A1:O832');
     SD2text(1,:) = [];
     %[SD3, SD3text, SD3raw] = xlsread('/Volumes/GlacierAlex/Data/FieldDataRevisedAP.xlsx','SD#3','A1:O675'); 
-    [SD3, SD3text, SD3raw] = xlsread('/media/glaciology1/GlacierAlex/Data/FieldDataRevisedAP.xlsx','SD#3','A1:O675'); 
+    %[SD3, SD3text, SD3raw] = xlsread('/media/glaciology1/GlacierAlex/Data/FieldDataRevisedAP.xlsx','SD#3','A1:O675'); 
+    [SD3, SD3text, SD3raw] = xlsread('FieldDataRevisedAP.xlsx','SD#3','A1:O675'); 
     SD3text(1,:) = [];
     %[ZZ, ZZtext, ZZraw] = xlsread('/Volumes/GlacierAlex/Data/FieldDataRevisedAP.xlsx','ZigZag','A1:H1653'); 
-    [ZZ, ZZtext, ZZraw] = xlsread('/media/glaciology1/GlacierAlex/Data/FieldDataRevisedAP.xlsx','ZigZag','A1:H1653'); 
+    %[ZZ, ZZtext, ZZraw] = xlsread('/media/glaciology1/GlacierAlex/Data/FieldDataRevisedAP.xlsx','ZigZag','A1:H1653'); 
+    [ZZ, ZZtext, ZZraw] = xlsread('FieldDataRevisedAP.xlsx','ZigZag','A1:H1653'); 
     ZZtext(1,:) = [];
     %[ExtraSD, ExtraSDtext, ExtraSDraw] = xlsread('/Volumes/GlacierAlex/Data/FieldDataRevisedAP.xlsx','SWEDepth','A1:AU38'); 
-    [ExtraSD, ExtraSDtext, ExtraSDraw] = xlsread('/media/glaciology1/GlacierAlex/Data/FieldDataRevisedAP.xlsx','SWEDepth','A1:AU38'); 
+    %[ExtraSD, ExtraSDtext, ExtraSDraw] = xlsread('/media/glaciology1/GlacierAlex/Data/FieldDataRevisedAP.xlsx','SWEDepth','A1:AU38'); 
+    [ExtraSD, ExtraSDtext, ExtraSDraw] = xlsread('FieldDataRevisedAP.xlsx','SWEDepth','A1:AU38'); 
     ExtraSDtext(1,:) = [];
 
 %Import vertex waypoints
     %[~,~,Vertex_cord] = xlsread('/Volumes/GlacierAlex/QGIS/Donjek Glaciers/Sampling/zigzag_corners_utm.xls');
-    [~,~,Vertex_cord] = xlsread('/media/glaciology1/GlacierAlex/QGIS/Donjek Glaciers/Sampling/zigzag_corners_utm.xls');
+    %[~,~,Vertex_cord] = xlsread('/media/glaciology1/GlacierAlex/QGIS/Donjek Glaciers/Sampling/zigzag_corners_utm.xls');
+    [~,~,Vertex_cord] = xlsread('/home/glaciology1/Documents/QGIS/Donjek Glaciers/Sampling/zigzag_corners_utm.xls');
 
 %% Categorizing data
 
