@@ -81,10 +81,11 @@ ZZ = [zeros(length(ZZ),1),ZZ];                              %[zeros(will be WP#)
 %Depth data from SWE and snowpits
     ExtraSD_Glacier = categorical(ExtraSDtext(:,44));           %%Glacier (G13, G02, G04)
     C = cell(size(ExtraSD_Glacier));
-    C(:) = {'ZZ'};
+    C(:) = {'Extra'};
     ExtraSD_Pattern = categorical(C);
     ExtraSD_Person = categorical(C);
     ExtraSD_Book = categorical(C);
     C(:) = {'1'};
     ExtraSD_Q = categorical(C);
         clear C
+               

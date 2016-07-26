@@ -19,7 +19,7 @@ for i = 1:size(SD3,1)
     SD3(i,6:7) = closest(ind(3),1:2);
 end
 
-clear ind i 
+clear ind i closest
 
 % Getting all waypoints in SD1, SD2, and SD3 data (empty for ones not 
 % measured). This allows SD matrices to be the same size and have aligned
@@ -34,7 +34,7 @@ for i=1:max(SD1(:,5))-3 %use WP range so that gaps can be filled
        SD1_Book = [SD1_Book(1:i-1,1); '<undefined>' ;SD1_Book(i:end,1)];
        SD1_Q = [SD1_Q(1:i-1,1:4);{'<undefined>', '<undefined>','<undefined>','<undefined>'};SD1_Q(i:end,1:4)];
        SD1raw = [SD1raw(1:i-1,:); repmat({NaN},1,15) ;SD1raw(i:end,:)]; %insert nan rows into cell arrays
-       SD1text = [SD1text(1:i-1,:); repmat({NaN},1,15) ;SD1text(i:end,:)];
+       SD1text = [SD1text(1:i-1,:); repmat({'None'},1,15) ;SD1text(i:end,:)];
    end
    if i+3~=SD2(i,5)
        SD2 = [SD2(1:i-1,:); nan,nan,nan,nan,i+3,nan,nan ;SD2(i:end,:)];
@@ -45,7 +45,7 @@ for i=1:max(SD1(:,5))-3 %use WP range so that gaps can be filled
        SD2_Book = [SD2_Book(1:i-1,1); '<undefined>' ;SD2_Book(i:end,1)];
        SD2_Q = [SD2_Q(1:i-1,1:4);{'<undefined>', '<undefined>','<undefined>','<undefined>'};SD2_Q(i:end,1:4)];
        SD2raw = [SD2raw(1:i-1,:); repmat({NaN},1,15) ;SD2raw(i:end,:)];
-       SD2text = [SD2text(1:i-1,:); repmat({NaN},1,15) ;SD2text(i:end,:)];
+       SD2text = [SD2text(1:i-1,:); repmat({'None'},1,15) ;SD2text(i:end,:)];
    end
    if i+3~=SD3(i,5)
        SD3 = [SD3(1:i-1,:); nan,nan,nan,nan,i+3,nan,nan ;SD3(i:end,:)];
@@ -56,11 +56,16 @@ for i=1:max(SD1(:,5))-3 %use WP range so that gaps can be filled
        SD3_Book = [SD3_Book(1:i-1,1); '<undefined>' ;SD3_Book(i:end,1)];
        SD3_Q = [SD3_Q(1:i-1,1:4);{'<undefined>', '<undefined>','<undefined>','<undefined>'};SD3_Q(i:end,1:4)];
        SD3raw = [SD3raw(1:i-1,:); repmat({NaN},1,15) ;SD3raw(i:end,:)];
-       SD3text = [SD3text(1:i-1,:); repmat({NaN},1,15) ;SD3text(i:end,:)];
+       SD3text = [SD3text(1:i-1,:); repmat({'None'},1,15) ;SD3text(i:end,:)];
    end
    
 end
 clear i 
+
+SD1text(find(cellfun(@isempty,SD1text(:,10))),10)={'None'};
+strmatch('Ice lens',SD1text(:,10))
+
+
 
 
 field1 = 'raw';         value1 = {SD1raw, SD2raw, SD3raw, ExtraSDraw};
@@ -70,48 +75,51 @@ field4 = 'pattern';     value4 = {SD1_Pattern, SD2_Pattern, SD3_Pattern, ExtraSD
 field5 = 'person';      value5 = {SD1_Person, SD2_Person, SD3_Person, ExtraSD_Person};
 field6 = 'Q';           value6 = {SD1_Q, SD2_Q, SD3_Q, ExtraSD_Q};
 field7 = 'book';        value7 = {SD1_Book, SD2_Book, SD3_Book, ExtraSD_Book};
+field8 = 'comments';    value8 = {SD1text(:,10), SD2text(:,10), SD3text(:,10), ExtraSDtext(:,43)};
 
 SD = struct(field1,value1,field2,value2,field3,value3,field4,value4,...
-    field5,value5,field6,value6,field7,value7);
+    field5,value5,field6,value6,field7,value7,field8,value8);
 clear value* field* SD1* SD2* SD3* ExtraSD*
+
+
 
 %% Basic Stats
 
-    
-
-%% Function test
-
     %pulldata(data, book, glacier, person, pattern, quality, format)
-%z = pulldata(SD,'ZZ','G04','ZZ','ZZ',1,'fat');
 z = pulldata(SD,'SD1','G04','AP','UT',1,'fat');
 
 SDmean = nanmean(z(5).depth(:,1:4),2);
 SDstd = nanstd(z(5).depth(:,1:4),1,2);  %std normalized by n
 
+figure
 errorbar(z(5).depth(:,5), SDmean, SDstd)
 xlabel('Waypoint number')
-ylabel('Mean snowdepth (cm)')
+ylabel('Mean snowdepth (cm)')    
+
+%% Function test
+
+    %pulldata(data, book, glacier, person, pattern, quality, format)
+z1 = pulldata(SD,'Extra','G04','Extra','Extra',1,'fat');
+z = pulldata(SD,'all','G04','all','all',1,'fat');
+
+SDmean = [nanmean(z(5).depth(:,1:4),2); nanmean(z1(5).depth(:,1:40),2)];
+SDstd = [nanstd(z(5).depth(:,1:4),1,2); nanstd(z1(5).depth(:,1:40),1,2)];  %std normalized by n
+
+
 %% Variogram - transect
 
 glacier = 'G13'; %select data from chosen glacier
-% x = [SD1(SD1_Glacier==glacier,6);   SD2(SD2_Glacier==glacier,6); ...
-%         SD3(SD3_Glacier==glacier,6);    ExtraSD(ExtraSD_Glacier==glacier,46)]; %easting
-% x2 = nanmax(x)-x; %convert easting to distance in m
-% y = [SD1(SD1_Glacier==glacier,7);   SD2(SD2_Glacier==glacier,7);...
-%         SD3(SD3_Glacier==glacier,7);    ExtraSD(ExtraSD_Glacier==glacier,47)]; %northing
-% y2 = nanmax(y)-y; %convert easting to distance in m
-% z = [SD1Mean(SD1_Glacier==glacier,1); SD2Mean(SD2_Glacier==glacier,1);...
-%         SD3Mean(SD3_Glacier==glacier,1);    ExtraSDMean(ExtraSD_Glacier==glacier,1)]; %mean snow dpeth
+    %z = pulldata(data, book, glacier, person, pattern, quality, format)
+z = pulldata(SD,'all',glacier,'all','all','1','fat'); %transect data  
+z1 = pulldata(SD,'Extra',glacier,'Extra','Extra',1,'fat'); %ExtraSD data from nontransect measurements
 
-%z = pulldata(data, book, glacier, person, pattern, quality, format)
-z = pulldata(SD,'all','G13','all','all','1','fat');    
-x = z(5).depth(:,6); x2 = nanmax(x)-x; %convert easting to distance in m
-y = z(5).depth(:,7); y2 = nanmax(y)-y; %convert easting to distance in m
-z = nanmean(z(5).depth(:,1:4),2);
+x = [z(5).depth(:,6);z1(5).depth(:,42)]; x2 = nanmax(x)-x; %convert easting to distance in m
+y = [z(5).depth(:,7);z1(5).depth(:,43)]; y2 = nanmax(y)-y; %convert easting to distance in m
+z = [nanmean(z(5).depth(:,1:4),2);nanmean(z1(5).depth(:,1:40),2)];
 
-% if ishandle(f1) %clears data from open plots
-%     clf(f1); clf(f2);
-% end
+if ishandle(f1) %clears data from open plots
+    clf(f1); clf(f2);
+end
 
 %Variogram
 f1 = figure(1); 

@@ -35,7 +35,7 @@ elseif strcmp(book,'SD3')
     data(2).depth = nan(size(data(2).depth));
     data(1).depth = nan(size(data(1).depth));
     data(4).depth = nan(size(data(4).depth));
-elseif strcmp(book,'ZZ')
+elseif strcmp(book,'Extra')
     range = 4;
     data(2).depth = nan(size(data(2).depth));
     data(1).depth = nan(size(data(1).depth));
@@ -71,7 +71,7 @@ for j = range;
 end
 
 if strcmp(format,'fat')
-    if strcmp(book,'ZZ')
+    if strcmp(book,'Extra')
             filtered = [data(4).depth(:,2:42), data(4).depth(:,46:47)];
             filtered(all(isnan(filtered),2),:) = [];
     elseif strcmp(book,'all')
