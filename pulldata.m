@@ -20,21 +20,25 @@ end
 % Set which SD books to look through
 if strcmp(book,'all')
     range = 1:size(data,2)-1;
+    display('This does not include "Extra" data')
 elseif strcmp(book,'SD1')
     range = 1;
     data(2).depth = nan(size(data(2).depth));
     data(3).depth = nan(size(data(3).depth));
     data(4).depth = nan(size(data(4).depth));
+    display('This does not include "Extra" data')
 elseif strcmp(book,'SD2') 
     range = 2;
     data(1).depth = nan(size(data(1).depth));
     data(3).depth = nan(size(data(3).depth));
     data(4).depth = nan(size(data(4).depth));
+    display('This does not include "Extra" data')
 elseif strcmp(book,'SD3')
     range = 3;
     data(2).depth = nan(size(data(2).depth));
     data(1).depth = nan(size(data(1).depth));
     data(4).depth = nan(size(data(4).depth));
+    display('This does not include "Extra" data')
 elseif strcmp(book,'Extra')
     range = 4;
     data(2).depth = nan(size(data(2).depth));
@@ -72,15 +76,19 @@ end
 
 if strcmp(format,'fat')
     if strcmp(book,'Extra')
-            filtered = [data(4).depth(:,2:42), data(4).depth(:,46:47)];
-            filtered(all(isnan(filtered),2),:) = [];
+        filtered = [data(4).depth(:,2:42), data(4).depth(:,46:47)];
+        filteredcomments = data(4).comments;
     elseif strcmp(book,'all')
         filtered = [data(1).depth; data(2).depth; data(3).depth];
+        filteredcomments = [data(1).comments; data(2).comments; data(3).comments];
     else 
         filtered = data(range).depth;
+        filteredcomments = data(range).comments;
     end
+    filteredcomments(all(isnan(filtered(:,1:4)),2),:) = [];
     filtered(all(isnan(filtered(:,1:4)),2),:) = [];
-    z = struct('depth',{data(1).depth, data(2).depth, data(3).depth, data(4).depth, filtered});
+    z = struct('depth',{data(1).depth, data(2).depth, data(3).depth, data(4).depth, filtered},...
+                'comments', {data(1).comments, data(2).comments, data(3).comments, data(4).comments, filteredcomments});
     
 elseif strcmp(format,'skinny') %Compile all data into vectors (nx1)
     f1 = 'depth';    v1 =  [data(1).depth(:,1); data(1).depth(:,2); data(1).depth(:,3); data(1).depth(:,4);
