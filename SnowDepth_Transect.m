@@ -18,7 +18,8 @@ ylabel('Mean snowdepth (cm)')
 
     %pulldata(data, book, glacier, person, pattern, quality, format)
 z1 = pulldata(SD,'Extra','all','Extra','Extra',1,'fat');
-z = pulldata(SD,'all','G04','all','all',1,'fat');
+z = pulldata(SD,'all','G04','all','all',1,'skinny');
+
 
 SDmean = [nanmean(z(5).depth(:,1:4),2); nanmean(z1(5).depth(:,1:40),2)];
 SDstd = [nanstd(z(5).depth(:,1:4),1,2); nanstd(z1(5).depth(:,1:40),1,2)];  %std normalized by n
@@ -28,13 +29,12 @@ SDstd = [nanstd(z(5).depth(:,1:4),1,2); nanstd(z1(5).depth(:,1:40),1,2)];  %std 
 z = pulldata(SD,'SD1','all','all','all','all','fat');
 SDmean = nanmean(z(5).depth(:,1:4),2);
 SDstd = nanstd(z(5).depth(:,1:4),1,2);
-
     %To search comments in all books you need to do them one at a time...
 expression = 'stream|channel';
 present = regexpi(z(5).comments, expression);
 waypoint = z(5).depth(~cellfun(@isempty,present),5);
-index = ismember(z(5).depth(:,5),waypoint);
-    
+index = ismember(z(5).depth(:,5),waypoint); 
+
 z(5).depth(index,1:4)
 %SDmean(index)
 %SDstd(index)
@@ -43,7 +43,23 @@ z(5).depth(index,1:4)
 all_comments = [num2cell(waypoint), z(5).comments(index,1)];
 
     clear expression present waypoint index
-    %% Variogram - transect
+    
+%% Std in vs out channel
+    %pulldata(data, book, glacier, person, pattern, quality, format)
+z = pulldata(SD,'all','all','all','all','all','fat');
+
+[fullSDmean, fullSDstd, all_comments] = commentsearch(z, 'stream|channel','in');
+
+figure(1)
+errorbar(fullSDmean(:,2), fullSDmean(:,1), fullSDstd(:,1),'o')
+    xlabel('Waypoint number')
+    ylabel('Mean snowdepth (cm)')    
+
+figure(2)
+scatter(fullSDstd(:,2),fullSDstd(:,1))
+    xlabel('Waypoint number')
+    ylabel('Standard deviation')    
+%% Variogram - transect
 
 glacier = 'G13'; %select data from chosen glacier
     %z = pulldata(data, book, glacier, person, pattern, quality, format)
@@ -105,46 +121,21 @@ end
     %Can only do for UT on G4 because it is continuous and evenly spaced data
     %Also for just one SD because they were taken every 60 m (for the most
     %part)
-glacier = 'G13';
-pattern = 'LM';
-z=[];
-for i = 1:length(SD1Mean)
-    if ismember(SD1_Glacier(i),glacier) && ismember(SD1_Pattern(i),pattern) %find values in desired glacier and pattern
-        z = [z; SD1Mean(i)]; %append data into a data matrix for plotting
-    end
-%     if ismember(SD2_Glacier(i),glacier) && ismember(SD2_Pattern(i),pattern)
-%         z = [z; SD2Mean(i)];
-%     end
-%     if ismember(SD3_Glacier(i),glacier) && ismember(SD3_Pattern(i),pattern)
-%         z = [z; SD3Mean(i)];
-%    end
-end
-autocorr(z,size(z,1)/4) %do autocorrelation of the data *change total lags with size of matrix
+    %z = pulldata(data, book, glacier, person, pattern, quality, format)
+z = pulldata(SD,'SD1','G02','all','UM','1','fat'); %transect data  
+SDmean = nanmean(z(5).depth(:,1:4),2);
+
+autocorr(SDmean,floor(size(SDmean,1)/4)) %do autocorrelation of the data *change total lags with size of matrix
 
 
 %% Stats between categories
 
-% %Compile all data into vectors (nx1)
-% allSD = [SD1(:,1); SD1(:,2); SD1(:,3); SD1(:,4);...
-%             SD2(:,1); SD2(:,2); SD2(:,3); SD2(:,4);...
-%             SD3(:,1); SD3(:,2); SD3(:,3); SD3(:,4)];
-% allSD_Person = [SD1_Person;SD1_Person;SD1_Person;SD1_Person;...
-%                 SD2_Person;SD2_Person;SD2_Person;SD2_Person;...
-%                 SD3_Person;SD3_Person;SD3_Person;SD3_Person];
-% allSD_Glacier = [SD1_Glacier;SD1_Glacier;SD1_Glacier;SD1_Glacier;...
-%                 SD2_Glacier;SD2_Glacier;SD2_Glacier;SD2_Glacier;...
-%                 SD3_Glacier;SD3_Glacier;SD3_Glacier;SD3_Glacier];        
-% allSD_Pattern = [SD1_Pattern;SD1_Pattern;SD1_Pattern;SD1_Pattern;...
-%                 SD2_Pattern;SD2_Pattern;SD2_Pattern;SD2_Pattern;...
-%                 SD3_Pattern;SD3_Pattern;SD3_Pattern;SD3_Pattern];    
-% allSD_Q = [SD1_Q(:,1);SD1_Q(:,2);SD1_Q(:,3);SD1_Q(:,4);...
-%                 SD2_Q(:,1);SD2_Q(:,2);SD2_Q(:,3);SD2_Q(:,4);...
-%                 SD3_Q(:,1);SD3_Q(:,2);SD3_Q(:,3);SD3_Q(:,4)];               
+z1 = pulldata(SD,'all','G02','all','UM','1','skinny'); 
+z2 = pulldata(SD,'all','G02','all','LM','1','skinny'); 
 
-group = allSD_Person; %chose category group
 
 %Mean SD and variance for each group
-[xbar,s2,grp] = grpstats(allSD,group,{'mean','var','gname'})
+[xbar,s2,grp] = grpstats([z1; z2],group,{'mean','var','gname'})
            
 %One-way ANOVA
 [~,~,stats] = anova1(allSD,group)

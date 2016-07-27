@@ -1,38 +1,42 @@
 %% Working with zigzag data
 
+%% Import data
+run SnowDepth_Import.m %Imports snow depth and measurement location data
+
+%%
 %Compute distance of each measurement from its vertex
-glacier_categories = categories(ZZ_Glacier);
-zone_categories = categories(ZZ_Zone);
+glacier_categories = categories(ZZ.glacier);
+zone_categories = categories(ZZ.zone);
 for k = 1:length(glacier_categories)
     glacier = glacier_categories(k);
     for j = 1:length(zone_categories)
         zone = zone_categories(j);
-        indpre = intersect(find(ZZ_Glacier==glacier),find(ZZ_Zone==zone));
+        indpre = intersect(find(ZZ.glacier==glacier),find(ZZ.zone==zone));
         for i = 1:8
             vertex = strcat('ZZ0',num2str(i));
-            ind = intersect(indpre,find(ZZ_Vertex==vertex));
+            ind = intersect(indpre,find(ZZ.vertexlabel==vertex));
             if isempty(ind)
                 continue
             else
-                ZZ(ind(1):ind(end),1) = cumsum(ZZ(ind,2));
+                ZZ.depth(ind(1):ind(end),1) = cumsum(ZZ.depth(ind,2));
             end
         end
     end
 end
 
 
-ZZ_cord = [strcat(ZZtext(:,1),'_',ZZtext(:,2),'_',ZZtext(:,3)),num2cell(ZZ(:,1))];
+ZZ_cord = [strcat(ZZ.text(:,1),'_',ZZ.text(:,2),'_',ZZ.text(:,3)),num2cell(ZZ.depth(:,1))];
     %use cell2mat to convert back to number
 
 for j = 1:length(ZZ_cord)
-    temp = strcmp(ZZ_cord(j,1),Vertex_cord(:,5));
+    temp = strcmp(ZZ_cord(j,1),ZZ.vertexcoord(:,5));
     tempind = find(temp,1);
-    easting = [cell2mat(Vertex_cord(tempind,1)), cell2mat(Vertex_cord(tempind+1,1))];
-    northing = [cell2mat(Vertex_cord(tempind,2)), cell2mat(Vertex_cord(tempind+1,2))];
+    easting = [cell2mat(ZZ.vertexcoord(tempind,1)), cell2mat(ZZ.vertexcoord(tempind+1,1))];
+    northing = [cell2mat(ZZ.vertexcoord(tempind,2)), cell2mat(ZZ.vertexcoord(tempind+1,2))];
 
-    if cell2mat(strfind(Vertex_cord(tempind,5),'8'))==12
-        easting = [cell2mat(Vertex_cord(tempind,1)), cell2mat(Vertex_cord(tempind-7,1))];
-        northing = [cell2mat(Vertex_cord(tempind,2)), cell2mat(Vertex_cord(tempind-7,2))];
+    if cell2mat(strfind(ZZ.vertexcoord(tempind,5),'8'))==12
+        easting = [cell2mat(ZZ.vertexcoord(tempind,1)), cell2mat(ZZ.vertexcoord(tempind-7,1))];
+        northing = [cell2mat(ZZ.vertexcoord(tempind,2)), cell2mat(ZZ.vertexcoord(tempind-7,2))];
     end
      % Create a series of points between two GPS locations 
     line = linspaceNDim([easting(1,1),northing(1,1)],[easting(1,2),northing(1,2)],1000);
@@ -49,9 +53,10 @@ for j = 1:length(ZZ_cord)
 end
 clear distinterp index i j line temp tempind easting northing ind indpre zone glacier vertex
 
-ZZ_cord = [ZZ_cord, num2cell(ZZ(:,3))];
+ZZ_cord = [ZZ_cord, num2cell(ZZ.depth(:,3))];
 
 %% Plotting zigzag data
+
 GZZ = [1,153,321,489,685,848,1004,1165,1314,1485,1653];
 GZZ_lab = ['G04 Z3A'; 'G04 Z2A'; 'G04 Z5B'; 'G02 Z5C'; 'G02 Z7A';'G02 Z3B'; 'G13 Z7C';'G13 Z4C'; 'G13 Z3B'; 'G13 Z5A'];
 for i = 1:3
