@@ -1,7 +1,15 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Importing Snow Depth Data
+% Importing Transect and Zigzag Snow Depth Data
 %       This script imports snowdepth data from the field data file for
-%       transects, zigzags, and SWE. It also categorizes the group data
+%       transects, zigzags, and SWE. It also categorizes the descriptive
+%       part of the data. Then it creates a structured array for transect
+%       data and zigzag data
+
+%       Inputs:         Field Data ('FieldDataRevisedAP.xlsx')
+%                       Zigzag corners 
+%       Other scripts:  MeasurementLocations.m ('zigzag_corners_utm.xls')
+%       Outputs:        Snowdepth structure (SD)
+%                       Zigzag structure (ZZ)
+%                       Elevations from GPS WPs (gps_elev)
 
 %       Alexandra Pulwicki July 2016
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -12,32 +20,24 @@ clear all
 run MeasurementLocations.m  %This program determines the easting and northing of measurements
 
 %Import data from excel sheet (change path based on computer)
-    %[SD1, SD1text, SD1raw] = xlsread('/Volumes/GlacierAlex/Data/FieldDataRevisedAP.xlsx','SD#1','A1:O833'); %Import values, text, and raw data from first sheet
-    %[SD1, SD1text, SD1raw] = xlsread('/media/glaciology1/GlacierAlex/Data/FieldDataRevisedAP.xlsx','SD#1','A1:O833'); %Import values, text, and raw data from first sheet
     [SD1, SD1text, SD1raw] = xlsread('FieldDataRevisedAP.xlsx','SD#1','A1:O833'); %Import values, text, and raw data from first sheet
     SD1text(1,:) = []; %Remaining text in sheet 1
     SD1(:,10) = []; %Remove comments column (not sure why it imports here)
-    %[SD2, SD2text, SD2raw] = xlsread('/Volumes/GlacierAlex/Data/FieldDataRevisedAP.xlsx','SD#2','A1:O832');
-    %[SD2, SD2text, SD2raw] = xlsread('/media/glaciology1/GlacierAlex/Data/FieldDataRevisedAP.xlsx','SD#2','A1:O832');
+
     [SD2, SD2text, SD2raw] = xlsread('FieldDataRevisedAP.xlsx','SD#2','A1:O832');
     SD2text(1,:) = [];
-    %[SD3, SD3text, SD3raw] = xlsread('/Volumes/GlacierAlex/Data/FieldDataRevisedAP.xlsx','SD#3','A1:O675'); 
-    %[SD3, SD3text, SD3raw] = xlsread('/media/glaciology1/GlacierAlex/Data/FieldDataRevisedAP.xlsx','SD#3','A1:O675'); 
+
     [SD3, SD3text, SD3raw] = xlsread('FieldDataRevisedAP.xlsx','SD#3','A1:O675'); 
     SD3text(1,:) = [];
-    %[ZZ, ZZtext, ZZraw] = xlsread('/Volumes/GlacierAlex/Data/FieldDataRevisedAP.xlsx','ZigZag','A1:H1653'); 
-    %[ZZ, ZZtext, ZZraw] = xlsread('/media/glaciology1/GlacierAlex/Data/FieldDataRevisedAP.xlsx','ZigZag','A1:H1653'); 
+
     [ZZ, ZZtext, ZZraw] = xlsread('FieldDataRevisedAP.xlsx','ZigZag','A1:H1653'); 
     ZZtext(1,:) = [];
-    %[ExtraSD, ExtraSDtext, ExtraSDraw] = xlsread('/Volumes/GlacierAlex/Data/FieldDataRevisedAP.xlsx','SWEDepth','A1:AU38'); 
-    %[ExtraSD, ExtraSDtext, ExtraSDraw] = xlsread('/media/glaciology1/GlacierAlex/Data/FieldDataRevisedAP.xlsx','SWEDepth','A1:AU38'); 
+
     [ExtraSD, ExtraSDtext, ExtraSDraw] = xlsread('FieldDataRevisedAP.xlsx','SWEDepth','A1:AU38'); 
     ExtraSDtext(1,:) = [];
 
 %Import vertex waypoints
-    %[~,~,Vertex_cord] = xlsread('/Volumes/GlacierAlex/QGIS/Donjek Glaciers/Sampling/zigzag_corners_utm.xls');
-    %[~,~,Vertex_cord] = xlsread('/media/glaciology1/GlacierAlex/QGIS/Donjek Glaciers/Sampling/zigzag_corners_utm.xls');
-    [~,~,Vertex_cord] = xlsread('/home/glaciology1/Documents/QGIS/Donjek Glaciers/Sampling/zigzag_corners_utm.xls');
+    [~,~,Vertex_cord] = xlsread('zigzag_corners_utm.xls');
 
 %% Categorizing data
 
@@ -71,47 +71,49 @@ SD2 = [SD2(:,2),SD2(:,4),SD2(:,6),SD2(:,8),SD2(:,1)];
     SD3_Date = categorical(SD3text(:,15));
     SD3_Book = categorical(SD3text(:,11));
 SD3 = [SD3(:,2),SD3(:,4),SD3(:,6),SD3(:,8),SD3(:,1)];       
+
 %Zigzag data
     ZZ_Glacier = categorical(ZZtext(:,1));                      %Glacier (G13, G02, G04)
     ZZ_Zone = categorical(ZZtext(:,2));                         %Zone label
-    ZZ_Vertex = categorical(ZZtext(:,3));                       %Reference vertex
+    ZZ_Vertex = categorical(ZZtext(:,3));                       %Reference vertex label
     ZZ_Q = categorical(ZZ(:,3));                                %Quality of data (1 for good, 0 for question mark)
     ZZ_Person = categorical(ZZtext(:,8));                       %Person that took the measurement (AP, CA, GF, AC)
     ZZ_Date = categorical(ZZtext(:,7));                         %Date meaurement was taken
+    C = cell(size(ZZ_Glacier));                                 
     C(:) = {'ZZ'};
-    ZZ_Book = categorical(C);
+    ZZ_Book = categorical(C);                                   %Book (all ZZ)
 ZZ = [zeros(length(ZZ),1),ZZ];                              %[zeros(will be WP#), distance data, depth, quality]
-%Depth data from SWE and snowpits
-    ExtraSD_Glacier = categorical(ExtraSDtext(:,44));           %%Glacier (G13, G02, G04)
-    C = cell(size(ExtraSD_Glacier));
+
+%Depth data from SWE and snowpits (aka ExtraSD)
+    ExtraSD_Glacier = categorical(ExtraSDtext(:,44));           %Glacier (G13, G02, G04)
+    C = cell(size(ExtraSD_Glacier));                            
     C(:) = {'Extra'};
-    ExtraSD_Pattern = categorical(C);
-    ExtraSD_Person = categorical(C);
-    ExtraSD_Book = categorical(C);
+    ExtraSD_Pattern = categorical(C);                            %Pattern (all Extra)
+    ExtraSD_Person = categorical(C);                             %Person (all Extra)
+    ExtraSD_Book = categorical(C);                               %Book (all Extra)
     C(:) = {'1'};
-    ExtraSD_Q = categorical(C);
+    ExtraSD_Q = categorical(C);                                  %Quality (all 1 = good)
         clear C
                
 %% Working with transect data
 
 % Getting easting and northing for each data point (columns 6 and 7) from
 % the vector 'closest' from the MeasurementLocation.m script
-for i = 1:size(SD1,1) %for all the waypoints in the SD1 matrix
-    ind = find(SD1(i,5)==floor(closest(:,3))); % get index of corresponding waypoint in 'closest' (there will be three because 4.1, 4.2, 4.3)
-    SD1(i,6:7) = closest(ind(1),1:2); %assign the first easting and northing from 'closest' to column 6 and 7 of SD
-end
+    for i = 1:size(SD1,1) %for all the waypoints in the SD1 matrix
+        ind = find(SD1(i,5)==floor(closest(:,3))); %get index of corresponding waypoint in 'closest' (there will be three because 4.1, 4.2, 4.3)
+        SD1(i,6:7) = closest(ind(1),1:2); %assign the first easting and northing from 'closest' to column 6 and 7 of SD
+    end
 
-for i = 1:size(SD2,1)
-    ind = find(SD2(i,5)==floor(closest(:,3)));
-    SD2(i,6:7) = closest(ind(2),1:2);
-end
+    for i = 1:size(SD2,1)
+        ind = find(SD2(i,5)==floor(closest(:,3)));
+        SD2(i,6:7) = closest(ind(2),1:2); %assign the second easting and northing from 'closest' to column 6 and 7 of SD
+    end
 
-for i = 1:size(SD3,1)
-    ind = find(SD3(i,5)==floor(closest(:,3)));
-    SD3(i,6:7) = closest(ind(3),1:2);
-end
-
-clear ind i closest
+    for i = 1:size(SD3,1)
+        ind = find(SD3(i,5)==floor(closest(:,3)));
+        SD3(i,6:7) = closest(ind(3),1:2); %assign the third easting and northing from 'closest' to column 6 and 7 of SD
+    end
+        clear ind i closest
 
 % Getting all waypoints in SD1, SD2, and SD3 data (empty for ones not 
 % measured). This allows SD matrices to be the same size and have aligned
@@ -119,14 +121,14 @@ clear ind i closest
 for i=1:max(SD1(:,5))-3 %use WP range so that gaps can be filled
    if i+3~=SD1(i,5) %determine if WP is missing from the data (first WP is 4 so each WP# = index+3)
        SD1 = [SD1(1:i-1,:); nan,nan,nan,nan,i+3,nan,nan ;SD1(i:end,:)]; %insert nan row with WP# in SD1
-       SD1_Date = [SD1_Date(1:i-1,1); '<undefined>' ;SD1_Date(i:end,1)]; %insert and undefinied into categorical arrays
+       SD1_Date = [SD1_Date(1:i-1,1); '<undefined>' ;SD1_Date(i:end,1)]; %insert an undefinied into categorical arrays
        SD1_Glacier = [SD1_Glacier(1:i-1,1); '<undefined>' ;SD1_Glacier(i:end,1)];
        SD1_Pattern = [SD1_Pattern(1:i-1,1); '<undefined>' ;SD1_Pattern(i:end,1)];
        SD1_Person = [SD1_Person(1:i-1,1); '<undefined>' ;SD1_Person(i:end,1)];
        SD1_Book = [SD1_Book(1:i-1,1); '<undefined>' ;SD1_Book(i:end,1)];
        SD1_Q = [SD1_Q(1:i-1,1:4);{'<undefined>', '<undefined>','<undefined>','<undefined>'};SD1_Q(i:end,1:4)];
        SD1raw = [SD1raw(1:i-1,:); repmat({NaN},1,15) ;SD1raw(i:end,:)]; %insert nan rows into cell arrays
-       SD1text = [SD1text(1:i-1,:); repmat({'None'},1,15) ;SD1text(i:end,:)];
+       SD1text = [SD1text(1:i-1,:); repmat({'None'},1,15) ;SD1text(i:end,:)]; %insert 'None' text into text array
    end
    if i+3~=SD2(i,5)
        SD2 = [SD2(1:i-1,:); nan,nan,nan,nan,i+3,nan,nan ;SD2(i:end,:)];
@@ -154,37 +156,44 @@ for i=1:max(SD1(:,5))-3 %use WP range so that gaps can be filled
 end
 clear i 
 
-SD1text(cellfun(@isempty,SD1text(:,10)),10)={'None'};
-SD2text(cellfun(@isempty,SD2text(:,10)),10)={'None'};
-SD3text(cellfun(@isempty,SD3text(:,10)),10)={'None'};
-ExtraSDtext(cellfun(@isempty,ExtraSDtext(:,43)),43)={'None'};
+    SD1text(cellfun(@isempty,SD1text(:,10)),10)={'None'}; %fills in the empty cells in the comments columns with 'None'
+    SD2text(cellfun(@isempty,SD2text(:,10)),10)={'None'};
+    SD3text(cellfun(@isempty,SD3text(:,10)),10)={'None'};
+    ExtraSDtext(cellfun(@isempty,ExtraSDtext(:,43)),43)={'None'};
 
+% Creating the structure for transect snowdepth data -> SD
+    %Field values are names for columns, values are the cell arrays within the
+    %structure. Original data arrangement is retained. SD1 is in row 1, 
+    %SD2 in row 2, SD3 in row 3, ExtraSD in row 4. Example of accessing 
+    %data: SD(2).depth(1,3)
+    field1 = 'raw';         value1 = {SD1raw, SD2raw, SD3raw, ExtraSDraw};
+    field2 = 'depth';       value2 = {SD1, SD2, SD3, ExtraSD};
+    field3 = 'glacier';     value3 = {SD1_Glacier, SD2_Glacier, SD3_Glacier, ExtraSD_Glacier};
+    field4 = 'pattern';     value4 = {SD1_Pattern, SD2_Pattern, SD3_Pattern, ExtraSD_Pattern};
+    field5 = 'person';      value5 = {SD1_Person, SD2_Person, SD3_Person, ExtraSD_Person};
+    field6 = 'Q';           value6 = {SD1_Q, SD2_Q, SD3_Q, ExtraSD_Q};
+    field7 = 'book';        value7 = {SD1_Book, SD2_Book, SD3_Book, ExtraSD_Book};
+    field8 = 'comments';    value8 = {SD1text(:,10), SD2text(:,10), SD3text(:,10), ExtraSDtext(:,43)};
 
-field1 = 'raw';         value1 = {SD1raw, SD2raw, SD3raw, ExtraSDraw};
-field2 = 'depth';       value2 = {SD1, SD2, SD3, ExtraSD};
-field3 = 'glacier';     value3 = {SD1_Glacier, SD2_Glacier, SD3_Glacier, ExtraSD_Glacier};
-field4 = 'pattern';     value4 = {SD1_Pattern, SD2_Pattern, SD3_Pattern, ExtraSD_Pattern};
-field5 = 'person';      value5 = {SD1_Person, SD2_Person, SD3_Person, ExtraSD_Person};
-field6 = 'Q';           value6 = {SD1_Q, SD2_Q, SD3_Q, ExtraSD_Q};
-field7 = 'book';        value7 = {SD1_Book, SD2_Book, SD3_Book, ExtraSD_Book};
-field8 = 'comments';    value8 = {SD1text(:,10), SD2text(:,10), SD3text(:,10), ExtraSDtext(:,43)};
-
-SD = struct(field1,value1,field2,value2,field3,value3,field4,value4,...
-    field5,value5,field6,value6,field7,value7,field8,value8);
-clear value* field* SD1* SD2* SD3* ExtraSD*
+    SD = struct(field1,value1,field2,value2,field3,value3,field4,value4,...
+        field5,value5,field6,value6,field7,value7,field8,value8);
+            clear value* field* SD1* SD2* SD3* ExtraSD*
 
 
 %% Working with zigzag data
+% Creating the structure for zigzag snowdepth data -> ZZ
+    %Field values are names for columns, values are the cell arrays within the
+    %structure. Only one row. Example of accessing data: ZZ.depth(3,1)
+    field1 = 'raw';         value1 = {ZZraw};
+    field2 = 'depth';       value2 = {ZZ};
+    field3 = 'vertexlabel'; value3 = {ZZ_Vertex};
+    field4 = 'vertexcoord'; value4 = {Vertex_cord};
+    field5 = 'zone';        value5 = {ZZ_Zone};
+    field6 = 'glacier';     value6 = {ZZ_Glacier};
+    field7 = 'person';      value7 = {ZZ_Person};
+    field8 = 'Q';           value8 = {ZZ_Q};
+    field9 = 'book';        value9 = {ZZ_Book};
 
-field1 = 'raw';         value1 = {ZZraw};
-field2 = 'depth';       value2 = {ZZ};
-field3 = 'vertex';      value3 = {ZZ_Vertex};
-field4 = 'zone';        value4 = {ZZ_Zone};
-field5 = 'glacier';     value5 = {ZZ_Glacier};
-field6 = 'person';      value6 = {ZZ_Person};
-field7 = 'Q';           value7 = {ZZ_Q};
-field8 = 'book';        value8 = {ZZ_Book};
-
-ZZ = struct(field1,value1,field2,value2,field3,value3,field4,value4,...
-    field5,value5,field6,value6,field7,value7,field8,value8);
-clear value* field* ZZ_* ZZraw ZZtext
+    ZZ = struct(field1,value1,field2,value2,field3,value3,field4,value4,...
+        field5,value5,field6,value6,field7,value7,field8,value8,field9,value9);
+            clear value* field* ZZ_* ZZraw ZZtext Vertex_cord
