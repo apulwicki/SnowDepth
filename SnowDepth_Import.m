@@ -156,12 +156,19 @@ for i=1:max(SD1(:,5))-3 %use WP range so that gaps can be filled
 end
 clear i 
 
-    SD1text(cellfun(@isempty,SD1text(:,10)),10)={'None'}; %fills in the empty cells in the comments columns with 'None'
-    SD2text(cellfun(@isempty,SD2text(:,10)),10)={'None'};
-    SD3text(cellfun(@isempty,SD3text(:,10)),10)={'None'};
-    ExtraSDtext(cellfun(@isempty,ExtraSDtext(:,43)),43)={'None'};
+    SD1text(cellfun(@isempty,SD1text(:,10)),10)={'None'};       %fills in the empty cells in the comments columns with 'None'
+    SD1comments = categorical(SD1text(:,10));                   %Categorizes comments written
 
-% Creating the structure for transect snowdepth data -> SD
+    SD2text(cellfun(@isempty,SD2text(:,10)),10)={'None'};
+    SD2comments = categorical(SD2text(:,10));                   
+
+    SD3text(cellfun(@isempty,SD3text(:,10)),10)={'None'};
+    SD3comments = categorical(SD3text(:,10));                  
+    
+    ExtraSDtext(cellfun(@isempty,ExtraSDtext(:,43)),43)={'None'};
+    ExtraSDcomments = categorical(ExtraSDtext(:,43));                  
+
+%% Creating the structure for transect snowdepth data -> SD
     %Field values are names for columns, values are the cell arrays within the
     %structure. Original data arrangement is retained. SD1 is in row 1, 
     %SD2 in row 2, SD3 in row 3, ExtraSD in row 4. Example of accessing 
@@ -173,7 +180,7 @@ clear i
     field5 = 'person';      value5 = {SD1_Person, SD2_Person, SD3_Person, ExtraSD_Person};
     field6 = 'Q';           value6 = {SD1_Q, SD2_Q, SD3_Q, ExtraSD_Q};
     field7 = 'book';        value7 = {SD1_Book, SD2_Book, SD3_Book, ExtraSD_Book};
-    field8 = 'comments';    value8 = {SD1text(:,10), SD2text(:,10), SD3text(:,10), ExtraSDtext(:,43)};
+    field8 = 'comments';    value8 = {SD1comments, SD2comments, SD3comments, ExtraSDcomments};
 
     SD = struct(field1,value1,field2,value2,field3,value3,field4,value4,...
         field5,value5,field6,value6,field7,value7,field8,value8);

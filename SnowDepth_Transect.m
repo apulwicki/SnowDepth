@@ -27,43 +27,39 @@ SDstd = [nanstd(z(5).depth(:,1:4),1,2); nanstd(z1(5).depth(:,1:40),1,2)];  %std 
 %% Searching comments
     %pulldata(data, book, glacier, person, pattern, quality, format)
 z = pulldata(SD,'SD1','all','all','all','all','fat');
-SDmean = nanmean(z(5).depth(:,1:4),2);
-SDstd = nanstd(z(5).depth(:,1:4),1,2);
-    %To search comments in all books you need to do them one at a time...
-expression = 'stream|channel';
-present = regexpi(z(5).comments, expression);
-waypoint = z(5).depth(~cellfun(@isempty,present),5);
-index = ismember(z(5).depth(:,5),waypoint); 
 
-z(5).depth(index,1:4)
-%SDmean(index)
-%SDstd(index)
-
-% Display comment and WP#
-all_comments = [num2cell(waypoint), z(5).comments(index,1)];
-
-    clear expression present waypoint index
+expression = {'stream?','rock'};
+%expression = {'None'};
+SDcomments = commentsearch(z, expression, 'in');
     
 %% Std in vs out channel
     %pulldata(data, book, glacier, person, pattern, quality, format)
-z = pulldata(SD,'all','all','all','all','all','fat');
+z = pulldata(SD,'all','all','all','all',1,'fat');
 
-[fullSDmean, fullSDstd, all_comments] = commentsearch(z, 'stream|channel','in');
+    %summary(z(5).comments)
+expression = {'Channel area','Channel?','In channel','stream?','Channel','Probably channel','Channel (320+)',...
+    '? Not ice!','? no ice','Not ice','Not on ice!'};
+SD_outchannel = commentsearch(z, expression, 'out');
+SD_inchannel = commentsearch(z, expression, 'in');
+
+display(['Average std in channel = ', num2str(mean(SD_inchannel(:,3)))])
+display(['Average std out of channel = ', num2str(mean(SD_outchannel(:,3)))])
+
 
 figure(1)
-errorbar(fullSDmean(:,2), fullSDmean(:,1), fullSDstd(:,1),'o')
+errorbar(SD_outchannel(:,1), SD_outchannel(:,2), SD_outchannel(:,3),'o')
     xlabel('Waypoint number')
     ylabel('Mean snowdepth (cm)')    
 
 figure(2)
-scatter(fullSDstd(:,2),fullSDstd(:,1))
+scatter(SD_outchannel(:,1), SD_outchannel(:,3))
     xlabel('Waypoint number')
     ylabel('Standard deviation')    
 %% Variogram - transect
 
 glacier = 'G13'; %select data from chosen glacier
     %z = pulldata(data, book, glacier, person, pattern, quality, format)
-z = pulldata(SD,'all',glacier,'all','all','1','fat'); %transect data  
+z = pulldata(SD,'all',glacier,'all','all',1,'fat'); %transect data  
 z1 = pulldata(SD,'Extra',glacier,'Extra','Extra',1,'fat'); %ExtraSD data from nontransect measurements
 
 x = [z(5).depth(:,6);z1(5).depth(:,42)]; x2 = nanmax(x)-x; %convert easting to distance in m
@@ -122,26 +118,22 @@ end
     %Also for just one SD because they were taken every 60 m (for the most
     %part)
     %z = pulldata(data, book, glacier, person, pattern, quality, format)
-z = pulldata(SD,'SD1','G02','all','UM','1','fat'); %transect data  
+z = pulldata(SD,'SD1','G02','all','UM',1,'fat'); %transect data  
 SDmean = nanmean(z(5).depth(:,1:4),2);
 
-autocorr(SDmean,floor(size(SDmean,1)/4)) %do autocorrelation of the data *change total lags with size of matrix
+autocorr(SDmean) %do autocorrelation of the data *change total lags with size of matrix
+%autocorr(SDmean,floor(size(SDmean,1)/4)) %do autocorrelation of the data *change total lags with size of matrix
 
 
 %% Stats between categories
 
-z1 = pulldata(SD,'all','G02','all','UM','1','skinny'); 
-z2 = pulldata(SD,'all','G02','all','LM','1','skinny'); 
-
+z = pulldata(SD,'all','G02','all','all',1,'skinny'); 
 
 %Mean SD and variance for each group
-[xbar,s2,grp] = grpstats([z1; z2],group,{'mean','var','gname'})
-           
+[xbar,s2,grp] = grpstats(z(2).depth,z(2).pattern,{'mean','var','gname'})
+
 %One-way ANOVA
-[~,~,stats] = anova1(allSD,group)
+[~,~,stats] = anova1(z(2).depth,z(2).pattern)
 [c,~,~,gnames] = multcompare(stats);
 [gnames(c(:,1)), gnames(c(:,2)), num2cell(c(:,3:6))] %diplays: groups compared, lower CI limit, difference between means, upper CI, p
-
-
-
 

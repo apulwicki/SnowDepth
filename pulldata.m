@@ -72,7 +72,7 @@ function z = pulldata(data, book, glacier, person, pattern, quality, format)
     end
 
 % Replace values that are not desired with NaN but keep original formating 
-for j = range; %look in the desired books (set by range value above)
+for j = range %look in the desired books (set by range value above)
     for i = 1:size(data(j).depth,1) %goes through whole matrix
          if ~ismember(data(j).glacier(i,1),glacier) || ... %if it is not part of the desired glacier, person, or patern, relace with NaN
                     ~ismember(data(j).person(i,1),person) ||...
@@ -99,6 +99,11 @@ for j = range; %look in the desired books (set by range value above)
     
 end
 
+%Adding decimal to waypoint to indicate book
+for i = 1:3 
+    data(i).depth(:,5) = data(i).depth(:,5) + 0.1*i;
+end
+
 %Filtering and formating data 
 if strcmp(format,'fat') %fat format = four depth columns, WP, and WP coordinates
     if strcmp(book,'Extra') %ExtraSD data will have extra columns (which is why you can't call SD and ExtraSD values together with doing some sort of processing) 
@@ -121,37 +126,37 @@ if strcmp(format,'fat') %fat format = four depth columns, WP, and WP coordinates
     
 elseif strcmp(format,'skinny') %skinny format = stacked data, one row not filtered, one row filtered
     %Compile all data into vectors (nx1)
-    f1 = 'depth';    v1 =  {[data(1).depth(:,1); data(1).depth(:,2); data(1).depth(:,3); data(1).depth(:,4);
+    f1 = 'depth';    v1 =  [data(1).depth(:,1); data(1).depth(:,2); data(1).depth(:,3); data(1).depth(:,4);
                             data(2).depth(:,1); data(2).depth(:,2); data(2).depth(:,3); data(2).depth(:,4);
-                            data(3).depth(:,1); data(3).depth(:,2); data(3).depth(:,3); data(3).depth(:,4)]};
-    f2 = 'WP';       v2 =  {[data(1).depth(:,5); data(1).depth(:,5); data(1).depth(:,5); data(1).depth(:,5);
+                            data(3).depth(:,1); data(3).depth(:,2); data(3).depth(:,3); data(3).depth(:,4)];
+    f2 = 'WP';       v2 =  [data(1).depth(:,5); data(1).depth(:,5); data(1).depth(:,5); data(1).depth(:,5);
                             data(2).depth(:,5); data(2).depth(:,5); data(2).depth(:,5); data(2).depth(:,5);
-                            data(3).depth(:,5); data(3).depth(:,5); data(3).depth(:,5); data(3).depth(:,5)]};
-    f3 = 'book';     v3 =  {[data(1).book(:,1); data(1).book(:,1); data(1).book(:,1); data(1).book(:,1);
+                            data(3).depth(:,5); data(3).depth(:,5); data(3).depth(:,5); data(3).depth(:,5)];
+    f3 = 'book';     v3 =  [data(1).book(:,1); data(1).book(:,1); data(1).book(:,1); data(1).book(:,1);
                             data(2).book(:,1); data(2).book(:,1); data(2).book(:,1); data(2).book(:,1);
-                            data(3).book(:,1); data(3).book(:,1); data(3).book(:,1); data(3).book(:,1)]};
-    f4 = 'glacier';  v4 =  {[data(1).glacier(:,1); data(1).glacier(:,1); data(1).glacier(:,1); data(1).glacier(:,1);
+                            data(3).book(:,1); data(3).book(:,1); data(3).book(:,1); data(3).book(:,1)];
+    f4 = 'glacier';  v4 =  [data(1).glacier(:,1); data(1).glacier(:,1); data(1).glacier(:,1); data(1).glacier(:,1);
                             data(2).glacier(:,1); data(2).glacier(:,1); data(2).glacier(:,1); data(2).glacier(:,1);
-                            data(3).glacier(:,1); data(3).glacier(:,1); data(3).glacier(:,1); data(3).glacier(:,1)]};
-    f5 = 'person';   v5 =  {[data(1).person(:,1); data(1).person(:,1); data(1).person(:,1); data(1).person(:,1);
+                            data(3).glacier(:,1); data(3).glacier(:,1); data(3).glacier(:,1); data(3).glacier(:,1)];
+    f5 = 'person';   v5 =  [data(1).person(:,1); data(1).person(:,1); data(1).person(:,1); data(1).person(:,1);
                             data(2).person(:,1); data(2).person(:,1); data(2).person(:,1); data(2).person(:,1);
-                            data(3).person(:,1); data(3).person(:,1); data(3).person(:,1); data(3).person(:,1)]};
-    f6 = 'pattern';  v6 =  {[data(1).pattern(:,1); data(1).pattern(:,1); data(1).pattern(:,1); data(1).pattern(:,1);
+                            data(3).person(:,1); data(3).person(:,1); data(3).person(:,1); data(3).person(:,1)];
+    f6 = 'pattern';  v6 =  [data(1).pattern(:,1); data(1).pattern(:,1); data(1).pattern(:,1); data(1).pattern(:,1);
                             data(2).pattern(:,1); data(2).pattern(:,1); data(2).pattern(:,1); data(2).pattern(:,1);
-                            data(3).pattern(:,1); data(3).pattern(:,1); data(3).pattern(:,1); data(3).pattern(:,1)]};
-    f7 = 'Q';        v7 =  {[data(1).Q(:,1); data(1).Q(:,2); data(1).Q(:,3); data(1).Q(:,4);
+                            data(3).pattern(:,1); data(3).pattern(:,1); data(3).pattern(:,1); data(3).pattern(:,1)];
+    f7 = 'Q';        v7 =  [data(1).Q(:,1); data(1).Q(:,2); data(1).Q(:,3); data(1).Q(:,4);
                             data(2).Q(:,1); data(2).Q(:,2); data(2).Q(:,3); data(2).Q(:,4);
-                            data(3).Q(:,1); data(3).Q(:,2); data(3).Q(:,3); data(3).Q(:,4)]};
-    f8 = 'comments'; v8 =  {[data(1).comments(:,1); data(1).comments(:,1); data(1).comments(:,1); data(1).comments(:,1);
+                            data(3).Q(:,1); data(3).Q(:,2); data(3).Q(:,3); data(3).Q(:,4)];
+    f8 = 'comments'; v8 =  [data(1).comments(:,1); data(1).comments(:,1); data(1).comments(:,1); data(1).comments(:,1);
                             data(2).comments(:,1); data(2).comments(:,1); data(2).comments(:,1); data(2).comments(:,1);
-                            data(3).comments(:,1); data(3).comments(:,1); data(3).comments(:,1); data(3).comments(:,1)]};                    
-    %Combine the SD matrices the first row of z
+                            data(3).comments(:,1); data(3).comments(:,1); data(3).comments(:,1); data(3).comments(:,1)];                    
+    %Combine the SD matrices in the first row of z
     z = struct(f1,v1,f2,v2,f3,v3,f4,v4,f5,v5,f6,v6,f7,v7,f8,v8);                    
     
     %Filter the data and add  to z
-    filterq = ~isnan(v1{1,1}(:,1)); %filter the data based on where the depth value (v1) is NaN or not
-    filtered = struct(f1,v1{1,1}(filterq),f2,v2{1,1}(filterq),f3,v3{1,1}(filterq),... %create new filtered matrix that is nx1
-        f4,v4{1,1}(filterq),f5,v5{1,1}(filterq),f6,v6{1,1}(filterq),f7,v7{1,1}(filterq),f8,v8{1,1}(filterq));
+    filterq = ~isnan(v1(:,1)); %filter the data based on where the depth value (v1) is NaN or not
+    filtered = struct(f1,v1(filterq),f2,v2(filterq),f3,v3(filterq),... %create new filtered matrix that is nx1
+        f4,v4(filterq),f5,v5(filterq),f6,v6(filterq),f7,v7(filterq),f8,v8(filterq));
     z = [z; filtered]; %combine full and filtered data                
 end
 
