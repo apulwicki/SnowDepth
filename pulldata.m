@@ -107,7 +107,7 @@ end
 %Filtering and formating data 
 if strcmp(format,'fat') %fat format = four depth columns, WP, and WP coordinates
     if strcmp(book,'Extra') %ExtraSD data will have extra columns (which is why you can't call SD and ExtraSD values together with doing some sort of processing) 
-        filtered = [data(4).depth(:,2:42), data(4).depth(:,46:47)]; %filtered data
+        filtered = [data(4).depth(:,2:42), data(4).depth(:,45:46)]; %filtered data
         filteredcomments = data(4).comments; %filtered comments (needed for search comments)
     elseif strcmp(book,'all')
         filtered = [data(1).depth; data(2).depth; data(3).depth]; %stacks SD1,2,3 into one matrix

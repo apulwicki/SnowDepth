@@ -3,7 +3,6 @@
 %% Import data
 run SnowDepth_Import.m %Imports snow depth and measurement location data
 
-%%
 %Compute distance of each measurement from its vertex
 glacier_categories = categories(ZZ.glacier);
 zone_categories = categories(ZZ.zone);
@@ -47,71 +46,88 @@ for j = 1:length(ZZ_cord)
         distinterp(i,1) = EuclideanDistance(line(1,i),line(2,i),easting(1,1),northing(1,1));
     end
 
-    [~, index] = nanmin(abs(distinterp-cell2mat(ZZ_cord(j,2))));
-    ZZ_cord(j,3:4) = num2cell(line(:,index)');
+    [~, section_sum] = nanmin(abs(distinterp-cell2mat(ZZ_cord(j,2))));
+    ZZ_cord(j,3:4) = num2cell(line(:,section_sum)');
 
 end
-clear distinterp index i j line temp tempind easting northing ind indpre zone glacier vertex
+clear distinterp index i j k line temp tempind easting northing ind indpre ...
+    zone glacier vertex zone_categories glacier_categories
 
-ZZ_cord = [ZZ_cord, num2cell(ZZ.depth(:,3))];
+%Adding data to ZZ structure
+ZZ_cord = [ZZ_cord, num2cell(ZZ.depth(:,3:4))];
+ZZ.depth = ZZ_cord; clear ZZ_cord 
 
+%Adding measured density from SWE values
+run SnowDensity_Import.m
+GZZindex = [1,150,318,482,674,835,987,1144,1289,1457,1620];
+for i = 1:size(GZZindex,2)-1
+    ZZ.depth(GZZindex(i):GZZindex(i+1)-1,7) = num2cell(cell2mat(ZZ.depth(GZZindex(i):GZZindex(i+1)-1,5))*cell2mat(zigzagSWE(i,2)));
+end
+
+%Selecting only good quality (Q=1) data
+GZZutm = ZZ.depth(GZZindex,3:4);
+ZZ.depth(cell2mat(ZZ.depth(:,6))==0,:)=[];
+for i = 1:size(GZZindex,2)
+    GZZindex(1,i) = find(cell2mat(GZZutm(i,1)) == cell2mat(ZZ.depth(:,3:4)),1);
+end
+clear GZZutm i k 
 %% Plotting zigzag data
 
-GZZ = [1,153,321,489,685,848,1004,1165,1314,1485,1653];
-GZZ_lab = ['G04 Z3A'; 'G04 Z2A'; 'G04 Z5B'; 'G02 Z5C'; 'G02 Z7A';'G02 Z3B'; 'G13 Z7C';'G13 Z4C'; 'G13 Z3B'; 'G13 Z5A'];
-for i = 1:3
-    x = cell2mat(ZZ_cord(GZZ(i):GZZ(i+1)-1,3));
-    y = cell2mat(ZZ_cord(GZZ(i):GZZ(i+1)-1,4));
-    z = cell2mat(ZZ_cord(GZZ(i):GZZ(i+1)-1,5));
+GZZlabel = ['G04 Z3A'; 'G04 Z2A'; 'G04 Z5B'; 'G02 Z5C'; 'G02 Z7A';'G02 Z3B'; 'G13 Z7C';'G13 Z4C'; 'G13 Z3B'; 'G13 Z5A'];
+min = nanmin(cell2mat(ZZ.depth(:,7)));
+max = nanmax(cell2mat(ZZ.depth(:,7)));
+
+for i = 1:size(GZZlabel,1)
+    x = cell2mat(ZZ.depth(GZZindex(i):GZZindex(i+1)-1,3));
+    y = cell2mat(ZZ.depth(GZZindex(i):GZZindex(i+1)-1,4));
+    z = cell2mat(ZZ.depth(GZZindex(i):GZZindex(i+1)-1,7));
     x2 = nanmax(x)-x;
     y2 = nanmax(y)-y;
-    pointsize = 20;
+    pointsize = 30;
+    
+    meandepth = mean(z);
+    stddepth = std(z);
     
     figure(1)
-    subplot(2,2,i)
+    %subplot(2,2,i)
     scatter(x2, y2, pointsize, z,'filled');
     axis equal
-    title(GZZ_lab(i,:))
+    str = {strcat('mean= ', num2str(round(meandepth,1)),'cm SWE'), ...
+        strcat('std= ', num2str(round(stddepth,1)),'cm SWE')};
+    title(GZZlabel(i,:))
+    annotation('textbox',dim,'String', str,'FitBoxToText','on')
     xlabel('Distance (m)')
     ylabel('Distance (m)')
-    if i == 3
-        min = nanmin(cell2mat(ZZ_cord(GZZ(i):GZZ(i+1)-1,5)));
-        max = nanmax(cell2mat(ZZ_cord(GZZ(i):GZZ(i+1)-1,5)));
         caxis([min max])
         c = colorbar;
-        colormap(flipud(cool))
-        c.Label.String = 'Snow depth (cm)';
-    end
+        %colormap(flipud(cool))
+        c.Label.String = 'SWE (cm)';
+   
+    
+        
+   filename = strcat('/home/glaciology1/Documents/Data/Plots/same_scale',GZZlabel(i,:));
+   print(filename,'-dpng')
+   %clf
+%     if i == 1
+%         min = nanmin(cell2mat(ZZ_cord(GZZ(i):GZZ(i+1)-1,5)));
+%         max = nanmax(cell2mat(ZZ_cord(GZZ(i):GZZ(i+1)-1,5)));
+%         caxis([min max])
+%         c = colorbar;
+%         colormap(flipud(cool))
+%         c.Label.String = 'Snow depth (cm)';
+%     end
     
 end
-
-clear max min x y x2 y2 z i k c
-
-i=10;
-x = cell2mat(ZZ_cord(GZZ(i):GZZ(i+1)-1,3));
-y = cell2mat(ZZ_cord(GZZ(i):GZZ(i+1)-1,4));
-z = cell2mat(ZZ_cord(GZZ(i):GZZ(i+1)-1,5));
-x2 = nanmax(x)-x;
-y2 = nanmax(y)-y;
-
-figure(1)
-    scatter(x2, y2, pointsize, z,'filled');
-    axis equal
-    title(GZZ_lab(i,:))
-    xlabel('Distance (m)')
-    ylabel('Distance (m)')
-        c = colorbar;
-        colormap(flipud(cool))
-        c.Label.String = 'Snow depth (cm)';
+clear max min x y x2 y2 z i k c pointsize stddepth meandepth str dim filename GZZlabel
 
 %dlmwrite('/home/glaciology1/Documents/QGIS/Data/TestPoints.csv',closest, 'delimiter', ',', 'precision', 9); %Write matrix with new waypoints to csv file for QGIS
 
 %% Variogram - zigzag
 
 i=10;
-x = cell2mat(ZZ_cord(GZZ(i):GZZ(i+1)-1,3));
-y = cell2mat(ZZ_cord(GZZ(i):GZZ(i+1)-1,4));
-z = cell2mat(ZZ_cord(GZZ(i):GZZ(i+1)-1,5));
+x = cell2mat(ZZ_cord(GZZindex(i):GZZindex(i+1)-1,3));
+y = cell2mat(ZZ_cord(GZZindex(i):GZZindex(i+1)-1,4));
+z = cell2mat(ZZ_cord(GZZindex(i):GZZindex(i+1)-1,5));
 x2 = nanmax(x)-x;
 y2 = nanmax(y)-y;
 
@@ -119,7 +135,7 @@ figure(1)
 subplot(2,2,1)
 scatter(x2,y2,4,z,'filled'); box on;
 ylabel('y'); xlabel('x')
-title(GZZ_lab(i,:))
+%title(GZZ_lab(i,:))
 subplot(2,2,2)
 hist(z,20)
 ylabel('frequency'); xlabel('z')
@@ -141,4 +157,22 @@ c0 = 0.1; % initial value: sill
                        'solver','fminsearchbnd',...
                        'nugget',0,...
                        'plotit',true);
+
                    
+%% Length of measured vs vertex
+
+section_sum = [1];
+for i = 1:size(ZZ.depth,1)-1
+    if ~cellfun(@isequal,ZZ.depth(i,1),ZZ.depth(i+1,1))
+        section_sum = [section_sum ; i+1];
+    end
+end
+
+for i = 1:size(section_sum,1)
+    section_sum(i,2) = cell2mat(ZZ.depth(section_sum(i+1,1)-1,2));
+end
+
+section_sum(end,:) = [];
+
+
+

@@ -66,9 +66,9 @@ x = [z(5).depth(:,6);z1(5).depth(:,42)]; x2 = nanmax(x)-x; %convert easting to d
 y = [z(5).depth(:,7);z1(5).depth(:,43)]; y2 = nanmax(y)-y; %convert easting to distance in m
 z = [nanmean(z(5).depth(:,1:4),2);nanmean(z1(5).depth(:,1:40),2)];
 
-if ishandle(f1) %clears data from open plots
-    clf(f1); clf(f2);
-end
+% if ishandle(f1) %clears data from open plots
+%     clf(f1); clf(f2);
+% end
 
 %Variogram
 f1 = figure(1); 
@@ -127,7 +127,7 @@ autocorr(SDmean) %do autocorrelation of the data *change total lags with size of
 
 %% Stats between categories
 
-z = pulldata(SD,'all','G02','all','all',1,'skinny'); 
+z = pulldata(SD,'all','G04','all','all',1,'skinny'); 
 
 %Mean SD and variance for each group
 [xbar,s2,grp] = grpstats(z(2).depth,z(2).pattern,{'mean','var','gname'})
@@ -137,3 +137,31 @@ z = pulldata(SD,'all','G02','all','all',1,'skinny');
 [c,~,~,gnames] = multcompare(stats);
 [gnames(c(:,1)), gnames(c(:,2)), num2cell(c(:,3:6))] %diplays: groups compared, lower CI limit, difference between means, upper CI, p
 
+%n-way ANOVA
+p = anovan(z(2).depth, {z(2).book, z(2).person, z(2).pattern},'varnames',{'book','person','pattern'})
+%n-way ANOVA with two-factor interactions -> DNE
+p = anovan(z(2).depth, {z(2).book, z(2).person, z(2).pattern, z(2).glacier}, ...
+    'model','interaction','varnames',{'book','person','pattern','glacier'})
+
+%% FFT on transects
+
+%z = pulldata(data, book, glacier, person, pattern, quality, format)
+z = pulldata(SD,'SD2','G02','all','UM',1,'fat'); %transect data  
+SDmean = nanmean(z(5).depth(:,1:4),2);
+
+Y = fft(SDmean);
+
+Fs = 30;            % Sampling frequency
+T = 1/Fs;             % Sampling period
+L = size(Y,1);             % Length of signal
+t = (0:L-1)*T;        % Time vector
+
+P2 = abs(Y/L);
+P1 = P2(1:L/2+1);
+P1(2:end-1) = 2*P1(2:end-1);
+
+f = Fs*(0:(L/2))/L;
+plot(f,P1)
+title('Single-Sided Amplitude Spectrum of X(t)')
+xlabel('f (Hz)')
+ylabel('|P1(f)|')

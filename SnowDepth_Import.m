@@ -22,7 +22,6 @@ run MeasurementLocations.m  %This program determines the easting and northing of
 %Import data from excel sheet (change path based on computer)
     [SD1, SD1text, SD1raw] = xlsread('FieldDataRevisedAP.xlsx','SD#1','A1:O833'); %Import values, text, and raw data from first sheet
     SD1text(1,:) = []; %Remaining text in sheet 1
-    SD1(:,10) = []; %Remove comments column (not sure why it imports here)
 
     [SD2, SD2text, SD2raw] = xlsread('FieldDataRevisedAP.xlsx','SD#2','A1:O832');
     SD2text(1,:) = [];
