@@ -1,5 +1,6 @@
 %% Import data
 run SnowDepth_Import.m %Imports snow depth and measurement location data
+run SnowDensity_Import.m %Imports snow density values
 
 %% Basic Stats
 
@@ -201,19 +202,6 @@ p = anovan(z(2).depth, {z(2).book, z(2).person, z(2).pattern},'varnames',{'book'
 p = anovan(z(2).depth, {z(2).book, z(2).person, z(2).pattern, z(2).glacier}, ...
     'model','interaction','varnames',{'book','person','pattern','glacier'})
 
-%% Std Stats
-
-glacier = 'G13'; %select data from chosen glacier
-pattern = 'UT';
-    %z = pulldata(data, book, glacier, person, pattern, quality, format)
-z = pulldata(SD,'all',glacier,'all',pattern,1,'fat'); %transect data  
-
-%One-way ANOVA
-[~,~,stats] = anova1(nanstd(z(5).depth(:,1:4),1,2),z(5).person);
-[c,~,~,gnames] = multcompare(stats);
-[gnames(c(:,1)), gnames(c(:,2)), num2cell(c(:,3:6))] %diplays: groups compared, lower CI limit, difference between means, upper CI, p
-
-
 %% FFT on transects
 
 %z = pulldata(data, book, glacier, person, pattern, quality, format)
@@ -266,4 +254,15 @@ z = pulldata(SD,'all',glacier,'all',pattern,1,'skinny');
 [c,~,~,gnames] = multcompare(stats);
 [gnames(c(:,1)), gnames(c(:,2)), num2cell(c(:,3:6))] %diplays: groups compared, lower CI limit, difference between means, upper CI, p
 
+%% Std Stats
+
+glacier = 'G13'; %select data from chosen glacier
+pattern = 'UT';
+    %z = pulldata(data, book, glacier, person, pattern, quality, format)
+z = pulldata(SD,'all',glacier,'all',pattern,1,'fat'); %transect data  
+
+%One-way ANOVA
+[~,~,stats] = anova1(nanstd(z(5).depth(:,1:4),1,2),z(5).person);
+[c,~,~,gnames] = multcompare(stats);
+[gnames(c(:,1)), gnames(c(:,2)), num2cell(c(:,3:6))] %diplays: groups compared, lower CI limit, difference between means, upper CI, p
 

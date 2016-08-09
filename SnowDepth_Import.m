@@ -11,7 +11,8 @@
 %                       Zigzag structure (ZZ)
 %                       Elevations from GPS WPs (gps_elev)
 
-%       Alexandra Pulwicki July 2016
+%       Alexandra Pulwicki  Created: July 2016
+%                           Updated: August 2016
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% Importing data
