@@ -165,3 +165,34 @@ plot(f,P1)
 title('Single-Sided Amplitude Spectrum of X(t)')
 xlabel('f (Hz)')
 ylabel('|P1(f)|')
+
+%% Same shape, check if people different
+
+pattern = 'LH';
+glacier = 'G04';
+
+%z = pulldata(data, book, glacier, person, pattern, quality, format)
+zAP = pulldata(SD,'all',glacier,'AP',pattern,1,'fat'); %transect data 
+zAP_mean = [zAP(5).depth(:,5), nanmean(zAP(5).depth(:,1:4),2), nanstd(zAP(5).depth(:,1:4),1,2)];
+
+zCA = pulldata(SD,'all',glacier,'CA',pattern,1,'fat'); %transect data 
+zCA_mean = [zCA(5).depth(:,5), nanmean(zCA(5).depth(:,1:4),2), nanstd(zCA(5).depth(:,1:4),1,2)];
+
+zGF = pulldata(SD,'all',glacier,'GF',pattern,1,'fat'); %transect data 
+zGF_mean = [zGF(5).depth(:,5), nanmean(zGF(5).depth(:,1:4),2), nanstd(zGF(5).depth(:,1:4),1,2)];
+
+figure(1)
+errorbar(zAP_mean(:,1),zAP_mean(:,2),zAP_mean(:,3)); hold on
+errorbar(zCA_mean(:,1),zCA_mean(:,2),zCA_mean(:,3)); hold on
+errorbar(zGF_mean(:,1),zGF_mean(:,2),zGF_mean(:,3))
+    xlabel('Waypoint')
+    ylabel('Depth on G02 UH')
+    legend('AP','CA','GF')
+
+%One-way ANOVA
+z = pulldata(SD,'all',glacier,'all',pattern,1,'skinny'); 
+[~,~,stats] = anova1(z(2).depth,z(2).person)
+[c,~,~,gnames] = multcompare(stats);
+[gnames(c(:,1)), gnames(c(:,2)), num2cell(c(:,3:6))] %diplays: groups compared, lower CI limit, difference between means, upper CI, p
+
+
