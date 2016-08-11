@@ -2,6 +2,7 @@
 
 %% Import data
 run SnowDepth_Import.m %Imports snow depth and measurement location data
+run SnowDensity_Import.m %Imports snow density values
 
 %Compute distance of each measurement from its vertex
 glacier_categories = categories(ZZ.glacier);
@@ -54,7 +55,6 @@ ZZ_cord = [ZZ_cord, num2cell(ZZ.depth(:,3:4))];
 ZZ.depth = ZZ_cord; clear ZZ_cord 
 
 %Adding measured density from SWE values
-run SnowDensity_Import.m
 GZZindex = [1,150,318,482,674,835,987,1144,1289,1457,1620];
 for i = 1:size(GZZindex,2)-1
     ZZ.depth(GZZindex(i):GZZindex(i+1)-1,7) = num2cell(cell2mat(ZZ.depth(GZZindex(i):GZZindex(i+1)-1,5))*cell2mat(zigzagSWE(i,2)));

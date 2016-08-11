@@ -10,8 +10,8 @@ function z = pulldata(data, book, glacier, person, pattern, quality, format)
     %with SD1, SD2, SD3, and ExtraSD depth cells, in original formating, 
     %with desired values retained and NaN for all other values. The last row
     %has the 'filtered' depth values along with WP and WP coordinates. The 
-    %first column has depth values and the second has comments associated
-    %with with WP
+    %first column has depth values and the remaining have glacier, person, 
+    %pattern, and comments associated with the WP.
         %This format is useful for calculating mean, std, etc.
     %When format 'skinny' is selected, the data is arranged in one column
     %with the measurements (D1, D2, D3, D4) stacked and then the books
@@ -24,7 +24,8 @@ function z = pulldata(data, book, glacier, person, pattern, quality, format)
     %***Note that you cannot get transect and zigzag data together, must run
     %two pulldata function with transect and zigzag values separately
     
-    %       Alexandra Pulwicki July 2016
+    %       Alexandra Pulwicki  Created: July 2016
+    %                           Updated: August 2016
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Set categories if 'all' is selected for glacier, person, or pattern
@@ -109,20 +110,37 @@ if strcmp(format,'fat') %fat format = four depth columns, WP, and WP coordinates
     if strcmp(book,'Extra') %ExtraSD data will have extra columns (which is why you can't call SD and ExtraSD values together with doing some sort of processing) 
         filtered = [data(4).depth(:,2:42), data(4).depth(:,45:46)]; %filtered data
         filteredcomments = data(4).comments; %filtered comments (needed for search comments)
+        filteredglacier = data(4).glacier; %filtered glacier (needed for search glacier)
+        filteredperson = data(4).person; %filtered person (needed for search person)
+        filteredpattern = data(4).pattern; %filtered pattern (needed for search pattern)
     elseif strcmp(book,'all')
         filtered = [data(1).depth; data(2).depth; data(3).depth]; %stacks SD1,2,3 into one matrix
         filteredcomments = [data(1).comments; data(2).comments; data(3).comments]; %stacks the comments
+        filteredglacier = [data(1).glacier; data(2).glacier; data(3).glacier]; %stacks the glacier
+        filteredperson = [data(1).person; data(2).person; data(3).person]; %stacks the person
+        filteredpattern = [data(1).pattern; data(2).pattern; data(3).pattern]; %stacks the pattern
     else 
         filtered = data(range).depth; %otherwise, just keep the data row you want (specificed by range)
         filteredcomments = data(range).comments; %and the comments you want too
+        filteredglacier = data(range).glacier; %and the glacier you want too
+        filteredperson = data(range).person; %and the person you want too
+        filteredpattern = data(range).pattern; %and the pattern you want too
     end
     filteredcomments(all(isnan(filtered(:,1:4)),2),:) = []; %removes all the comments that correspond to not desired values (seen as rows of NaN in the edited matrix)
+    filteredglacier(all(isnan(filtered(:,1:4)),2),:) = []; %removes all the glacier that correspond to not desired values (seen as rows of NaN in the edited matrix)
+    filteredperson(all(isnan(filtered(:,1:4)),2),:) = []; %removes all the person that correspond to not desired values (seen as rows of NaN in the edited matrix)
+    filteredpattern(all(isnan(filtered(:,1:4)),2),:) = []; %removes all the pattern that correspond to not desired values (seen as rows of NaN in the edited matrix)
     filtered(all(isnan(filtered(:,1:4)),2),:) = []; %removes all the not desired values and creates the final filtered data matrix
     
     %Combine the SD matrices and filtered matrix into the final structure
     %of z
-    z = struct('depth',{data(1).depth, data(2).depth, data(3).depth, data(4).depth, filtered},...
-                'comments', {data(1).comments, data(2).comments, data(3).comments, data(4).comments, filteredcomments});
+    f1 = 'depth';    v1 = {data(1).depth, data(2).depth, data(3).depth, data(4).depth, filtered};
+    f4 = 'glacier';  v4 = {data(1).glacier, data(2).glacier, data(3).glacier, data(4).glacier, filteredglacier};
+    f5 = 'person';   v5 = {data(1).person, data(2).person, data(3).person, data(4).person, filteredperson};
+    f6 = 'pattern';  v6 = {data(1).pattern, data(2).pattern, data(3).pattern, data(4).pattern, filteredpattern};
+    f8 = 'comments'; v8 = {data(1).comments, data(2).comments, data(3).comments, data(4).comments, filteredcomments};                 
+    %Combine the SD matrices in the first row of z
+    z = struct(f1,v1,f4,v4,f5,v5,f6,v6,f8,v8);      
     
 elseif strcmp(format,'skinny') %skinny format = stacked data, one row not filtered, one row filtered
     %Compile all data into vectors (nx1)
