@@ -1,14 +1,11 @@
-% Importing Transect and Zigzag Snow Depth Data
+% Importing Transect Snow Depth Data
 %       This script imports snowdepth data from the field data file for
 %       transects, zigzags, and SWE. It also categorizes the descriptive
 %       part of the data. Then it creates a structured array for transect
-%       data and zigzag data
-
+%       data
+%
 %       Inputs:         Field Data ('FieldDataRevisedAP.xlsx')
-%                       Zigzag corners 
-%       Other scripts:  MeasurementLocations.m ('zigzag_corners_utm.xls')
 %       Outputs:        Snowdepth structure (SD)
-%                       Zigzag structure (ZZ)
 %                       Elevations from GPS WPs (gps_elev)
 
 %       Alexandra Pulwicki  Created: July 2016
@@ -16,9 +13,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% Importing data
-
-clear all
-run MeasurementLocations.m  %This program determines the easting and northing of measurements
 
 %Import data from excel sheet (change path based on computer)
     [SD1, SD1text, SD1raw] = xlsread('FieldDataRevisedAP.xlsx','SD#1','A1:O833'); %Import values, text, and raw data from first sheet
@@ -30,14 +24,8 @@ run MeasurementLocations.m  %This program determines the easting and northing of
     [SD3, SD3text, SD3raw] = xlsread('FieldDataRevisedAP.xlsx','SD#3','A1:O675'); 
     SD3text(1,:) = [];
 
-    [ZZ, ZZtext, ZZraw] = xlsread('FieldDataRevisedAP.xlsx','ZigZag','A1:H1653'); 
-    ZZtext(1,:) = [];
-
     [ExtraSD, ExtraSDtext, ExtraSDraw] = xlsread('FieldDataRevisedAP.xlsx','SWEDepth','A1:AU38'); 
     ExtraSDtext(1,:) = [];
-
-%Import vertex waypoints
-    [~,~,Vertex_cord] = xlsread('zigzag_corners_utm.xls');
 
 %% Categorizing data
 
@@ -71,18 +59,6 @@ SD2 = [SD2(:,2),SD2(:,4),SD2(:,6),SD2(:,8),SD2(:,1)];
     SD3_Date = categorical(SD3text(:,15));
     SD3_Book = categorical(SD3text(:,11));
 SD3 = [SD3(:,2),SD3(:,4),SD3(:,6),SD3(:,8),SD3(:,1)];       
-
-%Zigzag data
-    ZZ_Glacier = categorical(ZZtext(:,1));                      %Glacier (G13, G02, G04)
-    ZZ_Zone = categorical(ZZtext(:,2));                         %Zone label
-    ZZ_Vertex = categorical(ZZtext(:,3));                       %Reference vertex label
-    ZZ_Q = categorical(ZZ(:,3));                                %Quality of data (1 for good, 0 for question mark)
-    ZZ_Person = categorical(ZZtext(:,8));                       %Person that took the measurement (AP, CA, GF, AC)
-    ZZ_Date = categorical(ZZtext(:,7));                         %Date meaurement was taken
-    C = cell(size(ZZ_Glacier));                                 
-    C(:) = {'ZZ'};
-    ZZ_Book = categorical(C);                                   %Book (all ZZ)
-ZZ = [zeros(length(ZZ),1),ZZ];                              %[zeros(will be WP#), distance data, depth, quality]
 
 %Depth data from SWE and snowpits (aka ExtraSD)
     ExtraSD_Glacier = categorical(ExtraSDtext(:,44));           %Glacier (G13, G02, G04)
@@ -185,23 +161,3 @@ clear i
     SD = struct(field1,value1,field2,value2,field3,value3,field4,value4,...
         field5,value5,field6,value6,field7,value7,field8,value8);
             clear value* field* SD1* SD2* SD3* ExtraSD*
-
-
-%% Working with zigzag data
-% Creating the structure for zigzag snowdepth data -> ZZ
-    %Field values are names for columns, values are the cell arrays within the
-    %structure. Only one row. Example of accessing data: ZZ.depth(3,1)
-    field1 = 'raw';         value1 = {ZZraw};
-    field2 = 'depth';       value2 = {ZZ};
-    field3 = 'vertexlabel'; value3 = {ZZ_Vertex};
-    field4 = 'vertexcoord'; value4 = {Vertex_cord};
-    field5 = 'zone';        value5 = {ZZ_Zone};
-    field6 = 'glacier';     value6 = {ZZ_Glacier};
-    field7 = 'person';      value7 = {ZZ_Person};
-    field8 = 'Q';           value8 = {ZZ_Q};
-    field9 = 'book';        value9 = {ZZ_Book};
-    field10 = 'text';       value10 = {ZZtext};
-
-    ZZ = struct(field1,value1,field2,value2,field3,value3,field4,value4,...
-        field5,value5,field6,value6,field7,value7,field8,value8,field9,value9,field10,value10);
-            clear value* field* ZZ_* ZZraw ZZtext Vertex_cord

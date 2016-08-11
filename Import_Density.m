@@ -37,7 +37,7 @@
 %Create variables to export for all the SWE value and all snowpit values    
     SWEtube_full = [SWEtube_text, num2cell(SWEtube_density)];
     Snowpit_full = [snowpit_text, num2cell(snowpit_density)];
-
+    
 %% Zigzag Density
 
 %Use index to select only density values from zigzag locations
@@ -79,6 +79,11 @@
     snowpittubeSWE = [snowpittubeSWE, num2cell(snowpit_density(indexSP,1)/1000), ...
                             num2cell(snowpit_density(indexSP,4))];
 
+%% Create structure for relevant data
+
+Density = struct('snowpit',{Snowpit_full},'pitANDtube',{snowpittubeSWE},...
+                'tube',{SWEtube_full},'zigzagtube',{zigzagSWE});
+                        
 %% Clear variables
-clear SWEtube_density SWEtube_text SWEtube_raw snowpit_density snowpit_text snowpit_raw
+clear SWEtube* snowpit* zigzagSWE Snowpit_full
 clear P LM x y index* i j count yfit str dim filename error
