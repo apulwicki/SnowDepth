@@ -1,8 +1,5 @@
 %test variogram
 
-run SnowDepth_Import.m %Imports snow depth and measurement location data
-run SnowDensity_Import.m %Imports snow density values
-
     %pulldata(data, book, glacier, person, pattern, quality, format)
 z = pulldata(SD,'all','G04','all','LH',1,'fat');
 

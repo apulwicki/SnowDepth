@@ -143,55 +143,44 @@ elseif optionsZ.location == 2
        
     end
 end    
-%     scatter(cell2mat(ZZ_cord(:,3)),cell2mat(ZZ_cord(:,4))) %834
-%     hold on
-%     scatter(cell2mat(ZZ_cord(:,3)),cell2mat(ZZ_cord(:,4)), 'filled')
-% %     hold on 
-%      scatter(easting(1,:),northing(1,:),'filled')
-%      hold on
-%          scatter(cell2mat(ZZ_cord(699:726,3)),cell2mat(ZZ_cord(699:726,4)),'filled') %834
 
-%%     
-%     for j = 1:length(ZZ_cord)
-%         tempind = find(strcmp(ZZ_cord(j,1),ZZ.vertexcoord(:,5)),1);
-%         easting = [cell2mat(ZZ.vertexcoord(tempind,1)), cell2mat(ZZ.vertexcoord(tempind+1,1))];
-%         northing = [cell2mat(ZZ.vertexcoord(tempind,2)), cell2mat(ZZ.vertexcoord(tempind+1,2))];
-% 
-%         if cell2mat(strfind(ZZ.vertexcoord(tempind,5),'8'))==12
-%             easting = [cell2mat(ZZ.vertexcoord(tempind,1)), cell2mat(ZZ.vertexcoord(tempind-7,1))];
-%             northing = [cell2mat(ZZ.vertexcoord(tempind,2)), cell2mat(ZZ.vertexcoord(tempind-7,2))];
-%         end
-% 
-%         x = easting(1,1) + cell2mat(ZZ_cord(j,2))*(easting(1,2)-easting(1,1))/...
-%             EuclideanDistance(easting(1,1),northing(1,1),easting(1,2),northing(1,2));
-%         y = northing(1,1) + cell2mat(ZZ_cord(j,2))*(northing(1,2)-northing(1,1))/...
-%             EuclideanDistance(easting(1,1),northing(1,1),easting(1,2),northing(1,2));
-% 
-%         ZZ_cord(j,3:4) = [num2cell(x), num2cell(y)];
-% 
-%     end
-    
-%end
 clear distinterp index i j k line temp tempind easting northing ind indpre ...
-    zone glacier vertex zone_categories glacier_categories
+    zone glacier vertex zone_categories glacier_categories use_vertex
 
 %Adding data to ZZ structure
 ZZ_cord = [ZZ_cord, num2cell(ZZ.depth(:,3:4))];
 ZZ.depth = ZZ_cord; clear ZZ_cord 
 
+%Selecting only good quality (Q=1) data
+goodQ_index = cell2mat(ZZ.depth(:,6))==0;
+
+ZZ.depth(goodQ_index,:)=[]; ZZ.depth(:,6) = [];
+ZZ.vertexlabel(goodQ_index,:)=[];
+ZZ.zone(goodQ_index,:)=[];
+ZZ.glacier(goodQ_index,:)=[];
+ZZ.person(goodQ_index,:)=[];
+ZZ.Q(goodQ_index,:)=[];
+ZZ.book(goodQ_index,:)=[];
+ZZ.text(goodQ_index,:)=[];
+    clear goodQ_index
+
+%Getting the index for the start of each zigzag
+GZZindex = 1;
+for i = 1:length(ZZ.zone)-1
+    if ~ismember(ZZ.zone(i,1),ZZ.zone(i+1,1))
+        GZZindex = [GZZindex; i+1];
+    end
+end
+GZZindex = [GZZindex; length(ZZ.zone)];
+GZZindex(:,2:3) = cell2mat(ZZ.depth(GZZindex,3:4)); %getting utm corrdinates for the start of each zigzag
+ZZ.index = GZZindex; %add to ZZ structure
+
 %Adding measured density from SWE values
 if optionsZ.z == 2
-    GZZindex = [1,150,318,482,674,835,987,1144,1289,1457,1620];
-    for i = 1:size(GZZindex,2)-1
-        ZZ.depth(GZZindex(i):GZZindex(i+1)-1,5) = num2cell(cell2mat(ZZ.depth(GZZindex(i):GZZindex(i+1)-1,5))*cell2mat(Density.zigzagtube(i,2)));
+    for i = 1:size(ZZ.index,2)-1
+        ZZ.depth(ZZ.index(i):ZZ.index(i+1)-1,5) = num2cell(cell2mat(ZZ.depth(ZZ.index(i):ZZ.index(i+1)-1,5))*cell2mat(Density.zigzagtube(i,2)));
     end
 end
     
-%Selecting only good quality (Q=1) data
-GZZutm = ZZ.depth(GZZindex,3:4);
-ZZ.depth(cell2mat(ZZ.depth(:,6))==0,:)=[];
-for i = 1:size(GZZindex,2)
-    GZZindex(1,i) = find(cell2mat(GZZutm(i,1)) == cell2mat(ZZ.depth(:,3:4)),1);
-end
-ZZ.depth(:,6) = [];
-clear GZZutm i k x y
+
+clear GZZutm i k x y GZZ*

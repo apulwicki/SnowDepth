@@ -5,9 +5,9 @@ min1 = nanmin(cell2mat(ZZ.depth(:,5)));
 max1 = nanmax(cell2mat(ZZ.depth(:,5)));
 
 for i = 1:size(GZZlabel,1)
-    x = cell2mat(ZZ.depth(GZZindex(i):GZZindex(i+1)-1,3));
-    y = cell2mat(ZZ.depth(GZZindex(i):GZZindex(i+1)-1,4));
-    z = cell2mat(ZZ.depth(GZZindex(i):GZZindex(i+1)-1,5));
+    x = cell2mat(ZZ.depth(ZZ.index(i):ZZ.index(i+1)-1,3));
+    y = cell2mat(ZZ.depth(ZZ.index(i):ZZ.index(i+1)-1,4));
+    z = cell2mat(ZZ.depth(ZZ.index(i):ZZ.index(i+1)-1,5));
     x2 = nanmax(x)-x;
     y2 = nanmax(y)-y;
     pointsize = 30;
@@ -45,7 +45,7 @@ for i = 1:size(GZZlabel,1)
 %     end
     
 end
-clear max min x y x2 y2 z i k c pointsize stddepth meandepth str dim filename GZZlabel
+clear max1 min1 x y x2 y2 z i k c pointsize stddepth meandepth str dim filename GZZlabel
 
 %dlmwrite('/home/glaciology1/Documents/QGIS/Data/TestPoints.csv',closest, 'delimiter', ',', 'precision', 9); %Write matrix with new waypoints to csv file for QGIS
 
@@ -56,9 +56,9 @@ min1 = nanmin(cell2mat(ZZ.depth(:,5)));
 max1 = nanmax(cell2mat(ZZ.depth(:,5)));
 
 for i = 1:size(GZZlabel,1)
-    x = cell2mat(ZZ.depth(GZZindex(i):GZZindex(i+1)-1,3));
-    y = cell2mat(ZZ.depth(GZZindex(i):GZZindex(i+1)-1,4));
-    z = cell2mat(ZZ.depth(GZZindex(i):GZZindex(i+1)-1,5));
+    x = cell2mat(ZZ.depth(ZZ.index(i):ZZ.index(i+1)-1,3));
+    y = cell2mat(ZZ.depth(ZZ.index(i):ZZ.index(i+1)-1,4));
+    z = cell2mat(ZZ.depth(ZZ.index(i):ZZ.index(i+1)-1,5));
     x2 = nanmax(x)-x;
     y2 = nanmax(y)-y;
     d = variogram([x2 y2],z,'plotit',false,'nrbins',100, 'maxdist', 40);
