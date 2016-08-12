@@ -102,38 +102,55 @@ if optionsZ.location == 1
         ZZ_cord(j,3:4) = [num2cell(x), num2cell(y)];
 
     end
-elseif optionsZ.location == 2
-%%
-    ZZsubset = ZZ_cord(1:149,:);
-    use_vertex = ['G04_Z3A_ZZ01';'G04_Z3A_ZZ05';'G04_Z2A_ZZ01';'G04_Z2A_ZZ05'];
     
-    for i = 1:80%length(ZZsubset)
-       easting = []; northing = [];
-       if ismember(ZZsubset(i,1),use_vertex)
-            tempind = find(strcmp(ZZsubset(i,1),ZZ.vertexcoord(:,5)),1);
+elseif optionsZ.location == 2
+    use_vertex = ['G04_Z3A_ZZ01';'G04_Z3A_ZZ05';'G04_Z2A_ZZ01';'G04_Z2A_ZZ05';...
+                   'G04_Z5B_ZZ01'; 'G04_Z5B_ZZ05';'G02_Z5C_ZZ08';'G02_Z7A_ZZ01';...
+                   'G02_Z7A_ZZ08';'G02_Z7A_ZZ04';'G02_Z3B_ZZ03';'G02_Z3B_ZZ07';...
+                   'G13_Z7C_ZZ02';'G13_Z7C_ZZ06';'G13_Z4C_ZZ08';'G13_Z4C_ZZ04';...
+                   'G13_Z3B_ZZ04';'G13_Z3B_ZZ08';'G13_Z5A_ZZ08';'G13_Z5A_ZZ04'];
+    
+    for i = 1:length(ZZ_cord)
+       if ismember(ZZ_cord(i,1),use_vertex)
+            tempind = find(strcmp(ZZ_cord(i,1),ZZ.vertexcoord(:,5)),1);
             easting = [cell2mat(ZZ.vertexcoord(tempind,1)), cell2mat(ZZ.vertexcoord(tempind+1,1))];
             northing = [cell2mat(ZZ.vertexcoord(tempind,2)), cell2mat(ZZ.vertexcoord(tempind+1,2))];
-       else
-           for j = 1:length(ZZsubset)
-               if isempty(cell2mat(ZZsubset(j,3)))
-                   tempind = find(strcmp(ZZsubset(i,1),ZZ.vertexcoord(:,5)),1);
-                   easting = [cell2mat(ZZsubset(j-1,3)), cell2mat(ZZ.vertexcoord(tempind+1,1))];
-                   northing = [cell2mat(ZZsubset(j-1,4)), cell2mat(ZZ.vertexcoord(tempind+1,2))];
+            if cell2mat(strfind(ZZ.vertexcoord(tempind,5),'8'))==12
+                easting = [cell2mat(ZZ.vertexcoord(tempind,1)), cell2mat(ZZ.vertexcoord(tempind-7,1))];
+                northing = [cell2mat(ZZ.vertexcoord(tempind,2)), cell2mat(ZZ.vertexcoord(tempind-7,2))];
+            end
+       elseif ~ismember(ZZ_cord(i,1),ZZ_cord(i-1,1))            
+           for j = 1:length(ZZ_cord)
+               if isempty(cell2mat(ZZ_cord(j,3)))
+                   tempind = find(strcmp(ZZ_cord(i,1),ZZ.vertexcoord(:,5)),1);
+                   easting = [cell2mat(ZZ_cord(j-1,3)), cell2mat(ZZ.vertexcoord(tempind+1,1))];
+                   northing = [cell2mat(ZZ_cord(j-1,4)), cell2mat(ZZ.vertexcoord(tempind+1,2))];
+                   if cell2mat(strfind(ZZ.vertexcoord(tempind,5),'8'))==12
+                        easting = [cell2mat(ZZ_cord(j-1,3)), cell2mat(ZZ.vertexcoord(tempind-7,1))];
+                        northing = [cell2mat(ZZ_cord(j-1,4)), cell2mat(ZZ.vertexcoord(tempind-7,2))];
+                   end
                    break
                end
            end
        end
        
-        x = easting(1,1) + cell2mat(ZZsubset(i,2))*(easting(1,2)-easting(1,1))/...
+        x = easting(1,1) + cell2mat(ZZ_cord(i,2))*(easting(1,2)-easting(1,1))/...
                 EuclideanDistance(easting(1,1),northing(1,1),easting(1,2),northing(1,2));
-        y = northing(1,1) + cell2mat(ZZsubset(i,2))*(northing(1,2)-northing(1,1))/...
+        y = northing(1,1) + cell2mat(ZZ_cord(i,2))*(northing(1,2)-northing(1,1))/...
                 EuclideanDistance(easting(1,1),northing(1,1),easting(1,2),northing(1,2));
 
-        ZZsubset(i,3:4) = [num2cell(x), num2cell(y)];   
+        ZZ_cord(i,3:4) = [num2cell(x), num2cell(y)];   
        
     end
-    
-    scatter(cell2mat(ZZsubset(:,3)),cell2mat(ZZsubset(:,4)))
+end    
+%     scatter(cell2mat(ZZ_cord(:,3)),cell2mat(ZZ_cord(:,4))) %834
+%     hold on
+%     scatter(cell2mat(ZZ_cord(:,3)),cell2mat(ZZ_cord(:,4)), 'filled')
+% %     hold on 
+%      scatter(easting(1,:),northing(1,:),'filled')
+%      hold on
+%          scatter(cell2mat(ZZ_cord(699:726,3)),cell2mat(ZZ_cord(699:726,4)),'filled') %834
+
 %%     
 %     for j = 1:length(ZZ_cord)
 %         tempind = find(strcmp(ZZ_cord(j,1),ZZ.vertexcoord(:,5)),1);
@@ -154,7 +171,7 @@ elseif optionsZ.location == 2
 % 
 %     end
     
-end
+%end
 clear distinterp index i j k line temp tempind easting northing ind indpre ...
     zone glacier vertex zone_categories glacier_categories
 

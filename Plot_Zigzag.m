@@ -1,13 +1,13 @@
 %% Plotting zigzag data
 
 GZZlabel = ['G04 Z3A'; 'G04 Z2A'; 'G04 Z5B'; 'G02 Z5C'; 'G02 Z7A';'G02 Z3B'; 'G13 Z7C';'G13 Z4C'; 'G13 Z3B'; 'G13 Z5A'];
-min1 = nanmin(cell2mat(ZZ.depth(:,7)));
-max1 = nanmax(cell2mat(ZZ.depth(:,7)));
+min1 = nanmin(cell2mat(ZZ.depth(:,5)));
+max1 = nanmax(cell2mat(ZZ.depth(:,5)));
 
 for i = 1:size(GZZlabel,1)
     x = cell2mat(ZZ.depth(GZZindex(i):GZZindex(i+1)-1,3));
     y = cell2mat(ZZ.depth(GZZindex(i):GZZindex(i+1)-1,4));
-    z = cell2mat(ZZ.depth(GZZindex(i):GZZindex(i+1)-1,7));
+    z = cell2mat(ZZ.depth(GZZindex(i):GZZindex(i+1)-1,5));
     x2 = nanmax(x)-x;
     y2 = nanmax(y)-y;
     pointsize = 30;

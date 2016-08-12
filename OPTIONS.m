@@ -4,7 +4,7 @@ global optionsZ
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% ZIGZAG %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Measurement locations
-l1 = 'location';    v1 = 1;
+l1 = 'location';    v1 = 2;
                     % 1 calculate location based on vertex utm
                     % 2 calculate location based on last probe point
 l2 = 'z';           v2 = 2;
