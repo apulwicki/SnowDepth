@@ -51,8 +51,8 @@
 
 %Get mean density and std (kg/m^3)
     % Location, mean density, std, number of obs, elevation
-    zigzagSWE = [SWEtube_text(index_zigzag',:), num2cell(nanmean(zigzagSWE(:,1:15),2)/1000),...
-        num2cell(nanstd(zigzagSWE(:,1:15),1,2)/1000), num2cell(count), num2cell(SWEtube_density(index_zigzag',21))];
+    zigzagSWE = [SWEtube_text(index_zigzag',:), num2cell(nanmean(zigzagSWE(:,1:15),2)),...
+        num2cell(nanstd(zigzagSWE(:,1:15),1,2)), num2cell(count), num2cell(SWEtube_density(index_zigzag',21))];
 
 %% Snowpit Density
 
@@ -67,8 +67,8 @@
 
 %Get mean density and std (kg/m^3)
     % Location, mean density, std, number of obs
-    snowpittubeSWE = [SWEtube_text(index_SPSWE',:), num2cell(nanmean(snowpittubeSWE(:,1:15),2)/1000),...
-        num2cell(nanstd(snowpittubeSWE(:,1:15),1,2)/1000), num2cell(count)];
+    snowpittubeSWE = [SWEtube_text(index_SPSWE',:), num2cell(nanmean(snowpittubeSWE(:,1:15),2)),...
+        num2cell(nanstd(snowpittubeSWE(:,1:15),1,2)), num2cell(count)];
 
 %Corresponding snowpit densities
     indexSP = zeros(size(index_SPSWE,2),1);
@@ -76,7 +76,7 @@
         indexSP(i,1) = find(strcmp(snowpittubeSWE(i,1),snowpit_text)); 
     end
     % Location, mean density, std, number of obs, snowpit density, elevation
-    snowpittubeSWE = [snowpittubeSWE, num2cell(snowpit_density(indexSP,1)/1000), ...
+    snowpittubeSWE = [snowpittubeSWE, num2cell(snowpit_density(indexSP,1)), ...
                             num2cell(snowpit_density(indexSP,4))];
 
 %% Create structure for relevant data
