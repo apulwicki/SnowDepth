@@ -67,6 +67,8 @@ x = [z(5).depth(:,6);z1(5).depth(:,42)]; x2 = nanmax(x)-x; %convert easting to d
 y = [z(5).depth(:,7);z1(5).depth(:,43)]; y2 = nanmax(y)-y; %convert easting to distance in m
 z = [nanmean(z(5).depth(:,1:4),2);nanmean(z1(5).depth(:,1:40),2)];
 
+
+
 % if ishandle(f1) %clears data from open plots
 %     clf(f1); clf(f2);
 % end
@@ -150,7 +152,7 @@ end
     z = [nanmean(z1(5).depth(:,1:4),2);nanmean(z2(5).depth(:,1:4),2);nanmean(z3(5).depth(:,1:4),2);...
         nanmean(z4(5).depth(:,1:4),2);nanmean(z5(5).depth(:,1:4),2)];
 
-    [d, ~]= variogram([x2 y2],z,'plotit',false,'nrbins',100);
+    d = variogramAlex([z x2 y2], 15, 750, ['Upper ', glacier]);
 
     %Variogram
     figure 
