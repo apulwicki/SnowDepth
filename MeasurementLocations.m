@@ -36,11 +36,7 @@ for i = 1:length(starters) %for each start waypoint
         x = easting(index)-40; %New easting of imaginary WP
         y = m*x+b; %New northing of imaginary WP
     end
-
-% hold on
-% plot(easting(index:index+1),northing(index:index+1),'ok')
-% plot(x,y,'ob')
-
+    
         %Insert the imaginary WP into the data
     easting = [easting(1:index-1);x;easting(index:end)];
     northing = [northing(1:index-1);y;northing(index:end)];

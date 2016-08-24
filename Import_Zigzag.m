@@ -1,10 +1,10 @@
 % Importing Zigzag Snow Depth Data
 %       This script imports snowdepth data from the field data file for
-%       transects, zigzags, and SWE. It also categorizes the descriptive
-%       part of the data. Then it creates a structured array for zigzag data
+%       zigzags. It also categorizes the descriptive part of the data. 
+%       Then it creates a structured array for zigzag data.
 %
 %       Inputs:         Field Data ('FieldDataRevisedAP.xlsx')
-%                       Zigzag corners 
+%                       Zigzag corners ('zigzag_corners_utm.xls')
 %       Outputs:        Zigzag structure (ZZ)
 
 %       Alexandra Pulwicki  Created: July 2016
@@ -27,16 +27,16 @@
     %data for plotting and stats analysis in the future     
 
 %Zigzag data
-    ZZ_Glacier = categorical(ZZtext(:,1));                      %Glacier (G13, G02, G04)
-    ZZ_Zone = categorical(ZZtext(:,2));                         %Zone label
-    ZZ_Vertex = categorical(ZZtext(:,3));                       %Reference vertex label
-    ZZ_Q = categorical(ZZ(:,3));                                %Quality of data (1 for good, 0 for question mark)
-    ZZ_Person = categorical(ZZtext(:,8));                       %Person that took the measurement (AP, CA, GF, AC)
-    ZZ_Date = categorical(ZZtext(:,7));                         %Date meaurement was taken
+    ZZ_Glacier = categorical(ZZtext(:,1));      %Glacier (G13, G02, G04)
+    ZZ_Zone = categorical(ZZtext(:,2));         %Zone label
+    ZZ_Vertex = categorical(ZZtext(:,3));       %Reference vertex label
+    ZZ_Q = categorical(ZZ(:,3));                %Quality of data (1 for good, 0 for question mark)
+    ZZ_Person = categorical(ZZtext(:,8));       %Person that took the measurement (AP, CA, GF, AC)
+    ZZ_Date = categorical(ZZtext(:,7));         %Date meaurement was taken
     C = cell(size(ZZ_Glacier));                                 
     C(:) = {'ZZ'};
-    ZZ_Book = categorical(C);                                   %Book (all ZZ)
-ZZ = [zeros(length(ZZ),1),ZZ];                              %[zeros(will be WP#), distance data, depth, quality]
+    ZZ_Book = categorical(C);                   %Book (all ZZ)
+ZZ = [zeros(length(ZZ),1),ZZ];                  %[zeros(will be WP#), distance data, depth, quality]
 
 clear C
 %% Creating the structure for zigzag snowdepth data -> ZZ
@@ -151,36 +151,38 @@ clear distinterp index i j k line temp tempind easting northing ind indpre ...
 ZZ_cord = [ZZ_cord, num2cell(ZZ.depth(:,3:4))];
 ZZ.depth = ZZ_cord; clear ZZ_cord 
 
-%Selecting only good quality (Q=1) data
-goodQ_index = cell2mat(ZZ.depth(:,6))==0;
+%% Other processing steps
 
-ZZ.depth(goodQ_index,:)=[]; ZZ.depth(:,6) = [];
-ZZ.vertexlabel(goodQ_index,:)=[];
-ZZ.zone(goodQ_index,:)=[];
-ZZ.glacier(goodQ_index,:)=[];
-ZZ.person(goodQ_index,:)=[];
-ZZ.Q(goodQ_index,:)=[];
-ZZ.book(goodQ_index,:)=[];
-ZZ.text(goodQ_index,:)=[];
-    clear goodQ_index
+%Selecting only good quality (Q=1) data
+    goodQ_index = cell2mat(ZZ.depth(:,6))==0;
+
+    ZZ.depth(goodQ_index,:)=[]; ZZ.depth(:,6) = [];
+    ZZ.vertexlabel(goodQ_index,:)=[];
+    ZZ.zone(goodQ_index,:)=[];
+    ZZ.glacier(goodQ_index,:)=[];
+    ZZ.person(goodQ_index,:)=[];
+    ZZ.Q(goodQ_index,:)=[];
+    ZZ.book(goodQ_index,:)=[];
+    ZZ.text(goodQ_index,:)=[];
+        clear goodQ_index
 
 %Getting the index for the start of each zigzag
-GZZindex = 1;
-for i = 1:length(ZZ.zone)-1
-    if ~ismember(ZZ.zone(i,1),ZZ.zone(i+1,1))
-        GZZindex = [GZZindex; i+1];
+    GZZindex = 1;
+    for i = 1:length(ZZ.zone)-1
+        if ~ismember(ZZ.zone(i,1),ZZ.zone(i+1,1))
+            GZZindex = [GZZindex; i+1];
+        end
     end
-end
-GZZindex = [GZZindex; length(ZZ.zone)];
-GZZindex(:,2:3) = cell2mat(ZZ.depth(GZZindex,3:4)); %getting utm corrdinates for the start of each zigzag
-ZZ.index = GZZindex; %add to ZZ structure
+    GZZindex = [GZZindex; length(ZZ.zone)];
+    GZZindex(:,2:3) = cell2mat(ZZ.depth(GZZindex,3:4)); %getting utm corrdinates for the start of each zigzag
+    
+    ZZ.index = GZZindex; %add to ZZ structure
 
 %Adding measured density from SWE values
-if optionsZ.z == 2
-    for i = 1:size(ZZ.index,2)-1
-        ZZ.depth(ZZ.index(i):ZZ.index(i+1)-1,5) = num2cell(cell2mat(ZZ.depth(ZZ.index(i):ZZ.index(i+1)-1,5))*cell2mat(Density.zigzagtube(i,2)));
+    if optionsZ.z == 2
+        for i = 1:size(ZZ.index,2)-1
+            ZZ.depth(ZZ.index(i):ZZ.index(i+1)-1,5) = num2cell(cell2mat(ZZ.depth(ZZ.index(i):ZZ.index(i+1)-1,5))*cell2mat(Density.zigzagtube(i,2)));
+        end
     end
-end
     
-
-clear GZZutm i k x y GZZ*
+        clear GZZutm i k x y GZZ*

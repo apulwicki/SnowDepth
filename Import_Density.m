@@ -4,10 +4,9 @@
 %       snowpit density values.
 
 %       Inputs:         Summary of density data ('summary_densitydata.xlsx')
-%       Other scripts:  None
-%       Outputs:        Density from snowpits and SWE tube where both are
-%                           recorded (snowpittubeSWE)
-%                       SWE tube values at zigzag locations (zigzagSWE)
+%       Outputs:        Density data structure with separated values for
+%                           just snowpit, snowpit and tube, just tube, and
+%                           tube in zigzag locations. 
 
 %       Alexandra Pulwicki  Created: August 2016
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
