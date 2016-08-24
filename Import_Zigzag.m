@@ -181,7 +181,7 @@ ZZ.depth = ZZ_cord; clear ZZ_cord
 %Adding measured density from SWE values
     if optionsZ.z == 2
         for i = 1:size(ZZ.index,2)-1
-            ZZ.depth(ZZ.index(i):ZZ.index(i+1)-1,5) = num2cell(cell2mat(ZZ.depth(ZZ.index(i):ZZ.index(i+1)-1,5))*cell2mat(Density.zigzagtube(i,2)));
+            ZZ.depth(ZZ.index(i):ZZ.index(i+1)-1,5) = num2cell(cell2mat(ZZ.depth(ZZ.index(i):ZZ.index(i+1)-1,5))/100*cell2mat(Density.zigzagtube(i,2))/10);
         end
     end
     

@@ -77,24 +77,18 @@ figure(3)
     y = cell2mat(Density.snowpit(1:4,5));
     errorx = 0.1*x;
     errory = zeros(length(y),1);
-h1 = errorbarxy(x,y,errorx,errory,'Color','k','LineStyle','none','Marker','o',...
-   'MarkerFaceColor','k','LineWidth',1,'MarkerSize',11); hold on
-    x = cell2mat(Density.snowpit(5:7,2));
-    y = cell2mat(Density.snowpit(5:7,5));
-    errorx = 0.1*x;
-    errory = zeros(length(y),1);
-h2 = errorbarxy(x,y,errorx,errory,'Color','k','LineStyle','none','Marker','o',...
-   'MarkerFaceColor','b','LineWidth',1,'MarkerSize',11); hold on   
-    x = cell2mat(Density.snowpit(8:end,2));
-    y = cell2mat(Density.snowpit(8:end,5));
-    errorx = 0.1*x;
-    errory = zeros(length(y),1);
 h3 = errorbarxy(x,y,errorx,errory,'Color','k','LineStyle','none','Marker','o',...
    'MarkerFaceColor','r','LineWidth',1,'MarkerSize',11); hold on
+    x = cell2mat(Density.snowpit(5:7,2));
+    y = cell2mat(Density.snowpit(5:7,5));
+scatter(x,y,'Filled'); hold on    
+    x = cell2mat(Density.snowpit(8:end,2));
+    y = cell2mat(Density.snowpit(8:end,5));
+scatter(x,y,'Filled')
 
     xlabel('Snowpit density (kg m^{-3})')
     ylabel('Elevation(m)')
-    legend([h1(1) h2(1) h3(1)], {'G04','G02','G13'})
+    legend('G02','G04','G13')
 %filename = strcat('/home/glaciology1/Documents/Data/Plots/ElevationVsSnowpit_all');
 filename = strcat('/Users/Alexandra/Documents/SFU/Data/Plots/ElevationVsSnowpit_all');
 print(filename,'-dpng')

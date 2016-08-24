@@ -1,7 +1,3 @@
-%% Import data
-run SnowDepth_Import.m %Imports snow depth and measurement location data
-run SnowDensity_Import.m %Imports snow density values
-
 %% Basic Stats
 
     %pulldata(data, book, glacier, person, pattern, quality, format)

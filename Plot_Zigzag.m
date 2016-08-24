@@ -19,19 +19,19 @@ for i = 1:size(GZZlabel,1)
     %subplot(2,2,i)
     scatter(x2, y2, pointsize, z,'filled');
     axis equal
-    str = {strcat('mean= ', num2str(round(meandepth,1)),'cm'), ...
-        strcat('std= ', num2str(round(stddepth,1)),'cm')};
+    str = {strcat('mean= ', num2str(round(meandepth,1)),'cm SWE'), ...
+        strcat('std= ', num2str(round(stddepth,1)),'cm SWE')};
     title(GZZlabel(i,:))
     dim = [.13 .5 .3 .3];
     annotation('textbox',dim,'String', str,'FitBoxToText','on')
     xlabel('Distance (m)')
     ylabel('Distance (m)')
-        caxis([min1 max1])
+        %caxis([min1 max1])
         c = colorbar;
         %colormap(flipud(cool))
-        c.Label.String = 'Depth (cm)';
+        c.Label.String = 'SWE (cm)';
    
-   filename = strcat('/Users/Alexandra/Documents/SFU/Data/Plots/',GZZlabel(i,:),'same_scale');
+   filename = strcat('/Users/Alexandra/Documents/SFU/Data/Plots/',GZZlabel(i,:));%,'same_scale');
    %filename = strcat('/home/glaciology1/Documents/Data/Plots/same_scale',GZZlabel(i,:));
    print(filename,'-dpng')
    clf
@@ -55,7 +55,7 @@ GZZlabel = ['G04 Z3A'; 'G04 Z2A'; 'G04 Z5B'; 'G02 Z5C'; 'G02 Z7A';'G02 Z3B'; 'G1
 min1 = nanmin(cell2mat(ZZ.depth(:,5)));
 max1 = nanmax(cell2mat(ZZ.depth(:,5)));
 
-for i = 1:size(GZZlabel,1)
+for i = 1%:size(GZZlabel,1)
     x = cell2mat(ZZ.depth(ZZ.index(i):ZZ.index(i+1)-1,3));
     y = cell2mat(ZZ.depth(ZZ.index(i):ZZ.index(i+1)-1,4));
     z = cell2mat(ZZ.depth(ZZ.index(i):ZZ.index(i+1)-1,5));
@@ -64,13 +64,13 @@ for i = 1:size(GZZlabel,1)
     
     d = variogramAlex([z x2 y2], 1, 40, GZZlabel(i,:));
        
-   %filename = strcat('/home/glaciology1/Documents/Data/Plots/variogram',GZZlabel(i,:));
-    filename = strcat('/Users/Alexandra/Documents/SFU/Data/Plots/Zigzag/',GZZlabel(i,:),'variogram');
-    fig = gcf;
-    fig.PaperUnits = 'inches';
-    fig.PaperPosition = [0 0 8 9];
-    print(filename,'-dpng','-r0')
-    clf
+%    %filename = strcat('/home/glaciology1/Documents/Data/Plots/variogram',GZZlabel(i,:));
+%     filename = strcat('/Users/Alexandra/Documents/SFU/Data/Plots/Zigzag/',GZZlabel(i,:),'variogram');
+%     fig = gcf;
+%     fig.PaperUnits = 'inches';
+%     fig.PaperPosition = [0 0 8 9];
+%     print(filename,'-dpng','-r0')
+%     clf
 
 end
 clear x y x2 y2 z i k c pointsize filename GZZlabel
