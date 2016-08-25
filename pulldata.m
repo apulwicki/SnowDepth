@@ -1,6 +1,5 @@
 function z = pulldata(data, book, glacier, person, pattern, quality, format)
 % Used for getting subsets of transect data based on categorical values
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %This function produces a structued array (z) that contains the selected
     %data, which is done by specifiying book, glaicer, person, pattern, and
     %quality when the function is called. The format of the 'filtered' cell 
@@ -26,7 +25,7 @@ function z = pulldata(data, book, glacier, person, pattern, quality, format)
     
     %       Alexandra Pulwicki  Created: July 2016
     %                           Updated: August 2016
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Set categories if 'all' is selected for glacier, person, or pattern
     if strcmp(glacier,'all')

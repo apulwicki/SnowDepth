@@ -54,7 +54,7 @@ scatter(SD_outchannel(:,1), SD_outchannel(:,3))
     ylabel('Standard deviation')    
 %% Variogram - transect
 
-glacier = 'G04'; %select data from chosen glacier
+glacier = 'G13'; %select data from chosen glacier
     %z = pulldata(data, book, glacier, person, pattern, quality, format)
 z = pulldata(SD,'all',glacier,'all','all',1,'fat'); %transect data  
 z1 = pulldata(SD,'Extra',glacier,'Extra','Extra',1,'fat'); %ExtraSD data from nontransect measurements
@@ -63,8 +63,28 @@ x = [z(5).depth(:,6);z1(5).depth(:,42)]; x2 = nanmax(x)-x; %convert easting to d
 y = [z(5).depth(:,7);z1(5).depth(:,43)]; y2 = nanmax(y)-y; %convert easting to distance in m
 z = [nanmean(z(5).depth(:,1:4),2);nanmean(z1(5).depth(:,1:40),2)];
 
+d = variogramAlex([z x2 y2], 15, 'default', glacier);
 
+   %filename = strcat('/home/glaciology1/Documents/Data/Plots/variofull',glacier);
+    filename = strcat('/Users/Alexandra/Documents/SFU/Data/Plots/variofull',glacier);
+    fig = gcf;
+    fig.PaperUnits = 'inches';
+    fig.PaperPosition = [0 0 8 9];
+    print(filename,'-dpng','-r0')
+   
+   
+    
+glacier = 'G04'; %select data from chosen glacier
+    %z = pulldata(data, book, glacier, person, pattern, quality, format)
+z = pulldata(SD,'SD1',glacier,'all','all',1,'fat'); %transect data  
 
+x = z(5).depth(1:2:end-1,6); x2 = nanmax(x)-x; %convert easting to distance in m
+y = z(5).depth(1:2:end-1,7); y2 = nanmax(y)-y; %convert easting to distance in m
+z = nanmean(z(5).depth(1:2:end-1,1:4),2);
+
+d = variogramAlex([z x2 y2], 15, 'default', glacier);    
+    
+    
 % if ishandle(f1) %clears data from open plots
 %     clf(f1); clf(f2);
 % end
@@ -104,23 +124,23 @@ z = [nanmean(z(5).depth(:,1:4),2);nanmean(z1(5).depth(:,1:40),2)];
 %                            'plotit',true);
 % clear a0 c0 h gammaexp c d2
  %Variogram
-    figure 
-    subplot(2,1,1)
-        scatter(x2,y2,4,z,'filled'); box on;
-        ylabel('y (m)'); xlabel('x (m)'); 
-        c = colorbar; c.Label.String = 'Snow depth (cm)';
-        title(glacier)
-    subplot(2,1,2)
-        h=d.distance;
-        gammaexp = d.val;
-        numobs = d.num;
-        a0 = 500; % initial value: range 
-        c0 = 500; % initial value: sill     
-        [a,b,n] = variogramfit(h,gammaexp,a0,c0,numobs,...
-                               'solver','fminsearchbnd',...
-                               'nugget',0,...
-                               'plotit',true);
-    clear a0 c0 h gammaexp c d2 x* y* z numobs n iid glacier a b 
+%     figure 
+%     subplot(2,1,1)
+%         scatter(x2,y2,4,z,'filled'); box on;
+%         ylabel('y (m)'); xlabel('x (m)'); 
+%         c = colorbar; c.Label.String = 'Snow depth (cm)';
+%         title(glacier)
+%     subplot(2,1,2)
+%         h=d.distance;
+%         gammaexp = d.val;
+%         numobs = d.num;
+%         a0 = 500; % initial value: range 
+%         c0 = 500; % initial value: sill     
+%         [a,b,n] = variogramfit(h,gammaexp,a0,c0,numobs,...
+%                                'solver','fminsearchbnd',...
+%                                'nugget',0,...
+%                                'plotit',true);
+%     clear a0 c0 h gammaexp c d2 x* y* z numobs n iid glacier a b 
 
 %Normality test (One-sample Kolmogorov-Smirnov test)
 if kstest(z)
@@ -132,8 +152,9 @@ end
 
 %% Variogram for different sections (lower, upper)
 
-%Upper
-    glacier = 'G04'; %select data from chosen glacier
+glacier = 'G13'; %select data from chosen glacier
+
+%UPPER
         %z = pulldata(data, book, glacier, person, pattern, quality, format)
     z1 = pulldata(SD,'all',glacier,'all','UH',1,'fat'); %transect data  
     z2 = pulldata(SD,'all',glacier,'all','UC',1,'fat'); %transect data  
@@ -148,27 +169,36 @@ end
     z = [nanmean(z1(5).depth(:,1:4),2);nanmean(z2(5).depth(:,1:4),2);nanmean(z3(5).depth(:,1:4),2);...
         nanmean(z4(5).depth(:,1:4),2);nanmean(z5(5).depth(:,1:4),2)];
 
-    d = variogramAlex([z x2 y2], 15, 750, ['Upper ', glacier]);
+    d = variogramAlex([z x2 y2], 15, 'default', ['Upper ', glacier]);
 
-    %Variogram
-    figure 
-    subplot(2,1,1)
-        scatter(x2,y2,4,z,'filled'); box on;
-        ylabel('y (m)'); xlabel('x (m)'); 
-        c = colorbar; c.Label.String = 'Snow depth (cm)';
-        title({glacier,'Upper Ablation'})
-    subplot(2,1,2)
-        h=d.distance;
-        gammaexp = d.val;
-        numobs = d.num;
-        a0 = 500; % initial value: range 
-        c0 = 500; % initial value: sill     
-        [a,b,n] = variogramfit(h,gammaexp,a0,c0,numobs,...
-                               'solver','fminsearchbnd',...
-                               'nugget',0,...
-                               'plotit',true);
-    clear a0 c0 h gammaexp c d2 x* y* z numobs n iid glacier a b 
+   %filename = strcat('/home/glaciology1/Documents/Data/Plots/vario_upper',glacier);
+    filename = strcat('/Users/Alexandra/Documents/SFU/Data/Plots/vario_upper',glacier);
+    fig = gcf;
+    fig.PaperUnits = 'inches';
+    fig.PaperPosition = [0 0 8 9];
+    print(filename,'-dpng','-r0')
+    clf
+    
+%LOWER
+        %z = pulldata(data, book, glacier, person, pattern, quality, format)
+    z1 = pulldata(SD,'all',glacier,'all','LH',1,'fat'); %transect data  
+    z2 = pulldata(SD,'all',glacier,'all','LC',1,'fat'); %transect data  
+    z3 = pulldata(SD,'all',glacier,'all','LM',1,'fat'); %transect data  
 
+    x = [z1(5).depth(:,6);z2(5).depth(:,6);z3(5).depth(:,6)]; 
+        x2 = nanmax(x)-x; %convert easting to distance in m
+    y = [z1(5).depth(:,7);z2(5).depth(:,7);z3(5).depth(:,7)]; 
+        y2 = nanmax(y)-y; %convert easting to distance in m
+    z = [nanmean(z1(5).depth(:,1:4),2);nanmean(z2(5).depth(:,1:4),2);nanmean(z3(5).depth(:,1:4),2)];
+
+    d = variogramAlex([z x2 y2], 15, 'default', ['Lower ', glacier]);
+
+   %filename = strcat('/home/glaciology1/Documents/Data/Plots/vario_lower',glacier);
+    filename = strcat('/Users/Alexandra/Documents/SFU/Data/Plots/vario_lower',glacier);
+    fig = gcf;
+    fig.PaperUnits = 'inches';
+    fig.PaperPosition = [0 0 8 9];
+    print(filename,'-dpng','-r0')
 
 %% Autocorrelation
     %Can only do for UT on G4 because it is continuous and evenly spaced data
