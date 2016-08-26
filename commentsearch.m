@@ -5,24 +5,24 @@ function [ SDcomments ] = commentsearch( z, expression, inout )
     %is chosen through the pulldata.m function. The expression is the text
     %that you want to search (use | for OR). inout is either 'in' or 'out'
     %based on whether you want the expression to be included or excluded. 
-    
-index = zeros(size(z(5).comments,1),size(expression,2));
-for i = 1:size(expression,2)
-    if strcmp(inout,'in')
-        index(z(5).comments==expression{1,i},i) = 1;
-        index2 = find(any(index,2));
-    elseif strcmp(inout,'out')
-        index(z(5).comments~=expression{1,i},i) = 1;
-        index2 = find(all(index,2));
+    index = zeros(size(z(5).comments,1),size(expression,2));
+    for i = 1:size(expression,2)
+        if strcmp(inout,'in')
+            index(z(5).comments==expression{1,i},i) = 1;
+            index2 = find(any(index,2));
+        elseif strcmp(inout,'out')
+            index(z(5).comments~=expression{1,i},i) = 1;
+            index2 = find(all(index,2));
+        end
     end
-end
 
 
 %test_comments = z(5).comments(index2,1);
 
-SDcomments = [z(5).depth(index2,5), nanmean(z(5).depth(index2,1:4),2), nanstd(z(5).depth(index2,1:4),1,2)];    
+    SDcomments = [z(5).depth(index2,5), nanmean(z(5).depth(index2,1:4),2), nanstd(z(5).depth(index2,1:4),1,2)];    
 
 
+    
 %%This is for when the comments were not categorical - keeping it just
 %%incase this ends up being more helpful
 % %Initialize matrices

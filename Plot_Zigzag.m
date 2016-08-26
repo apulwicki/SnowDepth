@@ -52,10 +52,9 @@ clear max1 min1 x y x2 y2 z i k c pointsize stddepth meandepth str dim filename 
 %% Variogram - zigzag
 
 GZZlabel = ['G04 Z3A'; 'G04 Z2A'; 'G04 Z5B'; 'G02 Z5C'; 'G02 Z7A';'G02 Z3B'; 'G13 Z7C';'G13 Z4C'; 'G13 Z3B'; 'G13 Z5A'];
-min1 = nanmin(cell2mat(ZZ.depth(:,5)));
-max1 = nanmax(cell2mat(ZZ.depth(:,5)));
 
-for i = 1:size(GZZlabel,1)
+
+for i = 9%:size(GZZlabel,1)
     x = cell2mat(ZZ.depth(ZZ.index(i):ZZ.index(i+1)-1,3));
     y = cell2mat(ZZ.depth(ZZ.index(i):ZZ.index(i+1)-1,4));
     z = cell2mat(ZZ.depth(ZZ.index(i):ZZ.index(i+1)-1,5));
@@ -63,15 +62,23 @@ for i = 1:size(GZZlabel,1)
     y2 = nanmax(y)-y;
     
     lag = 2; maxlag = 40;
-    d = variogramAlex([z x2 y2], lag, maxlag, [GZZlabel(i,:) ' (lag=' num2str(lag) ', maxlag=' num2str(maxlag) ')']);
-       
+    [d, SS, SG] = variogramAlex([z x2 y2], lag, maxlag, [GZZlabel(i,:) ' (lag=' num2str(lag) ', maxlag=' num2str(maxlag) ')']);
+      
+    display('spherical')
+    SS.nugget
+    SS.range
+    
+    display('gaussian')
+    SG.nugget
+    SG.range
+    
    %filename = strcat('/home/glaciology1/Documents/Data/Plots/variogram',GZZlabel(i,:));
-    filename = strcat('/Users/Alexandra/Documents/SFU/Data/Plots/Zigzag/variogram',GZZlabel(i,:));
-    fig = gcf;
-    fig.PaperUnits = 'inches';
-    fig.PaperPosition = [0 0 8 9];
-    print(filename,'-dpng','-r0')
-    clf
+%     filename = strcat('/Users/Alexandra/Documents/SFU/Data/Plots/Zigzag/variogram',GZZlabel(i,:));
+%     fig = gcf;
+%     fig.PaperUnits = 'inches';
+%     fig.PaperPosition = [0 0 8 9];
+%     print(filename,'-dpng','-r0')
+%     clf
 
 end
 clear x y x2 y2 z i k c pointsize filename GZZlabel

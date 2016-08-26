@@ -30,8 +30,10 @@ expression = {'stream?','rock'};
 SDcomments = commentsearch(z, expression, 'in');
     
 %% Std in vs out channel
+
+glacier = 'G13';
     %pulldata(data, book, glacier, person, pattern, quality, format)
-z = pulldata(SD,'all','all','all','all',1,'fat');
+z = pulldata(SD,'all',glacier,'all','all',1,'fat');
 
     %summary(z(5).comments)
 expression = {'Channel area','Channel?','In channel','stream?','Channel','Probably channel','Channel (320+)',...
@@ -54,7 +56,7 @@ scatter(SD_outchannel(:,1), SD_outchannel(:,3))
     ylabel('Standard deviation')    
 %% Variogram - transect
 
-glacier = 'G13'; %select data from chosen glacier
+glacier = 'G02'; %select data from chosen glacier
     %z = pulldata(data, book, glacier, person, pattern, quality, format)
 z = pulldata(SD,'all',glacier,'all','all',1,'fat'); %transect data  
 z1 = pulldata(SD,'Extra',glacier,'Extra','Extra',1,'fat'); %ExtraSD data from nontransect measurements
@@ -63,7 +65,15 @@ x = [z(5).depth(:,6);z1(5).depth(:,42)]; x2 = nanmax(x)-x; %convert easting to d
 y = [z(5).depth(:,7);z1(5).depth(:,43)]; y2 = nanmax(y)-y; %convert easting to distance in m
 z = [nanmean(z(5).depth(:,1:4),2);nanmean(z1(5).depth(:,1:40),2)];
 
-d = variogramAlex([z x2 y2], 15, 'default', glacier);
+[d, SS, SG] = variogramAlex([z x2 y2], 15, 'default', glacier);
+
+    display('spherical')
+    SS.nugget
+    SS.range
+    
+    display('gaussian')
+    SG.nugget
+    SG.range
 
    %filename = strcat('/home/glaciology1/Documents/Data/Plots/variofull',glacier);
     filename = strcat('/Users/Alexandra/Documents/SFU/Data/Plots/variofull',glacier);
@@ -168,16 +178,23 @@ glacier = 'G13'; %select data from chosen glacier
         y2 = nanmax(y)-y; %convert easting to distance in m
     z = [nanmean(z1(5).depth(:,1:4),2);nanmean(z2(5).depth(:,1:4),2);nanmean(z3(5).depth(:,1:4),2);...
         nanmean(z4(5).depth(:,1:4),2);nanmean(z5(5).depth(:,1:4),2)];
+    
+    [d, SS, SG] = variogramAlex([z x2 y2], 15, 'default', ['Upper ', glacier]);
 
-    d = variogramAlex([z x2 y2], 15, 'default', ['Upper ', glacier]);
-
+    display('spherical')
+    SS.nugget
+    SS.range
+    
+    display('gaussian')
+    SG.nugget
+    SG.range
    %filename = strcat('/home/glaciology1/Documents/Data/Plots/vario_upper',glacier);
-    filename = strcat('/Users/Alexandra/Documents/SFU/Data/Plots/vario_upper',glacier);
-    fig = gcf;
-    fig.PaperUnits = 'inches';
-    fig.PaperPosition = [0 0 8 9];
-    print(filename,'-dpng','-r0')
-    clf
+%     filename = strcat('/Users/Alexandra/Documents/SFU/Data/Plots/vario_upper',glacier);
+%     fig = gcf;
+%     fig.PaperUnits = 'inches';
+%     fig.PaperPosition = [0 0 8 9];
+%     print(filename,'-dpng','-r0')
+%     clf
     
 %LOWER
         %z = pulldata(data, book, glacier, person, pattern, quality, format)
@@ -190,15 +207,23 @@ glacier = 'G13'; %select data from chosen glacier
     y = [z1(5).depth(:,7);z2(5).depth(:,7);z3(5).depth(:,7)]; 
         y2 = nanmax(y)-y; %convert easting to distance in m
     z = [nanmean(z1(5).depth(:,1:4),2);nanmean(z2(5).depth(:,1:4),2);nanmean(z3(5).depth(:,1:4),2)];
+    
+    [d, SS, SG] = variogramAlex([z x2 y2], 15, 'default', ['Lower ', glacier]);
 
-    d = variogramAlex([z x2 y2], 15, 'default', ['Lower ', glacier]);
-
-   %filename = strcat('/home/glaciology1/Documents/Data/Plots/vario_lower',glacier);
-    filename = strcat('/Users/Alexandra/Documents/SFU/Data/Plots/vario_lower',glacier);
-    fig = gcf;
-    fig.PaperUnits = 'inches';
-    fig.PaperPosition = [0 0 8 9];
-    print(filename,'-dpng','-r0')
+    display('spherical')
+    SS.nugget
+    SS.range
+    
+    display('gaussian')
+    SG.nugget
+    SG.range
+    
+%    %filename = strcat('/home/glaciology1/Documents/Data/Plots/vario_lower',glacier);
+%     filename = strcat('/Users/Alexandra/Documents/SFU/Data/Plots/vario_lower',glacier);
+%     fig = gcf;
+%     fig.PaperUnits = 'inches';
+%     fig.PaperPosition = [0 0 8 9];
+%     print(filename,'-dpng','-r0')
 
 %% Autocorrelation
     %Can only do for UT on G4 because it is continuous and evenly spaced data
@@ -294,3 +319,18 @@ z = pulldata(SD,'all',glacier,'all',pattern,1,'fat'); %transect data
 [c,~,~,gnames] = multcompare(stats);
 [gnames(c(:,1)), gnames(c(:,2)), num2cell(c(:,3:6))] %diplays: groups compared, lower CI limit, difference between means, upper CI, p
 
+%% Comparing std values
+
+glacier = 'G04'; %select data from chosen glacier
+pattern = 'all';
+    %z = pulldata(data, book, glacier, person, pattern, quality, format)
+z = pulldata(SD,'all',glacier,'all',pattern,1,'fat'); %transect data  
+
+std = round(mean(nanstd(z(5).depth(:,1:4),1,2)),1);
+display('overall',num2str(std))
+cats = categories(z(5).person);
+for i= 1:size(cats,1)
+    index = z(5).person==cats(i);
+    std = round(mean(nanstd(z(5).depth(index,1:4),1,2)),1);
+    display(cats(i),num2str(std))
+end

@@ -1,4 +1,4 @@
-function [ d ] = variogramAlex(z, lag, maxlag, titletext)
+function [ d, SS, SG ] = variogramAlex(z, lag, maxlag, titletext)
 %Calculates the variogam values for input data
 %   This function calculates the variance between two points and their
 %   distance apart. It then bins the pairs of points into specified lags
