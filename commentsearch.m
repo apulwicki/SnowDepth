@@ -18,7 +18,7 @@ function [ SDcomments ] = commentsearch( z, expression, inout )
 
 
 %test_comments = z(5).comments(index2,1);
-
+                % [WP# mean_depth std_depth]
     SDcomments = [z(5).depth(index2,5), nanmean(z(5).depth(index2,1:4),2), nanstd(z(5).depth(index2,1:4),1,2)];    
 
 

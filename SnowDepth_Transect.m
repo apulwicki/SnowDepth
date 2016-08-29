@@ -31,29 +31,75 @@ SDcomments = commentsearch(z, expression, 'in');
     
 %% Std in vs out channel
 
-glacier = 'G13';
-    %pulldata(data, book, glacier, person, pattern, quality, format)
-z = pulldata(SD,'all',glacier,'all','all',1,'fat');
-
-    %summary(z(5).comments)
 expression = {'Channel area','Channel?','In channel','stream?','Channel','Probably channel','Channel (320+)',...
-    '? Not ice!','? no ice','Not ice','Not on ice!'};
-SD_outchannel = commentsearch(z, expression, 'out');
-SD_inchannel = commentsearch(z, expression, 'in');
+    '? Not ice!','? no ice','Not ice','Not on ice!','Crevasse?'};
+inout = 'out';
 
-display(['Average std in channel = ', num2str(mean(SD_inchannel(:,3)))])
-display(['Average std out of channel = ', num2str(mean(SD_outchannel(:,3)))])
+glacier = 'G13';
+z = pulldata(SD,'all',glacier,'all','all',1,'fat');
+c13 = commentsearch(z, expression, inout); c13 = c13(:,2);
+g13 = cell(length(c13),1); g13(:) = {'G13'};
 
+glacier = 'G02';
+z = pulldata(SD,'all',glacier,'all','all',1,'fat');
+c02 = commentsearch(z, expression, inout); c02 = c02(:,2);
+g02 = cell(length(c02),1); g02(:) = {'G02'};
 
-figure(1)
-errorbar(SD_outchannel(:,1), SD_outchannel(:,2), SD_outchannel(:,3),'o')
-    xlabel('Waypoint number')
-    ylabel('Mean snowdepth (cm)')    
+glacier = 'G04';
+z = pulldata(SD,'all',glacier,'all','all',1,'fat');
+c04 = commentsearch(z, expression, inout); c04 = c04(:,2);
+g04 = cell(length(c04),1); g04(:) = {'G04'};
 
-figure(2)
-scatter(SD_outchannel(:,1), SD_outchannel(:,3))
-    xlabel('Waypoint number')
-    ylabel('Standard deviation')    
+% display(['Average std in channel = ', num2str(mean(SD_inchannel(:,3)))])
+% display(['Average std out of channel = ', num2str(mean(SD_outchannel(:,3)))])
+
+boxplot([c04;c02;c13], [g04;g02;g13])
+    ylabel('Snow depth (cm)')
+    title({'Snow depth variability between glaciers','Include "channel"'})
+    
+    clear c* g*
+% figure(1)
+% errorbar(SD_outchannel(:,1), SD_outchannel(:,2), SD_outchannel(:,3),'o')
+%     xlabel('Waypoint number')
+%     ylabel('Mean snowdepth (cm)')    
+% 
+% figure(2)
+% scatter(SD_outchannel(:,1), SD_outchannel(:,3))
+%     xlabel('Waypoint number')
+%     ylabel('Standard deviation')   
+
+%% Box plots
+
+expression = {'Channel area','Channel?','In channel','stream?','Channel','Probably channel','Channel (320+)',...
+    '? Not ice!','? no ice','Not ice','Not on ice!','Crevasse?'};
+
+glacier = 'G02'; %select data from chosen glacier
+    %z = pulldata(data, book, glacier, person, pattern, quality, format)
+    z = pulldata(SD,'all',glacier,'all','all',1,'fat'); %transect data  
+    z1 = pulldata(SD,'Extra',glacier,'Extra','Extra',1,'fat'); %ExtraSD data from nontransect measurements
+z02 = [nanmean(z(5).depth(:,1:4),2);nanmean(z1(5).depth(:,1:40),2)];
+g02 = [z(5).glacier; z1(5).glacier];
+
+glacier = 'G04'; %select data from chosen glacier
+    %z = pulldata(data, book, glacier, person, pattern, quality, format)
+    z = pulldata(SD,'all',glacier,'all','all',1,'fat'); %transect data  
+    z1 = pulldata(SD,'Extra',glacier,'Extra','Extra',1,'fat'); %ExtraSD data from nontransect measurements
+z04 = [nanmean(z(5).depth(:,1:4),2);nanmean(z1(5).depth(:,1:40),2)];
+g04 = [z(5).glacier; z1(5).glacier];
+
+glacier = 'G13'; %select data from chosen glacier
+    %z = pulldata(data, book, glacier, person, pattern, quality, format)
+    z = pulldata(SD,'all',glacier,'all','all',1,'fat'); %transect data  
+    z1 = pulldata(SD,'Extra',glacier,'Extra','Extra',1,'fat'); %ExtraSD data from nontransect measurements
+z13 = [nanmean(z(5).depth(:,1:4),2);nanmean(z1(5).depth(:,1:40),2)];
+g13 = [z(5).glacier; z1(5).glacier];
+
+boxplot([z04; z02; z13], [g04; g02; g13], 'GroupOrder',{'G04','G02','G13'})
+    ylabel('Snow depth (cm)')
+    title('Snow depth variability between glaciers')
+
+    %clear z* g* glacier
+
 %% Variogram - transect
 
 glacier = 'G02'; %select data from chosen glacier

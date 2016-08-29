@@ -11,7 +11,7 @@ pattern = 'LH';
     z1 = nanmean(z(5).depth(:,1:4),2);
 figure(1)
 title = [glacier,' ', pattern];
-d = variogramAlex([z1 x2 y2], 15, 705, title);
+d = variogramAlex([z1 x2 y2], 15, 705, 'test');
 
 
 %% Variogram function

@@ -1,4 +1,4 @@
-function [ d, SS, SG ] = variogramAlex(z, lag, maxlag, titletext)
+function [ d, SS, SG ] = variogramAlex(zz, lag, maxlag, titletext)
 %Calculates the variogam values for input data
 %   This function calculates the variance between two points and their
 %   distance apart. It then bins the pairs of points into specified lags
@@ -18,19 +18,66 @@ function [ d, SS, SG ] = variogramAlex(z, lag, maxlag, titletext)
 %% Calculating semi-variance
 
 % Check formating of input data - converts to [value x y]
-    if isstruct(z) %identifies transect data (fat format)
-        data = [nanmean(z(5).depth(:,1:4),2), z(5).depth(:,6:7)]; %calculates mean depth
+    if isstruct(zz) %identifies transect data (fat format)
+        data = [nanmean(zz(5).depth(:,1:4),2), zz(5).depth(:,6:7)]; %calculates mean depth
     else %identifes zigzag data
-        data = z;
+        data = zz;
     end
     
-% Calculate distance and variance between pairs of points
-    variotest = zeros(size(data,1)*size(data,1),1); %set max size of matrix
+% Calculate distance and variance between pairs of points 
+    z = zz(:,1); x = zz(:,2); y = zz(:,3);
+    
+    X = meshgrid(x);
+    Y = meshgrid(y);
+    Z = meshgrid(z);
+    
+    distMtx = sqrt((X-X').^2+(Y - Y').^2);
+    distMtx = triu(distMtx,1);
+    varMtx = (Z-Z').^2;
+    ZmZp = (Z-Z');
+    varMtx = triu(varMtx,1);
+    
+    blength = lag;
+    
+    maxBin = ceil(max(max(distMtx))/lag/2)*lag;
+    bins = [0:lag:maxBin];
+    
+    for i = 1:length(bins)-1
+    
+        ll = bins(i);
+        ul = bins(i+1);
+        logiEl = distMtx > ll & distMtx <= ul;
+        numEls = sum(sum(logiEl));
+        distBin(i) = mean(mean(distMtx(logiEl)));
+        varBin = sum(sum(varMtx(logiEl)));
+        ZmZpEl = ZmZp(logiEl);
+        semiVar(i) = var(ZmZpEl)/2;
+%         keyboard
+%         semiVar(i) = varBin/(2*numEls);
+%         keyboard
+        
+    end
+    
+    binCenters = bins(1:end-1)+(lag/2)
+    
+    close all
+    plot(distBin,semiVar,'o')
+    hold on
+    plot(binCenters,semiVar,'+')
+    
+
+    
+    
+    
+    
+    
+    count = 1
     for i = 1:size(data,1) %over all input data
         z = data(i,1); x = data(i,2); y= data(i,3); %set the reference point
         for j = i:size(data,1) %for all new pairs with the reference point
-            variotest(i*j,1) = EuclideanDistance(x,y,data(j,2),data(j,3)); %calculate euclidean distance between points
-            variotest(i*j,2) = (z-data(j,1))^2; %calculate variance
+            variotest(count,1) = EuclideanDistance(x,y,data(j,2),data(j,3)); %calculate euclidean distance between points
+            variotest(count,2) = (z-data(j,1))^2; %calculate variance
+            count = count+1 
         end
     end
     variotest = variotest(variotest(:,1)~=0,:); %remove zero values 
