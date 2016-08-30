@@ -3,7 +3,7 @@
     %pulldata(data, book, glacier, person, pattern, quality, format)
 
 glacier = 'G04';
-pattern = 'LH';
+pattern = 'all';
 
     z = pulldata(SD,'all', glacier,'all', pattern, 1,'fat');
     x = z(5).depth(:,6); x2 = nanmax(x)-x; %convert easting to distance in m
@@ -11,7 +11,7 @@ pattern = 'LH';
     z1 = nanmean(z(5).depth(:,1:4),2);
 figure(1)
 title = [glacier,' ', pattern];
-d = variogramAlex([z1 x2 y2], 15, 705, 'test');
+d = variogramAlex([z1 x2 y2], 15, 1100, title);
 
 
 %% Variogram function

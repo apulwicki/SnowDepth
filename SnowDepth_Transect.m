@@ -102,110 +102,38 @@ boxplot([z04; z02; z13], [g04; g02; g13], 'GroupOrder',{'G04','G02','G13'})
 
 %% Variogram - transect
 
-glacier = 'G02'; %select data from chosen glacier
+glacier_list = ['G04';'G02';'G13']; %select data from chosen glacier
+%glacier_list = 'G02';
     %z = pulldata(data, book, glacier, person, pattern, quality, format)
+for i = 1:length(glacier_list)
+    
+    glacier = glacier_list(i,:);
 z = pulldata(SD,'all',glacier,'all','all',1,'fat'); %transect data  
 z1 = pulldata(SD,'Extra',glacier,'Extra','Extra',1,'fat'); %ExtraSD data from nontransect measurements
 
-x = [z(5).depth(:,6);z1(5).depth(:,42)]; x2 = nanmax(x)-x; %convert easting to distance in m
-y = [z(5).depth(:,7);z1(5).depth(:,43)]; y2 = nanmax(y)-y; %convert easting to distance in m
+x = [z(5).depth(:,6);z1(5).depth(:,42)]; x1 = nanmax(x)-x; %convert easting to distance in m
+y = [z(5).depth(:,7);z1(5).depth(:,43)]; y1 = nanmax(y)-y; %convert easting to distance in m
 z = [nanmean(z(5).depth(:,1:4),2);nanmean(z1(5).depth(:,1:40),2)];
 
-[d, SS, SG] = variogramAlex([z x2 y2], 15, 'default', glacier);
+d = variogramAlex([z x1 y1], 15, 1800);
+fit = variofitAlex(d,glacier);
 
-    display('spherical')
-    SS.nugget
-    SS.range
-    
-    display('gaussian')
-    SG.nugget
-    SG.range
-
-   %filename = strcat('/home/glaciology1/Documents/Data/Plots/variofull',glacier);
-    filename = strcat('/Users/Alexandra/Documents/SFU/Data/Plots/variofull',glacier);
+    filename = strcat('/home/glaciology1/Documents/Data/Plots/variofull',glacier);
+   % filename = strcat('/Users/Alexandra/Documents/SFU/Data/Plots/variofull',glacier);
     fig = gcf;
     fig.PaperUnits = 'inches';
     fig.PaperPosition = [0 0 8 9];
     print(filename,'-dpng','-r0')
-   
-   
-    
-glacier = 'G04'; %select data from chosen glacier
-    %z = pulldata(data, book, glacier, person, pattern, quality, format)
-z = pulldata(SD,'SD1',glacier,'all','all',1,'fat'); %transect data  
-
-x = z(5).depth(1:2:end-1,6); x2 = nanmax(x)-x; %convert easting to distance in m
-y = z(5).depth(1:2:end-1,7); y2 = nanmax(y)-y; %convert easting to distance in m
-z = nanmean(z(5).depth(1:2:end-1,1:4),2);
-
-d = variogramAlex([z x2 y2], 15, 'default', glacier);    
-    
-    
-% if ishandle(f1) %clears data from open plots
-%     clf(f1); clf(f2);
-% end
-% 
-% %Variogram
-% f1 = figure(1); 
-% subplot(2,2,1)
-%     scatter(x2,y2,4,z,'filled'); box on;
-%     ylabel('y'); xlabel('x'); 
-%     c = colorbar; c.Label.String = 'Snow depth (cm)';
-%     title(glacier)
-% subplot(2,2,2)
-%     hist(z,20)
-%     ylabel('frequency'); xlabel('z')
-%     title('histogram of z-values')
-% subplot(2,2,3)
-%     [d, iid]= variogram([x2 y2],z,'plotit',true,'nrbins',100);
-%     title('Isotropic variogram')
-% subplot(2,2,4)
-%     d2 = variogram([x2 y2],z,'plotit',true,'nrbins',100,'anisotropy',true);
-%     title('Anisotropic variogram')
-% 
-% %variogram fit
-% f2 = figure(2);
-% subplot(2,1,2)
-%     hist(iid(:,3),100)
-%     ylabel('frequency'); xlabel('binned lag distance');
-% subplot(2,1,1)
-%     h=d.distance;
-%     gammaexp = d.val;
-%     numobs = d.num;
-%     a0 = 500; % initial value: range 
-%     c0 = 500; % initial value: sill     
-%     [a,b,n] = variogramfit(h,gammaexp,a0,c0,numobs,...
-%                            'solver','fminsearchbnd',...
-%                            'nugget',0,...
-%                            'plotit',true);
-% clear a0 c0 h gammaexp c d2
- %Variogram
-%     figure 
-%     subplot(2,1,1)
-%         scatter(x2,y2,4,z,'filled'); box on;
-%         ylabel('y (m)'); xlabel('x (m)'); 
-%         c = colorbar; c.Label.String = 'Snow depth (cm)';
-%         title(glacier)
-%     subplot(2,1,2)
-%         h=d.distance;
-%         gammaexp = d.val;
-%         numobs = d.num;
-%         a0 = 500; % initial value: range 
-%         c0 = 500; % initial value: sill     
-%         [a,b,n] = variogramfit(h,gammaexp,a0,c0,numobs,...
-%                                'solver','fminsearchbnd',...
-%                                'nugget',0,...
-%                                'plotit',true);
-%     clear a0 c0 h gammaexp c d2 x* y* z numobs n iid glacier a b 
+    clf
 
 %Normality test (One-sample Kolmogorov-Smirnov test)
 if kstest(z)
-    display('Depth is normally distributed');
+    display([glacier, ': Depth is normally distributed']);
 else
-    display('Depth is NOT normally distributed');
+    display([glacier, ': Depth is NOT normally distributed']);
 end
 
-
+end
 %% Variogram for different sections (lower, upper)
 
 glacier = 'G13'; %select data from chosen glacier
@@ -380,3 +308,20 @@ for i= 1:size(cats,1)
     std = round(mean(nanstd(z(5).depth(index,1:4),1,2)),1);
     display(cats(i),num2str(std))
 end
+
+%% McGrath style plots of depth
+
+glacier_list = ['G04';'G02';'G13']; %select data from chosen glacier
+    %z = pulldata(data, book, glacier, person, pattern, quality, format)
+
+    for i = 1:3;
+        glacier = glacier_list(i,:);
+        z = pulldata(SD,'all',glacier,'all','all',1,'fat'); %transect data  
+        temp = nanmean(z(5).depth(:,1:4),2);
+        depth.(glacier) = temp;
+    end
+% Depth vs Elevation
+
+
+
+
