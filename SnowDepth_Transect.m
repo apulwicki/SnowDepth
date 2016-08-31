@@ -103,7 +103,7 @@ boxplot([z04; z02; z13], [g04; g02; g13], 'GroupOrder',{'G04','G02','G13'})
 %% Variogram - transect
 
 glacier_list = ['G04';'G02';'G13']; %select data from chosen glacier
-%glacier_list = 'G02';
+%glacier_list = 'G13';
     %z = pulldata(data, book, glacier, person, pattern, quality, format)
 for i = 1:length(glacier_list)
     
@@ -115,7 +115,7 @@ x = [z(5).depth(:,6);z1(5).depth(:,42)]; x1 = nanmax(x)-x; %convert easting to d
 y = [z(5).depth(:,7);z1(5).depth(:,43)]; y1 = nanmax(y)-y; %convert easting to distance in m
 z = [nanmean(z(5).depth(:,1:4),2);nanmean(z1(5).depth(:,1:40),2)];
 
-d = variogramAlex([z x1 y1], 15, 1800);
+d = variogramAlex([z x1 y1], 15, 'default');
 fit = variofitAlex(d,glacier);
 
     filename = strcat('/home/glaciology1/Documents/Data/Plots/variofull',glacier);
@@ -136,7 +136,11 @@ end
 end
 %% Variogram for different sections (lower, upper)
 
-glacier = 'G13'; %select data from chosen glacier
+glacier_list = ['G04';'G02';'G13']; %select data from chosen glacier
+%glacier_list = 'G13';
+    %z = pulldata(data, book, glacier, person, pattern, quality, format)
+for i = 1:length(glacier_list)
+        glacier = glacier_list(i,:);
 
 %UPPER
         %z = pulldata(data, book, glacier, person, pattern, quality, format)
@@ -153,22 +157,16 @@ glacier = 'G13'; %select data from chosen glacier
     z = [nanmean(z1(5).depth(:,1:4),2);nanmean(z2(5).depth(:,1:4),2);nanmean(z3(5).depth(:,1:4),2);...
         nanmean(z4(5).depth(:,1:4),2);nanmean(z5(5).depth(:,1:4),2)];
     
-    [d, SS, SG] = variogramAlex([z x2 y2], 15, 'default', ['Upper ', glacier]);
+    d = variogramAlex([z x2 y2], 15, 'default');
+    fit = variofitAlex(d,['Upper ', glacier]);
 
-    display('spherical')
-    SS.nugget
-    SS.range
-    
-    display('gaussian')
-    SG.nugget
-    SG.range
-   %filename = strcat('/home/glaciology1/Documents/Data/Plots/vario_upper',glacier);
-%     filename = strcat('/Users/Alexandra/Documents/SFU/Data/Plots/vario_upper',glacier);
-%     fig = gcf;
-%     fig.PaperUnits = 'inches';
-%     fig.PaperPosition = [0 0 8 9];
-%     print(filename,'-dpng','-r0')
-%     clf
+    filename = strcat('/home/glaciology1/Documents/Data/Plots/vario_upper',glacier);
+    %filename = strcat('/Users/Alexandra/Documents/SFU/Data/Plots/vario_upper',glacier);
+    fig = gcf;
+    fig.PaperUnits = 'inches';
+    fig.PaperPosition = [0 0 8 9];
+    print(filename,'-dpng','-r0')
+    clf
     
 %LOWER
         %z = pulldata(data, book, glacier, person, pattern, quality, format)
@@ -182,22 +180,17 @@ glacier = 'G13'; %select data from chosen glacier
         y2 = nanmax(y)-y; %convert easting to distance in m
     z = [nanmean(z1(5).depth(:,1:4),2);nanmean(z2(5).depth(:,1:4),2);nanmean(z3(5).depth(:,1:4),2)];
     
-    [d, SS, SG] = variogramAlex([z x2 y2], 15, 'default', ['Lower ', glacier]);
-
-    display('spherical')
-    SS.nugget
-    SS.range
+    d = variogramAlex([z x2 y2], 15, 'default');
+    fit = variofitAlex(d, ['Lower ', glacier]);
     
-    display('gaussian')
-    SG.nugget
-    SG.range
-    
-%    %filename = strcat('/home/glaciology1/Documents/Data/Plots/vario_lower',glacier);
-%     filename = strcat('/Users/Alexandra/Documents/SFU/Data/Plots/vario_lower',glacier);
-%     fig = gcf;
-%     fig.PaperUnits = 'inches';
-%     fig.PaperPosition = [0 0 8 9];
-%     print(filename,'-dpng','-r0')
+    filename = strcat('/home/glaciology1/Documents/Data/Plots/vario_lower',glacier);
+   % filename = strcat('/Users/Alexandra/Documents/SFU/Data/Plots/vario_lower',glacier);
+    fig = gcf;
+    fig.PaperUnits = 'inches';
+    fig.PaperPosition = [0 0 8 9];
+    print(filename,'-dpng','-r0')
+    clf
+end
 
 %% Autocorrelation
     %Can only do for UT on G4 because it is continuous and evenly spaced data
@@ -309,19 +302,61 @@ for i= 1:size(cats,1)
     display(cats(i),num2str(std))
 end
 
-%% McGrath style plots of depth
+%% Elevation and SD (McGrath style plots of depth)
+
+% Depth vs Elevation (GPS elev)
+
+glacier = 'G02';
 
 glacier_list = ['G04';'G02';'G13']; %select data from chosen glacier
     %z = pulldata(data, book, glacier, person, pattern, quality, format)
 
-    for i = 1:3;
-        glacier = glacier_list(i,:);
-        z = pulldata(SD,'all',glacier,'all','all',1,'fat'); %transect data  
-        temp = nanmean(z(5).depth(:,1:4),2);
-        depth.(glacier) = temp;
+for j = 1:3;
+        glacier = glacier_list(j,:);
+     z = pulldata(SD,'all',glacier,'all','all',1,'fat'); %transect data  
+    index = any(~isnan(z(1).depth),2);
+
+    elev = gps_elev(index,1);
+    depth = nanmean(SD(1).depth(index,1:4),2);
+
+    binSize = 10;
+    bins = [min(elev):binSize:max(elev)]';
+    depthBin = zeros(length(bins)-1,1);
+    for i = 1:length(bins)-1
+        logiEL = elev>bins(i) & elev<=bins(i+1);
+        depthBin(i) = mean(depth(logiEL));
     end
-% Depth vs Elevation
+
+    binsPlot.(glacier) = bins(~isnan(depthBin))-binSize/2;
+    depthPlot.(glacier) = depthBin(~isnan(depthBin));
+
+    [myfit.(glacier) gof.(glacier)] = fit(binsPlot.(glacier), depthPlot.(glacier),'poly1');
+    p.(glacier) = plot(myfit.(glacier), binsPlot.(glacier), depthPlot.(glacier),'-'); hold on
+end
+
+title('Mean snow depth (binned) vs GPS elevation')
+xlabel('Elevation (m a.s.l.)'); ylabel('Mean Snow Depth (cm)')
+legend([p.G04(1,1) p.G02(1,1) p.G13(1,1)], ...
+    {['G04 R^2 = ', num2str(round(gof.G04.rsquare,2))],...
+    ['G02 R^2 = ', num2str(round(gof.G02.rsquare,2))],...
+    ['G13 R^2 = ', num2str(round(gof.G13.rsquare,2))]});
+
+%% Normalized Elev
+
+elevG = struct('G04',[1573 2854],'G02',[1906 3098],'G13',[1775 3037]);
 
 
-
-
+for i = 1:3;
+    glacier = glacier_list(i,:);
+    binsPlot.(glacier)(:,2) = (binsPlot.(glacier)(:,1)- elevG.(glacier)(1,1))/...
+        (elevG.(glacier)(1,2)- elevG.(glacier)(1,1));
+    
+    [myfit.(glacier) gof.(glacier)] = fit(binsPlot.(glacier)(:,2), depthPlot.(glacier),'poly1');
+    p.(glacier) = plot(myfit.(glacier),binsPlot.(glacier)(:,2), depthPlot.(glacier),'-'); hold on
+end
+title('Mean snow depth (binned) vs GPS elevation')
+xlabel('Normalized elevation'); ylabel('Mean Snow Depth (cm)')
+legend([p.G04(1,1) p.G02(1,1) p.G13(1,1)], ...
+    {['G04 R^2 = ', num2str(round(gof.G04.rsquare,2))],...
+    ['G02 R^2 = ', num2str(round(gof.G02.rsquare,2))],...
+    ['G13 R^2 = ', num2str(round(gof.G13.rsquare,2))]});

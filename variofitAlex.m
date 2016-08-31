@@ -1,7 +1,7 @@
 function myfit = variofitAlex(d, titletext)
 
 %% Spherical Fitting
-range = 100; nugget = 800; sill = 1000;
+range = 100; nugget = min(d.val); sill = max(d.val);
 
 f = fittype('nugget + ( sill*( 1.5*(h/range) - 0.5*(h/range).^3).*(h <= range) + sill*(h>range))',...
     'independent','h');
@@ -39,7 +39,7 @@ subplot(3,1,3)
         logiEl = d.binCentre > bins(i) & d.binCentre <= bins(i+1);
         numMtx(i) = sum(d.num(logiEl));
     end   
-    bar(numMtx,'BarWidth', 1)
+    bar(bins(2:end), numMtx,'BarWidth', 1)
         xlabel('Lag'); ylabel('# Pairs');
 
 % Inset plot of number of pairs        

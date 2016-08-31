@@ -4,7 +4,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %Import data from excel sheet
-    [GPS, ~, GPSraw] = xlsread('GlacierWP_UTM.xlsx','A1:G846'); %Import values, text, and raw data from first sheet
+    [GPS, ~, GPSraw] = xlsread('GlacierWP_UTM.xlsx','A1:G845'); %Import values, text, and raw data from first sheet
     GPS(:,6) = [];
 
 % Allocate imported array to column variable names
