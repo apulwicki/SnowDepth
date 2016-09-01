@@ -8,7 +8,7 @@ f = fittype('nugget + ( sill*( 1.5*(h/range) - 0.5*(h/range).^3).*(h <= range) +
 
 [myfit, gof]= fit(d.binCentre,d.val,f, 'StartPoint',[range,nugget,sill],'Weights',d.num);
 
-range = round(myfit.range); nugget = round(myfit.nugget); sill = round(myfit.sill);
+range = round(myfit.range); nugget = round(myfit.nugget); sill = round(myfit.sill+myfit.nugget);
 
 
 %% Plotting data
