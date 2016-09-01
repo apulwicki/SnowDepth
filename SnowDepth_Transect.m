@@ -317,7 +317,8 @@ for j = 1:3;
     index = any(~isnan(z(1).depth),2);
 
     elev = gps_elev(index,1);
-    depth = nanmean(SD(1).depth(index,1:4),2);
+    depth = nanstd(SD(1).depth(index,1:4),1,2);
+    %depth = nanmean(SD(1).depth(index,1:4),2);
 
     binSize = 10;
     bins = [min(elev):binSize:max(elev)]';
@@ -334,8 +335,8 @@ for j = 1:3;
     p.(glacier) = plot(myfit.(glacier), binsPlot.(glacier), depthPlot.(glacier),'-'); hold on
 end
 
-title('Mean snow depth (binned) vs GPS elevation')
-xlabel('Elevation (m a.s.l.)'); ylabel('Mean Snow Depth (cm)')
+title('Snow depth STD (binned) vs GPS elevation')
+xlabel('Elevation (m a.s.l.)'); ylabel('St. Dev. Snow depth (cm)')
 legend([p.G04(1,1) p.G02(1,1) p.G13(1,1)], ...
     {['G04 R^2 = ', num2str(round(gof.G04.rsquare,2))],...
     ['G02 R^2 = ', num2str(round(gof.G02.rsquare,2))],...
@@ -360,3 +361,12 @@ legend([p.G04(1,1) p.G02(1,1) p.G13(1,1)], ...
     {['G04 R^2 = ', num2str(round(gof.G04.rsquare,2))],...
     ['G02 R^2 = ', num2str(round(gof.G02.rsquare,2))],...
     ['G13 R^2 = ', num2str(round(gof.G13.rsquare,2))]});
+
+%%
+
+load DEMelev
+
+z = pulldata(SD,'all','all','all','all',1,'fat'); %transect data  
+
+[~, match] = intersect(DEMelev(:,1), z(5).depth(:,5),'rows');
+
