@@ -14,7 +14,7 @@
 %% Importing density values
 
 %Get data from file
-    [snowpit_density, snowpit_text, snowpit_raw] = xlsread('summary_densitydata.xlsx','snowpit','A2:E11');
+    [snowpit_density, snowpit_text, snowpit_raw] = xlsread('summary_densitydata.xlsx','snowpit','A2:G11');
     [SWEtube_density, SWEtube_text, SWEtube_raw] = xlsread('summary_densitydata.xlsx','SWEtube','A2:V34');
 
 %Establishing index for various data corresponding to SWEtube_density
@@ -59,24 +59,23 @@
     snowpittubeSWE = SWEtube_density(index_SPSWE',:);
 
 %Get number of good quality measurements for each location
-    count = zeros(size(snowpittubeSWE,1),1);
-    for i = 1:size(snowpittubeSWE,1)%add together all the 'true' for when a value is present (not nan)
-        count(i,1) = sum(~isnan(snowpittubeSWE(i,1:15)));
-    end
+    count = sum(~isnan(snowpittubeSWE(:,1:15)),2);
 
 %Get mean density and std (kg/m^3)
-    % Location, mean density, std, number of obs
+    % Location, mean density, std, min, max, number of obs
     snowpittubeSWE = [SWEtube_text(index_SPSWE',:), num2cell(nanmean(snowpittubeSWE(:,1:15),2)),...
-        num2cell(nanstd(snowpittubeSWE(:,1:15),1,2)), num2cell(count)];
+        num2cell(nanstd(snowpittubeSWE(:,1:15),1,2)), num2cell(min(snowpittubeSWE(:,1:15),[],2)),...
+        num2cell(max(snowpittubeSWE(:,1:15),[],2)), num2cell(count)];
 
 %Corresponding snowpit densities
     indexSP = zeros(size(index_SPSWE,2),1);
     for i = 1:size(index_SPSWE,2) %find index where SP label is the same as the snowpit density data labels
         indexSP(i,1) = find(strcmp(snowpittubeSWE(i,1),snowpit_text)); 
     end
-    % Location, mean density, std, number of obs, snowpit density, elevation
+    % Location, mean tube density, std, min, max, number of obs, snowpit
+    % density, elevation, SP min, SP max
     snowpittubeSWE = [snowpittubeSWE, num2cell(snowpit_density(indexSP,1)), ...
-                            num2cell(snowpit_density(indexSP,4))];
+                            num2cell(snowpit_density(indexSP,4:6))];
 
 %% Create structure for relevant data
 

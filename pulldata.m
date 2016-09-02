@@ -27,19 +27,6 @@ function z = pulldata(data, book, glacier, person, pattern, quality, format)
     %                           Updated: August 2016
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Set categories if 'all' is selected for glacier, person, or pattern
-    if strcmp(glacier,'all')
-        glacier = {'G13','G02','G04'};
-    end
-
-    if strcmp(person,'all')
-       person =  {'AP','GF','CA','AC'};
-    end
-
-    if strcmp(pattern,'all')
-        pattern = {'B','BT','LC','LH','LM','UC','UH','UM','UT'};
-    end
-
 % Set which SD books to look through
     %Range corresponds to the row of the data structure to go through
     %All other snowdepth book data are set to NaNs 
@@ -69,8 +56,24 @@ function z = pulldata(data, book, glacier, person, pattern, quality, format)
         data(2).depth = nan(size(data(2).depth));
         data(1).depth = nan(size(data(1).depth));
         data(3).depth = nan(size(data(3).depth));
+        if strcmp(person,'all')
+            person = categories(data(4).person);
+        end
     end
 
+    % Set categories if 'all' is selected for glacier, person, or pattern
+    if strcmp(glacier,'all')
+        glacier = {'G13','G02','G04'};
+    end
+
+    if strcmp(person,'all')
+       person =  {'AP','GF','CA','AC'};
+    end
+
+    if strcmp(pattern,'all')
+        pattern = {'B','BT','LC','LH','LM','UC','UH','UM','UT'};
+    end
+    
 % Replace values that are not desired with NaN but keep original formating 
 for j = range %look in the desired books (set by range value above)
     for i = 1:size(data(j).depth,1) %goes through whole matrix

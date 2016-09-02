@@ -61,12 +61,12 @@ for i = 1:size(GZZlabel,1)
     x2 = nanmax(x)-x;
     y2 = nanmax(y)-y;
     
-    lag = 2; maxlag = 40;
+    lag = 1.5; maxlag = 40;
     d = variogramAlex([z x2 y2], lag, maxlag);
     fit = variofitAlex(d, [GZZlabel(i,:) ' (lag=' num2str(lag) ', maxlag=' num2str(maxlag) ')']);      
    
-    filename = strcat('/home/glaciology1/Documents/Data/Plots/variogram',GZZlabel(i,:));
-    %filename = strcat('/Users/Alexandra/Documents/SFU/Data/Plots/Zigzag/variogram',GZZlabel(i,:));
+    %filename = strcat('/home/glaciology1/Documents/Data/Plots/variogram',GZZlabel(i,:));
+    filename = strcat('/Users/Alexandra/Documents/SFU/Data/Plots/Zigzag/variogram',GZZlabel(i,:));
     fig = gcf;
     fig.PaperUnits = 'inches';
     fig.PaperPosition = [0 0 8 9];

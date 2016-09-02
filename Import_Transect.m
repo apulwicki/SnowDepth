@@ -62,12 +62,16 @@ SD3 = [SD3(:,2),SD3(:,4),SD3(:,6),SD3(:,8),SD3(:,1)];
 
 %Depth data from SWE and snowpits (aka ExtraSD)
     ExtraSD_Glacier = categorical(ExtraSDtext(:,44));           %Glacier (G13, G02, G04)
-    C = cell(size(ExtraSD_Glacier));                            
-    C(:) = {'Extra'};
+        WP_index = [9,20:28,34];
+        for i = 1:length(WP_index)
+            ExtraSDraw{WP_index(i),1}=num2str(ExtraSDraw{WP_index(i),1});
+        end
+    ExtraSD_Person = categorical(ExtraSDraw(2:end,1));           %Person (waypoint label)
+        C = cell(size(ExtraSD_Glacier));                            
+        C(:) = {'Extra'};
     ExtraSD_Pattern = categorical(C);                            %Pattern (all Extra)
-    ExtraSD_Person = categorical(C);                             %Person (all Extra)
     ExtraSD_Book = categorical(C);                               %Book (all Extra)
-    C(:) = {'1'};
+        C(:) = {'1'};
     ExtraSD_Q = categorical(C);                                  %Quality (all 1 = good)
         clear C
                

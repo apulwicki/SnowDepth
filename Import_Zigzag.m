@@ -83,7 +83,7 @@ clear C
     % Reference vertex and the distance from it for each point
     ZZ_cord = [strcat(ZZ.text(:,1),'_',ZZ.text(:,2),'_',ZZ.text(:,3)),num2cell(ZZ.depth(:,1))];
         %use cell2mat to convert back to number
-if optionsZ.location == 1 
+if options.ZigzagLocation == 1 
     for j = 1:length(ZZ_cord)
         tempind = find(strcmp(ZZ_cord(j,1),ZZ.vertexcoord(:,5)),1);
         easting = [cell2mat(ZZ.vertexcoord(tempind,1)), cell2mat(ZZ.vertexcoord(tempind+1,1))];
@@ -103,7 +103,7 @@ if optionsZ.location == 1
 
     end
     
-elseif optionsZ.location == 2
+elseif options.ZigzagLocation == 2
     use_vertex = ['G04_Z3A_ZZ01';'G04_Z3A_ZZ05';'G04_Z2A_ZZ01';'G04_Z2A_ZZ05';...
                    'G04_Z5B_ZZ01'; 'G04_Z5B_ZZ05';'G02_Z5C_ZZ08';'G02_Z7A_ZZ01';...
                    'G02_Z7A_ZZ08';'G02_Z7A_ZZ04';'G02_Z3B_ZZ03';'G02_Z3B_ZZ07';...
@@ -179,7 +179,7 @@ ZZ.depth = ZZ_cord; clear ZZ_cord
     ZZ.index = GZZindex; %add to ZZ structure
 
 %Adding measured density from SWE values
-    if optionsZ.z == 2
+    if options.ZigzagSWE == 2
         for i = 1:size(ZZ.index,2)-1
             ZZ.depth(ZZ.index(i):ZZ.index(i+1)-1,5) = num2cell(cell2mat(ZZ.depth(ZZ.index(i):ZZ.index(i+1)-1,5))/100*cell2mat(Density.zigzagtube(i,2))/10);
         end

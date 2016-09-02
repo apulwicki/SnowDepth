@@ -1,12 +1,37 @@
-global optionsZ
+global options
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% ZIGZAG %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Measurement locations
-optionsZ.location   = 2;
+options.ZigzagLocation  = 2;
                 % 1 calculate location based on vertex utm
                 % 2 calculate location based on last probe point
-optionsZ.z          = 2;
+% Converting to SWE
+options.ZigzagSWE       = 2;
                 % 1 depth value (raw)
                 % 2 SWE value using mean SWE tube value at zigzag
+
+                
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% GLACIER SWE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Converting to SWE
+
+options.TransectSWE     = 1;
+                % 1 Depth (raw)
+                
+                % 2 Donjek mean density (uniform)       Snowpit
+                % 3 Donjek mean density (uniform)       SWE tube
+                % 4 Glacier mean density (uniform)      Snowpit
+                % 5 Glacier mean density (uniform)      SWE tube
+                
+                % 6 Linear elevation regression (variable)      Snowpit
+                % 7 Linear elevation regression (variable)      SWE tube
+                % 8 Inverse distance weighted mean (variable)   Snowpit
+                % 9 Inverse distance weighted mean (variable)   SWE tube
+
+                
+                
+                
+                
+                
