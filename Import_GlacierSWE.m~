@@ -30,27 +30,18 @@ clear C depth glacier i mergeMtx WP_index z x y z1 ZZlabel
 
 if options.DensitySWE == 1
     %do nothing
-
 elseif options.DensitySWE == 2
-    density = nanmean(cell2mat(Density.snowpit(:,2)));  
+    
+    density = nanmean(cell2mat(Density.snowpit(:,2)));
+    
     for i = 1:length(SWE)
         SWE(i).density = zeros(size(SWE(i).depth,1),1);
         SWE(i).density(:) = density;
         
         SWE(i).swe = SWE(i).depth(:)/100.*SWE(i).density(:)/1000;
     end
-    SWE = orderfields(SWE); 
-
-elseif options.DensitySWE == 3
-    density = nanmean(nanmean(cell2mat(Density.tube(:,2:19))));  
-    for i = 1:length(SWE)
-        SWE(i).density = zeros(size(SWE(i).depth,1),1);
-        SWE(i).density(:) = density;
-        
-        SWE(i).swe = SWE(i).depth(:)/100.*SWE(i).density(:)/1000;
-    end
-    SWE = orderfields(SWE);
+    
+    SWE
+    
     
 end
-
-clear density
