@@ -1,3 +1,5 @@
+clear all
+close all
 
 run OPTIONS.m
 run MeasurementLocations.m  %This program determines the easting and northing of transect measurements
