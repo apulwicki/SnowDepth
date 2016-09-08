@@ -103,6 +103,49 @@ filename = strcat('/Users/Alexandra/Documents/SFU/Data/Plots/ElevationVsSnowpit_
 print(filename,'-dpng')
     clear P LM x y index* i j count yfit str dim filename error
 
+%% Depth vs Density
+
+% Probe depth
+figure(1)
+nonnanindex = [1:3,10:103];
+[swefit, gof] = fit(cell2mat(Density.SWEdepth(nonnanindex,4)),cell2mat(Density.SWEdepth(nonnanindex,2)),'poly1');
+plot(swefit, cell2mat(Density.SWEdepth(nonnanindex,4)),cell2mat(Density.SWEdepth(nonnanindex,2)));
+    xlabel('SWE tube density (kg m^{-3})')
+    ylabel('Mean snow probe depth (cm)')
+    title({'Depth vs Density','(Snow probe depth)'});
+    dim = [.20 .5 .3 .3];
+    str = ['R^2 = ', num2str(round(gof.rsquare,2))];
+    annotation('textbox',dim,'String',str,'FitBoxToText','on')
+    p = legend('data');
+    set(p,'visible','off')
+    
+% SWE tube depth
+figure(2)
+nonnanindex = [1:103];
+[swefit, gof] = fit(cell2mat(Density.SWEdepth(nonnanindex,4)),cell2mat(Density.SWEdepth(nonnanindex,3)),'poly1');
+plot(swefit, cell2mat(Density.SWEdepth(nonnanindex,4)),cell2mat(Density.SWEdepth(nonnanindex,3)));
+    xlabel('SWE tube density (kg m^{-3})')
+    ylabel('SWE tube depth (cm)')
+    title({'Depth vs Density','(SWE tube depth)'});
+    dim = [.20 .5 .3 .3];
+    str = ['R^2 = ', num2str(round(gof.rsquare,2))];
+    annotation('textbox',dim,'String',str,'FitBoxToText','on')
+    p = legend('data');
+    set(p,'visible','off')    
+    
+% Snowpit
+figure(3)
+[swefit, gof] = fit(cell2mat(Density.snowpit(:,2)),cell2mat(Density.snowpit(:,8)),'poly1');
+plot(swefit, cell2mat(Density.snowpit(:,2)),cell2mat(Density.snowpit(:,8)));
+    xlabel('Snowpit density (kg m^{-3})')
+    ylabel('Snowpit depth (cm)')
+    title({'Depth vs Density','(Snowpit)'});
+    dim = [.20 .5 .3 .3];
+    str = ['R^2 = ', num2str(round(gof.rsquare,2))];
+    annotation('textbox',dim,'String',str,'FitBoxToText','on')
+    p = legend('data');
+    set(p,'visible','off')      
+    
 %% Basic stats
 
 % Snowpit

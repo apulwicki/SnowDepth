@@ -14,8 +14,10 @@
 %% Importing density values
 
 %Get data from file
-    [snowpit_density, snowpit_text, snowpit_raw] = xlsread('summary_densitydata.xlsx','snowpit','A2:G11');
+    [snowpit_density, snowpit_text, snowpit_raw] = xlsread('summary_densitydata.xlsx','snowpit','A2:H11');
     [SWEtube_density, SWEtube_text, SWEtube_raw] = xlsread('summary_densitydata.xlsx','SWEtube','A2:V34');
+    [depth_density, depth_text, depth_raw] = xlsread('summary_densitydata.xlsx','DepthDensity','A2:D104');
+    
 
 %Establishing index for various data corresponding to SWEtube_density
     %This was determined by just looking through the imported data
@@ -36,6 +38,7 @@
 %Create variables to export for all the SWE value and all snowpit values    
     SWEtube_full = [SWEtube_text, num2cell(SWEtube_density)];
     Snowpit_full = [snowpit_text, num2cell(snowpit_density)];
+    depth_full = [depth_text, num2cell(depth_density)];
     
 %% Zigzag Density
 
@@ -80,8 +83,8 @@
 %% Create structure for relevant data
 
 Density = struct('snowpit',{Snowpit_full},'pitANDtube',{snowpittubeSWE},...
-                'tube',{SWEtube_full},'zigzagtube',{zigzagSWE});
+                'tube',{SWEtube_full},'zigzagtube',{zigzagSWE},'SWEdepth',{depth_full});
                         
 %% Clear variables
-clear SWEtube* snowpit* zigzagSWE Snowpit_full
+clear SWEtube* snowpit* zigzagSWE Snowpit_full depth*
 clear P LM x y index* i j count yfit str dim filename error

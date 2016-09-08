@@ -24,8 +24,25 @@ SWE(i).label = [categorical(z(5).depth(:,5)); z1(5).person; categorical(ZZlabel(
 
 end
 
-clear C depth glacier i mergeMtx WP_index z x y z1 ZZlabel
+clear C depth glacier* i mergeMtx WP_index z x y z1 ZZlabel
 
+%% Add DEM elevations of measurements
+load DEMelev
+
+for i = 1:3
+    value = str2double(cellstr(SWE(i).label(:,1))); array = DEMelev(:,1);
+    [~, match] = ismember(value, array);
+    match(match==0) = [];
+
+    array = str2double(cellstr(SWE(i).label(:,1))); value = DEMelev(match,1);
+    [~, match2] = ismember(value, array);
+    match2(match2==0) = [];
+
+    SWE(i).utm(match2,3) = DEMelev(match,2);
+
+end
+
+clear match* array value DEMelev i
 %% Density options
 
 if options.DensitySWE == 1
