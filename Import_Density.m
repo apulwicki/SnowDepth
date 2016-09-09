@@ -18,12 +18,6 @@
     [SWEtube_density, SWEtube_text, SWEtube_raw] = xlsread('summary_densitydata.xlsx','SWEtube','A2:V34');
     [depth_density, depth_text, depth_raw] = xlsread('summary_densitydata.xlsx','DepthDensity','A2:D104');
     
-
-%Establishing index for various data corresponding to SWEtube_density
-    %This was determined by just looking through the imported data
-    index_zigzag = [1,3,5,8,10,13,26,28,30,32];
-    index_SPSWE = [2,4,9,14,15,27];
-
 %Select only good quality data
     for i = 1:size(SWEtube_density,1) %for all elemnts in the matrix
         for j = 1:size(SWEtube_density,2)
@@ -33,8 +27,18 @@
                SWEtube_density(i,j)=nan; %then replace the 1 with a NaN (makes it easier to average later)
             end
         end
+        
     end
+    
+    remove_index = all(isnan(SWEtube_density(:,1:18)),2);
+    SWEtube_density(remove_index,:) = [];
+    SWEtube_text(remove_index,:) = [];
 
+%Establishing index for various data corresponding to SWEtube_density
+    %This was determined by just looking through the imported data
+    index_zigzag = [1,3,5:8,10:13,24,26,28:31];
+    index_SPSWE = [2,4,9,14,15,25];
+    
 %Create variables to export for all the SWE value and all snowpit values    
     SWEtube_full = [SWEtube_text, num2cell(SWEtube_density)];
     Snowpit_full = [snowpit_text, num2cell(snowpit_density)];

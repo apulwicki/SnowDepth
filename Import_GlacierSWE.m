@@ -112,6 +112,53 @@ elseif options.DensitySWE == 7 %Linear elevation regression (variable)      SWE 
         count = count + 2;
     end    
     
+elseif options.DensitySWE == 8 %Inverse distance weighted mean (variable)   Snowpit    
+    for i = 1:length(SWE)
+    %distance matrix
+            X = zeros(length(SWE(i).utm(:,1)),length(Density.snowpit)); Y = X;
+        for j = 1:length(Density.snowpit)
+            X(:,j) = SWE(i).utm(:,1)-cell2mat(Density.snowpit(j,3));
+            Y(:,j) = SWE(i).utm(:,2)-cell2mat(Density.snowpit(j,4));
+        end 
+        weight = 1./hypot(X,Y);
+        
+        %density  
+        density = zeros(length(SWE(i).utm(:,1)),length(Density.snowpit));
+        for j = 1:length(Density.snowpit)
+            density(:,j) = cell2mat(Density.snowpit(j,2))*weight(:,j);
+        end     
+        density = sum(density,2)./sum(weight,2);
+
+        SWE(i).density = zeros(size(SWE(i).depth,1),1);
+        SWE(i).density(:) = density;
+        
+        SWE(i).swe = SWE(i).depth(:)/100.*SWE(i).density(:)/1000;
+    end 
+    
+elseif options.DensitySWE == 9 %Inverse distance weighted mean (variable)   SWE tube    
+    for i = 1:length(SWE)
+    %distance matrix
+            X = zeros(length(SWE(i).utm(:,1)),length(Density.tube)); Y = X;
+        for j = 1:length(Density.tube)
+            X(:,j) = SWE(i).utm(:,1)-cell2mat(Density.tube(j,20));
+            Y(:,j) = SWE(i).utm(:,2)-cell2mat(Density.tube(j,21));
+        end 
+        weight = 1./hypot(X,Y);
+        
+        %density  
+        density = zeros(length(SWE(i).utm(:,1)),length(Density.tube));
+        for j = 1:length(Density.tube)
+            density(:,j) = nanmean(cell2mat(Density.tube(j,2:19)))*weight(:,j);
+        end     
+        density = sum(density,2)./sum(weight,2);
+
+        SWE(i).density = zeros(size(SWE(i).depth,1),1);
+        SWE(i).density(:) = density;
+        
+        SWE(i).swe = SWE(i).depth(:)/100.*SWE(i).density(:)/1000;
+    end 
+    
+    
 end
 
 SWE = orderfields(SWE);    
