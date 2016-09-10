@@ -36,6 +36,8 @@
     C = cell(size(ZZ_Glacier));                                 
     C(:) = {'ZZ'};
     ZZ_Book = categorical(C);                   %Book (all ZZ)
+    C(:) = {'None'};
+    ZZ_comments = categorical(C);                %Comments (all 'None')
 ZZ = [zeros(length(ZZ),1),ZZ];                  %[zeros(will be WP#), distance data, depth, quality]
 
 clear C
@@ -52,9 +54,10 @@ clear C
     field8 = 'Q';           value8 = {ZZ_Q};
     field9 = 'book';        value9 = {ZZ_Book};
     field10 = 'text';       value10 = {ZZtext};
+    field11 = 'comments';   value11 = {ZZ_comments};
 
     ZZ = struct(field1,value1,field2,value2,field3,value3,field4,value4,...
-        field5,value5,field6,value6,field7,value7,field8,value8,field9,value9,field10,value10);
+        field5,value5,field6,value6,field7,value7,field8,value8,field9,value9,field10,value10,field11,value11);
             clear value* field* ZZ_* ZZraw ZZtext Vertex_cord
             
 %% Compute distance of each measurement from its vertex
@@ -186,3 +189,9 @@ ZZ.depth = ZZ_cord; clear ZZ_cord
     end
     
         clear GZZutm i k x y GZZ*
+        
+%% Exporting zigzag measurement coordinates for GIS
+
+c = table(ZZ.depth(:,1), ZZ.depth(:,3), ZZ.depth(:,4));
+writetable(c,'/home/glaciology1/Documents/QGIS/Data/ZigzagMeasurementLocations.csv');
+    clear c

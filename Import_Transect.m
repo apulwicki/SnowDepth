@@ -164,4 +164,4 @@ clear i
 
     SD = struct(field1,value1,field2,value2,field3,value3,field4,value4,...
         field5,value5,field6,value6,field7,value7,field8,value8);
-            clear value* field* SD1* SD2* SD3* ExtraSD*
+            clear value* field* SD1* SD2* SD3* ExtraSD* gps_elev

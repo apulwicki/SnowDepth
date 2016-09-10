@@ -21,28 +21,25 @@ SWE(i).glacier = [z(5).glacier; z1(5).glacier; ZZ.glacier(ZZ.glacier==glacier)];
     mergeMtx = [ZZ.text(:,1),C,ZZ.text(:,2),C,ZZ.text(:,3)];
     ZZlabel = cellstr(cell2mat(mergeMtx));
 SWE(i).label = [categorical(z(5).depth(:,5)); z1(5).person; categorical(ZZlabel(ZZ.glacier==glacier))];
+SWE(i).person = [z(5).person; z1(5).person; ZZ.person(ZZ.glacier==glacier)];
+SWE(i).book = [z(5).book; z1(5).book; ZZ.book(ZZ.glacier==glacier)];
+SWE(i).comments = [z(5).comments; z1(5).comments; ZZ.comments(ZZ.glacier==glacier)];
 
 end
 
-clear C depth glacier* i mergeMtx WP_index z x y z1 ZZlabel
+clear C depth glacier* i mergeMtx WP_index z x y z1 ZZlabel remove_index
 
 %% Add DEM elevations of measurements
-load DEMelev
 
-for i = 1:3
-    value = str2double(cellstr(SWE(i).label(:,1))); array = DEMelev(:,1);
-    [~, match] = ismember(value, array);
-    match(match==0) = [];
+DEMelev = xlsread('TransectMeasurementLocations.xlsx', 'Sheet1','D1:D3935');
 
-    array = str2double(cellstr(SWE(i).label(:,1))); value = DEMelev(match,1);
-    [~, match2] = ismember(value, array);
-    match2(match2==0) = [];
+SWE(1).utm(:,3) = DEMelev(1:length(SWE(1).utm),1);
+    bit = length(SWE(1).utm);
+SWE(2).utm(:,3) = DEMelev(bit+1:bit+length(SWE(2).utm),1);
+    bit = length(SWE(1).utm)+length(SWE(2).utm);
+SWE(3).utm(:,3) = DEMelev(bit+1:bit+length(SWE(3).utm),1);
 
-    SWE(i).utm(match2,3) = DEMelev(match,2);
-
-end
-
-clear match* array value DEMelev i
+    clear DEMelev bit
 %% Density options
 
 if options.DensitySWE == 1 %depth
@@ -98,7 +95,7 @@ elseif options.DensitySWE == 6 %Linear elevation regression (variable)      Snow
     end    
     
 elseif options.DensitySWE == 7 %Linear elevation regression (variable)      SWE tube    
-    index = [1,7,8,14,15,33];
+    index = [1,7,8,14,15,31];
     count = 1;
     for i = 1:length(SWE)
         y = nanmean(cell2mat(Density.tube(index(count):index(count+1),2:19)),2);
@@ -157,14 +154,15 @@ elseif options.DensitySWE == 9 %Inverse distance weighted mean (variable)   SWE 
         
         SWE(i).swe = SWE(i).depth(:)/100.*SWE(i).density(:)/1000;
     end 
-    
-    
+
 end
 
 SWE = orderfields(SWE);    
 
-clear density count i 
+clear density count i fitDen gof index j weight x X y Y 
+clear SD ZZ
 
-plot(SWE(1).density,'.'); hold on
-plot(SWE(2).density,'.'); hold on
-plot(SWE(3).density,'.'); hold on
+% plot(SWE(1).density,'.'); hold on
+% plot(SWE(2).density,'.'); hold on
+% plot(SWE(3).density,'.');
+% legend('G04','G02','G13')

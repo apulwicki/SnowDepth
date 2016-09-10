@@ -32,25 +32,21 @@ function z = pulldata(data, book, glacier, person, pattern, quality, format)
     %All other snowdepth book data are set to NaNs 
     if strcmp(book,'all')
         range = 1:size(data,2)-1;
-        display('This does not include "Extra" data')
     elseif strcmp(book,'SD1')
         range = 1;
         data(2).depth = nan(size(data(2).depth));
         data(3).depth = nan(size(data(3).depth));
         data(4).depth = nan(size(data(4).depth));
-        display('This does not include "Extra" data')
     elseif strcmp(book,'SD2') 
         range = 2;
         data(1).depth = nan(size(data(1).depth));
         data(3).depth = nan(size(data(3).depth));
         data(4).depth = nan(size(data(4).depth));
-        display('This does not include "Extra" data')
     elseif strcmp(book,'SD3')
         range = 3;
         data(2).depth = nan(size(data(2).depth));
         data(1).depth = nan(size(data(1).depth));
         data(4).depth = nan(size(data(4).depth));
-        display('This does not include "Extra" data')
     elseif strcmp(book,'Extra')
         range = 4;
         data(2).depth = nan(size(data(2).depth));
@@ -110,28 +106,33 @@ end
 %Filtering and formating data 
 if strcmp(format,'fat') %fat format = four depth columns, WP, and WP coordinates
     if strcmp(book,'Extra') %ExtraSD data will have extra columns (which is why you can't call SD and ExtraSD values together with doing some sort of processing) 
-        filtered = [data(4).depth(:,2:42), data(4).depth(:,45:46)]; %filtered data
+        filtered = [data(4).depth(:,1:42), data(4).depth(:,44:45)]; %filtered data
         filteredcomments = data(4).comments; %filtered comments (needed for search comments)
         filteredglacier = data(4).glacier; %filtered glacier (needed for search glacier)
         filteredperson = data(4).person; %filtered person (needed for search person)
         filteredpattern = data(4).pattern; %filtered pattern (needed for search pattern)
+        filteredbook = data(4).book; %filtered book (needed for search pattern)
     elseif strcmp(book,'all')
         filtered = [data(1).depth; data(2).depth; data(3).depth]; %stacks SD1,2,3 into one matrix
         filteredcomments = [data(1).comments; data(2).comments; data(3).comments]; %stacks the comments
         filteredglacier = [data(1).glacier; data(2).glacier; data(3).glacier]; %stacks the glacier
         filteredperson = [data(1).person; data(2).person; data(3).person]; %stacks the person
         filteredpattern = [data(1).pattern; data(2).pattern; data(3).pattern]; %stacks the pattern
+        filteredbook = [data(1).book; data(2).book; data(3).book]; %stacks the book
     else 
         filtered = data(range).depth; %otherwise, just keep the data row you want (specificed by range)
         filteredcomments = data(range).comments; %and the comments you want too
         filteredglacier = data(range).glacier; %and the glacier you want too
         filteredperson = data(range).person; %and the person you want too
         filteredpattern = data(range).pattern; %and the pattern you want too
+        filteredbook = data(range).book; %and the book you want too
+
     end
     filteredcomments(all(isnan(filtered(:,1:4)),2),:) = []; %removes all the comments that correspond to not desired values (seen as rows of NaN in the edited matrix)
     filteredglacier(all(isnan(filtered(:,1:4)),2),:) = []; %removes all the glacier that correspond to not desired values (seen as rows of NaN in the edited matrix)
     filteredperson(all(isnan(filtered(:,1:4)),2),:) = []; %removes all the person that correspond to not desired values (seen as rows of NaN in the edited matrix)
     filteredpattern(all(isnan(filtered(:,1:4)),2),:) = []; %removes all the pattern that correspond to not desired values (seen as rows of NaN in the edited matrix)
+    filteredbook(all(isnan(filtered(:,1:4)),2),:) = []; %removes all the pattern that correspond to not desired values (seen as rows of NaN in the edited matrix)
     filtered(all(isnan(filtered(:,1:4)),2),:) = []; %removes all the not desired values and creates the final filtered data matrix
     
     %Combine the SD matrices and filtered matrix into the final structure
@@ -140,9 +141,10 @@ if strcmp(format,'fat') %fat format = four depth columns, WP, and WP coordinates
     f4 = 'glacier';  v4 = {data(1).glacier, data(2).glacier, data(3).glacier, data(4).glacier, filteredglacier};
     f5 = 'person';   v5 = {data(1).person, data(2).person, data(3).person, data(4).person, filteredperson};
     f6 = 'pattern';  v6 = {data(1).pattern, data(2).pattern, data(3).pattern, data(4).pattern, filteredpattern};
-    f8 = 'comments'; v8 = {data(1).comments, data(2).comments, data(3).comments, data(4).comments, filteredcomments};                 
+    f8 = 'comments'; v8 = {data(1).comments, data(2).comments, data(3).comments, data(4).comments, filteredcomments};   
+    f9 = 'book';     v9 = {data(1).book, data(2).book, data(3).book, data(4).book, filteredbook};
     %Combine the SD matrices in the first row of z
-    z = struct(f1,v1,f4,v4,f5,v5,f6,v6,f8,v8);      
+    z = struct(f1,v1,f4,v4,f5,v5,f6,v6,f8,v8,f9,v9);      
     
 elseif strcmp(format,'skinny') %skinny format = stacked data, one row not filtered, one row filtered
     %Compile all data into vectors (nx1)
