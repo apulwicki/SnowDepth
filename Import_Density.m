@@ -9,6 +9,7 @@
 %                           tube in zigzag locations. 
 
 %       Alexandra Pulwicki  Created: August 2016
+%                           Updated: September 2016
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% Importing density values

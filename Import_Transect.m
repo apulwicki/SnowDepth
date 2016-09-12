@@ -9,7 +9,7 @@
 %                       Elevations from GPS WPs (gps_elev)
 
 %       Alexandra Pulwicki  Created: July 2016
-%                           Updated: August 2016
+%                           Updated: September 2016
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% Importing data

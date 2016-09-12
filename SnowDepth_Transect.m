@@ -360,4 +360,9 @@ legend([p.G04(1,1) p.G02(1,1) p.G13(1,1)], ...
     ['G02 R^2 = ', num2str(round(gof.G02.rsquare,2))],...
     ['G13 R^2 = ', num2str(round(gof.G13.rsquare,2))]});
 
+%% pulldataSWE test
+
+    %pulldataSWE(data, glacier, pattern, book, person)
+z = pulldataSWE(SWE, 'all','all','all','all');
+    %scatter(z.utm(:,1),z.utm(:,2), 10, z.depth,'filled');
 

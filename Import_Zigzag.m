@@ -1,7 +1,10 @@
 % Importing Zigzag Snow Depth Data
 %       This script imports snowdepth data from the field data file for
 %       zigzags. It also categorizes the descriptive part of the data. 
-%       Then it creates a structured array for zigzag data.
+%       Then it creates a structured array for zigzag data. Locations of
+%       measurements are based from vertex corrdinates from QGIS. Two
+%       options exist: 1) use all vertex cooordinates and 2) make each Z
+%       continuous. 
 %
 %       Inputs:         Field Data ('FieldDataRevisedAP.xlsx')
 %                       Zigzag corners ('zigzag_corners_utm.xls')

@@ -215,3 +215,41 @@ display('G02 tube'); range = 8:14;
 display('G13 tube'); range = [15,17,18,20:33];
     SPfit = fit(cell2mat(Density.tube(range,22)), nanmean(cell2mat(Density.tube(range,2:19)),2),'poly1');
     display([num2str(round(SPfit.p1,3)),'x + ',num2str(round(SPfit.p2,1))])
+    
+%% SWE depth correction    
+
+    depth = cell2mat(Density.SWEdepth(:,3));
+    den = cell2mat(Density.SWEdepth(:,4));
+C = [depth, den];
+[sortC, I] = sortrows(C);
+detrendC = [I, detrend(C(:,2)) + mean(C(:,2))];
+final = sortrows(detrendC);
+%plot(final(:,2),'.')
+
+tube = [Density.SWEdepth(4,1), mean(final(4:9,2)); Density.SWEdepth(13,1), mean(final(13:19,2));...
+    Density.SWEdepth(29,1), mean(final(29:35,2)); Density.SWEdepth(44,1), mean(final(44:50,2));...
+    Density.SWEdepth(54,1), mean(final(54:61,2)); Density.SWEdepth(85,1), mean(final(84:89,2))];
+
+    x = cell2mat(Density.pitANDtube(:,7)); %Snowpit
+    y = cell2mat(tube(:,2)); %Detrended SWE tube
+    errory = [0, 0];
+    %errory = [cell2mat(Density.pitANDtube(:,2))-cell2mat(Density.pitANDtube(:,4)), ...
+    %    cell2mat(Density.pitANDtube(:,5))-cell2mat(Density.pitANDtube(:,2))]; %min and max tube
+    errorx = [cell2mat(Density.pitANDtube(:,7))-cell2mat(Density.pitANDtube(:,9)), ...
+        cell2mat(Density.pitANDtube(:,10))-cell2mat(Density.pitANDtube(:,7))]; %min and max SP
+errorbarxy(x,y,errorx(:,1),errorx(:,2),errory(:,1),errory(:,2),'Color','k','LineStyle','none','Marker','o',...
+   'MarkerFaceColor','k','LineWidth',1,'MarkerSize',5); hold on
+    
+    P = polyfit(x,y,1); yfit = P(1)*x+P(2);
+    LM = fitlm(x,y);
+plot(x,yfit,'r')
+    xlabel('Snowpit density (kg m^{-3})')
+    ylabel('SWE tube density (kg m^{-3})')
+    dim = [0.15,0.5,0.11,0.11];
+    str = {strcat('y=',num2str(round(P(1),2)),'*x+',num2str(round(P(2),2))), ...
+        strcat('R^2=',num2str(round(LM.Rsquared.Ordinary,2)))} ;
+    annotation('textbox',dim,'String', str,'FitBoxToText','on')
+    text(x+2, y+2, Density.pitANDtube(:,1))
+%     axis([290 400 220 400])
+    axis equal
+

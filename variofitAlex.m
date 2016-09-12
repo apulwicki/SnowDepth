@@ -1,14 +1,29 @@
 function myfit = variofitAlex(d, titletext)
+%Fits theoretical variogram curve to variogram data and plots results
+%   This function fits a spherical curve to the variogram calculated by
+%   variogramAlex.m. The fit is weighted by the nuber of point pairs that
+%   make up each point on the variogram. It also computes the goodness of 
+%   fit (Rsquared) and outputs the range, nugget and sill from the 
+%   theroetical fit. Results are plotted.
+%
+%       Alexandra Pulwicki  Created: August 2016
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% Spherical Fitting
-range = 100; nugget = min(d.val); sill = max(d.val);
+% Set initial guesses for range, nugget, and sill 
+    range = 100; nugget = min(d.val); sill = max(d.val); 
 
-f = fittype('nugget + ( sill*( 1.5*(h/range) - 0.5*(h/range).^3).*(h <= range) + sill*(h>range))',...
-    'independent','h');
+% Set fit type to spherical
+    f = fittype('nugget + ( sill*( 1.5*(h/range) - 0.5*(h/range).^3).*(h <= range) + sill*(h>range))',...
+        'independent','h');
 
-[myfit, gof]= fit(d.binCentre,d.val,f, 'StartPoint',[range,nugget,sill],'Weights',d.num);
+% Calculate best range, nugget and sill parameters for fit
+    %Fit is weighted by number of ppair points that make up each variogram
+    %point
+    [myfit, gof]= fit(d.binCentre,d.val,f, 'StartPoint',[range,nugget,sill],'Weights',d.num);
 
-range = round(myfit.range); nugget = round(myfit.nugget); sill = round(myfit.sill+myfit.nugget);
+% Return value for fit parameters
+    range = round(myfit.range); nugget = round(myfit.nugget); sill = round(myfit.sill+myfit.nugget);
 
 
 %% Plotting data
