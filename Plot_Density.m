@@ -23,17 +23,16 @@
 errorbarxy(x,y,errorx(:,1),errorx(:,2),errory(:,1),errory(:,2),'Color','k','LineStyle','none','Marker','o',...
    'MarkerFaceColor','k','LineWidth',1,'MarkerSize',5); hold on
     
-    x = cell2mat(Density.pitANDtube(:,7)); y = cell2mat(Density.pitANDtube(:,2));
     P = polyfit(x,y,1); yfit = P(1)*x+P(2);
     LM = fitlm(x,y);
 plot(x,yfit,'r')
     xlabel('Snowpit density (kg m^{-3})')
     ylabel('SWE tube density (kg m^{-3})')
     dim = [0.15,0.5,0.11,0.11];
-    str = {strcat('y=',num2str(round(P(1),2)),'*x+',num2str(round(P(2),2))), ...
-        strcat('R^2=',num2str(round(LM.Rsquared.Ordinary,2)))} ;
+    str = {strcat('y= ',num2str(round(P(1),2)),'x + ',num2str(round(P(2),2))), ...
+        strcat('R^2= ',num2str(round(LM.Rsquared.Ordinary,2)))} ;
     annotation('textbox',dim,'String', str,'FitBoxToText','on')
-    text(cell2mat(Density.pitANDtube(:,7))+2, cell2mat(Density.pitANDtube(:,2))+2, Density.pitANDtube(:,1))
+    text(x+2, y+3, Density.pitANDtube(:,1))
     axis([290 400 220 400])
     axis equal
     
@@ -177,11 +176,11 @@ display('G02 tube'); range = 8:14;
 display(['mean = ',num2str(round(nanmean(nanmean(cell2mat(Density.tube(range,2:19)))))),...
         ', std = ',num2str(round(nanstd(nanstd(cell2mat(Density.tube(range,2:19)))))),...
         ', n = ',num2str(length(range))]);
-display('G13 tube'); range = 15:33;
+display('G13 tube'); range = 15:31;
 display(['mean = ',num2str(round(nanmean(nanmean(cell2mat(Density.tube(range,2:19)))))),...
         ', std = ',num2str(round(nanstd(nanstd(cell2mat(Density.tube(range,2:19)))))),...
         ', n = ',num2str(length(range))]);
-display('All tube'); range = 1:33;
+display('All tube'); range = 1:31;
 display(['mean = ',num2str(round(nanmean(nanmean(cell2mat(Density.tube(range,2:19)))))),...
         ', std = ',num2str(round(nanstd(nanstd(cell2mat(Density.tube(range,2:19)))))),...
         ', n = ',num2str(length(range))]);
@@ -226,9 +225,17 @@ detrendC = [I, detrend(C(:,2)) + mean(C(:,2))];
 final = sortrows(detrendC);
 %plot(final(:,2),'.')
 
-tube = [Density.SWEdepth(4,1), mean(final(4:9,2)); Density.SWEdepth(13,1), mean(final(13:19,2));...
-    Density.SWEdepth(29,1), mean(final(29:35,2)); Density.SWEdepth(44,1), mean(final(44:50,2));...
-    Density.SWEdepth(54,1), mean(final(54:61,2)); Density.SWEdepth(85,1), mean(final(84:89,2))];
+tube = [Density.SWEdepth(4,1), mean(final(4:9,2)), std(final(4:9,2)); Density.SWEdepth(13,1), mean(final(13:19,2)), std(final(13:19,2));...
+    Density.SWEdepth(29,1), mean(final(29:35,2)), std(final(29:35,2)); Density.SWEdepth(44,1), mean(final(44:50,2)), std(final(44:50,2));...
+    Density.SWEdepth(54,1), mean(final(54:61,2)), std(final(54:61,2)); Density.SWEdepth(85,1), mean(final(84:89,2)), std(final(84:89,2))];
+tube(:,2:3) = num2cell(round(cell2mat(tube(:,2:3))));
+
+tubeG = [cellstr('G04'), mean([final(4:9,2);final(13:19,2)]), std([final(4:9,2);final(13:19,2)]);...
+    cellstr('G02'), mean([final(29:35,2);final(44:50,2)]), std([final(29:35,2);final(44:50,2)]);...
+    cellstr('G13'), mean([final(54:61,2);final(84:89,2)]), std([final(54:61,2);final(84:89,2)]);...
+    cellstr('All'), mean([final(4:9,2);final(13:19,2);final(29:35,2);final(44:50,2);final(54:61,2);final(84:89,2)]),...
+        std([final(4:9,2);final(13:19,2);final(29:35,2);final(44:50,2);final(54:61,2);final(84:89,2)])];
+tubeG(:,2:3) = num2cell(round(cell2mat(tubeG(:,2:3))));
 
     x = cell2mat(Density.pitANDtube(:,7)); %Snowpit
     y = cell2mat(tube(:,2)); %Detrended SWE tube
@@ -252,4 +259,17 @@ plot(x,yfit,'r')
     text(x+2, y+2, Density.pitANDtube(:,1))
 %     axis([290 400 220 400])
     axis equal
+
+%% Density Range
+
+%Snowpit
+    %Name, ref, min ,max, range
+disp = [Density.snowpit(:,1), num2cell(round(cell2mat(Density.snowpit(:,2)))),num2cell(round(cell2mat(Density.snowpit(:,6)))), num2cell(round(cell2mat(Density.snowpit(:,7))))];
+disp = [disp, num2cell(cell2mat(disp(:,4))-cell2mat(disp(:,3)))];
+
+%Tube
+    %Name, num, mean density, min, max, range as % of mean
+disp2 = [Density.tube(:,1), num2cell(sum(~isnan(cell2mat(Density.tube(:,2:18))),2)), num2cell(round(nanmean(cell2mat(Density.tube(:,2:18)),2))),...
+    num2cell(round(nanmin(cell2mat(Density.tube(:,2:18)),[],2))),num2cell(round(nanmax(cell2mat(Density.tube(:,2:18)),[],2)))];
+disp2(:,6) = num2cell(round((cell2mat(disp2(:,5))-cell2mat(disp2(:,4)))./cell2mat(disp2(:,3))*100));
 

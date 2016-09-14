@@ -195,6 +195,6 @@ ZZ.depth = ZZ_cord; clear ZZ_cord
         
 %% Exporting zigzag measurement coordinates for GIS
 
-c = table(ZZ.depth(:,1), ZZ.depth(:,3), ZZ.depth(:,4));
-writetable(c,'/home/glaciology1/Documents/QGIS/Data/ZigzagMeasurementLocations.csv');
-    clear c
+% c = table(ZZ.depth(:,1), ZZ.depth(:,3), ZZ.depth(:,4));
+% writetable(c,'/home/glaciology1/Documents/QGIS/Data/ZigzagMeasurementLocations.csv');
+%     clear c
