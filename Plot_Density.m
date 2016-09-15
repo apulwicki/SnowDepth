@@ -225,6 +225,32 @@ detrendC = [I, detrend(C(:,2)) + mean(C(:,2))];
 final = sortrows(detrendC);
 %plot(final(:,2),'.')
 
+final2 = [Density.SWEdepth(:,1), num2cell(final(:,2))];
+
+
+a = categorical(final2(:,1));
+a1 = [a(1:end-1),a(2:end)];
+index = find(a1(:,1)~=a1(:,2));
+index = [1;index;length(a)];
+
+M = cell(10,2);
+for i = 2:2:length(index)+1
+   M(i/2,1:2) =  [final2(index(i-1),1), num2cell(mean(cell2mat(final2(index(i-1):index(i),2))))];
+end
+
+% 
+% 
+% [test, test2] = meshgrid(grp2idx(a));
+% index = triu(test==test2);
+% 
+% values = meshgrid(cell2mat(final2(:,2)));
+% M = mean(values(index),2);
+
+
+
+Density.SWEdepthDETREND = [Density.SWEdepth(:,1), num2cell(final(:,2))];
+
+
 tube = [Density.SWEdepth(4,1), mean(final(4:9,2)), std(final(4:9,2)); Density.SWEdepth(13,1), mean(final(13:19,2)), std(final(13:19,2));...
     Density.SWEdepth(29,1), mean(final(29:35,2)), std(final(29:35,2)); Density.SWEdepth(44,1), mean(final(44:50,2)), std(final(44:50,2));...
     Density.SWEdepth(54,1), mean(final(54:61,2)), std(final(54:61,2)); Density.SWEdepth(85,1), mean(final(84:89,2)), std(final(84:89,2))];
@@ -239,7 +265,7 @@ tubeG(:,2:3) = num2cell(round(cell2mat(tubeG(:,2:3))));
 
     x = cell2mat(Density.pitANDtube(:,7)); %Snowpit
     y = cell2mat(tube(:,2)); %Detrended SWE tube
-    errory = [0, 0];
+    errory = [cell2mat(tube(:,3)),cell2mat(tube(:,3))];
     %errory = [cell2mat(Density.pitANDtube(:,2))-cell2mat(Density.pitANDtube(:,4)), ...
     %    cell2mat(Density.pitANDtube(:,5))-cell2mat(Density.pitANDtube(:,2))]; %min and max tube
     errorx = [cell2mat(Density.pitANDtube(:,7))-cell2mat(Density.pitANDtube(:,9)), ...
@@ -257,7 +283,7 @@ plot(x,yfit,'r')
         strcat('R^2=',num2str(round(LM.Rsquared.Ordinary,2)))} ;
     annotation('textbox',dim,'String', str,'FitBoxToText','on')
     text(x+2, y+2, Density.pitANDtube(:,1))
-%     axis([290 400 220 400])
+     axis([220 400 220 400])
     axis equal
 
 %% Density Range
