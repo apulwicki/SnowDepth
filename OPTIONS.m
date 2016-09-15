@@ -1,5 +1,10 @@
 global options
 
+%%%%%%%%%%%%%%%%%%%%%% DETREND FED. SAMPLER DENSITY %%%%%%%%%%%%%%%%%%%%%%%
+
+options.TubeDensity     = 2;
+                % 1 original fed. sampler density values
+                % 2 depth detrended fed. sampler density values
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% ZIGZAG %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

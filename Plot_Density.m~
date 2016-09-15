@@ -51,19 +51,19 @@ figure(2)
 h1 = errorbarxy(x,y,errorx(:,2),errory(:,2),errorx(:,1),errory(:,1),'Color','k','LineStyle','none','Marker','o',...
    'MarkerFaceColor','b','LineWidth',1,'MarkerSize',11); hold on
 
-    x = cell2mat(Density.tube(8:14,2)); %Glacier 2
-    y = cell2mat(Density.tube(8:14,9));
-    errorx = [cell2mat(Density.tube(8:14,2))-cell2mat(Density.tube(8:14,4)),...
-        cell2mat(Density.tube(8:14,5))-cell2mat(Density.tube(8:14,2))];
-    errory = [zeros(length(y),1),zeros(length(y),1)];
+    x = nanmean(cell2mat(Density.tube(8:14,2:16)),2);
+    y = cell2mat(Density.tube(8:14,22));
+    errorx = [cell2mat(Density.tube(1:7,2))-cell2mat(Density.tube(1:7,4)),...
+        cell2mat(Density.tube(1:7,5))-cell2mat(Density.tube(1:7,2))];
+    errory = zeros(length(y),1);
 h2 = errorbarxy(x,y,errorx(:,2),errory(:,2),errorx(:,1),errory(:,1),'Color','k','LineStyle','none','Marker','o',...
    'MarkerFaceColor','k','LineWidth',1,'MarkerSize',11); hold on
 
-    x = cell2mat(Density.tube(15:end,2)); %Glacier 13
-    y = cell2mat(Density.tube(15:end,9));
-    errorx = [cell2mat(Density.tube(15:end,2))-cell2mat(Density.tube(15:end,4)),...
-        cell2mat(Density.tube(15:end,5))-cell2mat(Density.tube(15:end,2))];
-    errory = [zeros(length(y),1),zeros(length(y),1)];
+    x = nanmean(cell2mat(Density.tube(15:end,2:16)),2);
+    y = cell2mat(Density.tube(15:end,22));
+    errorx = [cell2mat(Density.tube(1:7,2))-cell2mat(Density.tube(1:7,4)),...
+        cell2mat(Density.tube(1:7,5))-cell2mat(Density.tube(1:7,2))];
+    errory = zeros(length(y),1);
 h3 = errorbarxy(x,y,errorx(:,2),errory(:,2),errorx(:,1),errory(:,1),'Color','k','LineStyle','none','Marker','o',...
    'MarkerFaceColor','r','LineWidth',1,'MarkerSize',11); hold on
 
@@ -80,23 +80,20 @@ print(filename,'-dpng')
 figure(3)
     x = cell2mat(Density.snowpit(1:4,2));
     y = cell2mat(Density.snowpit(1:4,5));
-    errorx = [cell2mat(Density.snowpit(1:4,2))-cell2mat(Density.snowpit(1:4,6)),...
-        cell2mat(Density.snowpit(1:4,7))-cell2mat(Density.snowpit(1:4,2))];
-    errory = [zeros(length(y),1),zeros(length(y),1)];
+    errorx = 0.1*x;
+    errory = zeros(length(y),1);
 h2 = errorbarxy(x,y,errorx,errory,'Color','k','LineStyle','none','Marker','o',...
    'MarkerFaceColor','k','LineWidth',1,'MarkerSize',11); hold on
     x = cell2mat(Density.snowpit(5:7,2));
     y = cell2mat(Density.snowpit(5:7,5));
-    errorx = [cell2mat(Density.snowpit(5:7,2))-cell2mat(Density.snowpit(5:7,6)),...
-        cell2mat(Density.snowpit(5:7,7))-cell2mat(Density.snowpit(5:7,2))];
-    errory = [zeros(length(y),1),zeros(length(y),1)];
+    errorx = 0.1*x;
+    errory = zeros(length(y),1);
 h1 = errorbarxy(x,y,errorx,errory,'Color','k','LineStyle','none','Marker','o',...
    'MarkerFaceColor','b','LineWidth',1,'MarkerSize',11); hold on   
     x = cell2mat(Density.snowpit(8:end,2));
     y = cell2mat(Density.snowpit(8:end,5));
-    errorx = [cell2mat(Density.snowpit(8:end,2))-cell2mat(Density.snowpit(8:end,6)),...
-        cell2mat(Density.snowpit(8:end,7))-cell2mat(Density.snowpit(8:end,2))];
-    errory = [zeros(length(y),1),zeros(length(y),1)];
+    errorx = 0.1*x;
+    errory = zeros(length(y),1);
 h3 = errorbarxy(x,y,errorx,errory,'Color','k','LineStyle','none','Marker','o',...
    'MarkerFaceColor','r','LineWidth',1,'MarkerSize',11); hold on
 
