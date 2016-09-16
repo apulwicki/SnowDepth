@@ -48,28 +48,36 @@ figure(2)
     errorx = [cell2mat(Density.tube(1:7,2))-cell2mat(Density.tube(1:7,4)),...
         cell2mat(Density.tube(1:7,5))-cell2mat(Density.tube(1:7,2))];
     errory = [zeros(length(y),1),zeros(length(y),1)];
+    [SPfit, gof1] = fit(x,y,'poly1');
 h1 = errorbarxy(x,y,errorx(:,2),errory(:,2),errorx(:,1),errory(:,1),'Color','k','LineStyle','none','Marker','o',...
    'MarkerFaceColor','b','LineWidth',1,'MarkerSize',11); hold on
+l1 = plot(SPfit,'b'); hold on
 
     x = cell2mat(Density.tube(8:14,2)); %Glacier 2
     y = cell2mat(Density.tube(8:14,9));
     errorx = [cell2mat(Density.tube(8:14,2))-cell2mat(Density.tube(8:14,4)),...
         cell2mat(Density.tube(8:14,5))-cell2mat(Density.tube(8:14,2))];
     errory = [zeros(length(y),1),zeros(length(y),1)];
+    [SPfit, gof2] = fit(x,y,'poly1');
 h2 = errorbarxy(x,y,errorx(:,2),errory(:,2),errorx(:,1),errory(:,1),'Color','k','LineStyle','none','Marker','o',...
    'MarkerFaceColor','k','LineWidth',1,'MarkerSize',11); hold on
+l2 = plot(SPfit,'k'); hold on
 
     x = cell2mat(Density.tube(15:end,2)); %Glacier 13
     y = cell2mat(Density.tube(15:end,9));
     errorx = [cell2mat(Density.tube(15:end,2))-cell2mat(Density.tube(15:end,4)),...
         cell2mat(Density.tube(15:end,5))-cell2mat(Density.tube(15:end,2))];
     errory = [zeros(length(y),1),zeros(length(y),1)];
+    [SPfit, gof3] = fit(x,y,'poly1');
 h3 = errorbarxy(x,y,errorx(:,2),errory(:,2),errorx(:,1),errory(:,1),'Color','k','LineStyle','none','Marker','o',...
    'MarkerFaceColor','r','LineWidth',1,'MarkerSize',11); hold on
+l3 = plot(SPfit,'r'); hold on
 
     xlabel('SWE tube density (kg m^{-3})')
     ylabel('Elevation(m)')
-    legend([h1(1) h2(1) h3(1)], {'G04','G02','G13'})
+    legend([h1(1) l1 h2(1) l2 h3(1) l3], {'G04',['G04 fit R^2=',num2str(round(gof1.rsquare,2))], ...
+        'G02',['G02 fit R^2=',num2str(round(gof2.rsquare,2))],...
+        'G13',['G13 fit R^2=',num2str(round(gof3.rsquare,2))]})
 
 %filename = strcat('/home/glaciology1/Documents/Data/Plots/ElevationVsSWEtube_all');
 filename = strcat('/Users/Alexandra/Documents/SFU/Data/Plots/ElevationVsSWEtube_all');
@@ -83,27 +91,36 @@ figure(3)
     errorx = [cell2mat(Density.snowpit(1:4,2))-cell2mat(Density.snowpit(1:4,6)),...
         cell2mat(Density.snowpit(1:4,7))-cell2mat(Density.snowpit(1:4,2))];
     errory = [zeros(length(y),1),zeros(length(y),1)];
+    [SPfit, gof2] = fit(x,y,'poly1');
 h2 = errorbarxy(x,y,errorx,errory,'Color','k','LineStyle','none','Marker','o',...
    'MarkerFaceColor','k','LineWidth',1,'MarkerSize',11); hold on
+l2 = plot(SPfit,'k'); hold on
+
     x = cell2mat(Density.snowpit(5:7,2));
     y = cell2mat(Density.snowpit(5:7,5));
     errorx = [cell2mat(Density.snowpit(5:7,2))-cell2mat(Density.snowpit(5:7,6)),...
         cell2mat(Density.snowpit(5:7,7))-cell2mat(Density.snowpit(5:7,2))];
     errory = [zeros(length(y),1),zeros(length(y),1)];
+    [SPfit, gof1] = fit(x,y,'poly1');
 h1 = errorbarxy(x,y,errorx,errory,'Color','k','LineStyle','none','Marker','o',...
    'MarkerFaceColor','b','LineWidth',1,'MarkerSize',11); hold on   
+l1 = plot(SPfit,'b'); hold on
+
     x = cell2mat(Density.snowpit(8:end,2));
     y = cell2mat(Density.snowpit(8:end,5));
     errorx = [cell2mat(Density.snowpit(8:end,2))-cell2mat(Density.snowpit(8:end,6)),...
         cell2mat(Density.snowpit(8:end,7))-cell2mat(Density.snowpit(8:end,2))];
     errory = [zeros(length(y),1),zeros(length(y),1)];
+    [SPfit, gof3] = fit(x,y,'poly1');
 h3 = errorbarxy(x,y,errorx,errory,'Color','k','LineStyle','none','Marker','o',...
    'MarkerFaceColor','r','LineWidth',1,'MarkerSize',11); hold on
+l3 = plot(SPfit,'r'); hold on
 
     xlabel('Snowpit density (kg m^{-3})')
     ylabel('Elevation(m)')
-    legend([h1(1) h2(1) h3(1)], {'G04','G02','G13'})
-%filename = strcat('/home/glaciology1/Documents/Data/Plots/ElevationVsSnowpit_all');
+    legend([h1(1) l1 h2(1) l2 h3(1) l3], {'G04',['G04 fit R^2=',num2str(round(gof1.rsquare,2))], ...
+            'G02',['G02 fit R^2=',num2str(round(gof2.rsquare,2))],...
+            'G13',['G13 fit R^2=',num2str(round(gof3.rsquare,2))]})%filename = strcat('/home/glaciology1/Documents/Data/Plots/ElevationVsSnowpit_all');
 filename = strcat('/Users/Alexandra/Documents/SFU/Data/Plots/ElevationVsSnowpit_all');
 print(filename,'-dpng')
     clear P LM x y index* i j count yfit str dim filename error
@@ -175,20 +192,20 @@ display(['mean = ',num2str(round(nanmean(cell2mat(Density.snowpit(range,2))))),.
 % SWE tube
 display('')
 display('G04 tube'); range = 1:7;
-display(['mean = ',num2str(round(nanmean(nanmean(cell2mat(Density.tube(range,2:19)))))),...
-        ', std = ',num2str(round(nanstd(nanstd(cell2mat(Density.tube(range,2:19)))))),...
+display(['mean = ',num2str(round(nanmean(cell2mat(Density.tube(range,2))))),...
+        ', std = ',num2str(round(nanstd(cell2mat(Density.tube(range,2))))),...
         ', n = ',num2str(length(range))]);
 display('G02 tube'); range = 8:14;
-display(['mean = ',num2str(round(nanmean(nanmean(cell2mat(Density.tube(range,2:19)))))),...
-        ', std = ',num2str(round(nanstd(nanstd(cell2mat(Density.tube(range,2:19)))))),...
+display(['mean = ',num2str(round(nanmean(cell2mat(Density.tube(range,2))))),...
+        ', std = ',num2str(round(nanstd(cell2mat(Density.tube(range,2))))),...
         ', n = ',num2str(length(range))]);
 display('G13 tube'); range = 15:31;
-display(['mean = ',num2str(round(nanmean(nanmean(cell2mat(Density.tube(range,2:19)))))),...
-        ', std = ',num2str(round(nanstd(nanstd(cell2mat(Density.tube(range,2:19)))))),...
+display(['mean = ',num2str(round(nanmean(cell2mat(Density.tube(range,2))))),...
+        ', std = ',num2str(round(nanstd(cell2mat(Density.tube(range,2))))),...
         ', n = ',num2str(length(range))]);
 display('All tube'); range = 1:31;
-display(['mean = ',num2str(round(nanmean(nanmean(cell2mat(Density.tube(range,2:19)))))),...
-        ', std = ',num2str(round(nanstd(nanstd(cell2mat(Density.tube(range,2:19)))))),...
+display(['mean = ',num2str(round(nanmean(cell2mat(Density.tube(range,2))))),...
+        ', std = ',num2str(round(nanstd(cell2mat(Density.tube(range,2))))),...
         ', n = ',num2str(length(range))]);
     
 %% Linear regression
@@ -210,15 +227,15 @@ display('G13 SP'); range = 8:10;
 %SP
 display('')
 display('G04 tube'); range = 1:7;
-    SPfit = fit(cell2mat(Density.tube(range,22)), nanmean(cell2mat(Density.tube(range,2:19)),2),'poly1');
+    SPfit = fit(cell2mat(Density.tube(range,22)), nanmean(cell2mat(Density.tube(range,2)),2),'poly1');
     display([num2str(round(SPfit.p1,3)),'x + ',num2str(round(SPfit.p2,1))])
     
 display('G02 tube'); range = 8:14;
-    SPfit = fit(cell2mat(Density.tube(range,22)), nanmean(cell2mat(Density.tube(range,2:19)),2),'poly1');
+    SPfit = fit(cell2mat(Density.tube(range,22)), nanmean(cell2mat(Density.tube(range,2)),2),'poly1');
     display([num2str(round(SPfit.p1,3)),'x + ',num2str(round(SPfit.p2,1))])
     
 display('G13 tube'); range = [15,17,18,20:33];
-    SPfit = fit(cell2mat(Density.tube(range,22)), nanmean(cell2mat(Density.tube(range,2:19)),2),'poly1');
+    SPfit = fit(cell2mat(Density.tube(range,22)), nanmean(cell2mat(Density.tube(range,2)),2),'poly1');
     display([num2str(round(SPfit.p1,3)),'x + ',num2str(round(SPfit.p2,1))])
 
 %% Density Range
