@@ -22,7 +22,7 @@ options.ZigzagSWE       = 2;
 
 % Converting to SWE
 
-options.DensitySWE     = 8;
+options.DensitySWE     = 1;
                 % 1 Depth (raw)
                 
                 % 2 Donjek mean density (uniform)       Snowpit

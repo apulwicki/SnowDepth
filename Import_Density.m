@@ -137,9 +137,12 @@ if options.TubeDensity == 2
     detrendC = [I, detrend(C(:,2)) + mean(C(:,2))];
     final = sortrows(detrendC);
 
-    % plot(detrendC(:,2),detrendC(:,1),'.','markers',13)
-    %     xlabel('Snowpit density (kg m^{-3})')
-    %     ylabel('SWE tube density (kg m^{-3})')
+%     plot(detrendC(:,2),detrendC(:,1),'.','markers',13)
+%         xlabel('Snowpit density (kg m^{-3})')
+%         ylabel('Snow depth (cm)')
+%     filename = strcat('/home/glaciology1/Documents/Data/Plots/DepthDensity_tubeDETREND');
+%     %filename = strcat('/Users/Alexandra/Documents/SFU/Data/Plots/DepthDensity_tubeDETREND');
+%     print(filename,'-dpng')
 
     final2 = [Density.SWEdepth(:,1), num2cell(final(:,2))];
     a = categorical(final2(:,1));
