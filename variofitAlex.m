@@ -1,4 +1,4 @@
-function myfit = variofitAlex(d, titletext)
+function values = variofitAlex(d, titletext, PlotOption)
 %Fits theoretical variogram curve to variogram data and plots results
 %   This function fits a spherical curve to the variogram calculated by
 %   variogramAlex.m. The fit is weighted by the nuber of point pairs that
@@ -24,10 +24,11 @@ function myfit = variofitAlex(d, titletext)
 
 % Return value for fit parameters
     range = round(myfit.range); nugget = round(myfit.nugget); sill = round(myfit.sill+myfit.nugget);
-
+    values.range = range;       values.nugget = nugget;       values.sill = sill;         
 
 %% Plotting data
 
+if PlotOption ==1
 figure(1)
 
 % Plot of variance vs lag distance (bin label)
@@ -63,5 +64,5 @@ subplot(3,1,3)
         plot(d.binCentre,d.num)
         axis([0 d.binCentre(end,1) 0 max(d.num)])
         ylabel('# pairs'); xlabel('lag');
-
+end
 end

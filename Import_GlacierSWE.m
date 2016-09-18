@@ -70,7 +70,7 @@ elseif options.DensitySWE == 2 %Donjek mean density (uniform)       Snowpit
     end
 
 elseif options.DensitySWE == 3 %Donjek mean density (uniform)       SWE tube
-    density = nanmean(nanmean(cell2mat(Density.tube(:,2:19)))); %mean density from all SWE tubes 
+    density = mean(cell2mat(Density.tube(:,2))); %mean density from all SWE tubes 
     for i = 1:length(SWE) %for each glacier
         SWE(i).density(:) = density; %uniform density for all measures
         SWE(i).swe = SWE(i).depth(:)/100.*SWE(i).density(:)/1000;  %SWE calculation
@@ -87,10 +87,10 @@ elseif options.DensitySWE == 4 %Glacier mean density (uniform)      Snowpit
     end
     
 elseif options.DensitySWE == 5 %Glacier mean density (uniform)      SWE tube
-    index = [1,7,8,14,15,33]; %start and end indices for swe tube densities
+    index = [1,7,8,14,15,31]; %start and end indices for swe tube densities
     count = 1;
     for i = 1:length(SWE) %for each glacier
-        density = nanmean(nanmean(cell2mat(Density.tube(index(count):index(count+1),2:19))));  %mean density for each glacier
+        density = mean(cell2mat(Density.tube(index(count):index(count+1),2)));  %mean density for each glacier
         SWE(i).density(:) = density; %uniform density for each glacier
         SWE(i).swe = SWE(i).depth(:)/100.*SWE(i).density(:)/1000; %SWE calculation
         count = count + 2;
@@ -114,8 +114,8 @@ elseif options.DensitySWE == 7 %Linear elevation regression (variable)      SWE 
     index = [1,7,8,14,15,31];  %start and end indices for swe tube densities
     count = 1;
     for i = 1:length(SWE) %for each glacier
-        y = nanmean(cell2mat(Density.tube(index(count):index(count+1),2:19)),2); %density values
-        x = cell2mat(Density.tube(index(count):index(count+1),22)); %elevation values
+        y = cell2mat(Density.tube(index(count):index(count+1),2)); %density values
+        x = cell2mat(Density.tube(index(count):index(count+1),9)); %elevation values
         [fitDen, gof] = fit(x,y,'poly1'); %linear fit
         density = fitDen.p1*SWE(i).utm(:,3)+fitDen.p2; %calculate density for all values from fit
         SWE(i).density = zeros(size(SWE(i).depth,1),1);
@@ -148,16 +148,16 @@ elseif options.DensitySWE == 8 %Inverse distance weighted mean (variable)   Snow
 elseif options.DensitySWE == 9 %Inverse distance weighted mean (variable)   SWE tube    
     for i = 1:length(SWE)
     %distance matrix
-        Epit = repmat(cell2mat(Density.tube(:,20))',length(SWE(i).utm(:,1)),1); %repeating tube easting
-        Npit = repmat(cell2mat(Density.tube(:,21))',length(SWE(i).utm(:,1)),1); %repeating tube northing
-        Eloc = repmat(SWE(i).utm(:,1),1,length(Density.tube(:,20))); %repeating locations easting
-        Nloc = repmat(SWE(i).utm(:,2),1,length(Density.tube(:,20))); %repeating locations northing
+        Epit = repmat(cell2mat(Density.tube(:,7))',length(SWE(i).utm(:,1)),1); %repeating tube easting
+        Npit = repmat(cell2mat(Density.tube(:,8))',length(SWE(i).utm(:,1)),1); %repeating tube northing
+        Eloc = repmat(SWE(i).utm(:,1),1,length(Density.tube(:,7))); %repeating locations easting
+        Nloc = repmat(SWE(i).utm(:,2),1,length(Density.tube(:,7))); %repeating locations northing
        
         X = Eloc-Epit; Y = Nloc-Npit; %separation between locations and tube
         weight = 1./hypot(X,Y); %weight is 1/distance between location and tube
         
    %density  
-        D = repmat(nanmean(cell2mat(Density.tube(:,2:19)),2)',length(SWE(i).utm(:,1)),1); %repeating density matrix
+        D = repmat(cell2mat(Density.tube(:,2))',length(SWE(i).utm(:,1)),1); %repeating density matrix
         density = D.*weight; %calculate weighted density
         density = sum(density,2)./sum(weight,2); %add weighted density and divide by sums of weights (inverse distance weighting)
             SWE(i).density = zeros(size(SWE(i).depth,1),1); %initialize SWE field
