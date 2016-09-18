@@ -28,8 +28,8 @@ for i = 1:length(glacier_list) %go through each glacier
     %glacier
     SWE(i).depth = [nanmean(z(5).depth(:,1:4),2); nanmean(z1(5).depth(:,1:40),2); ... %depth
         cell2mat(ZZ.depth(ZZ.glacier==glacier,5))]; 
-        x = [z(5).depth(:,6); z1(5).depth(:,42); cell2mat(ZZ.depth(ZZ.glacier==glacier,3))]; %easting
-        y = [z(5).depth(:,7); z1(5).depth(:,43); cell2mat(ZZ.depth(ZZ.glacier==glacier,4))]; %northing
+        x = [z(5).depth(:,6); z1(5).depth(:,43); cell2mat(ZZ.depth(ZZ.glacier==glacier,3))]; %easting
+        y = [z(5).depth(:,7); z1(5).depth(:,44); cell2mat(ZZ.depth(ZZ.glacier==glacier,4))]; %northing
     SWE(i).utm = [x y]; %UTM coordinates
     SWE(i).pattern = [z(5).pattern; z1(5).pattern; ZZ.book(ZZ.glacier==glacier)]; %pattern label
     SWE(i).glacier = [z(5).glacier; z1(5).glacier; ZZ.glacier(ZZ.glacier==glacier)]; %glacier label

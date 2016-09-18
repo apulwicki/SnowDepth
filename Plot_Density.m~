@@ -213,20 +213,16 @@ end
     legend('Glacier 4','Glacier 2','Glacier 13')
     
 % All data
-colour = ['b','k','r'];
-for j = 1:3
-    depth = SWE(j).depth(~isnan(SWE(j).utm(:,3)));
-    elev = SWE(j).utm(~isnan(SWE(j).utm(:,3)),3);
-    i = ['n',num2str(j)];
+for i = 1:3
+    depth = SWE(i).depth(~isnan(SWE(i).utm(:,3)));
+    elev = SWE(i).utm(~isnan(SWE(i).utm(:,3)),3);
+    i = ['n',num2str(i)];
     [f.(i), g.(i)] = fit(depth,elev,'poly1');
-        mark = ['.',colour(j)];
-    h = plot(depth,elev,mark,'MarkerSize',13); hold on
-    plot(f.(i),colour(j)); hold on
+    h.(i) = plot(Dfit); hold on
+    p.(i) = plot(depth,elev,'.','MarkerSize',13); hold on
 end
     xlabel('Depth (cm)'); ylabel('Elevation (m a.s.l.)');
-    legend('Glacier 4',['R^2=',num2str(round(g.n1.rsquare,2))],...
-        'Glacier 2',['R^2=',num2str(round(g.n2.rsquare,2))],...
-        'Glacier 13',['R^2=',num2str(round(g.n3.rsquare,2))],'Location','best')
+    legend([p1, p2, p3],{'Glacier 4','Glacier 2','Glacier 13'})
 %% Basic stats
 
 % Snowpit

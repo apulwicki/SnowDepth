@@ -85,6 +85,19 @@
     snowpittubeSWE = [snowpittubeSWE, num2cell(snowpit_density(indexSP,1)), ...
                             num2cell(snowpit_density(indexSP,4:6))];
 
+%% Swe tube values                        
+%Elevation of snow pits
+depth = cell2mat(depth_full(:,3));
+    a = categorical(depth_full(:,1));
+    a1 = [a(1:end-1),a(2:end)];
+    ind = [find(a1(:,1)~=a1(:,2));length(a)];
+    index = [1;ind(1:end-1)+1];
+    index = [index, ind];
+    M = cell(10,2);
+    for i = 1:length(index)
+        M(i,1:2) =  [depth_full(index(i,1),1), num2cell(mean(depth(index(i,1):index(i,2),1)))];
+    end
+    SWEtube_full = [SWEtube_full, M(:,2)]; 
 %% Create structure for relevant data
 
 Density = struct('snowpit',{Snowpit_full},'pitANDtube',{snowpittubeSWE},...
@@ -159,7 +172,7 @@ if options.TubeDensity == 2
             (index(i,2)-index(i,1)+1)];
     end
 
-    Density.tube = [M, Density.tube(:,20:22)];
+    Density.tube = [M, Density.tube(:,20:23)];
     Density = rmfield(Density, 'SWEdepth');
     Density.pitANDtube(:,2:6) = M(index_SPSWE,2:6);
     Density.zigzagtube(:,2) = M(index_zigzag,2);

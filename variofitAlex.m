@@ -11,16 +11,16 @@ function myfit = variofitAlex(d, titletext)
 
 %% Spherical Fitting
 % Set initial guesses for range, nugget, and sill 
-    range = 100; nugget = min(d.val); sill = max(d.val); 
+    range = median(d.meanDist); nugget = min(d.val); sill = max(d.val); 
 
 % Set fit type to spherical
     f = fittype('nugget + ( sill*( 1.5*(h/range) - 0.5*(h/range).^3).*(h <= range) + sill*(h>range))',...
         'independent','h');
 
 % Calculate best range, nugget and sill parameters for fit
-    %Fit is weighted by number of ppair points that make up each variogram
+    %Fit is weighted by number of pair points that make up each variogram
     %point
-    [myfit, gof]= fit(d.binCentre,d.val,f, 'StartPoint',[range,nugget,sill],'Weights',d.num);
+    [myfit, gof]= fit(d.binCentre,d.val,f, 'StartPoint',[nugget,sill,range],'Weights',d.num);
 
 % Return value for fit parameters
     range = round(myfit.range); nugget = round(myfit.nugget); sill = round(myfit.sill+myfit.nugget);

@@ -8,26 +8,47 @@ boxplot([SWE(1).depth;SWE(2).depth;SWE(3).depth], [SWE(1).glacier;SWE(2).glacier
     fig=gcf;
     set(findall(fig,'-property','FontSize'),'FontSize',12) 
     
-    filename = strcat('/home/glaciology1/Documents/Data/Plots/box_depth');
-    %filename = strcat('/Users/Alexandra/Documents/SFU/Data/Plots/box_depth');
-    print(filename,'-dpng')
-    filename = strcat('/home/glaciology1/Documents/MastersDocuments/Methods/box_depth');
-    %filename = strcat('/Users/Alexandra/Documents/SFU/MastersDocuments/Methods/box_depth');
-    print(filename,'-dpng')
+    print([options.path1,'box_depth'],'-dpng'); print([options.path2,'box_depth'],'-dpng') 
 
 %% Zigzag
 
-    %pulldataSWE(data, glacier, pattern, book, person)
-z = pulldataSWE(SWE, 'all','all','all','all');
-    %scatter(z.utm(:,1),z.utm(:,2), 10, z.depth,'filled');
+zig_lab = ['G04\_Z3A\_ZZ0'; 'G04\_Z2A\_ZZ0'; 'G04\_Z5B\_ZZ0';...
+            'G02\_Z5C\_ZZ0'; 'G02\_Z7A\_ZZ0'; 'G02\_Z3B\_ZZ0'; ...
+            'G13\_Z7C\_ZZ0'; 'G13\_Z4C\_ZZ0'; 'G13\_Z3B\_ZZ0'; 'G13\_Z5A\_ZZ0'];
+for j = 1:3
+    T1 = cellstr(char(SWE(j).label));
 
-d = variogramAlex([z x1 y1], 15, 'default');
-fit = variofitAlex(d,glacier);
+    for i = 1:length(zig_lab)
+        T2 = find(~cellfun('isempty',strfind(T1,zig_lab(i,:))));
+        if isempty(T2)
+            break
+        end  
 
-    filename = strcat('/home/glaciology1/Documents/Data/Plots/variofull',glacier);
-   % filename = strcat('/Users/Alexandra/Documents/SFU/Data/Plots/variofull',glacier);
-    fig = gcf;
-    fig.PaperUnits = 'inches';
-    fig.PaperPosition = [0 0 8 9];
-    print(filename,'-dpng','-r0')
-    clf
+        data = [SWE(j).swe(T2)*100, SWE(j).utm(T2,1:2)];
+            data(:,2) = max(data(:,2))-data(:,2);
+            data(:,3) = max(data(:,3))-data(:,3);
+
+        scatter(data(:,2),data(:,3),25, data(:,1),'filled')
+            title(zig_lab(i,1:8))
+            str = {strcat('mean= ', num2str(round(mean(data(:,1)),2)),'cm SWE'), ...
+                strcat('std= ', num2str(round(std(data(:,1)),2)),'cm SWE')};
+            dim = [.13 .5 .3 .3];
+            annotation('textbox',dim,'String', str,'FitBoxToText','on')
+            xlabel('Distance (m)')
+            ylabel('Distance (m)')
+                c = colorbar;
+                c.Label.String = 'SWE (cm)';
+            filename = [zig_lab(i,1:3), zig_lab(i,6:8)];
+            print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
+            clf
+
+        d = variogramAlex(data, 2, 40);
+        fit = variofitAlex(d,zig_lab(i,1:8));
+
+            filename = [filename, 'variogram'];
+            fig = gcf; fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 8 9];
+            print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
+            clf
+
+    end
+end
