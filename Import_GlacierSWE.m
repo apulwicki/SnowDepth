@@ -56,7 +56,14 @@ end
         bit = length(SWE(1).utm)+length(SWE(2).utm); %start index
     SWE(3).utm(:,3) = DEMelev(bit+1:bit+length(SWE(3).utm),1);
 
-        clear DEMelev bit
+%Adding elev for tubes (weirdly not assigned in DEMelev)
+%     tubeLab = categorical(Density.tube(:,1));
+%     labels = char(SWE(1).label(isnan(SWE(1).swe),:));
+%     for i = 1:length(labels)
+%         find(tubeLab==labels(i,:))
+%     end
+    
+        clear DEMelev bit labels tubeLab
 %% Density options
 
 if options.DensitySWE == 1 %depth

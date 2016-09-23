@@ -7,12 +7,12 @@ global options
 %options.path2 = '/home/glaciology1/Documents/MastersDocuments/Methods/'; %Latex
 
 %Laptop
-options.path1 = '/Users/Alexandra/Documents/SFU/Data/Plots/'; %on laptop
+options.path1 = '/Users/Alexandra/Documents/SFU/Data/Plots/'; %Plots
 options.path2 = '/Users/Alexandra/Documents/SFU/MastersDocuments/Methods/'; %Latex
 
 %%%%%%%%%%%%%%%%%%%%%% DETREND FED. SAMPLER DENSITY %%%%%%%%%%%%%%%%%%%%%%%
 
-options.TubeDensity     = 2;
+options.TubeDensity     = 1;
                 % 1 original fed. sampler density values
                 % 2 depth detrended fed. sampler density values
 

@@ -366,3 +366,20 @@ legend([p.G04(1,1) p.G02(1,1) p.G13(1,1)], ...
 z = pulldataSWE(SWE, 'all','all','all','all');
     %scatter(z.utm(:,1),z.utm(:,2), 10, z.depth,'filled');
 
+%% Transect portions variograms -> not enough points....
+
+%Transverse
+index(1).transverse = [4:36,49:56,82:92,110:119]+.1;
+index(2).transverse = [267:275,239:247,344:354,519:528,371:378,450:458,407:413,483:488]+.2;
+index(3).transverse = [783:792,745:760,660:677,628:644,588:602]+.3;
+
+[~, I1] = intersect(SWE(1).label, categorical(index(1).transverse));
+[~, I2] = intersect(SWE(2).label, categorical(index(2).transverse));
+[~, I3] = intersect(SWE(3).label, categorical(index(3).transverse));
+
+data = [SWE(1).swe(I1), SWE(1).utm(I1,1:2); SWE(2).swe(I2), SWE(2).utm(I2,1:2);...
+    SWE(3).swe(I3), SWE(3).utm(I3,1:2)];
+
+d = variogramAlex(data, 20, 400);
+vario = variofitAlex(d,'test',1);
+

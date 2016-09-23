@@ -36,12 +36,9 @@ plot(x,yfit,'r')
     fig=gcf;
     set(findall(fig,'-property','FontSize'),'FontSize',12) 
 
-filename = strcat('/home/glaciology1/Documents/Data/Plots/SnowpitVsSWEtube_all');
-%filename = strcat('/Users/Alexandra/Documents/SFU/Data/Plots/SnowpitVsSWEtube_all');
-print(filename,'-dpng')
-filename = strcat('/home/glaciology1/Documents/MastersDocuments/Methods/SnowpitVsSWEtube_all');
-%filename = strcat('/Users/Alexandra/Documents/SFU/MastersDocuments/Methods/SnowpitVsSWEtube_all');
-print(filename,'-dpng')
+    filename = 'SnowpitVsSWEtube_all';
+print([options.path1, filename],'-dpng'); print([options.path2, filename],'-dpng')
+
 
     clear P LM x y index* i j count yfit str dim filename error* ans
     
