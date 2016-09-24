@@ -19,7 +19,7 @@ zig_lab = ['G04\_Z3A\_ZZ0'; 'G04\_Z2A\_ZZ0'; 'G04\_Z5B\_ZZ0';...
 for j = 1:3
     T1 = cellstr(char(SWE(j).label));
 
-    for i = 1:size(zig_lab,1)
+    for i = 9%1:size(zig_lab,1)
         T2 = find(~cellfun('isempty',strfind(T1,zig_lab(i,:))));
         if ~isempty(T2)
         data = [SWE(j).swe(T2)*100, SWE(j).utm(T2,1:2)];
@@ -41,7 +41,7 @@ for j = 1:3
             clf
 
         d_ZZ = variogramAlex(data, 2, 40);
-        vario = variofitAlex(d_ZZ,zig_lab(i,1:8),0);
+        vario = variofitAlex(d_ZZ,zig_lab(i,1:8),1);
             
             filename = [filename, 'variogram'];
             fig = gcf; fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 8 9];
@@ -96,19 +96,20 @@ for j = 1:3
      
     % full G
     lag_G = 15; 
-    d_G = variogramAlex([SWE(j).swe, SWE(j).utm(:,1:2)], lag_G, 'default');
-    vario_G = variofitAlex(d_G,char(SWE(j).glacier(1,1)),0);
+    d_G = variogramAlex([SWE(j).swe*100, SWE(j).utm(:,1:2)], lag_G, 'default');
+    vario_G = variofitAlex(d_G,char(SWE(j).glacier(1,1)),1);
     params_G(count_G,:) = [num2cell(options.DensitySWE), cellstr(char(SWE(j).glacier(1,1))), ...
                                  num2cell(vario_G.range), num2cell(vario_G.nugget), num2cell(vario_G.sill)];
+                             
     % upper G 
     T1 = num2cell(char(SWE(j).pattern)); T2 = any([strcmp(T1(:,1),'U'), strcmp(T1(:,1),'U')],2);
-    d_GU = variogramAlex([SWE(j).swe(T2), SWE(j).utm(T2,1:2)], lag_G, 'default');
+    d_GU = variogramAlex([SWE(j).swe(T2)*100, SWE(j).utm(T2,1:2)], lag_G, 'default');
     vario_GU = variofitAlex(d_GU,[char(SWE(j).glacier(1,1)),'UPPER'],0);
     params_GU(count_G,:) = [num2cell(options.DensitySWE), cellstr(char(SWE(j).glacier(1,1))), ...
                                  num2cell(vario_GU.range), num2cell(vario_GU.nugget), num2cell(vario_GU.sill)];
     % lower G 
     T1 = num2cell(char(SWE(j).pattern)); T2 = any([strcmp(T1(:,1),'L'), strcmp(T1(:,1),'U')],2);
-    d_GL = variogramAlex([SWE(j).swe(T2), SWE(j).utm(T2,1:2)], lag_G, 'default');
+    d_GL = variogramAlex([SWE(j).swe(T2)*100, SWE(j).utm(T2,1:2)], lag_G, 'default');
     vario_GL = variofitAlex(d_GL,[char(SWE(j).glacier(1,1)),'LOWER'],0);
     params_GL(count_G,:) = [num2cell(options.DensitySWE), cellstr(char(SWE(j).glacier(1,1))), ...
                                  num2cell(vario_GL.range), num2cell(vario_GL.nugget), num2cell(vario_GL.sill)];
@@ -117,12 +118,33 @@ for j = 1:3
 end
 end
 
+values_G.range = [params_G(1:3:end,1), params_G(1:3:end,3), params_G(2:3:end,3), params_G(3:3:end,3)];
+values_GL.range = [params_GL(1:3:end,1), params_GL(1:3:end,3), params_GL(2:3:end,3), params_GL(3:3:end,3)];
+values_GU.range = [params_GU(1:3:end,1), params_GU(1:3:end,3), params_GU(2:3:end,3), params_GU(3:3:end,3)];
 
-clear c d data dim filename fig i j str T* zig vario* count_var opts
+values_G.nugget = [params_G(1:3:end,1), params_G(1:3:end,4), params_G(2:3:end,4), params_G(3:3:end,4)];
+values_GL.nugget = [params_GL(1:3:end,1), params_GL(1:3:end,4), params_GL(2:3:end,4), params_GL(3:3:end,4)];
+values_GU.nugget = [params_GU(1:3:end,1), params_GU(1:3:end,4), params_GU(2:3:end,4), params_GU(3:3:end,4)];
+
+values_G.sill = [params_G(1:3:end,1), params_G(1:3:end,5), params_G(2:3:end,5), params_G(3:3:end,5)];
+values_GL.sill = [params_GL(1:3:end,1), params_GL(1:3:end,5), params_GL(2:3:end,5), params_GL(3:3:end,5)];
+values_GU.sill = [params_GU(1:3:end,1), params_GU(1:3:end,5), params_GU(2:3:end,5), params_GU(3:3:end,5)];
+
+values_G.all = params_G;
+values_GL.all = params_GL(1:3:end,1);
+values_GU.all = params_GU(1:3:end,1);
+
+
+values_ZZ.range = [params_zigzag(1:10:end,1),params_zigzag(1:10:end,3),params_zigzag(2:10:end,3), ...
+    params_zigzag(3:10:end,3),params_zigzag(4:10:end,3),params_zigzag(5:10:end,3),params_zigzag(6:10:end,3),...
+    params_zigzag(7:10:end,3),params_zigzag(8:10:end,3),params_zigzag(9:10:end,3),params_zigzag(10:10:end,3)];
+values_ZZ.nugget = [params_zigzag(1:10:end,1),params_zigzag(1:10:end,4),params_zigzag(2:10:end,4), ...
+    params_zigzag(3:10:end,4),params_zigzag(4:10:end,4),params_zigzag(5:10:end,4),params_zigzag(6:10:end,4),...
+    params_zigzag(7:10:end,4),params_zigzag(8:10:end,4),params_zigzag(9:10:end,4),params_zigzag(10:10:end,4)];
+values_ZZ.sill = [params_zigzag(1:10:end,1),params_zigzag(1:10:end,5),params_zigzag(2:10:end,5), ...
+    params_zigzag(3:10:end,5),params_zigzag(4:10:end,5),params_zigzag(5:10:end,5),params_zigzag(6:10:end,5),...
+    params_zigzag(7:10:end,5),params_zigzag(8:10:end,5),params_zigzag(9:10:end,5),params_zigzag(10:10:end,5)];
+values_ZZ.all = params_zigzag;
+
+clear c d data dim filename fig i j str T* zig* count_* opts lag_G vario* sill range nugget f myfit d_* params*
 close all
-
-
-T1 = num2cell(char(SWE(1).pattern));
-T2 = strcmp(T1(:,1),'B');
-T2a = strcmp(T1(:,1),'U');
-T3 = any([T2, T2a],2);

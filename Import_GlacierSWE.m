@@ -57,13 +57,16 @@ end
     SWE(3).utm(:,3) = DEMelev(bit+1:bit+length(SWE(3).utm),1);
 
 %Adding elev for tubes (weirdly not assigned in DEMelev)
-%     tubeLab = categorical(Density.tube(:,1));
-%     labels = char(SWE(1).label(isnan(SWE(1).swe),:));
-%     for i = 1:length(labels)
-%         find(tubeLab==labels(i,:))
-%     end
+    emptee = [cellstr(SWE(1).label(isnan(SWE(1).utm(:,3)))), num2cell(SWE(1).utm(isnan(SWE(1).utm(:,3)),1:2)),num2cell(ones(length(find(isnan(SWE(1).utm(:,3)))),1)),num2cell(find(isnan(SWE(1).utm(:,3))));...
+                cellstr(SWE(2).label(isnan(SWE(2).utm(:,3)))), num2cell(SWE(2).utm(isnan(SWE(2).utm(:,3)),1:2)),num2cell(ones(length(find(isnan(SWE(2).utm(:,3)))),1)+1),num2cell(find(isnan(SWE(2).utm(:,3))));...
+                cellstr(SWE(3).label(isnan(SWE(3).utm(:,3)))), num2cell(SWE(3).utm(isnan(SWE(3).utm(:,3)),1:2)),num2cell(ones(length(find(isnan(SWE(3).utm(:,3)))),1)+2),num2cell(find(isnan(SWE(3).utm(:,3))))];
+    empteeDEMelev =  xlsread('EmptyElevData.xlsx', 'Sheet1','D1:D37'); %get DEM elevations of all empty values
+    emptee = [cell2mat(emptee(:,4:5)), empteeDEMelev];
+    for i = 1:length(emptee)
+       SWE(emptee(i,1)).utm(emptee(i,2),3) = emptee(i,3);
+    end
     
-        clear DEMelev bit labels tubeLab
+        clear DEMelev emptee*
 %% Density options
 
 if options.DensitySWE == 1 %depth
@@ -177,7 +180,7 @@ end
 
 SWE = orderfields(SWE); %alphabetically order the fields   
 
-clear density count i fitDen gof index j weight x X y Y E* N* D
+clear density count i fitDen gof index j weight x X y Y E* N* D bit
 clear SD ZZ
 
 % plot(SWE(1).density,'.'); hold on

@@ -24,7 +24,17 @@ function values = variofitAlex(d, titletext, PlotOption)
 
 % Return value for fit parameters
     range = round(myfit.range); nugget = round(myfit.nugget); sill = round(myfit.sill+myfit.nugget);
-    values.range = range;       values.nugget = nugget;       values.sill = sill;         
+
+% Set nugget = 0 if fit nugget < 0
+    if nugget < 0
+        f = fittype('0 + ( sill*( 1.5*(h/range) - 0.5*(h/range).^3).*(h <= range) + sill*(h>range))',...
+                'independent','h');
+        [myfit, gof]= fit(d.binCentre,d.val,f, 'StartPoint',[sill,range],'Weights',d.num);
+            range = round(myfit.range); nugget = 0; sill = round(myfit.sill);
+    end
+    
+% Assign values for output    
+    values.range = range;       values.nugget = nugget;       values.sill = sill;
 
 %% Plotting data
 
