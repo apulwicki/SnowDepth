@@ -2,11 +2,11 @@ global options
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% PLOT SAVING PATH %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%SFU 
+    %SFU 
 %options.path1 = '/home/glaciology1/Documents/Data/Plots/'; %Plots folder
 %options.path2 = '/home/glaciology1/Documents/MastersDocuments/Methods/'; %Latex
 
-%Laptop
+    %Laptop
 options.path1 = '/Users/Alexandra/Documents/SFU/Data/Plots/'; %Plots
 options.path2 = '/Users/Alexandra/Documents/SFU/MastersDocuments/Methods/'; %Latex
 

@@ -16,10 +16,10 @@ zig_lab = ['G04\_Z3A\_ZZ0'; 'G04\_Z2A\_ZZ0'; 'G04\_Z5B\_ZZ0';...
        'G02\_Z5C\_ZZ0'; 'G02\_Z7A\_ZZ0'; 'G02\_Z3B\_ZZ0'; ...
        'G13\_Z7C\_ZZ0'; 'G13\_Z4C\_ZZ0'; 'G13\_Z3B\_ZZ0'; 'G13\_Z5A\_ZZ0'];
 
-for j = 1:3
+for j = 2%1:3
     T1 = cellstr(char(SWE(j).label));
 
-    for i = 9%1:size(zig_lab,1)
+    for i = 5%1:size(zig_lab,1)
         T2 = find(~cellfun('isempty',strfind(T1,zig_lab(i,:))));
         if ~isempty(T2)
         data = [SWE(j).swe(T2)*100, SWE(j).utm(T2,1:2)];
@@ -54,7 +54,19 @@ end
 clear c d data dim filename fig i j str T* zig vario
 close all
 
-%% Zigzag SWE variations
+%% Whole G plot
+
+j = 3;
+lag_G = 15; 
+    d_G = variogramAlex([SWE(j).swe*100, SWE(j).utm(:,1:2)], lag_G, 'default');
+    vario_G = variofitAlex(d_G,char(SWE(j).glacier(1,1)),1);
+                       
+ filename = 'variogram_Glacier13';
+    fig = gcf; fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 8 9];
+    print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
+        clear j lag_G d* vario* fig filename
+
+%% SWE calculation variations
 
 zig_lab = ['G04\_Z3A\_ZZ0'; 'G04\_Z2A\_ZZ0'; 'G04\_Z5B\_ZZ0';...
        'G02\_Z5C\_ZZ0'; 'G02\_Z7A\_ZZ0'; 'G02\_Z3B\_ZZ0'; ...
@@ -97,7 +109,7 @@ for j = 1:3
     % full G
     lag_G = 15; 
     d_G = variogramAlex([SWE(j).swe*100, SWE(j).utm(:,1:2)], lag_G, 'default');
-    vario_G = variofitAlex(d_G,char(SWE(j).glacier(1,1)),1);
+    vario_G = variofitAlex(d_G,char(SWE(j).glacier(1,1)),0);
     params_G(count_G,:) = [num2cell(options.DensitySWE), cellstr(char(SWE(j).glacier(1,1))), ...
                                  num2cell(vario_G.range), num2cell(vario_G.nugget), num2cell(vario_G.sill)];
                              
