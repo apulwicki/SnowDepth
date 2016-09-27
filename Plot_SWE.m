@@ -74,7 +74,7 @@ zig_lab = ['G04\_Z3A\_ZZ0'; 'G04\_Z2A\_ZZ0'; 'G04\_Z5B\_ZZ0';...
 count_zig = 1;  params_zigzag = cell(10,5);
 count_G = 1;    params_G = cell(10,5); params_GU = cell(10,5); params_GL = cell(10,5);
 
-for opts = 1:8;
+for opts = 1:9;
     run OPTIONS.m
     options.DensitySWE = opts;
     run MeasurementLocations.m  %This program determines the easting and northing of transect measurements
