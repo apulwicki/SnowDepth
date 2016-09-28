@@ -6,36 +6,30 @@
 %% Import Topo Params
 [topo, topotext, toporaw] = xlsread('SPOT_TopoParams.xlsx','SPOT_TopoParams','A1:D3981');
 
+div = [1, length(SWE(1).swe); length(SWE(1).swe)+1, length(SWE(1).swe)+length(SWE(2).swe);...
+        length(SWE(1).swe)+length(SWE(2).swe)+1, length(SWE(1).swe)+length(SWE(2).swe)+length(SWE(3).swe)];
 
-z = pulldataSWE(SWE, 'all','all','all','all');
-
-aspect      = topo(:,1);
-elevation   = topo(:,2);
-slope       = topo(:,3);
+for i = 1:3
+name = ['g', num2str(i)];
+    aspect.(name)      = topo(div(i,1):div(i,2),1);
+    elevation.(name)   = topo(div(i,1):div(i,2),2);
+    slope.(name)       = topo(div(i,1):div(i,2),3);
 
 %Standardizing variables
-% aspect      = (topo(:,1)-mean(topo(:,1)))/std(topo(:,1));
-% elevation   = (topo(:,2)-mean(topo(:,2)))/std(topo(:,2));
-% slope       = (topo(:,3)-mean(topo(:,3)))/std(topo(:,3));
+% aspect      = (aspect.(name)-mean(aspect.(name)))/std(aspect.(name));
+% elevation   = (elevation.(name)-mean(elevation.(name)))/std(elevation.(name));
+% slope       = (slope.(name)-mean(slope.(name)))/std(slope.(name));
+end 
 
+    clear div i name topo*
 %% MLR
 
-% plot(z.swe); hold on; plot(aspect); hold on; plot(elevation); hold on; plot(slope);
+for i = 1%:3
+    y = SWE(i).swe;
+    name = ['g', num2str(i)];
+    X = [aspect.(name), elevation.(name), slope.(name)];
 
-y = z.swe;
-X = [ones(length(y),1),aspect,elevation,slope];
-
-% applying stepwise regression on Y and X
-[a, ~, ~, ~, STATS]=stepwisefit(X(:,2:4),y);
-% constant coefficient
-a0 = STATS.intercept;
-
-y_regress = a0 + a(1,1)*X(:,1) + a(2,1)*X(:,2);
-
-[f, gof] = fit(y,y_regress,'poly1')
-plot(f,y,y_regress)
-    title('Stepwise MLR - aspect, elevation, slope'); xlabel('Original SWE (m w.e.)'); xlabel('Regressed SWE (m w.e.)'); 
-
-
+    mlr.(name) = MLRcalval(y, X);
+end
 %% Plots
 
