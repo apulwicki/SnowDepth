@@ -28,7 +28,7 @@ for j = 1:length(c)
     
     col = find(c(j,:));
     for i = 1:size(col,2)
-        mlr_best(j,col(1,i)) = mlr(rmse==min(rmse),:);
+        mlr_best(j,col(1,i)) = mlr(rmse==min(rmse),i);
     end
     rmse_best(j,1)  = min(rmse);
 end

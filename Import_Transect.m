@@ -24,7 +24,7 @@
     [SD3, SD3text, SD3raw] = xlsread('FieldDataRevisedAP.xlsx','SD#3','A1:O675'); 
     SD3text(1,:) = [];
 
-    [ExtraSD, ExtraSDtext, ExtraSDraw] = xlsread('FieldDataRevisedAP.xlsx','SWEDepth','A1:AU38'); 
+    [ExtraSD, ExtraSDtext, ExtraSDraw] = xlsread('FieldDataRevisedAP.xlsx','SWEDepth','A1:AU39'); 
     ExtraSDtext(1,:) = [];
 
 %% Categorizing data
@@ -154,7 +154,7 @@ clear i
     %SD2 in row 2, SD3 in row 3, ExtraSD in row 4. Example of accessing 
     %data: SD(2).depth(1,3)
     field1 = 'raw';         value1 = {SD1raw, SD2raw, SD3raw, ExtraSDraw};
-    field2 = 'depth';       value2 = {SD1, SD2, SD3, ExtraSD(:,2:end)};
+    field2 = 'depth';       value2 = {SD1, SD2, SD3, ExtraSD};
     field3 = 'glacier';     value3 = {SD1_Glacier, SD2_Glacier, SD3_Glacier, ExtraSD_Glacier};
     field4 = 'pattern';     value4 = {SD1_Pattern, SD2_Pattern, SD3_Pattern, ExtraSD_Pattern};
     field5 = 'person';      value5 = {SD1_Person, SD2_Person, SD3_Person, ExtraSD_Person};

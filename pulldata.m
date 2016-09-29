@@ -106,7 +106,7 @@ end
 %Filtering and formating data 
 if strcmp(format,'fat') %fat format = four depth columns, WP, and WP coordinates
     if strcmp(book,'Extra') %ExtraSD data will have extra columns (which is why you can't call SD and ExtraSD values together with doing some sort of processing) 
-        filtered = [data(4).depth(:,1:42), data(4).depth(:,44:45)]; %filtered data
+        filtered = [data(4).depth(:,1:42), data(4).depth(:,45:46)]; %filtered data
         filteredcomments = data(4).comments; %filtered comments (needed for search comments)
         filteredglacier = data(4).glacier; %filtered glacier (needed for search glacier)
         filteredperson = data(4).person; %filtered person (needed for search person)
