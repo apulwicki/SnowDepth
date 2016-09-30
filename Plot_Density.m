@@ -153,50 +153,33 @@ display('G13 SP');
 display([num2str(round(SPfit3.p1,3)),'x + ',num2str(round(SPfit3.p2,1))])
 %% Depth vs Density
 
-figure(2)
-nonnanindex = [1:103];
-[swefit, gof] = fit(cell2mat(Density.SWEdepth(nonnanindex,4)),cell2mat(Density.SWEdepth(nonnanindex,3)),'poly1');
-plot(swefit); hold on
-plot(cell2mat(Density.SWEdepth(nonnanindex,4)),cell2mat(Density.SWEdepth(nonnanindex,3)),'.','MarkerSize',13);
-    xlabel('SWE tube density (kg m^{-3})')
-    ylabel('SWE tube depth (cm)')
-    %title({'Depth vs Density','(SWE tube depth)'});
-    dim = [.20 .5 .3 .3];
-    str = ['R^2 = ', num2str(round(gof.rsquare,2))];
-    annotation('textbox',dim,'String',str,'FitBoxToText','on')
-    p = legend('data');
-    set(p,'visible','off')    
-    fig=gcf;
-    set(findall(fig,'-property','FontSize'),'FontSize',12) 
-filename = strcat('/home/glaciology1/Documents/Data/Plots/DepthDensity_SWEtube');
-%filename = strcat('/Users/Alexandra/Documents/SFU/Data/Plots/DepthDensity_SWEtube');
-print(filename,'-dpng')
-filename = strcat('/home/glaciology1/Documents/MastersDocuments/Methods/DepthDensity_SWEtube');
-%filename = strcat('/Users/Alexandra/Documents/SFU/MastersDocuments/Methods/DepthDensity_SWEtube');
-print(filename,'-dpng')
+figure
+%SWE tube
+tubeI = [1,26;27,53;54,106];
+pitI = [5 7; 1 4; 8 10];
+RGB = [0 76 153; 0 153 76; 255 127 0]/255;
+for i = 1:length(tubeI)
+   p.(['p',num2str(i)]) = plot(cell2mat(Density.SWEdepth(tubeI(i,1):tubeI(i,2),4)),... %density
+       cell2mat(Density.SWEdepth(tubeI(i,1):tubeI(i,2),3)),'.',... %depth
+       'Color',RGB(i,:),'MarkerSize',16); hold on; 
+   plot(cell2mat(Density.snowpit(pitI(i,1):pitI(i,2),2)),... %density
+       cell2mat(Density.snowpit(pitI(i,1):pitI(i,2),8)),'o',... %depth
+       'Color',RGB(i,:),'MarkerSize',18); hold on;
+end
+    xlabel('Federal Sampler density (kg m^{-3})'); ylabel('Snow depth (cm)');
+    legend([p.p1, p.p2, p.p3],{'Glacier 4','Glacier 2','Glacier 13'},'Location','best')
 
-% Snowpit
-figure(3)
-[swefit, gof] = fit(cell2mat(Density.snowpit(:,2)),cell2mat(Density.snowpit(:,8)),'poly1');
-plot(swefit); hold on
-plot(cell2mat(Density.snowpit(:,2)),cell2mat(Density.snowpit(:,8)),'.','markers',13);
-    xlabel('Snowpit density (kg m^{-3})')
-    ylabel('Snowpit depth (cm)')
-    %title({'Depth vs Density','(Snowpit)'});
-    dim = [.20 .5 .3 .3];
-    str = ['R^2 = ', num2str(round(gof.rsquare,2))];
-    annotation('textbox',dim,'String',str,'FitBoxToText','on')
-    p = legend('data');
-    set(p,'visible','off')      
+    
+%     dim = [.20 .5 .3 .3];
+%     str = ['R^2 = ', num2str(round(gof.rsquare,2))];
+%     annotation('textbox',dim,'String',str,'FitBoxToText','on')
+%     p = legend('data');
+%     set(p,'visible','off')    
     fig=gcf;
-    set(findall(fig,'-property','FontSize'),'FontSize',12) 
-filename = strcat('/home/glaciology1/Documents/Data/Plots/DepthDensity_SP');
-%filename = strcat('/Users/Alexandra/Documents/SFU/Data/Plots/DepthDensity_SP');
-print(filename,'-dpng')      
-filename = strcat('/home/glaciology1/Documents/MastersDocuments/Methods/DepthDensity_SP');
-%filename = strcat('/Users/Alexandra/Documents/SFU/MastersDocuments/Methods/DepthDensity_SP');
-print(filename,'-dpng')
+    set(findall(fig,'-property','FontSize'),'FontSize',14) 
 
+    filename = 'DepthDensity';
+print([options.path1, filename],'-dpng'); print([options.path2, filename],'-dpng')
 
 %% Depth vs Elevation
 % Swe tube
@@ -210,20 +193,26 @@ end
     legend('Glacier 4','Glacier 2','Glacier 13')
     
 % All data
-colour = ['b','k','r'];
+RGB = [0 76 153; 0 153 76; 255 127 0]/255;
 for j = 1:3
-    depth = SWE(j).depth(~isnan(SWE(j).utm(:,3)));
-    elev = SWE(j).utm(~isnan(SWE(j).utm(:,3)),3);
+    depth = SWE(j).depth;
+    elev = SWE(j).utm(:,3);
     i = ['n',num2str(j)];
     [f.(i), g.(i)] = fit(depth,elev,'poly1');
         mark = ['.',colour(j)];
-    h = plot(depth,elev,mark,'MarkerSize',13); hold on
-    plot(f.(i),colour(j)); hold on
+    h = plot(depth,elev,'.','Color',RGB(j,:),'MarkerSize',13); hold on
+    p = plot(f.(i)); hold on
+    set(p,'Color',RGB(j,:)); set(p, 'LineWidth',1.5);
 end
+    axis([0 350 2000 2600])
     xlabel('Depth (cm)'); ylabel('Elevation (m a.s.l.)');
     legend('Glacier 4',['R^2=',num2str(round(g.n1.rsquare,2))],...
         'Glacier 2',['R^2=',num2str(round(g.n2.rsquare,2))],...
-        'Glacier 13',['R^2=',num2str(round(g.n3.rsquare,2))],'Location','best')
+        'Glacier 13',['R^2=',num2str(round(g.n3.rsquare,2))],'Location','best')    
+    fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',20) 
+
+    filename = 'DepthElevation';
+print([options.path1, filename],'-dpng'); print([options.path2, filename],'-dpng')
 %% Basic stats
 
 % Snowpit

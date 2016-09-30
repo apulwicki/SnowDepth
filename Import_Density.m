@@ -173,7 +173,6 @@ if options.TubeDensity == 2
     end
 
     Density.tube = [M, Density.tube(:,20:23)];
-    Density = rmfield(Density, 'SWEdepth');
     Density.pitANDtube(:,2:6) = M(index_SPSWE,2:6);
     Density.zigzagtube(:,2) = M(index_zigzag,2);
 

@@ -39,8 +39,8 @@ for i = 1:3
    
     [SMLR, ~, ~, inmodel] = stepwisefit(X,y);
     text    = d300text(1,inmodel);
-    X1      = [ones(length(X),1), X(:,inmodel)];
-    mlr_Sx     = regress(y,X1); mlr_sort = real(sort(complex(mlr_Sx)));
+    X1      = X(:,inmodel);
+    mlr_Sx  = regress(y,X1); mlr_sort = real(sort(complex(mlr_Sx)));
     
     best            = find(mlr_Sx == mlr_sort(end-1,1));
     winddir.(name)  = text(best);
