@@ -74,13 +74,31 @@ end
 %% Plots
 
 % Actual vs fitted data
+RGB = [0 76 153; 0 153 76; 255 127 0]/255;
 for i = 1:3
     OG_swe  = SWE(i).swe;
     name    = ['G', num2str(glacier(i))];
     X       = [aspect.(name), northness.(name), profileCurve.(name), ...
                 tangentCurve.(name), slope.(name), elevation.(name), Sx.(name)];
-    fitted_swe = mlr.(name)*X;
+    fitted_swe = sum(repmat(mlr_best.(name),length(X),1).*[ones(length(X),1),X],2);
 
-    plot(OG_swe, fitted_swe, '.', 
-    
+    plot(OG_swe, fitted_swe, '.', 'Color', RGB(i,:),'MarkerSize',13); hold on
+
+    [f.(name), g.(name)] = fit(OG_swe, fitted_swe,'poly1');
+    p = plot(f.(name)); hold on
+    set(p,'Color',RGB(i,:)); set(p, 'LineWidth',1.5);    
 end
+
+    xlabel('Original SWE (m)'); ylabel('MLR SWE (m)');
+    legend('Glacier 4',['R^2=',num2str(round(g.G4.rsquare,2))],...
+        'Glacier 2',['R^2=',num2str(round(g.G2.rsquare,2))],...
+        'Glacier 13',['R^2=',num2str(round(g.G13.rsquare,2))],'Location','best')    
+    fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',20) 
+    
+    
+    
+    
+    
+    
+    
+    

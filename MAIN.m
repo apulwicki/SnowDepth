@@ -6,4 +6,4 @@ run MeasurementLocations.m  %This program determines the easting and northing of
 run Import_Density.m %Imports snow density values
 run Import_Transect.m %Imports transect snow depth and measurement location data
 run Import_Zigzag.m %Imports zigzag snow depth and measurement location data
-run Import_GlacierSWE.m %Converts to SWE and condences data
+run Import_SWE.m %Converts to SWE and condences data
