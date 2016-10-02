@@ -6,7 +6,7 @@ boxplot([SWE(1).depth;SWE(2).depth;SWE(3).depth], [SWE(1).glacier;SWE(2).glacier
     'GroupOrder',{'G04','G02','G13'},'labels',{'Glacier 4','Glacier 2','Glacier 13'})
     ylabel('Snow depth (cm)')
     fig=gcf;
-    set(findall(fig,'-property','FontSize'),'FontSize',12) 
+    set(findall(fig,'-property','FontSize'),'FontSize',20) 
     
     print([options.path1,'box_depth'],'-dpng'); print([options.path2,'box_depth'],'-dpng') 
         clear fig
@@ -26,33 +26,34 @@ for j = 2%1:3
             data(:,2) = max(data(:,2))-data(:,2);
             data(:,3) = max(data(:,3))-data(:,3);
 
-        scatter(data(:,2),data(:,3),25, data(:,1),'filled')
-            title(zig_lab(i,1:8))
-            str = {strcat('mean= ', num2str(round(mean(data(:,1)),2)),'cm SWE'), ...
-                strcat('std= ', num2str(round(std(data(:,1)),2)),'cm SWE')};
-            dim = [.13 .5 .3 .3];
-            annotation('textbox',dim,'String', str,'FitBoxToText','on')
+        scatter(data(:,2),data(:,3),30, data(:,1),'filled')
+%             title(zig_lab(i,1:8))
+%             str = {strcat('mean= ', num2str(round(mean(data(:,1)),2)),'cm SWE'), ...
+%                 strcat('std= ', num2str(round(std(data(:,1)),2)),'cm SWE')};
+%             dim = [.13 .5 .3 .3];
+%             annotation('textbox',dim,'String', str,'FitBoxToText','on')
             xlabel('Distance (m)')
             ylabel('Distance (m)')
                 c = colorbar;
                 c.Label.String = 'SWE (cm)';
+            fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',20) 
             filename = [zig_lab(i,1:3), zig_lab(i,6:8)];
             print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
             clf
 
         d_ZZ = variogramAlex(data, 2, 40);
-        vario = variofitAlex(d_ZZ,zig_lab(i,1:8),1);
+        vario = variofitAlex(d_ZZ,zig_lab(i,1:8),0);
             
-            filename = [filename, 'variogram'];
-            fig = gcf; fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 8 9];
-            print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
-            clf
+%             filename = [filename, 'variogram'];
+%             fig = gcf; fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 8 9];
+%             print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
+%             clf
         end
      end
 end
 
 clear c d data dim filename fig i j str T* zig vario
-close all
+%close all
 
 %% Whole G plot
 

@@ -14,7 +14,7 @@ for j = 1:length(c)
     rmse = zeros(runs,1); mlr = zeros(runs,mDim);
 
     for i = 1:runs
-        cal_ind = randperm(length(y),floor(length(y)/2));
+        cal_ind = randperm(length(y),floor(length(y)*3/4));
         val_ind = setdiff(1:length(y),cal_ind);
 
         mlr(i,:) = regress(y(cal_ind,1),X1(cal_ind,:))';

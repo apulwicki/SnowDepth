@@ -12,7 +12,7 @@ options.path2 = '/Users/Alexandra/Documents/SFU/MastersDocuments/Methods/'; %Lat
 
 %%%%%%%%%%%%%%%%%%%%%% DETREND FED. SAMPLER DENSITY %%%%%%%%%%%%%%%%%%%%%%%
 
-options.TubeDensity     = 2;
+options.TubeDensity     = 1;
                 % 1 original fed. sampler density values
                 % 2 depth detrended fed. sampler density values
 

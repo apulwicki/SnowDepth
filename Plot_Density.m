@@ -29,12 +29,12 @@ plot(x,yfit,'r')
     str = {strcat('y= ',num2str(round(P(1),2)),'x+ ',num2str(round(P(2)))), ...
         strcat('R^2= ',num2str(round(LM.Rsquared.Ordinary,2)))} ;
     annotation('textbox',dim,'String', str,'FitBoxToText','on')
-    text(x+2, y+3, Density.pitANDtube(:,1))
+    %text(x+2, y+3, Density.pitANDtube(:,1))
     axis([290 400 220 400])
     axis equal
     
     fig=gcf;
-    set(findall(fig,'-property','FontSize'),'FontSize',12) 
+    set(findall(fig,'-property','FontSize'),'FontSize',20) 
 
     filename = 'SnowpitVsSWEtube_all';
 print([options.path1, filename],'-dpng'); print([options.path2, filename],'-dpng')
@@ -159,15 +159,17 @@ tubeI = [1,26;27,53;54,106];
 pitI = [5 7; 1 4; 8 10];
 RGB = [0 76 153; 0 153 76; 255 127 0]/255;
 for i = 1:length(tubeI)
-   p.(['p',num2str(i)]) = plot(cell2mat(Density.SWEdepth(tubeI(i,1):tubeI(i,2),4)),... %density
+   t.(['p',num2str(i)]) = plot(cell2mat(Density.SWEdepth(tubeI(i,1):tubeI(i,2),4)),... %density
        cell2mat(Density.SWEdepth(tubeI(i,1):tubeI(i,2),3)),'.',... %depth
        'Color',RGB(i,:),'MarkerSize',16); hold on; 
-   plot(cell2mat(Density.snowpit(pitI(i,1):pitI(i,2),2)),... %density
+   p.(['p',num2str(i)]) = plot(cell2mat(Density.snowpit(pitI(i,1):pitI(i,2),2)),... %density
        cell2mat(Density.snowpit(pitI(i,1):pitI(i,2),8)),'o',... %depth
        'Color',RGB(i,:),'MarkerSize',18); hold on;
 end
-    xlabel('Federal Sampler density (kg m^{-3})'); ylabel('Snow depth (cm)');
-    legend([p.p1, p.p2, p.p3],{'Glacier 4','Glacier 2','Glacier 13'},'Location','best')
+    xlabel('Density (kg m^{-3})'); ylabel('Snow depth (cm)');
+    legend([p.p1, p.p2, p.p3,t.p1, t.p2, t.p3],...
+        {'Snowpit - Glacier 4','Snowpit - Glacier 2','Snowpit - Glacier 13',...
+        'Fed. Sampler - Glacier 4','Fed. Sampler - Glacier 2','Fed. Sampler - Glacier 13'},'Location','best')
 
     
 %     dim = [.20 .5 .3 .3];
