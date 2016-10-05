@@ -71,6 +71,19 @@ for i = 1:3
     mlr_best.(name) = mlr.(name)(best,:);   rmse_best.(name) = rmse.(name)(best,1);
 end
         clear best i name X y
+        
+%ANOVA
+for i = 1:3
+    OG_swe  = SWE(i).swe;
+    name    = ['G', num2str(glacier(i))];
+    X       = [aspect.(name), northness.(name), profileCurve.(name), ...
+                tangentCurve.(name), slope.(name), elevation.(name), Sx.(name)];
+    fitted_swe = sum(repmat(mlr_best.(name),length(X),1).*[ones(length(X),1),X],2);
+
+    display([name, ' ANOVA'])
+    anova1(OG_swe, fitted_swe)
+end
+    close all
 %% Plots
 
 % Actual vs fitted data
@@ -95,7 +108,7 @@ end
         'Glacier 13',['R^2=',num2str(round(g.G13.rsquare,2))],'Location','best')    
     fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',20) 
     
-    
+ 
     
     
     
