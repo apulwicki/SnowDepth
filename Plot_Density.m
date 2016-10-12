@@ -18,29 +18,33 @@
     errorx = [cell2mat(Density.pitANDtube(:,7))-cell2mat(Density.pitANDtube(:,9)), ...
         cell2mat(Density.pitANDtube(:,10))-cell2mat(Density.pitANDtube(:,7))]; %min and max SP
 errorbarxy(x,y,errorx(:,2),errory(:,2),errorx(:,1),errory(:,1),'Color','k','LineStyle','none','Marker','o',...
-   'MarkerFaceColor','k','LineWidth',1,'MarkerSize',5); hold on
+   'MarkerFaceColor','k','LineWidth',1,'MarkerSize',8); hold on
     
     P = polyfit(x,y,1); yfit = P(1)*x+P(2);
-    LM = fitlm(x,y);
-plot(x,yfit,'r')
+    LM = fitlm(x,y); %fit is not significant (p = 0.1)
+% plot(x,yfit,'r')
+
+%     dim = [0.15,0.79,0.11,0.11];
+%     str = {strcat('y= ',num2str(round(P(1),2)),'x+ ',num2str(round(P(2)))), ...
+%         strcat('R^2= ',num2str(round(LM.Rsquared.Ordinary,2)))} ;
+%     annotation('textbox',dim,'String', str,'FitBoxToText','on')
+%     %text(x+2, y+3, Density.pitANDtube(:,1))
+    axis([220 400 220 400])
     xlabel('Snowpit density (kg m^{-3})')
     ylabel('SWE tube density (kg m^{-3})')
-    dim = [0.15,0.16,0.11,0.11];
-    str = {strcat('y= ',num2str(round(P(1),2)),'x+ ',num2str(round(P(2)))), ...
-        strcat('R^2= ',num2str(round(LM.Rsquared.Ordinary,2)))} ;
-    annotation('textbox',dim,'String', str,'FitBoxToText','on')
-    %text(x+2, y+3, Density.pitANDtube(:,1))
-    axis([290 400 220 400])
-    axis equal
-    
+    line = refline(1,0);
+        line.Color = 'k'; line.LineStyle = '--'; hold on
+        
     fig=gcf;
     set(findall(fig,'-property','FontSize'),'FontSize',20) 
+    ax = gca; ax.XTick = [220:40:400]; ax.YTick = [220:40:400];
+
 
     filename = 'SnowpitVsSWEtube_all';
 print([options.path1, filename],'-dpng'); print([options.path2, filename],'-dpng')
 
 
-    clear P LM x y index* i j count yfit str dim filename error* ans
+    %clear P LM x y index* i j count yfit str dim filename error* ans
     
 %% SWEtube density vs elevation (all glaciers)
 
@@ -161,7 +165,7 @@ RGB = [0 76 153; 0 153 76; 255 127 0]/255;
 for i = 1:length(tubeI)
    t.(['p',num2str(i)]) = plot(cell2mat(Density.SWEdepth(tubeI(i,1):tubeI(i,2),4)),... %density
        cell2mat(Density.SWEdepth(tubeI(i,1):tubeI(i,2),3)),'.',... %depth
-       'Color',RGB(i,:),'MarkerSize',16); hold on; 
+       'Color',RGB(i,:),'MarkerSize',20); hold on; 
    p.(['p',num2str(i)]) = plot(cell2mat(Density.snowpit(pitI(i,1):pitI(i,2),2)),... %density
        cell2mat(Density.snowpit(pitI(i,1):pitI(i,2),8)),'o',... %depth
        'Color',RGB(i,:),'MarkerSize',18); hold on;
@@ -171,14 +175,19 @@ end
         {'Snowpit - Glacier 4','Snowpit - Glacier 2','Snowpit - Glacier 13',...
         'Fed. Sampler - Glacier 4','Fed. Sampler - Glacier 2','Fed. Sampler - Glacier 13'},'Location','best')
 
-    
-%     dim = [.20 .5 .3 .3];
-%     str = ['R^2 = ', num2str(round(gof.rsquare,2))];
-%     annotation('textbox',dim,'String',str,'FitBoxToText','on')
-%     p = legend('data');
-%     set(p,'visible','off')    
+%fit for tube
+x = cell2mat(Density.SWEdepth(:,4)); y = cell2mat(Density.SWEdepth(:,3));
+    P = polyfit(x,y,1); yfit = P(1)*x+P(2);
+    LM = fitlm(x,y); %fit is significant
+    plot(x,yfit,'k')
+
+     dim = [0.65,0.67,0.11,0.11];
+    str = {strcat('y= ',num2str(round(P(1),2)),'x+ ',num2str(round(P(2)))), ...
+        strcat('R^2= ',num2str(round(LM.Rsquared.Ordinary,2)))} ;
+    annotation('textbox',dim,'String', str,'FitBoxToText','on')
+
     fig=gcf;
-    set(findall(fig,'-property','FontSize'),'FontSize',14) 
+    set(findall(fig,'-property','FontSize'),'FontSize',18) 
 
     filename = 'DepthDensity';
 print([options.path1, filename],'-dpng'); print([options.path2, filename],'-dpng')

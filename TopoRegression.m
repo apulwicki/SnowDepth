@@ -73,20 +73,27 @@ end
         clear best i name X y
         
 %ANOVA
-for i = 1:3
-    OG_swe  = SWE(i).swe;
-    name    = ['G', num2str(glacier(i))];
-    X       = [aspect.(name), northness.(name), profileCurve.(name), ...
-                tangentCurve.(name), slope.(name), elevation.(name), Sx.(name)];
-    fitted_swe = sum(repmat(mlr_best.(name),length(X),1).*[ones(length(X),1),X],2);
-
-    display([name, ' ANOVA'])
-    anova1(OG_swe, fitted_swe)
-end
-    close all
+% for i = 1:3
+%     OG_swe  = SWE(i).swe;
+%     name    = ['G', num2str(glacier(i))];
+%     X       = [aspect.(name), northness.(name), profileCurve.(name), ...
+%                 tangentCurve.(name), slope.(name), elevation.(name), Sx.(name)];
+% %    fitted_swe = sum(repmat(mlr_best.(name),length(X),1).*[ones(length(X),1),X],2);
+% 
+% %     display([name, ' ANOVA'])
+% %     anova1(OG_swe, fitted_swe)
+%     y       = SWE(i).swe;
+%     mdl = fitlm(X,y);
+%     tbl = anova(mdl)
+% end
+%     close all
 %% Plots
 
 % Actual vs fitted data
+figure
+    axis([0 1.2 0 1.2]); box
+line = refline(1,0);
+    line.Color = 'k'; line.LineStyle = '--'; hold on
 RGB = [0 76 153; 0 153 76; 255 127 0]/255;
 for i = 1:3
     OG_swe  = SWE(i).swe;
@@ -101,15 +108,30 @@ for i = 1:3
     p = plot(f.(name)); hold on
     set(p,'Color',RGB(i,:)); set(p, 'LineWidth',1.5);    
 end
-
     xlabel('Original SWE (m)'); ylabel('MLR SWE (m)');
-    legend('Glacier 4',['R^2=',num2str(round(g.G4.rsquare,2))],...
+    legend('Reference Line','Glacier 4',['R^2=',num2str(round(g.G4.rsquare,2))],...
         'Glacier 2',['R^2=',num2str(round(g.G2.rsquare,2))],...
         'Glacier 13',['R^2=',num2str(round(g.G13.rsquare,2))],'Location','best')    
-    fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',20) 
+    fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18) 
     
- 
-    
+filename = 'MLRfit';
+print([options.path1, filename],'-dpng'); print([options.path2, filename],'-dpng')
+
+%% ANOVA between topographic params
+
+for i = 1:3
+    OG_swe  = SWE(i).swe;
+    name    = ['G', num2str(glacier(i))];
+    topo    = [aspect.(name); northness.(name); profileCurve.(name); ...
+                tangentCurve.(name); slope.(name); elevation.(name); Sx.(name)];
+    group   = cellstr([repmat('aspect',length(aspect.(name)),1); repmat('northn',length(northness.(name)),1);...
+                repmat('profCu',length(profileCurve.(name)),1); repmat('tangCu',length(tangentCurve.(name)),1);...
+                repmat('slopee',length(slope.(name)),1); repmat('elevat',length(elevation.(name)),1); repmat('Sxxxxx',length(Sx.(name)),1)]);
+    [p,tbl,stats] = anova1(topo,group);
+        
+            
+end
+
     
     
     
