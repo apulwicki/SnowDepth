@@ -87,7 +87,7 @@ end
 %     tbl = anova(mdl)
 % end
 %     close all
-%% Plots
+%% Plots - MLR
 
 % Actual vs fitted data
 figure
@@ -132,6 +132,40 @@ for i = 1:3
             
 end
 
+
+%% Regression tree
+
+header = {'aspect','northness', 'profileCurve', ...
+                'tangentCurve', 'slope', 'elevation', 'Sx'};
+figure;
+line = refline(1,0);
+    line.Color = 'k'; line.LineStyle = '--'; hold on
+
+for i = 1:3
+    y       = SWE(i).swe;
+    name    = ['G', num2str(glacier(i))];
+    X       = table(aspect.(name), northness.(name), profileCurve.(name), ...
+                tangentCurve.(name), slope.(name), elevation.(name), Sx.(name),...
+                'VariableNames',header);
+
+    cal_ind = randperm(length(y),floor(length(y)*3/4));
+    val_ind = setdiff(1:length(y),cal_ind);
+    
+    tree            = fitrtree(X(cal_ind,:),y(cal_ind,1));
+    [~,~,~,bestlevel] = cvLoss(tree,'SubTrees','All','TreeSize','min') %minimizing cross-validated loss
+    tree = prune(tree,'Level',6);
+    %view(tree,'Mode','Graph')
+    tree_predict    = predict(tree,X(val_ind,:));
+    
+    
+    plot(y(val_ind),tree_predict,'.'); hold on
+end
+    
+    
+    forest = TreeBagger(50, X, y,'OOBPrediction','On','Method','regression');
+    view(forest.Trees{1},'Mode','graph')
+    oobErrorBaggedEnsemble = oobError(forest);
+    plot(oobErrorBaggedEnsemble)
     
     
     

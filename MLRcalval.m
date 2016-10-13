@@ -10,7 +10,7 @@ for j = 1:length(c)
     X1 = Xones.*mult; X1(:,~any(X1,1)) = [];  
 
     mDim = size(X1,2);
-    runs = 1000;
+    runs = 9000;
     rmse = zeros(runs,1); mlr = zeros(runs,mDim);
 
     for i = 1:runs
