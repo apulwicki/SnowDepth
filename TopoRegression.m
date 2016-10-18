@@ -170,21 +170,38 @@ end
     
     
 %% Range of params sampled
-header = {'aspect','northness', 'profileCurve', ...
-                'tangentCurve', 'slope', 'elevation', 'Sx'};
-for i = 1:3
-    name    = ['G', num2str(glacier(i))];
-    topo.(name) = [aspect.(name), northness.(name), profileCurve.(name), ...
-                tangentCurve.(name), slope.(name), elevation.(name), Sx.(name)];
+header = {'Sx', 'aspect', 'elevation', 'northness', 'profileCurve', 'slope', 'tangentCurve'};
+topo_sampled = [Sx, aspect, elevation, northness, profileCurve, slope, tangentCurve];
+
+%Importing DEMs
+files = dir('/Volumes/Alex/TopoParams_indiv_glacier/ascii/*.asc');
+v = cell(0,0);
+for i = 1:length(files)
+    A = importdata(['/Volumes/Alex/TopoParams_indiv_glacier/ascii/', files(i).name]);
+    A.data(A.data==-9999) = NaN;    A.data(1:6) = [];
+    v(i,1) = cellstr(files(i).name(1:end-4)); eval([v{i,1} '= A.data;']);
+end
+    clear files A
+    
+for i = 1:7
+    eval(['topo_full(i).G4 = ',v{3*i-1,1},';']);
+    eval(['topo_full(i).G2 = ',v{3*i-2,1}]);
+    eval(['topo_full(i).G13 = ',v{3*i,1}]);
 end
 
-for r = 1:7
+for r = 3%1:7
 figure
     for i = 1:3
         name    = ['G', num2str(glacier(i))];
-        [N, edges] = histcounts(topo.(name)(:,r));
+        [N, edges] = histcounts(topo_sampled(r).(name)); N = N/max(N);
+        [Nall, edgesall] = histcounts(topo_full(r).(name)); Nall = Nall/max(Nall);
         subplot(1,3,i)
-            plot((edges(1:end-1)+edges(2:end))/2,N) %sampled values
+            plot((edges(1:end-1)+edges(2:end))/2,N); hold on %sampled values
+            plot((edgesall(1:end-1)+edgesall(2:end))/2,Nall)
             xlabel(header(r)); ylabel('Freq.')
     end
-end    
+end 
+
+
+
+
