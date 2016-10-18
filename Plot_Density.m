@@ -17,7 +17,7 @@
         cell2mat(Density.pitANDtube(:,5))-cell2mat(Density.pitANDtube(:,2))]; %min and max tube
     errorx = [cell2mat(Density.pitANDtube(:,7))-cell2mat(Density.pitANDtube(:,9)), ...
         cell2mat(Density.pitANDtube(:,10))-cell2mat(Density.pitANDtube(:,7))]; %min and max SP
-errorbarxy(x,y,errorx(:,2),errory(:,2),errorx(:,1),errory(:,1),'Color','k','LineStyle','none','Marker','o',...
+errorbarxy(x,y,errorx(:,2),errory(:,2),errorx(:,1),errory(:,1),'Color','k','LineStyle','none','Marker','s',...
    'MarkerFaceColor','k','LineWidth',1,'MarkerSize',8); hold on
     
     P = polyfit(x,y,1); yfit = P(1)*x+P(2);
@@ -161,7 +161,7 @@ figure
 %SWE tube
 tubeI = [1,26;27,53;54,106];
 pitI = [5 7; 1 4; 8 10];
-RGB = [0 76 153; 0 153 76; 255 127 0]/255;
+RGB = [9, 132, 103; 239, 9, 9; 130, 75, 135]/255;
 for i = 1:length(tubeI)
    t.(['p',num2str(i)]) = plot(cell2mat(Density.SWEdepth(tubeI(i,1):tubeI(i,2),4)),... %density
        cell2mat(Density.SWEdepth(tubeI(i,1):tubeI(i,2),3)),'.',... %depth
@@ -171,10 +171,10 @@ for i = 1:length(tubeI)
        'Color',RGB(i,:),'MarkerSize',18); hold on;
 end
     xlabel('Density (kg m^{-3})'); ylabel('Snow depth (cm)');
-    legend([p.p1, p.p2, p.p3,t.p1, t.p2, t.p3],...
-        {'Snowpit - Glacier 4','Snowpit - Glacier 2','Snowpit - Glacier 13',...
-        'Fed. Sampler - Glacier 4','Fed. Sampler - Glacier 2','Fed. Sampler - Glacier 13'},'Location','best')
-
+    legend([t.p1, t.p2, t.p3, p.p1, p.p2, p.p3],...
+        {'Fed. Sampler - Glacier 4','Fed. Sampler - Glacier 2','Fed. Sampler - Glacier 13',...
+        'Snowpit - Glacier 4','Snowpit - Glacier 2','Snowpit - Glacier 13'},'Location','best')
+     
 %fit for tube
 x = cell2mat(Density.SWEdepth(:,4)); y = cell2mat(Density.SWEdepth(:,3));
     P = polyfit(x,y,1); yfit = P(1)*x+P(2);
@@ -189,7 +189,7 @@ x = cell2mat(Density.SWEdepth(:,4)); y = cell2mat(Density.SWEdepth(:,3));
     fig=gcf;
     set(findall(fig,'-property','FontSize'),'FontSize',18) 
 
-    filename = 'DepthDensity';
+    filename = 'DepthDensity_SWEonly';
 print([options.path1, filename],'-dpng'); print([options.path2, filename],'-dpng')
 
 %% Depth vs Elevation

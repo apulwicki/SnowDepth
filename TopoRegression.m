@@ -94,7 +94,8 @@ figure
     axis([0 1.2 0 1.2]); box
 line = refline(1,0);
     line.Color = 'k'; line.LineStyle = '--'; hold on
-RGB = [0 76 153; 0 153 76; 255 127 0]/255;
+RGB = [9, 132, 103; 239, 9, 9; 130, 75, 135]/255;
+    %RGB = [0 76 153; 0 153 76; 255 127 0]/255;
 for i = 1:3
     OG_swe  = SWE(i).swe;
     name    = ['G', num2str(glacier(i))];
