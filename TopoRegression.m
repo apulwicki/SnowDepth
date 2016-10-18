@@ -7,7 +7,7 @@
 MAIN
 
 %% Import Topo Params
-[topo, topotext, toporaw] = xlsread('SPOT_TopoParams.xlsx','sampling_TopoParams','A1:G3936');
+[topo, ~, ~] = xlsread('SPOT_TopoParams.xlsx','sampling_TopoParams','A1:G3936');
 
 div = [1, length(SWE(1).swe); length(SWE(1).swe)+1, length(SWE(1).swe)+length(SWE(2).swe);...
         length(SWE(1).swe)+length(SWE(2).swe)+1, length(SWE(1).swe)+length(SWE(2).swe)+length(SWE(3).swe)];
@@ -21,8 +21,11 @@ name = ['G', num2str(glacier(i))];
     tangentCurve.(name)     = topo(div(i,1):div(i,2),5);
     slope.(name)            = topo(div(i,1):div(i,2),6);
     elevation.(name)        = topo(div(i,1):div(i,2),7);
-
+end
+    topo_original = [aspect, elevation, northness, profileCurve, slope, tangentCurve];
 %Standardizing variables
+for i = 1:3
+name = ['G', num2str(glacier(i))];    
     aspect.(name)           = (aspect.(name)-mean(aspect.(name)))/std(aspect.(name));
     northness.(name)        = (northness.(name)-mean(northness.(name)))/std(northness.(name));
     profileCurve.(name)     = (profileCurve.(name)-mean(profileCurve.(name)))/std(profileCurve.(name));
@@ -31,9 +34,9 @@ name = ['G', num2str(glacier(i))];
     elevation.(name)        = (elevation.(name)-mean(elevation.(name)))/std(elevation.(name));
 end 
 
-    clear i name topo*
+    clear i name topo
 
-%% Sx import & stepwise MLR
+% Sx import & stepwise MLR
 
 [d300, d300text] = xlsread('d300_h0.xlsx','sampling_d300_h0','B1:BU3936');
 [d200, d200text] = xlsread('d200_h0.xlsx','sampling_d200_h0','A1:BT3936');
@@ -57,6 +60,7 @@ for i = 1:3
     winddir.(name)  = text(best);
     Sx.(name)       = X1(:,best);
 end
+    topo_original = [Sx, topo_original];
         clear best d300* d200* d100* i inmodel mlr* name text X* y
 %% MLR
 
@@ -171,35 +175,44 @@ end
     
 %% Range of params sampled
 header = {'Sx', 'aspect', 'elevation', 'northness', 'profileCurve', 'slope', 'tangentCurve'};
-topo_sampled = [Sx, aspect, elevation, northness, profileCurve, slope, tangentCurve];
+%topo_sampled = [Sx, aspect, elevation, northness, profileCurve, slope, tangentCurve];
 
 %Importing DEMs
 files = dir('/Volumes/Alex/TopoParams_indiv_glacier/ascii/*.asc');
 v = cell(0,0);
 for i = 1:length(files)
     A = importdata(['/Volumes/Alex/TopoParams_indiv_glacier/ascii/', files(i).name]);
-    A.data(A.data==-9999) = NaN;    A.data(1:6) = [];
+    A.data(A.data==-9999) = NaN;   A.data(1:6) = [];
     v(i,1) = cellstr(files(i).name(1:end-4)); eval([v{i,1} '= A.data;']);
 end
     clear files A
+    elev_G04(elev_G04==0) = NaN; elev_G02(elev_G02==0) = NaN; elev_G13(elev_G13==0) = NaN;
     
 for i = 1:7
     eval(['topo_full(i).G4 = ',v{3*i-1,1},';']);
     eval(['topo_full(i).G2 = ',v{3*i-2,1}]);
     eval(['topo_full(i).G13 = ',v{3*i,1}]);
 end
+    clear aspect* elev* north* profil* slope* Sx* tangent*
+    
+    topo_full(4).G13(topo_full(4).G13<-3e+38) = NaN; topo_full(4).G2(topo_full(4).G2<-3e+38) = NaN; topo_full(4).G4(topo_full(4).G4<-3e+38) = NaN;
 
-for r = 3%1:7
+for r = 1:7
 figure
     for i = 1:3
         name    = ['G', num2str(glacier(i))];
-        [N, edges] = histcounts(topo_sampled(r).(name)); N = N/max(N);
+        [N, edges] = histcounts(topo_original(r).(name)); N = N/max(N);
         [Nall, edgesall] = histcounts(topo_full(r).(name)); Nall = Nall/max(Nall);
         subplot(1,3,i)
             plot((edges(1:end-1)+edges(2:end))/2,N); hold on %sampled values
             plot((edgesall(1:end-1)+edgesall(2:end))/2,Nall)
-            xlabel(header(r)); ylabel('Freq.')
+            xlabel([header(r), ' ', name]); ylabel('Freq.')
+            legend('Sampled','Full range')
     end
+        fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',13) 
+        fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 14 8];
+filename = ['SampledRangeTopo_',header{r}];
+print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
 end 
 
 

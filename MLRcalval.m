@@ -4,12 +4,8 @@ n = size(X,2);
 Xones = [ones(length(X),1), X];
 c = [ones(2^n,1), (dec2bin(0:(2^n)-1)=='1')];      c = c(2:end,:);
 mlr_best = zeros(length(c),1);    rmse_best = zeros(length(c),1); 
-ind_best = zeros(length(c),floor(length(y)*3/4));    
-ind_worst = zeros(length(c),floor(length(y)*3/4));
-
 
 runs = 1000;        
-%cal_ind = randperm(length(y),floor(length(y)*3/4));
 [~, cal_ind] = sort(rand(runs,length(y)),2);
 cal_ind = cal_ind(:,1:floor(length(y)*3/4));
 
