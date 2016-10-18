@@ -66,14 +66,9 @@ for i = 1:3
     X       = [aspect.(name), northness.(name), profileCurve.(name), ...
                 tangentCurve.(name), slope.(name), elevation.(name), Sx.(name)];
 
-    [mlr.(name), rmse.(name), indB.(name), indW.(name)] = MLRcalval(y, X);
+    [mlr.(name), rmse.(name)] = MLRcalval(y, X);
     best = find(rmse.(name)==min(rmse.(name)));
     mlr_best.(name) = mlr.(name)(best,:);   rmse_best.(name) = rmse.(name)(best,1); 
-    
-%     ind_best.(name) = indB.(name)(best,:);   ind_worst.(name) = indW.(name)(best,:);   
-%     plot(SWE(i).utm(ind_best.(name),1),SWE(i).utm(ind_best.(name),2),'.')
-%     plot(SWE(i).utm(ind_worst.(name),1),SWE(i).utm(ind_worst.(name),2),'.')
-
 end
         clear best i name X y
         
@@ -173,6 +168,22 @@ end
     plot(oobErrorBaggedEnsemble)
     
     
-    
-    
-    
+%% Range of params sampled
+header = {'aspect','northness', 'profileCurve', ...
+                'tangentCurve', 'slope', 'elevation', 'Sx'};
+for i = 1:3
+    name    = ['G', num2str(glacier(i))];
+    topo.(name) = [aspect.(name), northness.(name), profileCurve.(name), ...
+                tangentCurve.(name), slope.(name), elevation.(name), Sx.(name)];
+end
+
+for r = 1:7
+figure
+    for i = 1:3
+        name    = ['G', num2str(glacier(i))];
+        [N, edges] = histcounts(topo.(name)(:,r));
+        subplot(1,3,i)
+            plot((edges(1:end-1)+edges(2:end))/2,N) %sampled values
+            xlabel(header(r)); ylabel('Freq.')
+    end
+end    

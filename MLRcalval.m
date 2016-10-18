@@ -1,4 +1,4 @@
-function [mlr_best, rmse_best, ind_best, ind_worst] = MLRcalval(y, X)
+function [mlr_best, rmse_best] = MLRcalval(y, X)
 
 n = size(X,2);
 Xones = [ones(length(X),1), X];
@@ -34,8 +34,6 @@ for j = 1:length(c)
     %plot(rmse,'.')
     
     col = find(c(j,:));
-    ind_best(j,:) = cal_ind(rmse==min(rmse),:);
-    ind_worst(j,:) = cal_ind(rmse==max(rmse),:);
     for i = 1:size(col,2)
         mlr_best(j,col(1,i)) = mlr(rmse==min(rmse),i);    
     end
