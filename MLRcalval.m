@@ -1,4 +1,4 @@
-function [mlr_best, rmse_best] = MLRcalval(y, X)
+function [mlr_final, rmse_final, lm] = MLRcalval(y, X)
 
 n = size(X,2);
 Xones = [ones(length(X),1), X];
@@ -31,10 +31,37 @@ for j = 1:length(c)
     
     col = find(c(j,:));
     for i = 1:size(col,2)
-        mlr_best(j,col(1,i)) = mlr(rmse==min(rmse),i);    
+        mlr_best(j,col(1,i)) = mlr(rmse==min(rmse),i);  %chose best coefficients  
     end
-    rmse_best(j,1)  = min(rmse);
-
+    rmse_best(j,1)  = min(rmse); %lowest rmse value
 end
 
+%Chose best combination of variables and output final MLR coefficients
+best = find(rmse_best==min(rmse_best)); 
+
+%Do a linear regression and get the stats (esp. p value) for the
+%coefficents
+c_best = c(best,2:end); c_best = repmat(c_best,length(X),1); 
+T = X.*c_best;  T = T(:,any(T));
+lm = fitlm(T,y,'linear'); 
+
+coeffs = [lm.Coefficients(:,1),lm.Coefficients(:,4)];   rmse_final = rmse_best(best,1);
+
+mlr_final = table(zeros(8,1),zeros(8,1),'RowNames',{'intercept','aspect','northness', 'profileCurve', ...
+                'tangentCurve', 'slope', 'elevation', 'Sx'},'VariableNames',{'coefficient','pvalue'});
+mlr_final(1,1:2) = coeffs(1,1:2);  
+
+row = 2; next = 2;
+for i = 1:length(c_best(1,:))
+    if c_best(1,i)~=0
+       mlr_final(row,1:2) = coeffs(next,1:2);
+       next = next+1;
+    end
+    row = row+1;
+end        
+    
 end
+
+
+
+

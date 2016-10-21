@@ -62,7 +62,7 @@ for i = 1:3
 end
     topo_original = [Sx, topo_original];
         clear best d300* d200* d100* i inmodel mlr* name text X* y
-%% MLR
+%% MLR - Topo Regression
 
 for i = 1:3
     y       = SWE(i).swe;
@@ -70,27 +70,12 @@ for i = 1:3
     X       = [aspect.(name), northness.(name), profileCurve.(name), ...
                 tangentCurve.(name), slope.(name), elevation.(name), Sx.(name)];
 
-    [mlr.(name), rmse.(name)] = MLRcalval(y, X);
-    best = find(rmse.(name)==min(rmse.(name)));
-    mlr_best.(name) = mlr.(name)(best,:);   rmse_best.(name) = rmse.(name)(best,1); 
+    [mlr.(name), rmse.(name), lm.(name)] = MLRcalval(y, X); 
 end
         clear best i name X y
         
-%ANOVA
-% for i = 1:3
-%     OG_swe  = SWE(i).swe;
-%     name    = ['G', num2str(glacier(i))];
-%     X       = [aspect.(name), northness.(name), profileCurve.(name), ...
-%                 tangentCurve.(name), slope.(name), elevation.(name), Sx.(name)];
-% %    fitted_swe = sum(repmat(mlr_best.(name),length(X),1).*[ones(length(X),1),X],2);
-% 
-% %     display([name, ' ANOVA'])
-% %     anova1(OG_swe, fitted_swe)
-%     y       = SWE(i).swe;
-%     mdl = fitlm(X,y);
-%     tbl = anova(mdl)
-% end
-%     close all
+%Check normality of reisduals
+%plotResiduals(lm.G4) %many options for plotting
 %% Plots - MLR
 
 % Actual vs fitted data
@@ -101,15 +86,15 @@ line = refline(1,0);
 RGB = [9, 132, 103; 239, 9, 9; 130, 75, 135]/255;
     %RGB = [0 76 153; 0 153 76; 255 127 0]/255;
 for i = 1:3
-    OG_swe  = SWE(i).swe;
+    y  = SWE(i).swe;
     name    = ['G', num2str(glacier(i))];
     X       = [aspect.(name), northness.(name), profileCurve.(name), ...
                 tangentCurve.(name), slope.(name), elevation.(name), Sx.(name)];
     fitted_swe = sum(repmat(mlr_best.(name),length(X),1).*[ones(length(X),1),X],2);
 
-    plot(OG_swe, fitted_swe, '.', 'Color', RGB(i,:),'MarkerSize',13); hold on
+    plot(y, fitted_swe, '.', 'Color', RGB(i,:),'MarkerSize',13); hold on
 
-    [f.(name), g.(name)] = fit(OG_swe, fitted_swe,'poly1');
+    [f.(name), g.(name)] = fit(y, fitted_swe,'poly1');
     p = plot(f.(name)); hold on
     set(p,'Color',RGB(i,:)); set(p, 'LineWidth',1.5);    
 end
@@ -125,7 +110,7 @@ print([options.path1, filename],'-dpng'); print([options.path2, filename],'-dpng
 %% ANOVA between topographic params
 
 for i = 1:3
-    OG_swe  = SWE(i).swe;
+    y  = SWE(i).swe;
     name    = ['G', num2str(glacier(i))];
     topo    = [aspect.(name); northness.(name); profileCurve.(name); ...
                 tangentCurve.(name); slope.(name); elevation.(name); Sx.(name)];
