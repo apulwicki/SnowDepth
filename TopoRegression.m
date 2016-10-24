@@ -15,26 +15,18 @@ glacier = [4,2,13];
 
 for i = 1:3
 name = ['G', num2str(glacier(i))];
-    aspect.(name)           = topo(div(i,1):div(i,2),2);
-    northness.(name)        = topo(div(i,1):div(i,2),3);
-    profileCurve.(name)     = topo(div(i,1):div(i,2),4);
-    tangentCurve.(name)     = topo(div(i,1):div(i,2),5);
-    slope.(name)            = topo(div(i,1):div(i,2),6);
-    elevation.(name)        = topo(div(i,1):div(i,2),7);
-end
-    topo_original = [aspect, elevation, northness, profileCurve, slope, tangentCurve];
-%Standardizing variables
-for i = 1:3
-name = ['G', num2str(glacier(i))];    
-    aspect.(name)           = (aspect.(name)-mean(aspect.(name)))/std(aspect.(name));
-    northness.(name)        = (northness.(name)-mean(northness.(name)))/std(northness.(name));
-    profileCurve.(name)     = (profileCurve.(name)-mean(profileCurve.(name)))/std(profileCurve.(name));
-    tangentCurve.(name)     = (tangentCurve.(name)-mean(tangentCurve.(name)))/std(tangentCurve.(name));
-    slope.(name)            = (slope.(name)-mean(slope.(name)))/std(slope.(name));
-    elevation.(name)        = (elevation.(name)-mean(elevation.(name)))/std(elevation.(name));
-end 
+    aspect           = topo(div(i,1):div(i,2),2);
+    northness        = topo(div(i,1):div(i,2),3);
+    profileCurve     = topo(div(i,1):div(i,2),4);
+    tangentCurve     = topo(div(i,1):div(i,2),5);
+    slope            = topo(div(i,1):div(i,2),6);
+    elevation        = topo(div(i,1):div(i,2),7);
+    
+    topo_sampled.(name) = struct('aspect',aspect, 'elevation',elevation,...
+        'northness',northness, 'profileCurve',profileCurve, 'slope',slope,...
+        'tangentCurve',tangentCurve);
 
-    clear i name topo
+end
 
 % Sx import & stepwise MLR
 
@@ -58,21 +50,47 @@ for i = 1:3
     
     best            = find(mlr_Sx == mlr_sort(end-1,1));
     winddir.(name)  = text(best);
-    Sx.(name)       = X1(:,best);
+    Sx              = X1(:,best);
+    topo_sampled.(name).Sx = Sx;
 end
-    topo_original = [Sx, topo_original];
         clear best d300* d200* d100* i inmodel mlr* name text X* y
+        
+%Standardizing variables
+params = fieldnames(topo_sampled.G4);
+for i = 1:3
+name = ['G', num2str(glacier(i))];
+    for t = 1:length(params)
+    field = char(params(t));
+    
+    topo_sampled.(name).(field) = (topo_sampled.(name).(field)-...
+        mean(topo_sampled.(name).(field)))/std(topo_sampled.(name).(field));
+    end
+end
+
+    clear i name topo field j glacier params div
+    clear aspect* elev* north* profil* slope* Sx* tangent*
+
 %% MLR - Topo Regression
 
-for i = 1:3
-    y       = SWE(i).swe;
-    name    = ['G', num2str(glacier(i))];
-    X       = [aspect.(name), northness.(name), profileCurve.(name), ...
-                tangentCurve.(name), slope.(name), elevation.(name), Sx.(name)];
+for t = 2:9
+options.DensitySWE = t;
+run MeasurementLocations.m  %This program determines the easting and northing of transect measurements
+run Import_Density.m %Imports snow density values
+run Import_Transect.m %Imports transect snow depth and measurement location data
+run Import_Zigzag.m %Imports zigzag snow depth and measurement location data
+run Import_SWE.m %Converts to SWE and condences data
 
-    [mlr.(name), rmse.(name), lm.(name)] = MLRcalval(y, X); 
+    for i = 1:3
+        glacier = [4,2,13];
+        y       = SWE(i).swe;
+        name    = ['G', num2str(glacier(i))]; 
+            display(['option = ',num2str(t), ', glacier = ',name]);
+        X       = topo_sampled.(name);
+
+        [mlr(t).(name), rmse(t).(name), lm(t).(name)] = MLRcalval(y, X); 
+    end
 end
-        clear best i name X y
+        clear best i name X y t 
         
 %Check normality of reisduals
 %plotResiduals(lm.G4) %many options for plotting
@@ -163,10 +181,10 @@ header = {'Sx', 'aspect', 'elevation', 'northness', 'profileCurve', 'slope', 'ta
 %topo_sampled = [Sx, aspect, elevation, northness, profileCurve, slope, tangentCurve];
 
 %Importing DEMs
-files = dir('/Volumes/Alex/TopoParams_indiv_glacier/ascii/*.asc');
+files = dir('/home/glaciology1/Documents/Data/GlacierTopos/*.asc');
 v = cell(0,0);
 for i = 1:length(files)
-    A = importdata(['/Volumes/Alex/TopoParams_indiv_glacier/ascii/', files(i).name]);
+    A = importdata(['/home/glaciology1/Documents/Data/GlacierTopos/', files(i).name]);
     A.data(A.data==-9999) = NaN;   A.data(1:6) = [];
     v(i,1) = cellstr(files(i).name(1:end-4)); eval([v{i,1} '= A.data;']);
 end
@@ -178,7 +196,7 @@ for i = 1:7
     eval(['topo_full(i).G2 = ',v{3*i-2,1}]);
     eval(['topo_full(i).G13 = ',v{3*i,1}]);
 end
-    clear aspect* elev* north* profil* slope* Sx* tangent*
+    clear aspect* elev* north* profil* slope* Sx* tangent* 
     
     topo_full(4).G13(topo_full(4).G13<-3e+38) = NaN; topo_full(4).G2(topo_full(4).G2<-3e+38) = NaN; topo_full(4).G4(topo_full(4).G4<-3e+38) = NaN;
 
@@ -186,7 +204,7 @@ for r = 1:7
 figure
     for i = 1:3
         name    = ['G', num2str(glacier(i))];
-        [N, edges] = histcounts(topo_original(r).(name)); N = N/max(N);
+        [N, edges] = histcounts(topo_sampled(r).(name)); N = N/max(N);
         [Nall, edgesall] = histcounts(topo_full(r).(name)); Nall = Nall/max(Nall);
         subplot(1,3,i)
             plot((edges(1:end-1)+edges(2:end))/2,N); hold on %sampled values
@@ -200,6 +218,6 @@ filename = ['SampledRangeTopo_',header{r}];
 print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
 end 
 
-
+    clear v i r name header glacier
 
 
