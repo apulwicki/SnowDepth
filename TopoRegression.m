@@ -81,34 +81,54 @@ run Import_Zigzag.m %Imports zigzag snow depth and measurement location data
 run Import_SWE.m %Converts to SWE and condences data
 
     for i = 1:3
-        glacier = [4,2,13];
+         glacier = [4,2,13];
         y       = SWE(i).swe;
-        name    = ['G', num2str(glacier(i))]; 
+         name    = ['G', num2str(glacier(i))]; 
             display(['option = ',num2str(t), ', glacier = ',name]);
         X       = topo_sampled.(name);
 
-        [mlr(t).(name), rmse(t).(name), lm(t).(name)] = MLRcalval(y, X); 
+        [mlr(t).(name), rmse(t).(name), lm(t).(name)] = MLRcalval(y, X);
+        mlr(t).(name).Properties.VariableNames = strcat(mlr(t).(name).Properties.VariableNames, num2str(t));
     end
 end
         clear best i name X y t 
-        
+
+%Export all values
+G4_mlrDensity = []; G2_mlrDensity = []; G13_mlrDensity = [];
+for i = 2:9
+G4_mlrDensity  = [G4_mlrDensity, mlr(i).G4];
+G2_mlrDensity  = [G2_mlrDensity, mlr(i).G2];
+G13_mlrDensity = [G13_mlrDensity, mlr(i).G13];
+end
+    writetable(G4_mlrDensity,'/home/glaciology1/Documents/Data/GlacierTopos/G4_mlrDensity.xlsx')
+    writetable(G2_mlrDensity,'/home/glaciology1/Documents/Data/GlacierTopos/G2_mlrDensity.xlsx')
+    writetable(G13_mlrDensity,'/home/glaciology1/Documents/Data/GlacierTopos/G13_mlrDensity.xlsx')
+    
 %Check normality of reisduals
 %plotResiduals(lm.G4) %many options for plotting
 %% Plots - MLR
 
 % Actual vs fitted data
 figure
-    axis([0 1.2 0 1.2]); box
+    axis([0 1.2 0 1.2]);
 line = refline(1,0);
     line.Color = 'k'; line.LineStyle = '--'; hold on
-RGB = [9, 132, 103; 239, 9, 9; 130, 75, 135]/255;
-    %RGB = [0 76 153; 0 153 76; 255 127 0]/255;
+RGB = [9, 132, 103; 224, 187, 2; 130, 75, 135]/255;
+
+option = 8;
+
 for i = 1:3
     y  = SWE(i).swe;
     name    = ['G', num2str(glacier(i))];
-    X       = [aspect.(name), northness.(name), profileCurve.(name), ...
-                tangentCurve.(name), slope.(name), elevation.(name), Sx.(name)];
-    fitted_swe = sum(repmat(mlr_best.(name),length(X),1).*[ones(length(X),1),X],2);
+    X       = topo_sampled.(name);
+        params = fieldnames(X); 
+        M = X.(char(params(1)));
+        for j = 2:length(params)
+            field = char(params(j));
+            M = [M, X.(field)];
+        end
+fitted_swe = sum(repmat(table2array(mlr(option).(name)(:,1))',length(M),1).*...
+                        [ones(length(M),1),M],2);
 
     plot(y, fitted_swe, '.', 'Color', RGB(i,:),'MarkerSize',13); hold on
 
@@ -119,11 +139,40 @@ end
     xlabel('Original SWE (m)'); ylabel('MLR SWE (m)');
     legend('Reference Line','Glacier 4',['R^2=',num2str(round(g.G4.rsquare,2))],...
         'Glacier 2',['R^2=',num2str(round(g.G2.rsquare,2))],...
-        'Glacier 13',['R^2=',num2str(round(g.G13.rsquare,2))],'Location','best')    
+        'Glacier 13',['R^2=',num2str(round(g.G13.rsquare,2))],'Location','northwest')    
     fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18) 
-    
+    fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 10 9];
+
 filename = 'MLRfit';
 print([options.path1, filename],'-dpng'); print([options.path2, filename],'-dpng')
+
+%% Plots - Box and whisker for coeffs from density options
+
+%Rearrange to compare density options
+params = mlr(2).G4.Properties.RowNames;
+box.G4 = []; box.G2 = []; box.G13 = [];
+for i = 2:9
+    box.G4 = [box.G4; table2array(mlr(i).G4(:,1))'];
+    box.G2 = [box.G2; table2array(mlr(i).G2(:,1))'];
+    box.G13 = [box.G13; table2array(mlr(i).G13(:,1))'];
+end
+%No intercept option
+box.G4 = box.G4(:,2:end); box.G2 = box.G2(:,2:end); box.G13 = box.G13(:,2:end); params = params(2:end);
+
+h = cat(1, reshape(box.G4,[1 size(box.G4)]), reshape(box.G2,[1 size(box.G2)]),...
+            reshape(box.G13,[1 size(box.G13)]));
+
+    RGB = [9, 132, 103; 224, 187, 2; 130, 75, 135]/255;
+aboxplot(h,'labels',params, ...
+    'Colormap',                 RGB,...
+    'OutlierMarkerSize',        10,...
+    'OutlierMarkerEdgeColor',   [0 0 0]); % Advanced box plot
+        legend('Glacier 4','Glacier 2','Glacier 13'); % Add a legend
+        fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',13) 
+        fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 10 10];
+
+filename = 'Coeffs_DensityOpts';
+print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
 
 %% ANOVA between topographic params
 
