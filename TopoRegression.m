@@ -81,9 +81,9 @@ run Import_Zigzag.m %Imports zigzag snow depth and measurement location data
 run Import_SWE.m %Converts to SWE and condences data
 
     for i = 1:3
-         glacier = [4,2,13];
+        glacier = [4,2,13];
         y       = SWE(i).swe;
-         name    = ['G', num2str(glacier(i))]; 
+        name    = ['G', num2str(glacier(i))]; 
             display(['option = ',num2str(t), ', glacier = ',name]);
         X       = topo_sampled.(name);
 
@@ -91,18 +91,23 @@ run Import_SWE.m %Converts to SWE and condences data
         mlr(t).(name).Properties.VariableNames = strcat(mlr(t).(name).Properties.VariableNames, num2str(t));
     end
 end
-        clear best i name X y t 
+        clear best i name X y t glacier
 
-%Export all values
+%% Export all values
 G4_mlrDensity = []; G2_mlrDensity = []; G13_mlrDensity = [];
 for i = 2:9
-G4_mlrDensity  = [G4_mlrDensity, mlr(i).G4];
-G2_mlrDensity  = [G2_mlrDensity, mlr(i).G2];
-G13_mlrDensity = [G13_mlrDensity, mlr(i).G13];
+G4_mlrDensity  = [G4_mlrDensity, mlr(i).G4(:,3)];
+G2_mlrDensity  = [G2_mlrDensity, mlr(i).G2(:,3)];
+G13_mlrDensity = [G13_mlrDensity, mlr(i).G13(:,3)];
 end
-    writetable(G4_mlrDensity,'/home/glaciology1/Documents/Data/GlacierTopos/G4_mlrDensity.xlsx')
-    writetable(G2_mlrDensity,'/home/glaciology1/Documents/Data/GlacierTopos/G2_mlrDensity.xlsx')
-    writetable(G13_mlrDensity,'/home/glaciology1/Documents/Data/GlacierTopos/G13_mlrDensity.xlsx')
+%     writetable(G4_mlrDensity,'/home/glaciology1/Documents/Data/GlacierTopos/G4_mlrDensity.xlsx')
+%     writetable(G2_mlrDensity,'/home/glaciology1/Documents/Data/GlacierTopos/G2_mlrDensity.xlsx')
+%     writetable(G13_mlrDensity,'/home/glaciology1/Documents/Data/GlacierTopos/G13_mlrDensity.xlsx')
+%     
+    writetable(G4_mlrDensity,'/Users/Alexandra/Documents/SFU/Data/G4_mlrDensity.xlsx')
+    writetable(G2_mlrDensity,'/Users/Alexandra/Documents/SFU/Data/G2_mlrDensity.xlsx')
+    writetable(G13_mlrDensity,'/Users/Alexandra/Documents/SFU/Data/G13_mlrDensity.xlsx')
+    
     
 %Check normality of reisduals
 %plotResiduals(lm.G4) %many options for plotting
@@ -174,6 +179,19 @@ aboxplot(h,'labels',params, ...
 filename = 'Coeffs_DensityOpts';
 print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
 
+%% AIC values
+
+glacier = {'G4','G2','G13'};
+
+for g = 1:length(glacier)
+    G = char(glacier(g));
+    for t = 2:9
+       aic.(G)(t-1,1)   = t; %density option
+       aic.(G)(t-1,2)   = lm(t).(G).ModelCriterion.AIC; %AIC value
+    end
+
+    aic.(G)(:,3)        = exp((min(aic.(G)(:,2))-aic.(G)(:,2))/2); %
+end
 %% ANOVA between topographic params
 
 for i = 1:3

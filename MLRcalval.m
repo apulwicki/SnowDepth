@@ -45,7 +45,7 @@ for j = 1:length(c)
 end
 
 %Chose best combination of variables and output final MLR coefficients
-best = find(rmse_best==min(rmse_best)); 
+best = rmse_best==min(rmse_best); 
 
 %Do a linear regression and get the stats (esp. p value) for the
 %coefficents
@@ -53,16 +53,22 @@ c_best = c(best,2:end); c_best = repmat(c_best,length(M),1);
 T = M.*c_best;  T = T(:,any(T));
 lm = fitlm(T,y,'linear'); 
 
-coeffs = [lm.Coefficients(:,1),lm.Coefficients(:,4)];   rmse_final = rmse_best(best,1);
+%Caluclate % varience explained by each variable
+an = anova(lm); SumSq = table2array(an(:,1));
+Pvar = [0; SumSq(1:end-1)/sum(SumSq)*100]; Pvar = table(Pvar);
 
-mlr_final = table(zeros(8,1),zeros(8,1),'RowNames',[{'intercept'};params],...
-    'VariableNames',{'coefficient','pvalue'});
+coeffs = [lm.Coefficients(:,1),lm.Coefficients(:,4), Pvar];
+rmse_final = rmse_best(best,1);
+
+mlr_final = table(zeros(8,1),zeros(8,1),zeros(8,1),...
+    'RowNames',[{'intercept'};params],...
+    'VariableNames',{'coefficient','pvalue','PercentVarExplained'});
 mlr_final(1,1:2) = coeffs(1,1:2);  
 
 row = 2; next = 2;
 for i = 1:length(c_best(1,:))
     if c_best(1,i)~=0
-       mlr_final(row,1:2) = coeffs(next,1:2);
+       mlr_final(row,1:3) = coeffs(next,1:3);
        next = next+1;
     end
     row = row+1;
