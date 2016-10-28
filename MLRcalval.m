@@ -36,7 +36,9 @@ for j = 1:length(c)
     end
 
     %plot(rmse,'.')
-    
+    %hist(rmse)
+    %[h, p]=chi2gof(rmse);    display(['j = ',num2str(j),' h = ',num2str(h), ' p = ',num2str(p)])
+
     col = find(c(j,:));
     for i = 1:size(col,2)
         mlr_best(j,col(1,i)) = mlr(rmse==min(rmse),i);  %chose best coefficients  

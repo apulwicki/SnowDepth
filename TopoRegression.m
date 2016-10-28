@@ -87,6 +87,14 @@ run Import_SWE.m %Converts to SWE and condences data
             display(['option = ',num2str(t), ', glacier = ',name]);
         X       = topo_sampled.(name);
 
+        %No zigzag
+        NoZZ    = SWE(i).pattern~='ZZ';
+        y = y(NoZZ);    
+        f = fieldnames(X);
+        for d = 1:length(f)
+            param = char(f(d));     X.(param) = X.(param)(NoZZ);
+        end
+        
         [mlr(t).(name), rmse(t).(name), lm(t).(name)] = MLRcalval(y, X);
         mlr(t).(name).Properties.VariableNames = strcat(mlr(t).(name).Properties.VariableNames, num2str(t));
     end
@@ -126,6 +134,13 @@ for i = 1:3
     y  = SWE(i).swe;
     name    = ['G', num2str(glacier(i))];
     X       = topo_sampled.(name);
+    %No zigzag
+    NoZZ    = SWE(i).pattern~='ZZ';
+    y = y(NoZZ);    
+    ff = fieldnames(X);
+    for d = 1:length(ff)
+        param = char(ff(d));     X.(param) = X.(param)(NoZZ);
+    end
         params = fieldnames(X); 
         M = X.(char(params(1)));
         for j = 2:length(params)
@@ -157,9 +172,9 @@ print([options.path1, filename],'-dpng'); print([options.path2, filename],'-dpng
 params = mlr(2).G4.Properties.RowNames;
 box.G4 = []; box.G2 = []; box.G13 = [];
 for i = 2:9
-    box.G4 = [box.G4; table2array(mlr(i).G4(:,1))'];
-    box.G2 = [box.G2; table2array(mlr(i).G2(:,1))'];
-    box.G13 = [box.G13; table2array(mlr(i).G13(:,1))'];
+    box.G4 = [box.G4; table2array(mlr(i).G4(:,3))'];
+    box.G2 = [box.G2; table2array(mlr(i).G2(:,3))'];
+    box.G13 = [box.G13; table2array(mlr(i).G13(:,3))'];
 end
 %No intercept option
 box.G4 = box.G4(:,2:end); box.G2 = box.G2(:,2:end); box.G13 = box.G13(:,2:end); params = params(2:end);
@@ -173,6 +188,7 @@ aboxplot(h,'labels',params, ...
     'OutlierMarkerSize',        10,...
     'OutlierMarkerEdgeColor',   [0 0 0]); % Advanced box plot
         legend('Glacier 4','Glacier 2','Glacier 13'); % Add a legend
+        ylabel('% Variance Explained')
         fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',13) 
         fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 10 10];
 
@@ -258,21 +274,23 @@ end
     clear files A
     elev_G04(elev_G04==0) = NaN; elev_G02(elev_G02==0) = NaN; elev_G13(elev_G13==0) = NaN;
     
-for i = 1:7
-    eval(['topo_full(i).G4 = ',v{3*i-1,1},';']);
-    eval(['topo_full(i).G2 = ',v{3*i-2,1}]);
-    eval(['topo_full(i).G13 = ',v{3*i,1}]);
+for i = 1:length(files)
+    param = char(files(r));
+    eval(['topo_full.G4.(param) = ',v{3*i-1,1},';']);
+    eval(['topo_full.G2.(param) = ',v{3*i-2,1}]);
+    eval(['topo_full.G13.(param) = ',v{3*i,1}]);
 end
     clear aspect* elev* north* profil* slope* Sx* tangent* 
     
     topo_full(4).G13(topo_full(4).G13<-3e+38) = NaN; topo_full(4).G2(topo_full(4).G2<-3e+38) = NaN; topo_full(4).G4(topo_full(4).G4<-3e+38) = NaN;
 
+glacier = {'G4','G2','G13'};
 for r = 1:7
 figure
     for i = 1:3
-        name    = ['G', num2str(glacier(i))];
-        [N, edges] = histcounts(topo_sampled(r).(name)); N = N/max(N);
-        [Nall, edgesall] = histcounts(topo_full(r).(name)); Nall = Nall/max(Nall);
+        name    = char(glacier(i)); param = char(header(r));
+        [N, edges] = histcounts(topo_sampled.(name).(param)); 
+        [Nall, edgesall] = histcounts(topo_full.(name).(param)); 
         subplot(1,3,i)
             plot((edges(1:end-1)+edges(2:end))/2,N); hold on %sampled values
             plot((edgesall(1:end-1)+edgesall(2:end))/2,Nall)
