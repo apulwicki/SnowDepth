@@ -3,10 +3,12 @@
 % measurements along transects
 %%%%%%%%%%%%%%%%%%
 
+
+%% Import Topo Params
 %Run MAIN
 MAIN
 
-%% Import Topo Params
+%Import topos
 [topo, ~, ~] = xlsread('SPOT_TopoParams.xlsx','sampling_TopoParams','A1:G3936');
 
 div = [1, length(SWE(1).swe); length(SWE(1).swe)+1, length(SWE(1).swe)+length(SWE(2).swe);...
@@ -29,7 +31,6 @@ name = ['G', num2str(glacier(i))];
 end
 
 % Sx import & stepwise MLR
-
 [d300, d300text] = xlsread('d300_h0.xlsx','sampling_d300_h0','B1:BU3936');
 [d200, d200text] = xlsread('d200_h0.xlsx','sampling_d200_h0','A1:BT3936');
 [d100, d100text] = xlsread('d100_h0.xlsx','sampling_d100_h0','A1:BT3936');
@@ -54,11 +55,19 @@ for i = 1:3
     topo_sampled.(name).Sx = Sx;
 end
         clear best d300* d200* d100* i inmodel mlr* name text X* y
-        
+
+%Distance from centreline import
+run DistanceFromCentreline.m
+
+for i = 1:3
+   name     = char(glacier(i));
+   topo_sampled.(name).centreD = min_dist.(name);
+end
+            
 %Standardizing variables
 params = fieldnames(topo_sampled.G4);
 for i = 1:3
-name = ['G', num2str(glacier(i))];
+name= char(glacier(i));
     for t = 1:length(params)
     field = char(params(t));
     
@@ -67,10 +76,17 @@ name = ['G', num2str(glacier(i))];
     end
 end
 
-    clear i name topo field j glacier params div
+    clear i name topo field j params div glacier
     clear aspect* elev* north* profil* slope* Sx* tangent*
 
 %% MLR - Topo Regression
+
+glacier = {'G4','G2','G13'};
+%remove aspect
+for i = 1:3
+   name     = char(glacier(i));
+   topo_sampled.(name) = rmfield(topo_sampled.(name),'aspect');
+end
 
 for t = 2:9
 options.DensitySWE = t;
@@ -119,6 +135,8 @@ end
     
 %Check normality of reisduals
 %plotResiduals(lm.G4) %many options for plotting
+
+clear A box centreline d distance f* G* h i min_dist NoZZ param* RGB X1 Y1
 %% Plots - MLR
 
 % Actual vs fitted data
@@ -271,26 +289,24 @@ for i = 1:length(files)
     A.data(A.data==-9999) = NaN;   A.data(1:6) = [];
     v(i,1) = cellstr(files(i).name(1:end-4)); eval([v{i,1} '= A.data;']);
 end
-    clear files A
-    elev_G04(elev_G04==0) = NaN; elev_G02(elev_G02==0) = NaN; elev_G13(elev_G13==0) = NaN;
+    elevation_G04(elevation_G04==0) = NaN; elevation_G02(elevation_G02==0) = NaN; elevation_G13(elevation_G13==0) = NaN;
+    northness_G04(northness_G04<-3e+38) = NaN; northness_G02(northness_G02<-3e+38) = NaN; northness_G13(northness_G13<-3e+38) = NaN;
     
-for i = 1:length(files)
-    param = char(files(r));
+for i = 1:length(v)/3
+    param = char(v(i*3)); param = param(1:end-4);
     eval(['topo_full.G4.(param) = ',v{3*i-1,1},';']);
     eval(['topo_full.G2.(param) = ',v{3*i-2,1}]);
     eval(['topo_full.G13.(param) = ',v{3*i,1}]);
 end
-    clear aspect* elev* north* profil* slope* Sx* tangent* 
-    
-    topo_full(4).G13(topo_full(4).G13<-3e+38) = NaN; topo_full(4).G2(topo_full(4).G2<-3e+38) = NaN; topo_full(4).G4(topo_full(4).G4<-3e+38) = NaN;
-
+    clear aspect* elev* north* profil* slope* Sx* tangent* files A i param v
+   
 glacier = {'G4','G2','G13'};
 for r = 1:7
 figure
     for i = 1:3
         name    = char(glacier(i)); param = char(header(r));
-        [N, edges] = histcounts(topo_sampled.(name).(param)); 
-        [Nall, edgesall] = histcounts(topo_full.(name).(param)); 
+        [N, edges] = histcounts(topo_sampled.(name).(param),10); 
+        [Nall, edgesall] = histcounts(topo_full.(name).(param),10); 
         subplot(1,3,i)
             plot((edges(1:end-1)+edges(2:end))/2,N); hold on %sampled values
             plot((edgesall(1:end-1)+edgesall(2:end))/2,Nall)
@@ -298,7 +314,7 @@ figure
             legend('Sampled','Full range')
     end
         fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',13) 
-        fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 14 8];
+        fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 12 6];
 filename = ['SampledRangeTopo_',header{r}];
 print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
 end 
