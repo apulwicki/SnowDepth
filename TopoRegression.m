@@ -207,8 +207,8 @@ aboxplot(h,'labels',params, ...
     'OutlierMarkerEdgeColor',   [0 0 0]); % Advanced box plot
         legend('Glacier 4','Glacier 2','Glacier 13'); % Add a legend
         ylabel('% Variance Explained')
-        fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',13) 
-        fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 10 10];
+        fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18) 
+        fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 13 10];
 
 filename = 'Coeffs_DensityOpts';
 print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
@@ -278,7 +278,7 @@ end
     
     
 %% Range of params sampled
-header = {'Sx', 'aspect', 'elevation', 'northness', 'profileCurve', 'slope', 'tangentCurve'};
+header = {'Sx', 'elevation', 'northness', 'profileCurve', 'slope', 'tangentCurve'}; %rm aspect
 %topo_sampled = [Sx, aspect, elevation, northness, profileCurve, slope, tangentCurve];
 
 %Importing DEMs
@@ -301,7 +301,7 @@ end
     clear aspect* elev* north* profil* slope* Sx* tangent* files A i param v
    
 glacier = {'G4','G2','G13'};
-for r = 1:7
+for r = 1:length(header)
 figure
     for i = 1:3
         name    = char(glacier(i)); param = char(header(r));
@@ -319,6 +319,6 @@ filename = ['SampledRangeTopo_',header{r}];
 print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
 end 
 
-    clear v i r name header glacier
+    clear v i r name header glacier N*
 
 
