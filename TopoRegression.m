@@ -213,19 +213,6 @@ aboxplot(h,'labels',params, ...
 filename = 'Coeffs_DensityOpts';
 print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
 
-%% AIC values
-
-glacier = {'G4','G2','G13'};
-
-for g = 1:length(glacier)
-    G = char(glacier(g));
-    for t = 2:9
-       aic.(G)(t-1,1)   = t; %density option
-       aic.(G)(t-1,2)   = lm(t).(G).ModelCriterion.AIC; %AIC value
-    end
-
-    aic.(G)(:,3)        = exp((min(aic.(G)(:,2))-aic.(G)(:,2))/2); %
-end
 %% ANOVA between topographic params
 
 for i = 1:3
