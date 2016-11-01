@@ -40,7 +40,11 @@ end
 
 AICweight = exp(-(AIC_best-min(AIC_best))/2); AICweight = AICweight/sum(AICweight);
 
-mlr_best{1,1}.Coefficients(:,1)*AICweight(1,1)
+for j = 1:length(mlr_best)
+    coeffs_w{j,1} = mlr_best{1,1}.Coefficients(:,1);     
+    coeffs_w{j,1}{:,1} = coeffs_w{j,1}{:,1}*AICweight(1,1);
+end
+
 
 %Do a linear regression and get the stats (esp. p value) for the
 %coefficents
