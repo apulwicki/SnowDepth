@@ -192,5 +192,5 @@ elseif options.TubeDensity == 2
 end
 %% Clear variables
 clear SWEtube* snowpit* zigzagSWE Snowpit_full depth*
-clear P LM x y index* i j count yfit str dim filename error
+clear P LM x y index* i j count yfit str dim filename error A
 clear a* C den detrendC final* I ind M remove_index

@@ -56,25 +56,28 @@ for i = 1:3
 end
         clear best d300* d200* d100* i inmodel mlr* name text X* y
 
-%Distance from centreline import
-run DistanceFromCentreline.m
+%No zigzag
 
-for i = 1:3
-   name     = char(glacier(i));
-   topo_sampled.(name).centreD = min_dist.(name);
-end
-            
-%Standardizing variables
-params = fieldnames(topo_sampled.G4);
-for i = 1:3
-name= char(glacier(i));
-    for t = 1:length(params)
-    field = char(params(t));
-    
-    topo_sampled.(name).(field) = (topo_sampled.(name).(field)-...
-        mean(topo_sampled.(name).(field)))/std(topo_sampled.(name).(field));
-    end
-end
+        
+% %Distance from centreline import
+% run DistanceFromCentreline.m
+% 
+% for i = 1:3
+%    name     = char(glacier(i));
+%    topo_sampled.(name).centreD = min_dist.(name);
+% end
+%             
+% %Standardizing variables
+% params = fieldnames(topo_sampled.G4);
+% for i = 1:3
+% name= char(glacier(i));
+%     for t = 1:length(params)
+%     field = char(params(t));
+%     
+%     topo_sampled.(name).(field) = (topo_sampled.(name).(field)-...
+%         mean(topo_sampled.(name).(field)))/std(topo_sampled.(name).(field));
+%     end
+% end
 
     clear i name topo field j params div glacier
     clear aspect* elev* north* profil* slope* Sx* tangent*
@@ -265,10 +268,9 @@ end
     
     
 %% Range of params sampled
-header = {'Sx', 'elevation', 'northness', 'profileCurve', 'slope', 'tangentCurve'}; %rm aspect
-%topo_sampled = [Sx, aspect, elevation, northness, profileCurve, slope, tangentCurve];
 
 %Importing DEMs
+files = dir('/home/glaciology1/Documents/Data/GlacierTopos/*.asc');
 files = dir('/home/glaciology1/Documents/Data/GlacierTopos/*.asc');
 v = cell(0,0);
 for i = 1:length(files)
@@ -286,24 +288,33 @@ for i = 1:length(v)/3
     eval(['topo_full.G13.(param) = ',v{3*i,1}]);
 end
     clear aspect* elev* north* profil* slope* Sx* tangent* files A i param v
-   
-glacier = {'G4','G2','G13'};
+
+    
+header = fieldnames(topo_sampled.G4);
+glacier = {'G4','G2','G13'}; N = zeros(3); edges = N; Nall = N; edgesall = N;
 for r = 1:length(header)
 figure
+    param = char(header(r));
+    x_min = min([topo_full.G4.(param);topo_full.G2.(param);topo_full.G13.(param)]);
+    x_max = max([topo_full.G4.(param);topo_full.G2.(param);topo_full.G13.(param)]);
     for i = 1:3
-        name    = char(glacier(i)); param = char(header(r));
-        [N, edges] = histcounts(topo_sampled.(name).(param),10); 
-        [Nall, edgesall] = histcounts(topo_full.(name).(param),10); 
-        subplot(1,3,i)
-            plot((edges(1:end-1)+edges(2:end))/2,N); hold on %sampled values
-            plot((edgesall(1:end-1)+edgesall(2:end))/2,Nall)
-            xlabel([header(r), ' ', name]); ylabel('Freq.')
-            legend('Sampled','Full range')
+        name    = char(glacier(i)); 
+        [N(i,:), edges(i,:)] = histcounts(topo_sampled_ns.(name).(param),10); 
+        [Nall(i,:), edgesall(i,:)] = histcounts(topo_full.(name).(param),10); 
+        y_min = min(min(Nall));     y_max = max(max(Nall));
     end
-        fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',13) 
-        fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 12 6];
-filename = ['SampledRangeTopo_',header{r}];
-print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
+    for i = 1:3
+        subplot(1,3,i)
+            plot((edges(i,1:end-1)+edges(i,2:end))/2,N(i,:)); hold on %sampled values
+            plot((edgesall(i,1:end-1)+edgesall(i,2:end))/2,Nall(i,:))
+            xlabel([header(r), ' ', name]);     ylabel('Freq.')
+            xlim([x_min x_max]);                ylim([y_min y_max]);
+            if i == 1; legend('Sampled','Full range'); end
+    end
+%         fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',13) 
+%         fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 12 6];
+% filename = ['SampledRangeTopo_',header{r}];
+% print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
 end 
 
     clear v i r name header glacier N*

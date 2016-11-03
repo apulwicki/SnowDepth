@@ -45,6 +45,11 @@ options.DensitySWE     = 8;
                 % 8 Inverse distance weighted mean (variable)   Snowpit
                 % 9 Inverse distance weighted mean (variable)   SWE tube
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% GLACIER RGB %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Colour scheme for glaciers
+options.RGB = [9, 132, 103; 224, 187, 2; 130, 75, 135]/255;
+
                 
                 
                 
