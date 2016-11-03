@@ -40,24 +40,45 @@ end
 
 AICweight = exp(-(AIC_best-min(AIC_best))/2); AICweight = AICweight/sum(AICweight);
 
+coeffs_full = table();
 for j = 1:length(mlr_best)
-    coeffs_w{j,1} = mlr_best{1,1}.Coefficients(:,1);     
+    coeffs_w{j,1} = mlr_best{j,1}.Coefficients(:,1); 
+    coeffs_w{j,1}.Properties.VariableNames = {['C',num2str(j)]};
     coeffs_w{j,1}{:,1} = coeffs_w{j,1}{:,1}*AICweight(1,1);
+
+    all = coeffs_w{end,1}.Properties.RowNames;
+    missing = all(~ismember(all,coeffs_w{j,1}.Properties.RowNames));
+    T = table(zeros(length(missing),1),'RowNames',missing,'VariableNames',coeffs_w{j,1}.Properties.VariableNames);
+    coeffs_w{j,1} = [coeffs_w{j,1};T];
+
+    coeffs_full = [coeffs_full,coeffs_w{j,1}];
 end
 
+for i = 1:height(coeffs_full)
+    coeffs_final(i,1) = table(sum(coeffs_full{i,:}));
+end
+coeffs_final.Properties.RowNames = coeffs_full.Properties.RowNames;
+coeffs_final.Properties.VariableNames = {'Coefficient'};
 
-%Do a linear regression and get the stats (esp. p value) for the
-%coefficents
-c_best = c(best,2:end); c_best = repmat(c_best,length(M),1); 
-T = M.*c_best;  T = T(:,any(T));
-lm = fitlm(T,y,'linear'); 
 
-%Caluclate % varience explained by each variable
-an = anova(lm); SumSq = table2array(an(:,1));
+params = coeffs_final.Properties.RowNames;
+for i = 2:length(params)
+    M1.(char(params(i,1))) = M1.(char(params(i,1)))*coeffs_final{i,1};
+end
+M1 = [M1, table(y)];
+
+
+T = fitlm(M1);
+
+%How to get the linear model with averaged coeffieicents to get % variance
+%explained??
+%Pratt index http://digitalcommons.wayne.edu/cgi/viewcontent.cgi?article=1879&context=jmasm
+%Dominance analysis
+
+%Caluclate % variance explained by each variable
+lm1 = lm(2).G4;
+an = anova(lm1); SumSq = table2array(an(:,1));
 Pvar = [0; SumSq(1:end-1)/sum(SumSq)*100]; Pvar = table(Pvar);
-
-%AIC values
-aic = lm.ModelCriterion.AIC; %AIC value
 
 coeffs = [lm.Coefficients(:,1),lm.Coefficients(:,4), Pvar, aic];
 
