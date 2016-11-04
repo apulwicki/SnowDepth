@@ -122,24 +122,21 @@ plot([0 size(section_sum,1)],[mean(vertex_spacing(:,1)) mean(vertex_spacing(:,1)
 
 %% Probably density function
 
-%Get just zigzag values
-for i = 1:3
-    SWEzz(i).swe    = SWE(i).swe(SWE(i).pattern=='ZZ');
-    SWEzz(i).label  = removecats(SWE(i).label(SWE(i).pattern=='ZZ'));
-    SWEzz(i).ZZ     = char(SWEzz(i).label); SWEzz(i).ZZ = categorical(cellstr(SWEzz(i).ZZ(:,1:end-6)));
-end
+%Remove zigzag values
+run OPTIONS.m; options.ZZ = 2;
+run MAIN.m
 
 %Histogram with individal zigzags divided into glaciers
 glacier = {'G4','G2','G13'}; 
 for i = 1:3
         name    = char(glacier(i)); 
-        bins    = round(sqrt(length(SWEzz(i).swe)/3));
+        bins    = round(sqrt(length(SWE(i).swe)/3));
         N       = zeros(3,bins); edges = zeros(3,bins+1);
-        zz      = categories(SWEzz(i).ZZ);
+        zz      = categories(SWE(i).ZZ);
         
         subplot(3,1,i)
         for j = 1:length(zz)
-        [N(j,:), edges(j,:)] = histcounts(SWEzz(i).swe(SWEzz(i).ZZ==char(zz(j))),bins);
+        [N(j,:), edges(j,:)] = histcounts(SWE(i).swe(SWE(i).ZZ==char(zz(j))),bins);
             plot((edges(j,1:end-1)+edges(j,2:end))/2,N(j,:),'LineWidth',2); hold on 
             xlabel('SWE (m)');     ylabel('Freq.')
             title(name)

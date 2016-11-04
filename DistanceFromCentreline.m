@@ -1,4 +1,4 @@
-filename = '/home/glaciology1/Documents/Data/centrelinepoints.csv';
+filename = 'centrelinepoints.csv';
 delimiter = ',';
 
 %% Read columns of data as strings:
