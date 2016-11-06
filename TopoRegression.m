@@ -201,8 +201,6 @@ glacier = {'G4','G2','G13'}; N = zeros(3,10); edges = zeros(3,11); Nall = N; edg
 for r = 1:length(header)
 figure
     param = char(header(r));
-    x_min = min(nanmin([topo_full.G4.(param)(:);topo_full.G2.(param)(:);topo_full.G13.(param)(:)]));
-    x_max = max(nanmax([topo_full.G4.(param)(:);topo_full.G2.(param)(:);topo_full.G13.(param)(:)]));
     for i = 1:3
         name    = char(glacier(i)); 
         [N(i,:), edges(i,:)] = histcounts(topo_sampled.(name).(param),10); 
@@ -210,14 +208,14 @@ figure
         y_min = min(min(Nall));     y_max = max(max(Nall));
     end
     for i = 1:3
-        subplot(1,3,i)
+        a(i) = subplot(1,3,i);
             plot((edges(i,1:end-1)+edges(i,2:end))/2,N(i,:)); hold on %sampled values
             plot((edgesall(i,1:end-1)+edgesall(i,2:end))/2,Nall(i,:))
             xlabel([header(r), ' ', name]);     ylabel('Freq.')
-            xlim([x_min x_max]);                ylim([y_min y_max]);
             if i == 1; legend('Sampled','Full range'); end
     end
-        fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',13) 
+    linkaxes(a);
+        fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',13)
         fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 12 6];
 filename = ['SampledRangeTopo_',header{r}];
 print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')

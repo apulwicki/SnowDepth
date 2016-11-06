@@ -1,28 +1,14 @@
 filename = 'centrelinepoints.csv';
 delimiter = ',';
-
-%% Read columns of data as strings:
-% For more information, see the TEXTSCAN documentation.
 formatSpec = '%q%q%[^\n\r]';
-
-%% Open the text file.
 fileID = fopen(filename,'r');
-
-%% Read columns of data according to format string.
-% This call is based on the structure of the file used to generate this
-% code. If an error occurs for a different file, try regenerating the code
-%Import Data
-
 dataArray = textscan(fileID, formatSpec, 'Delimiter', delimiter,  'ReturnOnError', false);
-
 fclose(fileID);
-
 raw = repmat({''},length(dataArray{1}),length(dataArray)-1);
 for col=1:length(dataArray)-1
     raw(1:length(dataArray{col}),col) = dataArray{col};
 end
 numericData = NaN(size(dataArray{1},1),size(dataArray,2));
-
 for col=[1,2]
     % Converts strings in the input cell array to numbers. Replaced non-numeric
     % strings with NaN.
@@ -54,20 +40,17 @@ for col=[1,2]
         end
     end
 end
-
 R = cellfun(@(x) ~isnumeric(x) && ~islogical(x),raw); % Find non-numeric cells
 raw(R) = {NaN}; % Replace non-numeric cells
-
 X1 = cell2mat(raw(:, 1));
 Y1 = cell2mat(raw(:, 2));
-
 clearvars filename delimiter formatSpec fileID dataArray ans raw col numericData rawData row regexstr result numbers invalidThousandsSeparator thousandsRegExp me R;
 
-centreline = [X1 Y1]; centreline(1,:) = [];
-%%
+centreline = [X1 Y1]; centreline(1,:) = []; clear X1 Y1
+%% Calculate distance from centre line
 
+%Sampled points
 glacier = {'G4','G2','G13'};
-
 for i = 1:3
         G = char(glacier(i));
 
@@ -80,3 +63,24 @@ for i = 1:3
     distance = sqrt(X.^2+Y.^2);
     min_dist.(G) = min(distance,[],2);
 end
+
+
+%Raster points
+
+%Create matrix with x and y locations of raster cells
+corner = [centreline(1,1) centreline(1,2)]; %NW corner of raster
+rasterSize = size(topo_full.G4.Sx);
+
+rasterX = corner(1,1):40:(40*rasterSize(1,2)+corner(1,1)-1);
+rasterX = repmat(rasterX, rasterSize(1,1),1);   rasterX = rasterX(:);
+rasterY = [corner(1,2):40:(40*rasterSize(1,1)+corner(1,2)-1)]';
+rasterY = repmat(rasterY, 1, rasterSize(1,2));  rasterY = rasterY(:);
+
+Ecentre = repmat(centreline(:,1)',length(rasterX),1); %repeating centreline easting
+Ncentre = repmat(centreline(:,2)',length(rasterY),1); %repeating centreline northing
+Eloc = repmat(rasterX,1,length(centreline(:,1))); %repeating locations easting
+Nloc = repmat(rasterY,1,length(centreline(:,1))); %repeating locations northing
+    
+X = Eloc-Ecentre; Y = Nloc-Ncentre; %separation between locations and pits
+distance = sqrt(X.^2+Y.^2);
+min_dist.(G) = min(distance,[],2);
