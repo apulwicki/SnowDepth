@@ -61,15 +61,15 @@ for i = 1:3
 
     X = Eloc-Ecentre; Y = Nloc-Ncentre; %separation between locations and pits
     distance = sqrt(X.^2+Y.^2);
-    min_dist.(G) = min(distance,[],2);
+    topo_sampled.(G).centreD = min(distance,[],2);
 end
-
+%scatter(SWE(i).utm(:,1), SWE(i).utm(:,2), 10, topo_sampled.G4.centreD,'filled'); 
 
 %Raster points
 
 %Create matrix with x and y locations of raster cells
 corner = [centreline(1,1) centreline(1,2)]; %NW corner of raster
-rasterSize = size(topo_full.G4.Sx);
+rasterSize = [max(centreline(:,1))-min(centreline(:,1)), max(centreline(:,2))-min(centreline(:,2))];
 
 rasterX = corner(1,1):40:(40*rasterSize(1,2)+corner(1,1)-1);
 rasterX = repmat(rasterX, rasterSize(1,1),1);   rasterX = rasterX(:);
