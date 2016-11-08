@@ -3,7 +3,7 @@
 
 %% Maps of topographic params for each glacier
 header  = fieldnames(topo_full.G4);
-units   = {'', '(degrees)','(m a.s.l)','','','(degrees)',''};
+units   = {'', '(^{\circ})','(m a.s.l)','','(m^{-1})','(^{\circ})','(m^{-1})','(m)'};
 glacier = {'G4','G2','G13'}; 
 for r = 1:length(header)
 figure(1)
@@ -19,12 +19,10 @@ figure(1)
                 colordata = colormap; colordata(end,:) = [1 1 1]; colormap(colordata); % for making NaN values white
                 axis square
             if i ==2; title(param); end            
-            if i ==3; colorbar('location','eastoutside'); ylabel(c,units(r)); end
+            if i ==3; c = colorbar('location','eastoutside');  ylabel(c,[param,' ',char(units(r))]); end 
     end
-            s1Pos = get(s(1),'position');
-            s3Pos = get(s(3),'position');
-            s3Pos(3:4) = s1Pos(3:4);
-            set(s(3),'position',s3Pos);
+            s1Pos = get(s(1),'position');   s3Pos = get(s(3),'position');   
+            s3Pos(3:4) = s1Pos(3:4);        set(s(3),'position',s3Pos);
 
         fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',13)
         fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 14 4];
@@ -38,13 +36,18 @@ end
     
 %% SWE at sampling locations
 
-rig.G4 = shaperead('/Users/Alexandra/Documents/SFU/Data/glaciershapefiles/RIG_G4.shp','UseGeoCoords', true);
-rig.G2 = shaperead('/Users/Alexandra/Documents/SFU/Data/glaciershapefiles/RIG_G2.shp','UseGeoCoords', true);
-rig.G13 = shaperead('/Users/Alexandra/Documents/SFU/Data/glaciershapefiles/RIG_G12.shp','UseGeoCoords', true);
+% rig.G4 = shaperead('/Users/Alexandra/Documents/SFU/Data/glaciershapefiles/RIG_G4.shp','UseGeoCoords', true);
+% rig.G2 = shaperead('/Users/Alexandra/Documents/SFU/Data/glaciershapefiles/RIG_G2.shp','UseGeoCoords', true);
+% rig.G13 = shaperead('/Users/Alexandra/Documents/SFU/Data/glaciershapefiles/RIG_G12.shp','UseGeoCoords', true);
+
+rig.G4 = shaperead('/home/glaciology1/Documents/Data/GlacierShapeFiles/RIG_G4.shp','UseGeoCoords', true);
+rig.G2 = shaperead('/home/glaciology1/Documents/Data/GlacierShapeFiles/RIG_G2.shp','UseGeoCoords', true);
+rig.G13 = shaperead('/home/glaciology1/Documents/Data/GlacierShapeFiles/RIG_G12.shp','UseGeoCoords', true);
+
 
 pointsize = 13;
+glacier = {'G4','G2','G13'}; 
 
-%%
 for i = 1:3
     name    = char(glacier(i));
     s(i) = subplot(1,3,i);

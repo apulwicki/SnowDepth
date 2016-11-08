@@ -88,12 +88,10 @@ end
 
         
 %Distance from centreline import
-run DistanceFromCentreline.m
+run CentrelineDistance.m
 
-for i = 1:3
-   name     = char(glacier(i));
-   topo_sampled.(name).centreD = min_dist.(name);
-end
+%Keep a copy of non-standardized variables for range of params sampled
+%plots
 topo_sampled_ns = topo_sampled;
 
 %Standardizing variables
@@ -108,7 +106,7 @@ name= char(glacier(i));
     end
 end
 
-    clear i name topo field j params div glacier G t X1 Y1 min_dist fields distance centreline
+    clear i name topo field j params div glacier G t X1 Y1 min_dist fields distance centreline corner
     clear aspect* elev* north* profil* slope* Sx* tangent*    
 
 %Put zigzags back in

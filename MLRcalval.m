@@ -1,11 +1,11 @@
-function [mlr_final, rmse_final, lm] = MLRcalval(y, X)
+function [coeffs_final, residuals] = MLRcalval(y, X)
 
 %Convert from structure to table
 M = struct2table(X);
 
 n = size(M,2);
 c = logical(dec2bin(0:(2^n)-1)=='1');      c = c(2:end,:);
-mlr_best = zeros(length(c),1);    rmse_best = zeros(length(c),1); 
+mlr_best = cell(length(c),1);    rmse_best = zeros(length(c),1); 
 
 runs = 1000;        
 [~, cal_ind] = sort(rand(runs,length(y)),2);
@@ -40,13 +40,15 @@ end
 
 AICweight = exp(-(AIC_best-min(AIC_best))/2); AICweight = AICweight/sum(AICweight);
 
-coeffs_full = table();
 for j = 1:length(mlr_best)
     coeffs_w{j,1} = mlr_best{j,1}.Coefficients(:,1); 
     coeffs_w{j,1}.Properties.VariableNames = {['C',num2str(j)]};
-    coeffs_w{j,1}{:,1} = coeffs_w{j,1}{:,1}*AICweight(1,1);
+    coeffs_w{j,1}{:,1} = coeffs_w{j,1}{:,1}*AICweight(j,1);
+end
 
-    all = coeffs_w{end,1}.Properties.RowNames;
+all = coeffs_w{end,1}.Properties.RowNames;
+coeffs_full = table();      
+for j = 1:length(mlr_best)
     missing = all(~ismember(all,coeffs_w{j,1}.Properties.RowNames));
     T = table(zeros(length(missing),1),'RowNames',missing,'VariableNames',coeffs_w{j,1}.Properties.VariableNames);
     coeffs_w{j,1} = [coeffs_w{j,1};T];
@@ -58,46 +60,42 @@ for i = 1:height(coeffs_full)
     coeffs_final(i,1) = table(sum(coeffs_full{i,:}));
 end
 coeffs_final.Properties.RowNames = coeffs_full.Properties.RowNames;
+coeffs_final.Properties.RowNames(1,1) = {'Intercept'};
 coeffs_final.Properties.VariableNames = {'Coefficient'};
 
 
-params = coeffs_final.Properties.RowNames;
-for i = 2:length(params)
-    M1.(char(params(i,1))) = M1.(char(params(i,1)))*coeffs_final{i,1};
+%% Caluclate % variance explained by each variable
+
+beta    = coeffs_final.Properties.RowNames;
+SSt     = sumsqr(y-mean(y));
+
+Pvar = table(zeros(length(beta),1),'RowNames',beta);
+Pvar.Properties.VariableNames = {'PercentVarExplained'};
+for i = 2:length(beta)
+    rowname         = char(beta(i));
+    Xfit            = coeffs_final{1,1} + coeffs_final{i,1}*X.(rowname);
+    SSr             = sumsqr(Xfit-mean(y));
+    Pvar{i,1}       = SSr/SSt*100;
 end
-M1 = [M1, table(y)];
 
+coeffs_final = [coeffs_final, Pvar];
 
-T = fitlm(M1);
+%% Residuals
 
-%How to get the linear model with averaged coeffieicents to get % variance
-%explained??
-%Pratt index http://digitalcommons.wayne.edu/cgi/viewcontent.cgi?article=1879&context=jmasm
-%Dominance analysis
+rows = coeffs_final.Properties.RowNames;
+for i = 1:length(rows)
+    param = char(rows(i));
+    B.(param) = coeffs_final{i,1};
+end
 
-%Caluclate % variance explained by each variable
-lm1 = lm(2).G4;
-an = anova(lm1); SumSq = table2array(an(:,1));
-Pvar = [0; SumSq(1:end-1)/sum(SumSq)*100]; Pvar = table(Pvar);
+Yfit = repmat(B.Intercept, length(X.(param)),1);
+for i = 2:length(rows)
+    param = char(rows(i));
+    Yfit =  B.(param)*X.(param) + Yfit;
+end
 
-coeffs = [lm.Coefficients(:,1),lm.Coefficients(:,4), Pvar, aic];
+residuals = y-Yfit;
 
-    rmse_final = rmse_best(best,1);
-
-mlr_final = table(zeros(length(params)+1,1),zeros(length(params)+1,1),zeros(length(params)+1,1),...
-    'RowNames',[{'intercept'};params],...
-    'VariableNames',{'coefficient','pvalue','PercentVarExplained'});
-mlr_final(1,1:2) = coeffs(1,1:2);  
-
-row = 2; next = 2;
-for i = 1:length(c_best(1,:))
-    if c_best(1,i)~=0
-       mlr_final(row,1:3) = coeffs(next,1:3);
-       next = next+1;
-    end
-    row = row+1;
-end        
-    
 end
 
 

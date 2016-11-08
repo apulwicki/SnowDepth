@@ -8,20 +8,18 @@ load TopoMLR.mat
 
 %% MLR - Topo Regression
 
-glacier = {'G4','G2','G13'};
-%remove aspect
-for i = 1:3
-   name     = char(glacier(i));
-   topo_sampled.(name) = rmfield(topo_sampled.(name),'aspect');
-end
+% %remove aspect
+% glacier = {'G4','G2','G13'};
+% for i = 1:3
+%    name     = char(glacier(i));
+%    topo_sampled.(name) = rmfield(topo_sampled.(name),'aspect');
+% end
 
 for t = 2:9
-options.DensitySWE = t;
-run MeasurementLocations.m  %This program determines the easting and northing of transect measurements
-run Import_Density.m %Imports snow density values
-run Import_Transect.m %Imports transect snow depth and measurement location data
-run Import_Zigzag.m %Imports zigzag snow depth and measurement location data
-run Import_SWE.m %Converts to SWE and condences data
+run OPTIONS.m
+options.DensitySWE  = t;
+options.ZZ          = 2; %no zigzags
+run MAIN
 
     for i = 1:3
         glacier = [4,2,13];
@@ -30,15 +28,7 @@ run Import_SWE.m %Converts to SWE and condences data
             display(['option = ',num2str(t), ', glacier = ',name]);
         X       = topo_sampled.(name);
 
-        %No zigzag
-        NoZZ    = SWE(i).pattern~='ZZ';
-        y = y(NoZZ);    
-        f = fieldnames(X);
-        for d = 1:length(f)
-            param = char(f(d));     X.(param) = X.(param)(NoZZ);
-        end
-        
-        [mlr(t).(name), rmse(t).(name), lm(t).(name)] = MLRcalval(y, X);
+        [mlr(t).(name), residuals(t).(name)] = MLRcalval(y, X);
         mlr(t).(name).Properties.VariableNames = strcat(mlr(t).(name).Properties.VariableNames, num2str(t));
     end
 end
@@ -153,74 +143,40 @@ for i = 1:3
     [p,tbl,stats] = anova1(topo,group);
         
             
-end
-
-
-%% Regression tree
-
-header = {'aspect','northness', 'profileCurve', ...
-                'tangentCurve', 'slope', 'elevation', 'Sx'};
-figure;
-line = refline(1,0);
-    line.Color = 'k'; line.LineStyle = '--'; hold on
-
-for i = 1:3
-    y       = SWE(i).swe;
-    name    = ['G', num2str(glacier(i))];
-    X       = table(aspect.(name), northness.(name), profileCurve.(name), ...
-                tangentCurve.(name), slope.(name), elevation.(name), Sx.(name),...
-                'VariableNames',header);
-
-    cal_ind = randperm(length(y),floor(length(y)*3/4));
-    val_ind = setdiff(1:length(y),cal_ind);
-    
-    tree            = fitrtree(X(cal_ind,:),y(cal_ind,1));
-    [~,~,~,bestlevel] = cvLoss(tree,'SubTrees','All','TreeSize','min') %minimizing cross-validated loss
-    tree = prune(tree,'Level',6);
-    %view(tree,'Mode','Graph')
-    tree_predict    = predict(tree,X(val_ind,:));
-    
-    
-    plot(y(val_ind),tree_predict,'.'); hold on
-end
-    
-    
-    forest = TreeBagger(50, X, y,'OOBPrediction','On','Method','regression');
-    view(forest.Trees{1},'Mode','graph')
-    oobErrorBaggedEnsemble = oobError(forest);
-    plot(oobErrorBaggedEnsemble)
-    
+end    
     
 %% Range of params sampled
 
-run Import_Topo.m
-
+%run Import_Topo.m
     
 header = fieldnames(topo_full.G4);
+units   = {'', '(^{\circ})','(m a.s.l)','','(m^{-1})','(^{\circ})','(m^{-1})','(m)'};
 glacier = {'G4','G2','G13'}; N = zeros(3,10); edges = zeros(3,11); Nall = N; edgesall = edges;
 for r = 1:length(header)
 figure
     param = char(header(r));
     for i = 1:3
         name    = char(glacier(i)); 
-        [N(i,:), edges(i,:)] = histcounts(topo_sampled.(name).(param),10); 
+        [N(i,:), edges(i,:)] = histcounts(topo_sampled_ns.(name).(param),10); 
         [Nall(i,:), edgesall(i,:)] = histcounts(topo_full.(name).(param),10); 
-        y_min = min(min(Nall));     y_max = max(max(Nall));
     end
     for i = 1:3
+        name = char(glacier(i)); 
         a(i) = subplot(1,3,i);
             plot((edges(i,1:end-1)+edges(i,2:end))/2,N(i,:)); hold on %sampled values
             plot((edgesall(i,1:end-1)+edgesall(i,2:end))/2,Nall(i,:))
-            xlabel([header(r), ' ', name]);     ylabel('Freq.')
+            xlabel({[char(header(r)), ' ', char(units(r))], name});     ylabel('Freq.')
+            axis tight
             if i == 1; legend('Sampled','Full range'); end
     end
-    linkaxes(a);
+    linkaxes(flip(a));
         fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',13)
-        fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 12 6];
+        fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 14 4];
 filename = ['SampledRangeTopo_',header{r}];
 print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
 end 
 
-    clear v i r name header glacier N*
+    close all
+    clear v i r name header glacier N* a filename edges* param fig units
 
 
