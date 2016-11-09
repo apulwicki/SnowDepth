@@ -56,50 +56,40 @@ end
 clear A box centreline d distance f* G* h i min_dist NoZZ param* RGB X1 Y1
 %% Plots - MLR
 
-% Actual vs fitted data
+% Actual vs fitted data  
+glacier = [4,2,13];
+
+option = 2;
+
 figure
-    axis([0 1.2 0 1.2]);
-line = refline(1,0);
-    line.Color = 'k'; line.LineStyle = '--'; hold on
-RGB = [9, 132, 103; 224, 187, 2; 130, 75, 135]/255;
-
-option = 8;
-
 for i = 1:3
-    y  = SWE(i).swe;
     name    = ['G', num2str(glacier(i))];
+    y       = SWE(i).swe;
     X       = topo_sampled.(name);
-    %No zigzag
-    NoZZ    = SWE(i).pattern~='ZZ';
-    y = y(NoZZ);    
-    ff = fieldnames(X);
-    for d = 1:length(ff)
-        param = char(ff(d));     X.(param) = X.(param)(NoZZ);
-    end
         params = fieldnames(X); 
         M = X.(char(params(1)));
         for j = 2:length(params)
             field = char(params(j));
             M = [M, X.(field)];
         end
-fitted_swe = sum(repmat(table2array(mlr(option).(name)(:,1))',length(M),1).*...
-                        [ones(length(M),1),M],2);
+fitted_swe = sum(repmat(mlr(option).(name){:,1}',length(M),1).*[ones(length(M),1),M],2);
 
-    plot(y, fitted_swe, '.', 'Color', RGB(i,:),'MarkerSize',13); hold on
+    subplot(1,3,i)
+    axis([0 1.2 0 1.2]);    line = refline(1,0);    line.Color = 'k'; line.LineStyle = '--'; hold on
+        plot(y, fitted_swe, '.', 'Color', options.RGB(i,:),'MarkerSize',13); hold on
 
-    [f.(name), g.(name)] = fit(y, fitted_swe,'poly1');
-    p = plot(f.(name)); hold on
-    set(p,'Color',RGB(i,:)); set(p, 'LineWidth',1.5);    
+        [f.(name), g.(name)] = fit(y, fitted_swe,'poly1');
+        p = plot(f.(name)); hold on
+        set(p,'Color',RGB(i,:)); set(p, 'LineWidth',1.5);     
+        xlabel('Original SWE (m)'); ylabel('MLR SWE (m)');
+        legend('Reference Line',['Glacier ',num2str(glacier(i))],['R^2=',num2str(round(g.(name).rsquare,2))])
+   
 end
-    xlabel('Original SWE (m)'); ylabel('MLR SWE (m)');
-    legend('Reference Line','Glacier 4',['R^2=',num2str(round(g.G4.rsquare,2))],...
-        'Glacier 2',['R^2=',num2str(round(g.G2.rsquare,2))],...
-        'Glacier 13',['R^2=',num2str(round(g.G13.rsquare,2))],'Location','northwest')    
-    fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18) 
-    fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 10 9];
 
+    fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18)
+    fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 14 4];
 filename = 'MLRfit';
-print([options.path1, filename],'-dpng'); print([options.path2, filename],'-dpng')
+% print([options.path1, filename],'-dpng'); print([options.path2, filename],'-dpng')
 
 %% Plots - Box and whisker for coeffs from density options
 

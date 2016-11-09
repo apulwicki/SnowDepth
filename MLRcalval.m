@@ -7,7 +7,7 @@ n = size(M,2);
 c = logical(dec2bin(0:(2^n)-1)=='1');      c = c(2:end,:);
 mlr_best = cell(length(c),1);    rmse_best = zeros(length(c),1); 
 
-runs = 1000;        
+runs = 100;        
 [~, cal_ind] = sort(rand(runs,length(y)),2);
 cal_ind = cal_ind(:,1:floor(length(y)*3/4));
 

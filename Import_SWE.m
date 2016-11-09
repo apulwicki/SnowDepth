@@ -65,14 +65,14 @@ if options.DensitySWE == 1 %depth
 elseif options.DensitySWE == 2 %Donjek mean density (uniform)       Snowpit
     density = nanmean(cell2mat(Density.snowpit(:,2))); %mean density from all snowpits  
     for i = 1:length(SWE) %for each glacier
-        SWE(i).density(:) = density; %uniform density for all measures
+        SWE(i).density(1:length(SWE(i).depth),1) = density; %uniform density for all measures
         SWE(i).swe = SWE(i).depth(:)/100.*SWE(i).density(:)/1000; %SWE calculation
     end
 
 elseif options.DensitySWE == 3 %Donjek mean density (uniform)       SWE tube
     density = mean(cell2mat(Density.tube(:,2))); %mean density from all SWE tubes 
     for i = 1:length(SWE) %for each glacier
-        SWE(i).density(:) = density; %uniform density for all measures
+        SWE(i).density(1:length(SWE(i).depth),1) = density; %uniform density for all measures
         SWE(i).swe = SWE(i).depth(:)/100.*SWE(i).density(:)/1000;  %SWE calculation
     end
  
@@ -81,7 +81,7 @@ elseif options.DensitySWE == 4 %Glacier mean density (uniform)      Snowpit
     count = 1;
     for i = 1:length(SWE) %for each glacier
         density = nanmean(cell2mat(Density.snowpit(index(count):index(count+1),2))); %mean density for each glacier
-        SWE(i).density(:) = density; %uniform density for each glacier
+        SWE(i).density(1:length(SWE(i).depth),1) = density; %uniform density for each glacier
         SWE(i).swe = SWE(i).depth(:)/100.*SWE(i).density(:)/1000; %SWE calculation
         count = count + 2;
     end
@@ -91,7 +91,7 @@ elseif options.DensitySWE == 5 %Glacier mean density (uniform)      SWE tube
     count = 1;
     for i = 1:length(SWE) %for each glacier
         density = mean(cell2mat(Density.tube(index(count):index(count+1),2)));  %mean density for each glacier
-        SWE(i).density(:) = density; %uniform density for each glacier
+        SWE(i).density(1:length(SWE(i).depth),1) = density; %uniform density for each glacier
         SWE(i).swe = SWE(i).depth(:)/100.*SWE(i).density(:)/1000; %SWE calculation
         count = count + 2;
     end

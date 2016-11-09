@@ -1,3 +1,4 @@
+clear SWE Density
 
 run MeasurementLocations.m  %This program determines the easting and northing of transect measurements
 run Import_Density.m %Imports snow density values
