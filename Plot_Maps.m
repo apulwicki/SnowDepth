@@ -5,6 +5,8 @@
 header  = fieldnames(topo_full.G4);
 units   = {'', '(^{\circ})','(m a.s.l)','','(m^{-1})','(^{\circ})','(m^{-1})','(m)'};
 glacier = {'G4','G2','G13'}; 
+pos_axis = [0 0 .3 .9; 0.3 0 .3 .9; 0.6 0 .3 .9];
+
 for r = 1:length(header)
 figure(1)
     param = char(header(r));
@@ -18,6 +20,8 @@ figure(1)
                 imagesc(data); caxis([x_min max([x_max,max(data)])]);
                 colordata = colormap; colordata(end,:) = [1 1 1]; colormap(colordata); % for making NaN values white
                 axis square
+                s(i).Position   = pos_axis(i,:);
+                s(i).Box        = 'off';  axis off
             if i ==2; title(param); end            
             if i ==3; c = colorbar('location','eastoutside');  ylabel(c,[param,' ',char(units(r))]); end 
     end
@@ -46,7 +50,9 @@ rig.G13 = shaperead('/home/glaciology1/Documents/Data/GlacierShapeFiles/RIG_G12.
 
 
 pointsize = 13;
-glacier = {'G4','G2','G13'}; 
+glacier = {'G4','G2','G13'};  
+
+pos_axis = [0 0 .3 1; 0.25 0 .3 1; 0.53 0 .3 1];
 
 for i = 1:3
     name    = char(glacier(i));
@@ -56,14 +62,15 @@ for i = 1:3
         geoshow(rig.(name), 'FaceColor', [1 1 1]); hold on
         scatter(SWE(i).utm(:,1), SWE(i).utm(:,2), pointsize, SWE(i).swe,'filled'); 
             axis off; axis tight
-            s(i).Box = 'off'; 
-    if i ==3; c = colorbar('location','eastoutside'); ylabel(c,'SWE (m)'); end        
-end
+            s(i).Box        = 'off'; 
+            s(i).Position   = pos_axis(i,:);
+            if i ==3; c = colorbar('location','eastoutside'); ylabel(c,'SWE (m)'); end        
+end  
     linkprop(s,'Clim');
-    s1Pos = get(s(1),'position');	s2Pos = get(s(2),'position');  s3Pos = get(s(3),'position');    
+    s2Pos = get(s(2),'position');   s3Pos = get(s(3),'position');    
     s3Pos(3:4) = s2Pos(3:4);        set(s(3),'position',s3Pos);
-    s1Pos(3:4) = s2Pos(3:4);        set(s(1),'position',s1Pos);
 
+    
     fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',13)
     fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 14 4];
 filename = 'SWEmap';

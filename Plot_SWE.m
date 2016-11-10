@@ -78,11 +78,7 @@ count_G = 1;    params_G = cell(10,5); params_GU = cell(10,5); params_GL = cell(
 for opts = 1:9;
     run OPTIONS.m
     options.DensitySWE = opts;
-    run MeasurementLocations.m  %This program determines the easting and northing of transect measurements
-    run Import_Density.m %Imports snow density values
-    run Import_Transect.m %Imports transect snow depth and measurement location data
-    run Import_Zigzag.m %Imports zigzag snow depth and measurement location data
-    run Import_GlacierSWE.m %Converts to SWE and condences data
+    run MAIN.m
     
 for j = 1:3
     T1 = cellstr(char(SWE(j).label));

@@ -18,7 +18,7 @@ load TopoMLR.mat
 for t = 2:9
 run OPTIONS.m
 options.DensitySWE  = t;
-options.ZZ          = 2; %no zigzags
+options.ZZ          = 1; %include zigzags
 run MAIN
 
     for i = 1:3
@@ -59,37 +59,74 @@ clear A box centreline d distance f* G* h i min_dist NoZZ param* RGB X1 Y1
 % Actual vs fitted data  
 glacier = [4,2,13];
 
-option = 2;
+for r = 2:9
+option = r;
 
-figure
+figure(1)
 for i = 1:3
-    name    = ['G', num2str(glacier(i))];
+    name	= ['G', num2str(glacier(i))];
     y       = SWE(i).swe;
     X       = topo_sampled.(name);
-        params = fieldnames(X); 
-        M = X.(char(params(1)));
+        params = mlr(option).(name).Properties.RowNames; 
         for j = 2:length(params)
-            field = char(params(j));
-            M = [M, X.(field)];
+            field       = char(params(j));
+            X.(field)   = X.(field)*mlr(option).(name){j,1};
         end
-fitted_swe = sum(repmat(mlr(option).(name){:,1}',length(M),1).*[ones(length(M),1),M],2);
+	X       = struct2table(X);
+    X       = sum(X{:,:},2)+mlr(option).(name){1,1};
 
     subplot(1,3,i)
     axis([0 1.2 0 1.2]);    line = refline(1,0);    line.Color = 'k'; line.LineStyle = '--'; hold on
-        plot(y, fitted_swe, '.', 'Color', options.RGB(i,:),'MarkerSize',13); hold on
+        plot(y, X, '.', 'Color', options.RGB(i,:),'MarkerSize',13); hold on
 
-        [f.(name), g.(name)] = fit(y, fitted_swe,'poly1');
+        [f.(name), g.(name)] = fit(y, X,'poly1');
         p = plot(f.(name)); hold on
-        set(p,'Color',RGB(i,:)); set(p, 'LineWidth',1.5);     
+        set(p,'Color',options.RGB(i,:)); set(p, 'LineWidth',1.5);     
         xlabel('Original SWE (m)'); ylabel('MLR SWE (m)');
-        legend('Reference Line',['Glacier ',num2str(glacier(i))],['R^2=',num2str(round(g.(name).rsquare,2))])
-   
+        title(['Glacier ',num2str(glacier(i))])
+                axis square;    box on
+        b = gca; legend(b,'off');
+        dim = [b.Position(1)+0.01 b.Position(2)+.37 .3 .3];
+        annotation('textbox',dim,'String', ['R^2=',num2str(round(g.(name).rsquare,2))],'FitBoxToText','on')
 end
 
-    fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18)
+    fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',13)
+    fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 12 4];
+filename = ['MLRfit_opt',num2str(r)];
+print([options.path1, filename],'-dpng'); print([options.path2, filename],'-dpng')
+
+clf
+end
+
+%% Plots - Residuals
+glacier = [4,2,13];
+
+for r = 2:9
+option = r;
+
+figure(1)
+for i = 1:3
+    name	= ['G', num2str(glacier(i))];
+    
+    subplot(1,3,i)
+    hist(residuals(r).(name))
+        xlabel('Residuals'); ylabel('Frequency');
+        title(['Glacier ',num2str(glacier(i))]) 
+        b = gca; 
+        dim = [b.Position(1)+0.01 b.Position(2)+.5 .3 .3];
+        chi = 'Normally distributed';
+        if chi2gof(residuals(r).(name))==1; chi = 'NOT normally distributed'; end
+        annotation('textbox',dim,'String', chi ,'FitBoxToText','on')
+end
+
+    fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',13)
     fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 14 4];
-filename = 'MLRfit';
-% print([options.path1, filename],'-dpng'); print([options.path2, filename],'-dpng')
+filename = ['MLRresiduals_opt',num2str(r)];
+print([options.path1, filename],'-dpng'); print([options.path2, filename],'-dpng')
+
+clf
+end
+
 
 %% Plots - Box and whisker for coeffs from density options
 
@@ -97,10 +134,13 @@ filename = 'MLRfit';
 params = mlr(2).G4.Properties.RowNames;
 box.G4 = []; box.G2 = []; box.G13 = [];
 for i = 2:9
-    box.G4 = [box.G4; table2array(mlr(i).G4(:,3))'];
-    box.G2 = [box.G2; table2array(mlr(i).G2(:,3))'];
-    box.G13 = [box.G13; table2array(mlr(i).G13(:,3))'];
+    box.G4 = [box.G4; table2array(mlr(i).G4(:,2))'];
+    box.G2 = [box.G2; table2array(mlr(i).G2(:,2))'];
+    box.G13 = [box.G13; table2array(mlr(i).G13(:,2))'];
 end
+
+% box.G4 = log(box.G4); box.G2 = log(box.G2); box.G13 = log(box.G13);
+
 %No intercept option
 box.G4 = box.G4(:,2:end); box.G2 = box.G2(:,2:end); box.G13 = box.G13(:,2:end); params = params(2:end);
 

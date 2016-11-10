@@ -112,3 +112,32 @@ end
 %Put zigzags back in
 run OPTIONS.m; options.ZZ = 1;
 run MAIN.m   
+
+
+%% Get topoparams for zigzags
+
+glacier = {'G4','G2','G13'};
+topo_sampled_wZZ = topo_sampled;
+
+for i = 1:3;
+    name = char(glacier(i));
+
+    zz = SWE(i).pattern =='ZZ';
+    zz_lab = char(SWE(i).label(:)); zz_lab = cellstr(zz_lab(:,1:8));
+
+    zz_vals = find(~cellfun(@isempty,strfind(cellstr(SWE(i).label),'SWE')));
+    zz_valsName = char(SWE(i).label(zz_vals)); zz_valsName = zz_valsName(:,1:8);
+
+    params = fieldnames(topo_sampled_wZZ.(name));
+    for k = 1:length(params)
+        topo = char(params(k));
+        
+        for j = 1:size(zz_valsName,1)
+            TT = ~cellfun(@isempty,strfind(zz_lab,zz_valsName(j,:)));
+            topo_sampled_wZZ.(name).(topo)(TT) = topo_sampled.(name).(topo)(zz_vals(j));
+        end
+
+    end
+end
+
+
