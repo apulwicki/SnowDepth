@@ -34,6 +34,16 @@ run MAIN
 end
         clear best i name X y t glacier
 
+% Sort topo params
+
+order = mlr(2).G2.Properties.RowNames(2:end);
+for i = 1:3
+   name     = char(options.glacier(i));
+   topo_full.(name)         = orderfields(topo_full.(name),order);
+   topo_sampled.(name)      = orderfields(topo_sampled.(name),order);
+   topo_sampled_ns.(name)   = orderfields(topo_sampled_ns.(name),order);
+end
+        
 %% Export all values
 G4_mlrDensity = []; G2_mlrDensity = []; G13_mlrDensity = [];
 for i = 2:9
@@ -82,7 +92,7 @@ for i = 1:3
         [f.(name), g.(name)] = fit(y, X,'poly1');
         p = plot(f.(name)); hold on
         set(p,'Color',options.RGB(i,:)); set(p, 'LineWidth',1.5);     
-        xlabel('Original SWE (m)'); ylabel('MLR SWE (m)');
+        xlabel('Measured Winter Balance (m w.e.)'); ylabel('Modelled Winter Balance (m w.e.)');
         title(['Glacier ',num2str(glacier(i))])
                 axis square;    box on
         b = gca; legend(b,'off');
@@ -99,24 +109,22 @@ clf
 end
 
 %% Plots - Residuals
-glacier = [4,2,13];
 
 for r = 2:9
 option = r;
 
 figure(1)
 for i = 1:3
-    name	= ['G', num2str(glacier(i))];
+    name	= char(options.glacier(i));
     
     subplot(1,3,i)
     hist(residuals(r).(name))
-        xlabel('Residuals'); ylabel('Frequency');
-        title(['Glacier ',num2str(glacier(i))]) 
+        xlabel('Residual (m w.e.)'); ylabel('Frequency');
+        title(name) 
         b = gca; 
         dim = [b.Position(1)+0.01 b.Position(2)+.5 .3 .3];
-        chi = 'Normally distributed';
-        if chi2gof(residuals(r).(name))==1; chi = 'NOT normally distributed'; end
-        annotation('textbox',dim,'String', chi ,'FitBoxToText','on')
+        [~, chi] = chi2gof(residuals(r).(name));
+        annotation('textbox',dim,'String', ['p_{\chi} = ', num2str(chi)], 'EdgeColor','none')
 end
 
     fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',13)
@@ -180,25 +188,22 @@ end
 %run Import_Topo.m
     
 header = fieldnames(topo_full.G4);
-units   = {'', '(^{\circ})','(m a.s.l)','','(m^{-1})','(^{\circ})','(m^{-1})','(m)'};
-glacier = {'G4','G2','G13'}; N = zeros(3,10); edges = zeros(3,11); Nall = N; edgesall = edges;
 for r = 1:length(header)
 figure
     param = char(header(r));
     for i = 1:3
-        name    = char(glacier(i)); 
-        [N(i,:), edges(i,:)] = histcounts(topo_sampled_ns.(name).(param),10); 
-        [Nall(i,:), edgesall(i,:)] = histcounts(topo_full.(name).(param),10); 
-    end
-    for i = 1:3
-        name = char(glacier(i)); 
+        name = char(options.glacier(i)); 
         a(i) = subplot(1,3,i);
-            plot((edges(i,1:end-1)+edges(i,2:end))/2,N(i,:)); hold on %sampled values
-            plot((edgesall(i,1:end-1)+edgesall(i,2:end))/2,Nall(i,:))
-            xlabel({[char(header(r)), ' ', char(units(r))], name});     ylabel('Freq.')
+            h(i).f = histogram(topo_full.(name).(param)(:),25); hold on
+            h(i).s = histogram(topo_sampled_ns.(name).(param),25); 
+            
+            dim = [a(i).Position(1)+0.01 a(i).Position(2)*5.41 .3 .3];
+            annotation('textbox',dim,'String', name,'EdgeColor','none','FontWeight','bold')
+            xlabel(char(options.topoVars(r)));     ylabel('Frequency')
             axis tight
-            if i == 1; legend('Sampled','Full range'); end
+            legend('Full range','Sampled');
     end
+    set([h(1).f h(1).s h(2).f h(2).s h(3).s], 'BinEdges', h(3).f.BinEdges)
     linkaxes(flip(a));
         fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',13)
         fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 14 4];

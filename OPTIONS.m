@@ -3,12 +3,12 @@ global options
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% PLOT SAVING PATH %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     %SFU 
-options.path1 = '/home/glaciology1/Documents/Data/Plots/'; %Plots folder
-options.path2 = '/home/glaciology1/Documents/MastersDocuments/Methods/'; %Latex
+% options.path1 = '/home/glaciology1/Documents/Data/Plots/'; %Plots folder
+% options.path2 = '/home/glaciology1/Documents/MastersDocuments/Methods/'; %Latex
 
     %Laptop
-% options.path1 = '/Users/Alexandra/Documents/SFU/Data/Plots/'; %Plots
-% options.path2 = '/Users/Alexandra/Documents/SFU/MastersDocuments/Methods/'; %Latex
+options.path1 = '/Users/Alexandra/Documents/SFU/Data/Plots/'; %Plots
+options.path2 = '/Users/Alexandra/Documents/SFU/MastersDocuments/Methods/'; %Latex
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% TO ZZ OR NOT TO ZZ %%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -56,10 +56,15 @@ options.DensitySWE     = 8;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% GLACIER RGB %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Colour scheme for glaciers
-options.RGB = [9, 132, 103; 224, 187, 2; 130, 75, 135]/255;
+options.RGB            = [9, 132, 103; 224, 187, 2; 130, 75, 135]/255;
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% EASE OF USE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 
                 
+options.glacier        = {'G4','G2','G13'};
+options.topoVars       = {'{\itd} (m)', '\alpha (^{\circ})', '{\itz} (m a.s.l)', ...
+                            '{\itN}', '{\kappa_P} (m^{-1})',...
+                            '{\itm}', '{\kappa_T} (m^{-1})', '{\itSx}'};
                 
-                
+                   
                 
