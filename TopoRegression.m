@@ -161,7 +161,13 @@ aboxplot(h,'labels',params, ...
     'OutlierMarkerSize',        10,...
     'OutlierMarkerEdgeColor',   [0 0 0]); % Advanced box plot
         legend('Glacier 4','Glacier 2','Glacier 13'); % Add a legend
-        ylabel('% Variance Explained')
+        ylabel('% Variance Explained'); hold on 
+
+%         plot(ylim,[1 1])
+
+%         hax=axes; SP=1; %your point goes here 
+%         line([SP SP],get(hax,'YLim'),'Color',[1 0 0])
+
         fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18) 
         fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 13 10];
 
