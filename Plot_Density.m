@@ -36,7 +36,7 @@ errorbarxy(x,y,errorx(:,2),errory(:,2),errorx(:,1),errory(:,1),'Color','k','Line
         line.Color = 'k'; line.LineStyle = '--'; hold on
         
     fig=gcf;
-    set(findall(fig,'-property','FontSize'),'FontSize',20) 
+    set(findall(fig,'-property','FontSize'),'FontSize',12) 
     ax = gca; ax.XTick = [220:40:400]; ax.YTick = [220:40:400];
 
 

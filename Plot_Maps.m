@@ -63,17 +63,16 @@ end
     
 %% SWE at sampling locations
 
-% rig.G4 = shaperead('/Users/Alexandra/Documents/SFU/Data/glaciershapefiles/RIG_G4.shp','UseGeoCoords', true);
-% rig.G2 = shaperead('/Users/Alexandra/Documents/SFU/Data/glaciershapefiles/RIG_G2.shp','UseGeoCoords', true);
-% rig.G13 = shaperead('/Users/Alexandra/Documents/SFU/Data/glaciershapefiles/RIG_G12.shp','UseGeoCoords', true);
+% rig.G4 = csvread('/Users/Alexandra/Documents/SFU/Data/glaciershapefiles/RIG_G4.csv');
+% rig.G2 = csvread('/Users/Alexandra/Documents/SFU/Data/glaciershapefiles/RIG_G2.csv');
+% rig.G13 = csvread('/Users/Alexandra/Documents/SFU/Data/glaciershapefiles/RIG_G13.csv');
 
-% rig.G4 = shaperead('/home/glaciology1/Documents/Data/GlacierShapeFiles/RIG_G4.shp','UseGeoCoords', true);
-% rig.G2 = shaperead('/home/glaciology1/Documents/Data/GlacierShapeFiles/RIG_G2.shp','UseGeoCoords', true);
-% rig.G13 = shaperead('/home/glaciology1/Documents/Data/GlacierShapeFiles/RIG_G12.shp','UseGeoCoords', true);
+rig.G4 = csvread('/home/glaciology1/Documents/Data/GlacierShapeFiles/RIG_G4.csv');
+rig.G2 = csvread('/home/glaciology1/Documents/Data/GlacierShapeFiles/RIG_G2.csv');
+rig.G13 = csvread('/home/glaciology1/Documents/Data/GlacierShapeFiles/RIG_G13.csv');
+rig.ELA = csvread('/home/glaciology1/Documents/Data/GlacierShapeFiles/ELA.csv');
 
-rig.G4 = csvread('/Users/Alexandra/Documents/SFU/Data/glaciershapefiles/RIG_G4.csv');
-rig.G2 = csvread('/Users/Alexandra/Documents/SFU/Data/glaciershapefiles/RIG_G2.csv');
-rig.G13 = csvread('/Users/Alexandra/Documents/SFU/Data/glaciershapefiles/RIG_G13.csv');
+ELA_d = [1 7; 16 23; 8 15];
 
 pointsize = 13;
 glacier = {'G4','G2','G13'};  
@@ -89,11 +88,17 @@ Ylim = [0 max([rig.G4(:,2)-min(rig.G4(:,2));rig.G2(:,2)-min(rig.G2(:,2));rig.G13
 for i = 1:2
     name    = char(glacier(i));
     s(i) = subplot(1,3,i);
+       %Glacier outline
             minE = min(rig.(name)(:,1));
             minN = min(rig.(name)(:,2));
         Eg = rig.(name)(:,1) - minE;
         Ng = rig.(name)(:,2) - minN;
         plot(Eg,Ng,'k'); hold on
+       %ELA
+        Eela = rig.ELA(ELA_d(i,1):ELA_d(i,2),1) - minE;
+        Nela = rig.ELA(ELA_d(i,1):ELA_d(i,2),2) - minN;
+        plot(Eela,Nela ,'k--')
+       %SWE
         Es = SWE(i).utm(:,1) - minE;
         Ns = SWE(i).utm(:,2) - minN;
         scatter(Es,Ns , pointsize, SWE(i).swe,'filled');
@@ -111,6 +116,7 @@ end
 i = 3;
 name    = char(glacier(i));
 s(i) = subplot(1,3,i);
+%Glacier outline
     minE = min(rig.(name)(:,1));
     minN = min(rig.(name)(:,2));
 Eg = rig.(name)(:,1) - minE;
@@ -119,6 +125,11 @@ plot(Eg(1:304),Ng(1:304),'k'); hold on
 plot(Eg(305:330),Ng(305:330),'k');
 plot(Eg(331:356),Ng(331:356),'k');
 plot(Eg(357:end),Ng(357:end),'k');
+   %ELA
+    Eela = rig.ELA(ELA_d(i,1):ELA_d(i,2),1) - minE;
+    Nela = rig.ELA(ELA_d(i,1):ELA_d(i,2),2) - minN;
+    plot(Eela,Nela ,'k--')
+%SWE
 Es = SWE(i).utm(:,1) - minE;
 Ns = SWE(i).utm(:,2) - minN;
 scatter(Es,Ns , pointsize, SWE(i).swe,'filled');
