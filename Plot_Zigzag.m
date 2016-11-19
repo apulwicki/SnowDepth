@@ -1,51 +1,56 @@
 %% Plotting zigzag data
 
-GZZlabel = ['G04 Z3A'; 'G04 Z2A'; 'G04 Z5B'; 'G02 Z5C'; 'G02 Z7A';'G02 Z3B'; 'G13 Z7C';'G13 Z4C'; 'G13 Z3B'; 'G13 Z5A'];
-min1 = nanmin(cell2mat(ZZ.depth(:,5)));
-max1 = nanmax(cell2mat(ZZ.depth(:,5)));
+run OPTIONS.m
+options.ZZ = 3; %only zigzags
+run MAIN
 
-for i = 1:size(GZZlabel,1)
-    x = cell2mat(ZZ.depth(ZZ.index(i):ZZ.index(i+1)-1,3));
-    y = cell2mat(ZZ.depth(ZZ.index(i):ZZ.index(i+1)-1,4));
-    z = cell2mat(ZZ.depth(ZZ.index(i):ZZ.index(i+1)-1,5));
-    x2 = nanmax(x)-x;
-    y2 = nanmax(y)-y;
-    pointsize = 30;
-    
-    meandepth = mean(z);
-    stddepth = std(z);
-    
-    figure(1)
-    %subplot(2,2,i)
-    scatter(x2, y2, pointsize, z,'filled');
-    axis equal
-    str = {strcat('mean= ', num2str(round(meandepth,1)),'cm SWE'), ...
-        strcat('std= ', num2str(round(stddepth,1)),'cm SWE')};
-    title(GZZlabel(i,:))
-    dim = [.13 .5 .3 .3];
-    annotation('textbox',dim,'String', str,'FitBoxToText','on')
-    xlabel('Distance (m)')
-    ylabel('Distance (m)')
-        %caxis([min1 max1])
-        c = colorbar;
-        %colormap(flipud(cool))
-        c.Label.String = 'SWE (cm)';
+MinMaxC = [0 220];
+
+for i = 1:3
+   labels = categories(SWE(i).ZZ);
+       pointsize = 30; clear s
+
+   if length(labels) == 3
+      for j = 1:length(labels)
+          thatZZ = SWE(i).ZZ == labels(j);
+          x = SWE(i).utm(thatZZ,1) - min(SWE(i).utm(thatZZ,1));     
+          y = SWE(i).utm(thatZZ,2) - min(SWE(i).utm(thatZZ,2));   
+          z = SWE(i).depth(thatZZ,1);
+          s(j) = subplot(1,3,j);
+            scatter(x, y, pointsize, z, 'filled');
+                axis([0 45 0 45]); axis square; box on
+                xlabel('Distance (m)'); ylabel('Distance (m)'); title(char(labels(j)));
+                if j == length(labels); 
+                caxis(MinMaxC);     c = colorbar;   c.Label.String = 'Snow depth (cm)';  %colormap(flipud(cool))
+                end
+      end
+      s1Pos = get(s(1),'position');   s3Pos = get(s(end),'position');   
+      s3Pos(3:4) = s1Pos(3:4);        set(s(end),'position',s3Pos);
+      fig=gcf;  fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 14 4];
    
-   filename = strcat('/Users/Alexandra/Documents/SFU/Data/Plots/',GZZlabel(i,:));%,'same_scale');
-   %filename = strcat('/home/glaciology1/Documents/Data/Plots/same_scale',GZZlabel(i,:));
-   print(filename,'-dpng')
-   clf
-%     if i == 3
-%         min = nanmin(cell2mat(ZZ_cord(GZZ(i):GZZ(i+1)-1,5)));
-%         max = nanmax(cell2mat(ZZ_cord(GZZ(i):GZZ(i+1)-1,5)));
-%         caxis([min max])
-%         c = colorbar;
-%         colormap(flipud(cool))
-%         c.Label.String = 'Snow depth (cm)';
-%     end
-    
+   elseif length(labels) == 4
+      for j = 1:length(labels)
+          thatZZ = SWE(i).ZZ == labels(j);
+          x = SWE(i).utm(thatZZ,1) - min(SWE(i).utm(thatZZ,1));     
+          y = SWE(i).utm(thatZZ,2) - min(SWE(i).utm(thatZZ,2));   
+          z = SWE(i).depth(thatZZ,1);
+          s(j) = subplot(2,2,j);
+            scatter(x, y, pointsize, z, 'filled');
+                axis([0 45 0 45]); axis square; box on
+                xlabel('Distance (m)'); ylabel('Distance (m)'); title(char(labels(j)));
+                if j == length(labels); 
+                caxis(MinMaxC);     c = colorbar;   c.Label.String = 'Snow depth (cm)';  %colormap(flipud(cool))
+                end
+      end
+      s1Pos = get(s(1),'position');   s3Pos = get(s(end),'position');   
+      s3Pos(3:4) = s1Pos(3:4);        set(s(end),'position',s3Pos);
+      fig=gcf;  fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 10 8];
+   end 
+
+   set(findall(fig,'-property','FontSize'),'FontSize',16)
+filename = ['ZigzagDepth_', char(SWE(i).glacier(1,1))];
+print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')         
 end
-clear max1 min1 x y x2 y2 z i k c pointsize stddepth meandepth str dim filename GZZlabel
 
 %dlmwrite('/home/glaciology1/Documents/QGIS/Data/TestPoints.csv',closest, 'delimiter', ',', 'precision', 9); %Write matrix with new waypoints to csv file for QGIS
 

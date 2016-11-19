@@ -2,14 +2,33 @@
 
 % Box plots for each glacier
 
+ % With zigzags
+run OPTIONS.m
+options.ZZ = 1;
+run MAIN
+
 boxplot([SWE(1).depth;SWE(2).depth;SWE(3).depth], [SWE(1).glacier;SWE(2).glacier;SWE(3).glacier],...
     'GroupOrder',{'G04','G02','G13'},'labels',{'Glacier 4','Glacier 2','Glacier 13'})
     ylabel('Snow depth (cm)')
     fig=gcf;
-    set(findall(fig,'-property','FontSize'),'FontSize',20) 
+    set(findall(fig,'-property','FontSize'),'FontSize',17) 
     
-    print([options.path1,'box_depth'],'-dpng'); print([options.path2,'box_depth'],'-dpng') 
+    print([options.path1,'box_depth_wZZ'],'-dpng'); print([options.path2,'box_depth_wZZ'],'-dpng') 
         clear fig
+        
+ % Remove zigzags
+run OPTIONS.m
+options.ZZ = 2;
+run MAIN
+
+boxplot([SWE(1).depth;SWE(2).depth;SWE(3).depth], [SWE(1).glacier;SWE(2).glacier;SWE(3).glacier],...
+    'GroupOrder',{'G04','G02','G13'},'labels',{'Glacier 4','Glacier 2','Glacier 13'})
+    ylabel('Snow depth (cm)')
+    fig=gcf;
+    set(findall(fig,'-property','FontSize'),'FontSize',17) 
+    
+    print([options.path1,'box_depth_noZZ'],'-dpng'); print([options.path2,'box_depth_noZZ'],'-dpng') 
+        clear fig        
 %% Zigzag Plot
 
 zig_lab = ['G04\_Z3A\_ZZ0'; 'G04\_Z2A\_ZZ0'; 'G04\_Z5B\_ZZ0';...

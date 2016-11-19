@@ -55,8 +55,8 @@ print([options.path1, filename],'-dpng'); print([options.path2, filename],'-dpng
     errorx = [zeros(length(y),1),zeros(length(y),1)];
     [SPfit1, gof1] = fit(x,y,'poly1');
 h1 = errorbarxy(x,y,errorx(:,2),errory(:,2),errorx(:,1),errory(:,1),'Color','k','LineStyle','none','Marker','o',...
-   'MarkerFaceColor','b','LineWidth',1,'MarkerSize',11); hold on
-l1 = plot(SPfit1,'b'); hold on
+   'MarkerFaceColor',options.RGB(1,:),'LineWidth',1,'MarkerSize',11); hold on
+l1 = plot(SPfit1,'k'); l1.Color = options.RGB(1,:); hold on
 
     y = cell2mat(Density.tube(8:14,2)); %Glacier 2
     x = cell2mat(Density.tube(8:14,9));
@@ -65,8 +65,8 @@ l1 = plot(SPfit1,'b'); hold on
     errorx = [zeros(length(y),1),zeros(length(y),1)];
     [SPfit2, gof2] = fit(x,y,'poly1');
 h2 = errorbarxy(x,y,errorx(:,2),errory(:,2),errorx(:,1),errory(:,1),'Color','k','LineStyle','none','Marker','o',...
-   'MarkerFaceColor','k','LineWidth',1,'MarkerSize',11); hold on
-l2 = plot(SPfit2,'k'); hold on
+   'MarkerFaceColor',options.RGB(2,:),'LineWidth',1,'MarkerSize',11); hold on
+l2 = plot(SPfit2,'k'); l2.Color = options.RGB(2,:); hold on
 
     y = cell2mat(Density.tube(15:end,2)); %Glacier 13
     x = cell2mat(Density.tube(15:end,9));
@@ -75,23 +75,21 @@ l2 = plot(SPfit2,'k'); hold on
     errorx = [zeros(length(y),1),zeros(length(y),1)];
     [SPfit3, gof3] = fit(x,y,'poly1');
 h3 = errorbarxy(x,y,errorx(:,2),errory(:,2),errorx(:,1),errory(:,1),'Color','k','LineStyle','none','Marker','o',...
-   'MarkerFaceColor','r','LineWidth',1,'MarkerSize',11); hold on
-l3 = plot(SPfit3,'r'); hold on
+   'MarkerFaceColor',options.RGB(3,:),'LineWidth',1,'MarkerSize',11); hold on
+l3 = plot(SPfit3,'k'); l3.Color = options.RGB(3,:); hold on
+
 
     ylabel('SWE tube density (kg m^{-3})')
     xlabel('Elevation(m)')
     legend([h1(1) l1 h2(1) l2 h3(1) l3], {'G04',['G04 fit R^2=',num2str(round(gof1.rsquare,2))], ...
         'G02',['G02 fit R^2=',num2str(round(gof2.rsquare,2))],...
-        'G13',['G13 fit R^2=',num2str(round(gof3.rsquare,2))]})
-    fig=gcf;
-    set(findall(fig,'-property','FontSize'),'FontSize',12) 
+        'G13',['G13 fit R^2=',num2str(round(gof3.rsquare,2))]}, 'Location','southeast')
+    fig=gcf;set(findall(fig,'-property','FontSize'),'FontSize',12)
+    fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 7.3 7];
     
-filename = strcat('/home/glaciology1/Documents/Data/Plots/ElevationVsSWEtube_all');
-%filename = strcat('/Users/Alexandra/Documents/SFU/Data/Plots/ElevationVsSWEtube_all');
-print(filename,'-dpng')
-filename = strcat('/home/glaciology1/Documents/MastersDocuments/Methods/ElevationVsSWEtube_all');
-%filename = strcat('/Users/Alexandra/Documents/SFU/MastersDocuments/Methods/ElevationVsSWEtube_all');
-print(filename,'-dpng')
+ filename = 'ElevationVsSWEtube_all';
+print([options.path1, filename],'-dpng'); print([options.path2, filename],'-dpng')
+   
     clear P LM x y index* i j count yfit str dim filename error
 
     
@@ -113,8 +111,8 @@ figure(3)
     errorx = [zeros(length(y),1),zeros(length(y),1)];
     [SPfit2, gof2] = fit(x,y,'poly1');
 h2 = errorbarxy(x,y,errorx,errory,'Color','k','LineStyle','none','Marker','o',...
-   'MarkerFaceColor','k','LineWidth',1,'MarkerSize',11); hold on
-l2 = plot(SPfit2,'k'); hold on
+   'MarkerFaceColor',options.RGB(2,:),'LineWidth',1,'MarkerSize',11); hold on
+l2 = plot(SPfit2,'k'); l2.Color = options.RGB(2,:); hold on
 
     y = cell2mat(Density.snowpit(5:7,2));
     x = cell2mat(Density.snowpit(5:7,5));
@@ -123,8 +121,8 @@ l2 = plot(SPfit2,'k'); hold on
     errorx = [zeros(length(y),1),zeros(length(y),1)];
     [SPfit1, gof1] = fit(x,y,'poly1');
 h1 = errorbarxy(x,y,errorx,errory,'Color','k','LineStyle','none','Marker','o',...
-   'MarkerFaceColor','b','LineWidth',1,'MarkerSize',11); hold on   
-l1 = plot(SPfit1,'b'); hold on
+   'MarkerFaceColor',options.RGB(1,:),'LineWidth',1,'MarkerSize',11); hold on   
+l1 = plot(SPfit1,'b'); l1.Color = options.RGB(1,:); hold on
 
     y = cell2mat(Density.snowpit(8:end,2));
     x = cell2mat(Density.snowpit(8:end,5));
@@ -133,17 +131,20 @@ l1 = plot(SPfit1,'b'); hold on
     errorx = [zeros(length(y),1),zeros(length(y),1)];
     [SPfit3, gof3] = fit(x,y,'poly1');
 h3 = errorbarxy(x,y,errorx,errory,'Color','k','LineStyle','none','Marker','o',...
-   'MarkerFaceColor','r','LineWidth',1,'MarkerSize',11); hold on
-l3 = plot(SPfit3,'r'); hold on
+   'MarkerFaceColor',options.RGB(3,:),'LineWidth',1,'MarkerSize',11); hold on
+l3 = plot(SPfit3,'r'); l3.Color = options.RGB(3,:); hold on
 
     ylabel('Snowpit density (kg m^{-3})')
     xlabel('Elevation(m)')
     legend([h1(1) l1 h2(1) l2 h3(1) l3], {'G04',['G04 fit R^2=',num2str(round(gof1.rsquare,2))], ...
             'G02',['G02 fit R^2=',num2str(round(gof2.rsquare,2))],...
             'G13',['G13 fit R^2=',num2str(round(gof3.rsquare,2))]},'Location','best')
-filename = strcat('/home/glaciology1/Documents/Data/Plots/ElevationVsSnowpit_all');
-%filename = strcat('/Users/Alexandra/Documents/SFU/Data/Plots/ElevationVsSnowpit_all');
-print(filename,'-dpng')
+    
+    fig = gcf; set(findall(fig,'-property','FontSize'),'FontSize',12)
+    fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 7 6.5];
+    filename = 'ElevationVsSnowpit_all';
+print([options.path1, filename],'-dpng'); print([options.path2, filename],'-dpng')
+
     clear P LM x y index* i j count yfit str dim filename error
 
     
@@ -161,19 +162,18 @@ figure
 %SWE tube
 tubeI = [1,26;27,53;54,106];
 pitI = [5 7; 1 4; 8 10];
-RGB = [9, 132, 103; 239, 9, 9; 130, 75, 135]/255;
 for i = 1:length(tubeI)
    t.(['p',num2str(i)]) = plot(cell2mat(Density.SWEdepth(tubeI(i,1):tubeI(i,2),4)),... %density
        cell2mat(Density.SWEdepth(tubeI(i,1):tubeI(i,2),3)),'.',... %depth
-       'Color',RGB(i,:),'MarkerSize',20); hold on; 
+       'Color',options.RGB(i,:),'MarkerSize',20); hold on; 
    p.(['p',num2str(i)]) = plot(cell2mat(Density.snowpit(pitI(i,1):pitI(i,2),2)),... %density
        cell2mat(Density.snowpit(pitI(i,1):pitI(i,2),8)),'o',... %depth
-       'Color',RGB(i,:),'MarkerSize',18); hold on;
+       'Color',options.RGB(i,:),'MarkerSize',18); hold on;
 end
     xlabel('Density (kg m^{-3})'); ylabel('Snow depth (cm)');
     legend([t.p1, t.p2, t.p3, p.p1, p.p2, p.p3],...
         {'Fed. Sampler - Glacier 4','Fed. Sampler - Glacier 2','Fed. Sampler - Glacier 13',...
-        'Snowpit - Glacier 4','Snowpit - Glacier 2','Snowpit - Glacier 13'},'Location','best')
+        'Snowpit - Glacier 4','Snowpit - Glacier 2','Snowpit - Glacier 13'},'Location','northwest')
      
 %fit for tube
 x = cell2mat(Density.SWEdepth(:,4)); y = cell2mat(Density.SWEdepth(:,3));
@@ -181,46 +181,52 @@ x = cell2mat(Density.SWEdepth(:,4)); y = cell2mat(Density.SWEdepth(:,3));
     LM = fitlm(x,y); %fit is significant
     plot(x,yfit,'k')
 
-     dim = [0.65,0.67,0.11,0.11];
+     dim = [0.65,0.75,0.11,0.11];
     str = {strcat('y= ',num2str(round(P(1),2)),'x+ ',num2str(round(P(2)))), ...
         strcat('R^2= ',num2str(round(LM.Rsquared.Ordinary,2)))} ;
     annotation('textbox',dim,'String', str,'FitBoxToText','on')
 
-    fig=gcf;
-    set(findall(fig,'-property','FontSize'),'FontSize',18) 
-
+    fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',12)
+    fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 7 6.5];
     filename = 'DepthDensity_SWEonly';
-print([options.path1, filename],'-dpng'); print([options.path2, filename],'-dpng')
+print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
 
 %% Depth vs Elevation
 % Swe tube
-depth = cell2mat(Density.tube(:,10));
-elev = cell2mat(Density.tube(:,9));
-index = [1,7; 8,14; 15,31];
-for i = 1:3
-   plot(depth(index(i,1):index(i,2)), elev(index(i,1):index(i,2)), '.','MarkerSize', 15); hold on
-end
-    xlabel('Depth (cm)'); ylabel('Elevation (m a.s.l.)');
-    legend('Glacier 4','Glacier 2','Glacier 13')
+% depth = cell2mat(Density.tube(:,10));
+% elev = cell2mat(Density.tube(:,9));
+% index = [1,7; 8,14; 15,31];
+%     figure
+% for i = 1:3
+%    plot(depth(index(i,1):index(i,2)), elev(index(i,1):index(i,2)), '.',...
+%        'MarkerSize', 15, 'Color', options.RGB(i,:)); hold on
+% end
+%     xlabel('Depth (cm)'); ylabel('Elevation (m a.s.l.)');
+%     legend('Glacier 4','Glacier 2','Glacier 13')
     
 % All data
-RGB = [0 76 153; 0 153 76; 255 127 0]/255;
+% run OPTIONS.m
+% options.ZZ = 2; %exclude zigzags
+% run MAIN
+    figure(1); clf
 for j = 1:3
     depth = SWE(j).depth;
     elev = SWE(j).utm(:,3);
     i = ['n',num2str(j)];
     [f.(i), g.(i)] = fit(depth,elev,'poly1');
-        mark = ['.',colour(j)];
-    h = plot(depth,elev,'.','Color',RGB(j,:),'MarkerSize',13); hold on
-    p = plot(f.(i)); hold on
-    set(p,'Color',RGB(j,:)); set(p, 'LineWidth',1.5);
-end
+    subplot(1,3,j)
+        h = plot(depth,elev,'.','Color',options.RGB(j,:),'MarkerSize',13); hold on
+        p = plot(f.(i)); hold on
+        set(p,'Color',options.RGB(j,:)); set(p, 'LineWidth',1.5);
+        
+        b = gca; legend(b,'off');
+        dim = [b.Position(1)+0.01 b.Position(2)+.5 .3 .3];
+        annotation('textbox',dim,'String', {char(options.glacier(j)),['R^2=',num2str(round(g.(i).rsquare,2))]},'FitBoxToText','on')
     axis([0 350 2000 2600])
     xlabel('Depth (cm)'); ylabel('Elevation (m a.s.l.)');
-    legend('Glacier 4',['R^2=',num2str(round(g.n1.rsquare,2))],...
-        'Glacier 2',['R^2=',num2str(round(g.n2.rsquare,2))],...
-        'Glacier 13',['R^2=',num2str(round(g.n3.rsquare,2))],'Location','best')    
-    fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',20) 
+end 
+    fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',12) 
+    fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 13 5];
 
     filename = 'DepthElevation';
 print([options.path1, filename],'-dpng'); print([options.path2, filename],'-dpng')
