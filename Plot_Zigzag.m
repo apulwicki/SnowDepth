@@ -54,6 +54,26 @@ end
 
 %dlmwrite('/home/glaciology1/Documents/QGIS/Data/TestPoints.csv',closest, 'delimiter', ',', 'precision', 9); %Write matrix with new waypoints to csv file for QGIS
 
+%% Boxplot to compare zigzags
+run OPTIONS.m
+options.ZZ = 3; %only zigzags
+run MAIN
+
+yaxis = [min([SWE(1).depth; SWE(2).depth; SWE(3).depth]) max([SWE(1).depth; SWE(2).depth; SWE(3).depth])];
+text_dim = [.16 .58 .3 .3;   .45 .58 .3 .3;     .73 .58 .3 .3];
+
+for i = 1:3
+   s(i) = subplot(1,3,i);
+   boxplot(SWE(i).depth,SWE(i).ZZ)
+      ylabel('Depth (cm)');     ylim(yaxis)
+      set(gca,'FontSize',10,'XTickLabelRotation',90)
+      annotation('textbox',text_dim(i,:),'String',char(options.glacier(i)),'FitBoxToText','on');
+end
+      fig=gcf;  fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 15 5];
+      set(findall(fig,'-property','FontSize'),'FontSize',16)
+filename = 'Zigzag_Boxplot';
+print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')         
+end
 %% Variogram - zigzag
 
 GZZlabel = ['G04 Z3A'; 'G04 Z2A'; 'G04 Z5B'; 'G02 Z5C'; 'G02 Z7A';'G02 Z3B'; 'G13 Z7C';'G13 Z4C'; 'G13 Z3B'; 'G13 Z5A'];

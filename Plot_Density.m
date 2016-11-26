@@ -84,7 +84,7 @@ l3 = plot(SPfit3,'k'); l3.Color = options.RGB(3,:); hold on
     legend([h1(1) l1 h2(1) l2 h3(1) l3], {'G04',['G04 fit R^2=',num2str(round(gof1.rsquare,2))], ...
         'G02',['G02 fit R^2=',num2str(round(gof2.rsquare,2))],...
         'G13',['G13 fit R^2=',num2str(round(gof3.rsquare,2))]}, 'Location','southeast')
-    fig=gcf;set(findall(fig,'-property','FontSize'),'FontSize',12)
+    fig=gcf;set(findall(fig,'-property','FontSize'),'FontSize',16)
     fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 7.3 7];
     
  filename = 'ElevationVsSWEtube_all';

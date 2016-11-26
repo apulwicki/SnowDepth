@@ -72,21 +72,29 @@ rig.G2 = csvread('/home/glaciology1/Documents/Data/GlacierShapeFiles/RIG_G2.csv'
 rig.G13 = csvread('/home/glaciology1/Documents/Data/GlacierShapeFiles/RIG_G13.csv');
 rig.ELA = csvread('/home/glaciology1/Documents/Data/GlacierShapeFiles/ELA.csv');
 
-ELA_d = [1 7; 16 23; 8 15];
 
 pointsize = 13;
-glacier = {'G4','G2','G13'};  
 
 clf
 pos_axis        = [0 0 .35 1; 0.19 0 .35 1; 0.51 0 .35 1];
-flowarrow_x     = [0.07 0.08; 0.47 0.45; 0.78 0.76];
-flowarrow_y     = [0.41 0.37; 0.3  0.34; 0.3 0.34];
+flowarrow_x     = [0.07 0.08; 0.46 0.42; 0.74 0.73];
+flowarrow_y     = [0.45 0.36; 0.23  0.31; 0.20 0.31];
 
+for opt = 2:9
+
+    run OPTIONS.m
+    options.DensitySWE  = opt;
+    options.ZZ          = 1; %include zigzags
+    run MAIN
+
+ELA_d = [1 7; 16 23; 8 15];
+    
 Xlim = [0 max([rig.G4(:,1)-min(rig.G4(:,1));rig.G2(:,1)-min(rig.G2(:,1));rig.G13(:,1)-min(rig.G13(:,1))])];
 Ylim = [0 max([rig.G4(:,2)-min(rig.G4(:,2));rig.G2(:,2)-min(rig.G2(:,2));rig.G13(:,2)-min(rig.G13(:,2))])];
+Zlim = [0 1.2]; %round(max([SWE(1).swe; SWE(2).swe; SWE(3).swe]),2)
 
 for i = 1:2
-    name    = char(glacier(i));
+    name    = char(options.glacier(i));
     s(i) = subplot(1,3,i);
        %Glacier outline
             minE = min(rig.(name)(:,1));
@@ -114,40 +122,41 @@ if i ==1; scalebar('ScaleLength', 2000, 'Unit', 'm', 'Location','northwest'); en
 end 
 
 i = 3;
-name    = char(glacier(i));
-s(i) = subplot(1,3,i);
-%Glacier outline
-    minE = min(rig.(name)(:,1));
-    minN = min(rig.(name)(:,2));
-Eg = rig.(name)(:,1) - minE;
-Ng = rig.(name)(:,2) - minN;
-plot(Eg(1:304),Ng(1:304),'k'); hold on
-plot(Eg(305:330),Ng(305:330),'k');
-plot(Eg(331:356),Ng(331:356),'k');
-plot(Eg(357:end),Ng(357:end),'k');
-   %ELA
-    Eela = rig.ELA(ELA_d(i,1):ELA_d(i,2),1) - minE;
-    Nela = rig.ELA(ELA_d(i,1):ELA_d(i,2),2) - minN;
-    plot(Eela,Nela ,'k--')
-%SWE
-Es = SWE(i).utm(:,1) - minE;
-Ns = SWE(i).utm(:,2) - minN;
-scatter(Es,Ns , pointsize, SWE(i).swe,'filled');
-    axis off;       axis equal;
-    s(i).Box        = 'off'; 
-    s(i).Position   = pos_axis(i,:);
-    annotation('textarrow',flowarrow_x(i,:),flowarrow_y(i,:),'String','')
-Xlim(2) = max([Xlim(2), max(Eg)]); Ylim(2) = max([Ylim(2), max(Ng)]); 
-axis([Xlim, Ylim]); caxis([0 1.2]);
+    name    = char(options.glacier(i));
+    s(i) = subplot(1,3,i);
+    %Glacier outline
+        minE = min(rig.(name)(:,1));
+        minN = min(rig.(name)(:,2));
+    Eg = rig.(name)(:,1) - minE;
+    Ng = rig.(name)(:,2) - minN;
+    plot(Eg(1:304),Ng(1:304),'k'); hold on
+    plot(Eg(305:330),Ng(305:330),'k');
+    plot(Eg(331:356),Ng(331:356),'k');
+    plot(Eg(357:end),Ng(357:end),'k');
+       %ELA
+        Eela = rig.ELA(ELA_d(i,1):ELA_d(i,2),1) - minE;
+        Nela = rig.ELA(ELA_d(i,1):ELA_d(i,2),2) - minN;
+        plot(Eela,Nela ,'k--')
+    %SWE
+    Es = SWE(i).utm(:,1) - minE;
+    Ns = SWE(i).utm(:,2) - minN;
+    s3 = scatter(Es,Ns , pointsize, SWE(i).swe,'filled');
+        axis off;       axis equal;
+        s(i).Box        = 'off'; 
+        s(i).Position   = pos_axis(i,:);
+        annotation('textarrow',flowarrow_x(i,:),flowarrow_y(i,:),'String','')
+    Xlim(2) = max([Xlim(2), max(Eg)]); Ylim(2) = max([Ylim(2), max(Ng)]); 
+    axis([Xlim, Ylim]); caxis(Zlim);
 
-if i ==3; c = colorbar('location','eastoutside');
-    ylabel(c,'SWE (m)'); end   
+    if i ==3; c = colorbar('location','eastoutside');
+        ylabel(c,'SWE (m)'); end   
   
 
- % North arrow
-Narrow = imread('Narrow.jpg');
-axes('position',[-0.02,0.65,0.12,0.12])
-imshow(Narrow);       
+     % North arrow
+    Narrow = imread('Narrow.jpg');
+    a = axes('position',[-0.02,0.65,0.12,0.12]); 
+    Nshow = imshow(Narrow, parula);   
+    colormap(a,gray)
 
        
 
@@ -157,16 +166,9 @@ imshow(Narrow);
     
     fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',13)
     fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 13 6];
-filename = 'SWEmap';
+filename = ['SWEmap_opt',num2str(opt)];
 print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
     
-
-% scaleruler('units','km')
-% setm(handlem('scaleruler'), ...
-%     'MajorTick', 0:0.5:2,...
-%     'MinorTick', 0,...
-%     'TickDir', 'down', ...
-%     'MajorTickLength', 0.25,...
-%     'MinorTickLength', 0)
+end
 
 
