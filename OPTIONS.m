@@ -64,6 +64,8 @@ options.glacier        = {'G4','G2','G13'};
 options.topoVars       = {'{\itd} (m)', '\alpha (^{\circ})', '{\itz} (m a.s.l)', ...
                             '{\itN}', '{\kappa_P} (m^{-1})',...
                             '{\itm}', '{\kappa_T} (m^{-1})', '{\itSx}'};
-                
+options.topoVars_xunit = {'\alpha', '{\itz}', '{\itN}','{\kappa_P}','{\itm}' ,...
+                            '{\kappa_T}','{\itSx}','{\itd}'};
+ 
                    
                 

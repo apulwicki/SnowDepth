@@ -221,3 +221,22 @@ end
     clear v i r name header glacier N* a filename edges* param fig units
 
 
+%% Correlation between topographic parameters 
+
+%Sampled
+for i = 1:3
+X = [];
+glacier = char(options.glacier(i));
+params = fieldnames(topo_sampled.(glacier));
+    for p = 1:length(params)
+        PP = char(params(p));
+        X = [X, topo_sampled.(glacier).(PP)];
+    end
+    pearson.(glacier) = corr(X); pearson.(glacier) = round(triu(pearson.(glacier)),2);
+    matrix2latex(pearson.(glacier),'/home/glaciology1/Documents/MastersDocuments/Methods/temp.txt',...
+        'rowLabels',options.topoVars_xunit,'columnLabels',options.topoVars_xunit, 'alignment','c')
+end
+    
+    
+    
+    

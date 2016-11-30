@@ -1,3 +1,17 @@
+% Importing Topographic Data
+%       This script imports topographic data that was exported from QGIS.
+%       It imports the DEMs (ratser) as well as the values of topographic
+%       parameters at each sampling location (found in QGIS). It also
+%       creates a standardized set of params (to be used in MLR for
+%       relevant coefficients) as well as a true value set (for plotting).
+%
+%       Inputs:         GlacierTopos/*, 'SPOT_TopoParams_noZZ.xlsx'
+%       Outputs:        Snowdepth structure (SD)
+%                       Elevations from GPS WPs (gps_elev)
+
+%       Alexandra Pulwicki  Created: September 2016
+%                           Updated: November 2016
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% Importing DEMs
 files = dir('/home/glaciology1/Documents/Data/GlacierTopos/*.asc');
@@ -24,7 +38,8 @@ for i = 1:length(files)
     A.data(:,~any(~isnan(A.data), 1))=[];
     v(i,1) = cellstr(files(i).name(1:end-4)); eval([v{i,1} '= A.data;']);
 end
-    
+
+%Create structure with full raster of data
 for i = 1:length(v)/3
     param = char(v(i*3)); param = param(1:end-4);
     eval(['topo_full.G4.(param) = ',v{3*i-1,1},';']);
@@ -38,16 +53,17 @@ end
 %Import topos
 [topo, ~, ~] = xlsread('SPOT_TopoParams_noZZ.xlsx','Sheet1','A1:G2353');
 
-%Remove zigzag values
+%Remove zigzag values (they skew the MLR results)
 run OPTIONS.m; options.ZZ = 2;
 run MAIN.m
 
+%Get divisions for each glacier of the continous file imported
 div = [1, length(SWE(1).swe); length(SWE(1).swe)+1, length(SWE(1).swe)+length(SWE(2).swe);...
         length(SWE(1).swe)+length(SWE(2).swe)+1, length(SWE(1).swe)+length(SWE(2).swe)+length(SWE(3).swe)];
-glacier = [4,2,13];
 
+%Create structure of topo params for each glacier
 for i = 1:3
-name = ['G', num2str(glacier(i))];
+name = char(options.glacier(i));
     aspect           = topo(div(i,1):div(i,2),2);
     northness        = topo(div(i,1):div(i,2),3);
     profileCurve     = topo(div(i,1):div(i,2),4);
@@ -60,31 +76,32 @@ name = ['G', num2str(glacier(i))];
         'tangentCurve',tangentCurve);
 end
 
-% Sx import & stepwise MLR
+% Sx import
 [d300, d300text] = xlsread('d300_h0.xlsx','sampling_d300_h0','B1:BU3936');
 [d200, d200text] = xlsread('d200_h0.xlsx','sampling_d200_h0','A1:BT3936');
 [d100, d100text] = xlsread('d100_h0.xlsx','sampling_d100_h0','A1:BT3936');
     d300text = strcat('d300',d300text);
     d200text = strcat('d200',d200text);
     d100text = strcat('d100',d100text);
-
-for i = 1:3
-    y       = SWE(i).swe;
-    name    = ['G', num2str(glacier(i))];
-    X       = [d100(div(i,1):div(i,2),:), d200(div(i,1):div(i,2),:), d300(div(i,1):div(i,2),:)];
-    text    = [d100text, d200text, d300text];
-   
-    [~, ~, ~, inmodel] = stepwisefit(X,y);
-    text    = text(1,inmodel);
-    X1      = [ones(length(X),1), X(:,inmodel)];
-    mlr_Sx     = regress(y,X1); mlr_sort = real(sort(complex(mlr_Sx)));
     
-    best            = find(mlr_Sx == mlr_sort(end-1,1));
-    winddir.(name)  = text(best);
-    Sx              = X1(:,best);
-    topo_sampled.(name).Sx = Sx;
-end
-        clear best d300* d200* d100* i inmodel mlr* name text X* y
+    %Sx stepwise regression
+    for i = 1:3
+        y       = SWE(i).swe; %get swe data
+        name    = char(options.glacier(i));
+        X       = [d100(div(i,1):div(i,2),:), d200(div(i,1):div(i,2),:), d300(div(i,1):div(i,2),:)]; %get Sx for all distances
+        text    = [d100text, d200text, d300text];
+        [~, ~, ~, inmodel] = stepwisefit(X,y); %stepwise regression for all directions and all distances
+        text    = text(1,inmodel);
+        
+        X1      = [ones(length(X),1), X(:,inmodel)]; %take only the parameters that were significant
+        mlr_Sx  = regress(y,X1); mlr_sort = real(sort(complex(mlr_Sx))); %do an MLR and find the most significant one
+
+        best            = find(mlr_Sx == mlr_sort(end-1,1)); %find best Sx
+        winddir.(name)  = text(best); %create structure with info on best wind direction and distance
+        Sx              = X1(:,best); %chose Sx data from best correlation
+        topo_sampled.(name).Sx = Sx; %add Sx with best correlation to structure
+    end
+            clear best d300* d200* d100* i inmodel mlr* name text X* y
 
         
 %Distance from centreline import
@@ -97,7 +114,7 @@ topo_sampled_ns = topo_sampled;
 %Standardizing variables
 params = fieldnames(topo_sampled.G4);
 for i = 1:3
-name= char(glacier(i));
+name = char(options.glacier(i));
     for t = 1:length(params)
     field = char(params(t));
     
@@ -109,18 +126,19 @@ end
     clear i name topo field j params div glacier G t X1 Y1 min_dist fields distance centreline corner
     clear aspect* elev* north* profil* slope* Sx* tangent*    
 
-%Put zigzags back in
+%Put zigzags back in the final SWE structure (not related to topo)
 run OPTIONS.m; options.ZZ = 1;
 run MAIN.m   
 
 
-%% Get topoparams for zigzags
+%% Get topo params for zigzag locations
 
-glacier = {'G4','G2','G13'};
 topo_sampled_wZZ = topo_sampled;
 
+%Find the zigzag label in the sampled topo structure and match it with the 
+%zigzag values that are missing for the full matrix
 for i = 1:3;
-    name = char(glacier(i));
+    name = char(options.glacier(i));
 
     zz = SWE(i).pattern =='ZZ';
     zz_lab = char(SWE(i).label(:)); zz_lab = cellstr(zz_lab(:,1:8));

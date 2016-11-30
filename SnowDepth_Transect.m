@@ -323,22 +323,35 @@ for j = 1:3;
     depthBin = zeros(length(bins)-1,1);
     for i = 1:length(bins)-1
         logiEL = elev>bins(i) & elev<=bins(i+1);
-        depthBin(i) = mean(depth(logiEL));
+        depthBin(i) = std(depth(logiEL))/mean(depth(logiEL))*100;
     end
 
     binsPlot.(glacier) = bins(~isnan(depthBin))-binSize/2;
     depthPlot.(glacier) = depthBin(~isnan(depthBin));
 
     [myfit.(glacier), gof.(glacier)] = fit(binsPlot.(glacier), depthPlot.(glacier),'poly1');
-    p.(glacier) = plot(myfit.(glacier), binsPlot.(glacier), depthPlot.(glacier),'-'); hold on
+    p.(glacier) = plot(myfit.(glacier), binsPlot.(glacier), depthPlot.(glacier),'.'); hold on
+    set(p.(glacier)(1,1), 'Color',options.RGB(j,:),'MarkerSize', 10)
+    set(p.(glacier)(2,1), 'Color',options.RGB(j,:), 'LineWidth', 2)
 end
 
-title('Mean snow depth (binned) vs DEM elevation')
-xlabel('Elevation (m a.s.l.)'); ylabel('Mean Snow depth (cm)')
+%Elevation span lines
+plot([1573 2854], [98 98], 'Color',options.RGB(1,:), 'LineWidth', 4);
+plot([1906 3098], [96 96], 'Color',options.RGB(2,:), 'LineWidth', 4);
+plot([1775 3037], [94 94], 'Color',options.RGB(3,:), 'LineWidth', 4);
+ylim([0 100]); xlim([1500 3100])
+
+xlabel('Elevation (m a.s.l.)'); ylabel([{'Standard deviation as percent'}, {'of mean snow depth (%)'}])
 legend([p.G04(1,1) p.G02(1,1) p.G13(1,1)], ...
     {['G04 R^2 = ', num2str(round(gof.G04.rsquare,2))],...
     ['G02 R^2 = ', num2str(round(gof.G02.rsquare,2))],...
-    ['G13 R^2 = ', num2str(round(gof.G13.rsquare,2))]});
+    ['G13 R^2 = ', num2str(round(gof.G13.rsquare,2))]}, 'Location', 'west');
+
+    fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',13)
+    fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 8 4.5];
+filename = 'binned_std_percent';
+print([options.path1, filename],'-dpng'); print([options.path2, filename],'-dpng')
+
 
 %% Normalized Elev
 
@@ -383,3 +396,40 @@ data = [SWE(1).swe(I1), SWE(1).utm(I1,1:2); SWE(2).swe(I2), SWE(2).utm(I2,1:2);.
 d = variogramAlex(data, 20, 400);
 vario = variofitAlex(d,'test',1);
 
+%% Normality tests
+
+run OPTIONS.m
+options.ZZ = 2; %exclude zigzags
+run MAIN
+
+for g = 1:3
+glacier = char(options.glacier(g));
+pat = categories(SWE(1).pattern);   %pat = pat(1:end-1);
+
+%Overall glacier
+%     [~,p,stats] = chi2gof(SWE(g).depth, 'Alpha', 0.1);
+%     display([char(glacier),' ', num2str(p), ' ', num2str(stats.chi2stat)])  
+    %display([char(glacier),' ', num2str(round(nanstd(SWE(g).depth)/ nanmean(SWE(g).depth)*100)),'%'])
+    display([char(glacier),' ', num2str(round(nanmean(SWE(g).depth),1))])
+
+    %Pattern and Person
+    per     = categories(SWE(1).person); per = per(1:4);    person = [];
+    for i = 1:length(pat)
+%         [~,p,stats] = chi2gof(SWE(g).depth(SWE(g).pattern==pat(i)), 'Alpha', 0.1);
+%         pattern(i) = stats.chi2stat;
+%         pattern(i) = round(nanstd(SWE(g).depth(SWE(g).pattern==pat(i)))/...
+%             nanmean(SWE(g).depth(SWE(g).pattern==pat(i)))*100);
+        pattern(i) = round(nanmean(SWE(g).depth(SWE(g).pattern==pat(i))),1);
+       for k = 1:4
+            data = SWE(g).pattern==pat(i) & SWE(g).person==per(k);
+%         	[~,p,stats] = chi2gof(SWE(g).depth(data), 'Alpha', 0.1);
+%             person(i,k) = [stats.chi2stat];
+%             person(i,k) = round(nanstd(SWE(g).depth(data))/...
+%                 nanmean(SWE(g).depth(data))*100);
+            person(i,k) = round(nanmean(SWE(g).depth(data)),2);
+        end
+    end
+pointvar.(glacier) = table(pattern', 'RowNames',pat);
+pointvar.(glacier) = [pointvar.(glacier), ...
+    table(person(:,1),person(:,2),person(:,3),person(:,4), 'VariableNames',per, 'RowNames',pat)];
+end
