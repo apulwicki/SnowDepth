@@ -67,14 +67,12 @@ clear A box centreline d distance f* G* h i min_dist NoZZ param* RGB X1 Y1
 %% Plots - MLR
 
 % Actual vs fitted data  
-glacier = [4,2,13];
-
 for r = 2:9
 option = r;
 
 figure(1)
 for i = 1:3
-    name	= ['G', num2str(glacier(i))];
+    name	= char(options.glacier(i));
     y       = SWE(i).swe;
     X       = topo_sampled.(name);
         params = mlr(option).(name).Properties.RowNames; 
@@ -108,35 +106,78 @@ print([options.path1, filename],'-dpng'); print([options.path2, filename],'-dpng
 clf
 end
 
-%% Plots - Residuals
+%% Plots - MLR fit for all SWE options
 
-for r = 2:9
-option = r;
+R2value = [];
 
 figure(1)
 for i = 1:3
-    name	= char(options.glacier(i));
-    
-    subplot(1,3,i)
-    hist(residuals(r).(name))
-        xlabel('Residual (m w.e.)'); ylabel('Frequency');
-        title(name) 
-        b = gca; 
-        dim = [b.Position(1)+0.01 b.Position(2)+.5 .3 .3];
-        [~, chi] = chi2gof(residuals(r).(name));
-        annotation('textbox',dim,'String', ['p_{\chi} = ', num2str(chi)], 'EdgeColor','none')
-end
 
+    for r = 2:9
+    option = r;
+    name	= char(options.glacier(i));
+    y       = SWE(i).swe;
+    X       = topo_sampled.(name);
+        params = mlr(option).(name).Properties.RowNames; 
+        for j = 2:length(params)
+            field       = char(params(j));
+            X.(field)   = X.(field)*mlr(option).(name){j,1};
+        end
+	X       = struct2table(X);
+    X       = sum(X{:,:},2)+mlr(option).(name){1,1};
+
+    subplot(1,3,i)
+    axis([0 1.2 0 1.2]);    line = refline(1,0);    line.Color = 'k'; line.LineStyle = '--'; hold on
+        [f.(name), g.(name)] = fit(y, X,'poly1');
+        p = plot(f.(name)); hold on
+        set(p,'Color',options.RGB(i,:)); set(p, 'LineWidth',1.5);     
+        xlabel('Measured Winter Balance (m w.e.)'); ylabel('Modelled Winter Balance (m w.e.)');
+        title(name)
+                axis square;    box on        
+        R2value = mean([R2value g.(name).rsquare]);
+    end
+        b = gca; legend(b,'off');
+        dim = [b.Position(1)+0.01 b.Position(2)+.37 .3 .3];
+        annotation('textbox',dim,'String', ['R^2=',num2str(round(R2value,2))],'FitBoxToText','on')
+    
     fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',13)
-    fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 14 4];
-filename = ['MLRresiduals_opt',num2str(r)];
+    fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 12 4];
+filename = 'MLRfit_allLines';
 print([options.path1, filename],'-dpng'); print([options.path2, filename],'-dpng')
 
-clf
 end
 
+%% Plots - Residuals
+
+figure(1)
+for i = 1:3
+
+    for r = 2:9
+    option = r;    name	= char(options.glacier(i));
+    
+    subplot(1,3,i)
+    [N, edges] = histcounts(residuals(r).(name)); hold on
+    plot(N,'-o')
+    %hist(residuals(r).(name)); hold on
+        %b = gca; 
+        %dim = [b.Position(1)+0.01 b.Position(2)+.5 .3 .3];
+        %[~, chi] = chi2gof(residuals(r).(name));
+        %annotation('textbox',dim,'String', ['p_{\chi} = ', num2str(chi)], 'EdgeColor','none')
+    end
+        legend('Option 1', 'Option 2','Option 3','Option 4','Option 5',...
+            'Option 6','Option 7','Option 8')
+        xlim([0 40]); ylim([0 180]);
+        xlabel('Residual (m w.e.)');         title(name) 
+        if i == 1; ylabel('Frequency');
+        else     ylabel('');        end
+end
+    fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',13)
+    fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 14 4];
+filename = 'MLRresiduals_all';
+print([options.path1, filename],'-dpng'); print([options.path2, filename],'-dpng')
 
 %% Plots - Box and whisker for coeffs from density options
+clf
 
 %Rearrange to compare density options
 params = mlr(2).G4.Properties.RowNames;
@@ -155,20 +196,19 @@ box.G4 = box.G4(:,2:end); box.G2 = box.G2(:,2:end); box.G13 = box.G13(:,2:end); 
 h = cat(1, reshape(box.G4,[1 size(box.G4)]), reshape(box.G2,[1 size(box.G2)]),...
             reshape(box.G13,[1 size(box.G13)]));
 
-    RGB = [9, 132, 103; 224, 187, 2; 130, 75, 135]/255;
-aboxplot(h,'labels',params, ...
-    'Colormap',                 RGB,...
+aboxplot(h,'labels',options.topoVars2, ...
+    'Colormap',                 options.RGB,...
     'OutlierMarkerSize',        10,...
     'OutlierMarkerEdgeColor',   [0 0 0]); % Advanced box plot
         legend('Glacier 4','Glacier 2','Glacier 13'); % Add a legend
-        ylabel('% Variance Explained'); hold on 
+        ylabel('Variance Explained (%)'); hold on 
 
-%         plot(ylim,[1 1])
+        for i = 1:7
+        line([i+0.5 i+0.5],[0 100],'Color',[0 0 0],'LineStyle','--','LineWidth', 0.5)
+        end
 
-%         hax=axes; SP=1; %your point goes here 
-%         line([SP SP],get(hax,'YLim'),'Color',[1 0 0])
 
-        fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18) 
+        fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',22) 
         fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 13 10];
 
 filename = 'Coeffs_DensityOpts';
@@ -232,11 +272,25 @@ params = fieldnames(topo_sampled.(glacier));
         PP = char(params(p));
         X = [X, topo_sampled.(glacier).(PP)];
     end
-    pearson.(glacier) = corr(X); pearson.(glacier) = round(triu(pearson.(glacier)),2);
-    matrix2latex(pearson.(glacier),'/home/glaciology1/Documents/MastersDocuments/Methods/temp.txt',...
-        'rowLabels',options.topoVars_xunit,'columnLabels',options.topoVars_xunit, 'alignment','c')
+    [pearson.(glacier) Ppearson.(glacier)] = corr(X); 
+    pearson.(glacier)   = round(triu(pearson.(glacier)),2); 
+    Ppearson.(glacier)  = round(triu(Ppearson.(glacier)),2);
+%     matrix2latex(pearson.(glacier),'/home/glaciology1/Documents/MastersDocuments/Methods/temp.txt',...
+%         'rowLabels',options.topoVars_xunit,'columnLabels',options.topoVars_xunit, 'alignment','c')
 end
     
-    
+%Full topo
+for i = 1:3
+X = [];
+glacier = char(options.glacier(i));
+params = fieldnames(topo_full.(glacier));
+    for p = 1:length(params)
+        PP = char(params(p));
+        X = [X, topo_full.(glacier).(PP)(:)];
+    end
+    [pearson.(glacier) Ppearson.(glacier)] = corr(X); 
+    pearson.(glacier)   = round(triu(pearson.(glacier)),2); 
+    Ppearson.(glacier)  = round(triu(Ppearson.(glacier)),2);
+end
     
     

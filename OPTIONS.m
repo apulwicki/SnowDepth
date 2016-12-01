@@ -61,11 +61,13 @@ options.RGB            = [9, 132, 103; 224, 187, 2; 130, 75, 135]/255;
                 
                 
 options.glacier        = {'G4','G2','G13'};
-options.topoVars       = {'{\itd} (m)', '\alpha (^{\circ})', '{\itz} (m a.s.l)', ...
+options.topoVars       = {'{\itSx}', '\alpha (^{\circ})', '{\itz} (m a.s.l)', ...
                             '{\itN}', '{\kappa_P} (m^{-1})',...
-                            '{\itm}', '{\kappa_T} (m^{-1})', '{\itSx}'};
+                            '{\itm}', '{\kappa_T} (m^{-1})', '{\itd_C} (m)'};
 options.topoVars_xunit = {'\alpha', '{\itz}', '{\itN}','{\kappa_P}','{\itm}' ,...
-                            '{\kappa_T}','{\itSx}','{\itd}'};
+                            '{\kappa_T}','{\itSx}','{\itd_C}'};
+options.topoVars2      = {'{\itd_C}', '\alpha', '{\itz}', '{\itN}','{\kappa_P}','{\itm}' ,...
+                            '{\kappa_T}','{\itSx}',};
  
                    
                 
