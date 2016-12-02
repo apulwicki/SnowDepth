@@ -48,6 +48,12 @@ for i = 1:length(v)/3
 end
     clear aspect* elev* north* profil* slope* Sx* tangent* files A i param v
     
+%Northness caluclation
+    for i = 1:3
+        glacier = char(options.glacier(i));
+        topo_full.(glacier).northness = sin(topo_full.(glacier).slope).*cos(topo_full.(glacier).aspect);
+    end
+    
 %% Import Topo Params
 
 %Import topos
