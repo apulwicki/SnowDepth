@@ -293,4 +293,36 @@ params = fieldnames(topo_full.(glacier));
     Ppearson.(glacier)  = round(triu(Ppearson.(glacier)),2);
 end
     
-    
+%% BMS
+
+cd BMS
+BMS = BMS_R(SWE, topo_sampled_ns);
+cd ..
+
+% Ploting coeffs
+clf
+heads    = fieldnames(BMS.G4);  heads = heads(1:end-3);
+rowNames = BMS.G4.Properties.RowNames(1:end-2);
+    for j = 1:length(heads)
+        param = char(heads(j));
+        s1 = subplot(1,3,1); title('G4')
+            plot(1:8,BMS.G4.(param)(1:end-2),'o','MarkerSize',10); hold on
+                ylabel('BMA Coefficient')
+        s2 = subplot(1,3,2); title('G2')
+            plot(1:8,BMS.G2.(param)(1:end-2),'o','MarkerSize',10); hold on
+            	ylabel('BMA Coefficient')
+        s3 = subplot(1,3,3); title('G13')
+            plot(1:8,BMS.G13.(param)(1:end-2),'o','MarkerSize',10); hold on
+                ylabel('BMA Coefficient')
+    end
+          legend(heads,'Location','best')
+          set([s1, s2, s3],'XTick', 1:length(rowNames), 'XTickLabel',rowNames); 
+          axes(s1); rotateticklabel(s1,45); 
+          axes(s2); rotateticklabel(s2,45);   
+          axes(s3); rotateticklabel(s3,45);
+
+        fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',13)
+        fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 14 7];
+filename = 'BMScoeff_compare';
+print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')        
+                
