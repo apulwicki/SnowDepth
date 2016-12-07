@@ -1,6 +1,3 @@
-## Work on ##
-#image(attG2) and for G13 not working...
-
 
 ################# Import Data ###############################
 #install.packages(...)
@@ -14,18 +11,18 @@ importG = readMat('/Users/Alexandra/Documents/SFU/Data/SnowDepth/BMS/mat2R.mat')
 #Glacier data
     params = attr(importG$topoG, "dimnames")[[1]]
     params = c("swe",params)
-    aspect = importG$topoG[1]
+    centreD = importG$topoG[1]
     elevation = importG$topoG[2]
-    northness = importG$topoG[3]
-    profileCurve = importG$topoG[4]
-    slope = importG$topoG[5]
-    tangentCurve = importG$topoG[6]
-    Sx = importG$topoG[7]
-    centreD = importG$topoG[8]
-G = data.frame(importG$sweG, aspect, elevation, northness, profileCurve, slope, tangentCurve, Sx, centreD)
+    aspect = importG$topoG[3]
+    slope = importG$topoG[4]
+    northness = importG$topoG[5]
+    profileCurve = importG$topoG[6]
+    tangentCurve = importG$topoG[7]
+    Sx = importG$topoG[8]
+G = data.frame(importG$sweG, centreD, elevation, aspect, slope, northness, profileCurve, tangentCurve, Sx)
 colnames(G) = params
 
-rm(aspect, elevation, northness, profileCurve, slope, tangentCurve, Sx, centreD,params,importG)
+rm(aspect, elevation, northness, profileCurve, slope, tangentCurve, Sx, centreD, params, importG)
   
 
 ####### Glacier BMS ##########

@@ -17,6 +17,10 @@ function [coeffs_final, residuals] = MLRcalval(y, X)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Initializing function
 
+ %Convert from structure to table
+M = struct2table(X);
+n = size(M,2);
+
  %Make a logical matrix with all linear combinations for choosing
  %parameters
 c = logical(dec2bin(0:(2^n)-1)=='1');      c = c(2:end,:);
@@ -27,10 +31,6 @@ runs = 1000;
  %Cross validation random number matrix
 [~, cal_ind] = sort(rand(runs,length(y)),2); %create matrix of random numbers
 cal_ind = cal_ind(:,1:floor(length(y)*3/4)); %Choose 3/4 for the calibration component
-
- %Convert from structure to table
-M = struct2table(X);
-n = size(M,2);
 
  %Initialize matrices
 mlr_best = cell(length(c),1);    rmse_best = zeros(length(c),1);    BIC_best = rmse_best;
@@ -119,24 +119,20 @@ end
 
 coeffs_final = [coeffs_final, Pvar];        %add to final table
 
-%% Residuals
-
- %Get coefficients
-rows = coeffs_final.Properties.RowNames;    
-for i = 1:length(rows)
-    param       = char(rows(i));
-    B.(param)   = coeffs_final{i,1};
-end
+%% Find rmse of coefficients
 
  %Predict all data at sampling locations
-Yfit = repmat(B.Intercept, length(X.(param)),1);
-for i = 2:length(rows)
-    param = char(rows(i));
-    Yfit =  B.(param)*X.(param) + Yfit;
-end
+y_regress   = sum(X1{:,:}.*repmat(coeffs_final{:,1}(2:end)',height(X1),1),2) + coeffs_final{1,1};      %predict validation data
+rmse_final  = sqrt(sum((y-y_regress).^2)/numel(y_regress));  %get the RMSE between observed and predicted values
+
+coeffs_final = [coeffs_final(2:end,:); coeffs_final(1,:)];
+coeffs_final = [coeffs_final; table(rmse_final, 0, ...
+                'VariableName',{'Coefficient', 'PercentVarExplained'},'RowNames',{'rmse'})];
+
+%% Residuals
 
  %Get residual
-residuals = y-Yfit;
+residuals = y-y_regress;
 
 end
 

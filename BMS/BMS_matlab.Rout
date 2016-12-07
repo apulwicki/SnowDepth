@@ -19,9 +19,6 @@ Type 'q()' to quit R.
 
 [Previously saved workspace restored]
 
-> ## Work on ##
-> #image(attG2) and for G13 not working...
-> 
 > 
 > ################# Import Data ###############################
 > #install.packages(...)
@@ -43,18 +40,18 @@ The following objects are masked from ‘package:base’:
 > #Glacier data
 >     params = attr(importG$topoG, "dimnames")[[1]]
 >     params = c("swe",params)
->     aspect = importG$topoG[1]
+>     centreD = importG$topoG[1]
 >     elevation = importG$topoG[2]
->     northness = importG$topoG[3]
->     profileCurve = importG$topoG[4]
->     slope = importG$topoG[5]
->     tangentCurve = importG$topoG[6]
->     Sx = importG$topoG[7]
->     centreD = importG$topoG[8]
-> G = data.frame(importG$sweG, aspect, elevation, northness, profileCurve, slope, tangentCurve, Sx, centreD)
+>     aspect = importG$topoG[3]
+>     slope = importG$topoG[4]
+>     northness = importG$topoG[5]
+>     profileCurve = importG$topoG[6]
+>     tangentCurve = importG$topoG[7]
+>     Sx = importG$topoG[8]
+> G = data.frame(importG$sweG, centreD, elevation, aspect, slope, northness, profileCurve, tangentCurve, Sx)
 > colnames(G) = params
 > 
-> rm(aspect, elevation, northness, profileCurve, slope, tangentCurve, Sx, centreD,params,importG)
+> rm(aspect, elevation, northness, profileCurve, slope, tangentCurve, Sx, centreD, params, importG)
 >   
 > 
 > ####### Glacier BMS ##########
@@ -68,17 +65,17 @@ The following objects are masked from ‘package:base’:
 >     ##binomial prior model
 >     att_fixedG = bms(G, mprior = "fixed", mprior.size = 2, user.int = T)
                     PIP     Post Mean      Post SD Cond.Pos.Sign Idx
-elevation    1.00000000  6.899225e-04 4.523712e-05             1   2
-centreD      0.99898639  1.066849e-04 2.260189e-05             1   8
-northness    0.97417279  2.597414e-01 7.902153e-02             1   3
-slope        0.18019542 -5.393053e-04 1.267211e-03             0   5
-tangentCurve 0.06083106 -2.810458e-01 1.273400e+00             0   6
-profileCurve 0.03760489 -1.516177e-01 9.267823e-01             0   4
-aspect       0.02200904  7.593890e-07 6.950554e-06             1   1
-Sx           0.01596809 -2.060769e-05 2.795097e-04             0   7
+elevation    1.00000000  5.132209e-02 0.0030904192             1   2
+northness    0.97691480  1.217731e-02 0.0035982256             1   5
+centreD      0.76686783  7.911876e-03 0.0051316230             1   1
+tangentCurve 0.33761650 -2.712102e-03 0.0041678698             0   7
+slope        0.05880911 -3.354218e-04 0.0015540224             0   4
+profileCurve 0.03572218 -1.570322e-04 0.0010080315             0   6
+aspect       0.02103357  6.594850e-05 0.0006300310             1   3
+Sx           0.01684913 -4.153064e-05 0.0005162551             0   8
 
 Mean no. regressors               Draws             Burnins                Time 
-           "3.2898"               "256"                 "0"   "0.08683896 secs" 
+           "3.2138"               "256"                 "0"   "0.09417486 secs" 
  No. models visited      Modelspace 2^K           % visited         % Topmodels 
               "256"               "256"               "100"               "100" 
            Corr PMP            No. Obs.         Model Prior             g-Prior 
@@ -86,7 +83,7 @@ Mean no. regressors               Draws             Burnins                Time
     Shrinkage-Stats 
         "Av=0.9986" 
 
-Time difference of 0.08683896 secs
+Time difference of 0.09417486 secs
 >         GC_fix = coef(att_fixedG, order.by.pip = F, include.constant = T)
 >     
 >     ##variable prior model (test how important 'complaints' is)
@@ -128,4 +125,4 @@ Time difference of 0.08683896 secs
 > 
 > proc.time()
    user  system elapsed 
-  2.617   0.114   2.865 
+  2.685   0.136   4.064 

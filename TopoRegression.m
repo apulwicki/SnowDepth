@@ -22,9 +22,8 @@ options.ZZ          = 1; %include zigzags
 run MAIN
 
     for i = 1:3
-        glacier = [4,2,13];
         y       = SWE(i).swe;
-        name    = ['G', num2str(glacier(i))]; 
+        name    = char(options.glacier(i)); 
             display(['option = ',num2str(t), ', glacier = ',name]);
         X       = topo_sampled.(name);
 
@@ -33,16 +32,6 @@ run MAIN
     end
 end
         clear best i name X y t glacier
-
-% Sort topo params
-
-order = mlr(2).G2.Properties.RowNames(2:end);
-for i = 1:3
-   name     = char(options.glacier(i));
-   topo_full.(name)         = orderfields(topo_full.(name),order);
-   topo_sampled.(name)      = orderfields(topo_sampled.(name),order);
-   topo_sampled_ns.(name)   = orderfields(topo_sampled_ns.(name),order);
-end
         
 %% Export all values
 G4_mlrDensity = []; G2_mlrDensity = []; G13_mlrDensity = [];
@@ -295,24 +284,36 @@ end
     
 %% BMS
 
-cd BMS
-BMS = BMS_R(SWE, topo_sampled_ns);
-cd ..
+for t = 2:9
+    run OPTIONS
+    options.DensitySWE  = t;
+    options.ZZ          = 2; %exclude zigzags
+    run MAIN
+    display(['Option ', num2str(t)]);
+    
+    cd BMS
+    BMSinit = BMS_R(SWE, topo_sampled);
+    cd ..
+BMS(t,:).G4     = BMSinit.G4;
+BMS(t,:).G2     = BMSinit.G2;
+BMS(t,:).G13     = BMSinit.G13;
+end
+    clear BMSinit
 
 % Ploting coeffs
 clf
 heads    = fieldnames(BMS.G4);  heads = heads(1:end-3);
-rowNames = BMS.G4.Properties.RowNames(1:end-2);
+rowNames = BMS.G4.Properties.RowNames(1:end-1);
     for j = 1:length(heads)
         param = char(heads(j));
         s1 = subplot(1,3,1); title('G4')
-            plot(1:8,BMS.G4.(param)(1:end-2),'o','MarkerSize',10); hold on
+            plot(1:9,BMS.G4.(param)(1:end-1),'o','MarkerSize',10); hold on
                 ylabel('BMA Coefficient')
         s2 = subplot(1,3,2); title('G2')
-            plot(1:8,BMS.G2.(param)(1:end-2),'o','MarkerSize',10); hold on
+            plot(1:9,BMS.G2.(param)(1:end-1),'o','MarkerSize',10); hold on
             	ylabel('BMA Coefficient')
         s3 = subplot(1,3,3); title('G13')
-            plot(1:8,BMS.G13.(param)(1:end-2),'o','MarkerSize',10); hold on
+            plot(1:9,BMS.G13.(param)(1:end-1),'o','MarkerSize',10); hold on
                 ylabel('BMA Coefficient')
     end
           legend(heads,'Location','best')
@@ -325,4 +326,40 @@ rowNames = BMS.G4.Properties.RowNames(1:end-2);
         fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 14 7];
 filename = 'BMScoeff_compare';
 print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')        
-                
+
+%% Predicting
+
+for t = 2:9
+    %check coeff order - MLR
+    mlrCoeff = mlr(t).G4.Properties.RowNames(1:end-2);   topoCoeff = fieldnames(topo_full_ns.G4);
+    if ~isequal(mlrCoeff, topoCoeff)
+        disp('Different order of coefficients between mlr and topo'); return; end
+    %check coeff order - BMS
+    bmaCoeff = BMS(t).G4.Properties.RowNames(1:end-2);   topoCoeff = fieldnames(topo_full_ns.G4);
+    if ~isequal(bmaCoeff, topoCoeff)
+        disp('Different order of coefficients between bms and topo'); return; end
+    
+    for g = 1:3
+    glacier = char(options.glacier(g));
+        %MLR
+         %Intercept
+        sweMLR(t).(glacier) = repmat(mlr(t).(glacier){9,1}, size(topo_full_ns.(glacier).centreD));
+         %multiply coeffs and add them
+        for n = 1:length(mlrCoeff)
+            param = char(mlrCoeff(n));
+            sweT = topo_full_ns.(glacier).(param)*mlr(t).(glacier){n,1};
+            sweMLR(t).(glacier) = sweMLR(t).(glacier) + sweT;
+        end
+        
+        %BMS
+         %Intercept
+        sweBMS(t).(glacier) = repmat(BMS(t).(glacier){9,1}, size(topo_full_ns.(glacier).centreD));
+         %multiply coeffs and add them
+        for n = 1:length(bmaCoeff)
+            param = char(bmaCoeff(n));
+            sweT = topo_full_ns.(glacier).(param)*BMS(t).(glacier){n,1};
+            sweBMS(t).(glacier) = sweBMS(t).(glacier) + sweT;
+        end
+    end
+end
+

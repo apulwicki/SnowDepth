@@ -113,9 +113,12 @@ end
 %Distance from centreline import
 run CentrelineDistance.m
 
+%% Standardizing variables
+
 %Keep a copy of non-standardized variables for range of params sampled
 %plots
 topo_sampled_ns = topo_sampled;
+topo_full_ns    = topo_full;
 
 %Standardizing variables
 params = fieldnames(topo_sampled.G4);
@@ -125,6 +128,8 @@ name = char(options.glacier(i));
     field = char(params(t));
     
     topo_sampled.(name).(field) = (topo_sampled.(name).(field)-...
+        mean(topo_sampled.(name).(field)))/std(topo_sampled.(name).(field));
+    topo_full.(name).(field) = (topo_full.(name).(field)-...
         mean(topo_sampled.(name).(field)))/std(topo_sampled.(name).(field));
     end
 end
@@ -164,4 +169,15 @@ for i = 1:3;
     end
 end
 
+%% Sort all topo param structures
 
+order = {'centreD','elevation','aspect','slope','northness','profileCurve',...
+            'tangentCurve','Sx'};
+for i = 1:3
+   name     = char(options.glacier(i));
+   topo_full.(name)         = orderfields(topo_full.(name),order);
+   topo_full_ns.(name)      = orderfields(topo_full_ns.(name),order);   
+   topo_sampled.(name)      = orderfields(topo_sampled.(name),order);
+   topo_sampled_ns.(name)   = orderfields(topo_sampled_ns.(name),order);
+end
+    clear i name order
