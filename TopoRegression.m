@@ -18,7 +18,7 @@ load TopoMLR.mat
 for t = 2:9
 run OPTIONS.m
 options.DensitySWE  = t;
-options.ZZ          = 1; %include zigzags
+options.ZZ          = 2; %exclude zigzags
 run MAIN
 
     for i = 1:3
@@ -27,8 +27,8 @@ run MAIN
             display(['option = ',num2str(t), ', glacier = ',name]);
         X       = topo_sampled.(name);
 
-        [mlr(t).(name), residuals(t).(name)] = MLRcalval(y, X);
-        mlr(t).(name).Properties.VariableNames = strcat(mlr(t).(name).Properties.VariableNames, num2str(t));
+        [MLR(t).(name), residualsMLR(t).(name)] = MLRcalval(y, X);
+        MLR(t).(name).Properties.VariableNames = strcat(MLR(t).(name).Properties.VariableNames, num2str(t));
     end
 end
         clear best i name X y t glacier
@@ -36,9 +36,9 @@ end
 %% Export all values
 G4_mlrDensity = []; G2_mlrDensity = []; G13_mlrDensity = [];
 for i = 2:9
-G4_mlrDensity  = [G4_mlrDensity, mlr(i).G4(:,3)];
-G2_mlrDensity  = [G2_mlrDensity, mlr(i).G2(:,3)];
-G13_mlrDensity = [G13_mlrDensity, mlr(i).G13(:,3)];
+G4_mlrDensity  = [G4_mlrDensity, MLR(i).G4(:,3)];
+G2_mlrDensity  = [G2_mlrDensity, MLR(i).G2(:,3)];
+G13_mlrDensity = [G13_mlrDensity, MLR(i).G13(:,3)];
 end
 %     writetable(G4_mlrDensity,'/home/glaciology1/Documents/Data/GlacierTopos/G4_mlrDensity.xlsx')
 %     writetable(G2_mlrDensity,'/home/glaciology1/Documents/Data/GlacierTopos/G2_mlrDensity.xlsx')
@@ -298,22 +298,24 @@ BMS(t,:).G4     = BMSinit.G4;
 BMS(t,:).G2     = BMSinit.G2;
 BMS(t,:).G13     = BMSinit.G13;
 end
-    clear BMSinit
+    clear BMSinit t
 
 % Ploting coeffs
 clf
-heads    = fieldnames(BMS.G4);  heads = heads(1:end-3);
-rowNames = BMS.G4.Properties.RowNames(1:end-1);
+opt = 8;
+II = 1; %To include intercept =1, exclude intercept =2
+heads    = fieldnames(BMS(opt).G4);  heads = heads(1:end-1);
+rowNames = BMS(opt).G4.Properties.RowNames(1:end-II);
     for j = 1:length(heads)
         param = char(heads(j));
         s1 = subplot(1,3,1); title('G4')
-            plot(1:9,BMS.G4.(param)(1:end-1),'o','MarkerSize',10); hold on
+            plot(1:9,BMS(opt).G4.(param)(1:end-II),'o','MarkerSize',10); hold on
                 ylabel('BMA Coefficient')
         s2 = subplot(1,3,2); title('G2')
-            plot(1:9,BMS.G2.(param)(1:end-1),'o','MarkerSize',10); hold on
+            plot(1:9,BMS(opt).G2.(param)(1:end-II),'o','MarkerSize',10); hold on
             	ylabel('BMA Coefficient')
         s3 = subplot(1,3,3); title('G13')
-            plot(1:9,BMS.G13.(param)(1:end-1),'o','MarkerSize',10); hold on
+            plot(1:9,BMS(opt).G13.(param)(1:end-II),'o','MarkerSize',10); hold on
                 ylabel('BMA Coefficient')
     end
           legend(heads,'Location','best')
@@ -331,23 +333,23 @@ print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],
 
 for t = 2:9
     %check coeff order - MLR
-    mlrCoeff = mlr(t).G4.Properties.RowNames(1:end-2);   topoCoeff = fieldnames(topo_full_ns.G4);
+    mlrCoeff = MLR(t).G4.Properties.RowNames(1:end-2);   topoCoeff = fieldnames(topo_full_ns.G4);
     if ~isequal(mlrCoeff, topoCoeff)
-        disp('Different order of coefficients between mlr and topo'); return; end
+        disp('Different order of coefficients between MLR and topo'); return; end
     %check coeff order - BMS
     bmaCoeff = BMS(t).G4.Properties.RowNames(1:end-2);   topoCoeff = fieldnames(topo_full_ns.G4);
     if ~isequal(bmaCoeff, topoCoeff)
-        disp('Different order of coefficients between bms and topo'); return; end
+        disp('Different order of coefficients between BMS and topo'); return; end
     
     for g = 1:3
     glacier = char(options.glacier(g));
         %MLR
          %Intercept
-        sweMLR(t).(glacier) = repmat(mlr(t).(glacier){9,1}, size(topo_full_ns.(glacier).centreD));
+        sweMLR(t).(glacier) = repmat(MLR(t).(glacier){9,1}, size(topo_full_ns.(glacier).centreD));
          %multiply coeffs and add them
         for n = 1:length(mlrCoeff)
             param = char(mlrCoeff(n));
-            sweT = topo_full_ns.(glacier).(param)*mlr(t).(glacier){n,1};
+            sweT = topo_full_ns.(glacier).(param)*MLR(t).(glacier){n,1};
             sweMLR(t).(glacier) = sweMLR(t).(glacier) + sweT;
         end
         

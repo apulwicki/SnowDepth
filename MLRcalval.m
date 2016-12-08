@@ -48,7 +48,7 @@ for j = 1:length(c)                             %all linear combos of params
         mlr{i,1}        = regress(y(cal_ind_temp,1), ...     %MLR between calibration data and chosen topo params
             [ones(length(cal_ind_temp),1), X1{cal_ind_temp,:}])'; %(need to include a row of ones for getting intercept)
         
-        y_regress   = sum(X1{val_ind,:}.*mlr{i,1}(2:end),2) + mlr{i,1}(1);      %predict validation data
+        y_regress   = sum(X1{val_ind,:}.*repmat(mlr{i,1}(2:end),length(val_ind),1),2) + mlr{i,1}(1);      %predict validation data
         rmse(i,1)   = sqrt(sum((y(val_ind,1)-y_regress).^2)/numel(y_regress));  %get the RMSE between observed and predicted values
 
     end
@@ -119,13 +119,18 @@ end
 
 coeffs_final = [coeffs_final, Pvar];        %add to final table
 
+ %Sort final tabel of coefficients
+row          = coeffs_final.Properties.RowNames;
+order        = [M.Properties.VariableNames, {'Intercept'}];
+[~, index]   = ismember(order, row);
+coeffs_final = coeffs_final(index,:);
+
 %% Find rmse of coefficients
 
  %Predict all data at sampling locations
 y_regress   = sum(X1{:,:}.*repmat(coeffs_final{:,1}(2:end)',height(X1),1),2) + coeffs_final{1,1};      %predict validation data
 rmse_final  = sqrt(sum((y-y_regress).^2)/numel(y_regress));  %get the RMSE between observed and predicted values
 
-coeffs_final = [coeffs_final(2:end,:); coeffs_final(1,:)];
 coeffs_final = [coeffs_final; table(rmse_final, 0, ...
                 'VariableName',{'Coefficient', 'PercentVarExplained'},'RowNames',{'rmse'})];
 

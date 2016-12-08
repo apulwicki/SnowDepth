@@ -169,6 +169,8 @@ for i = 1:3;
     end
 end
 
+    clear j k fields params topo TT zz*
+
 %% Sort all topo param structures
 
 order = {'centreD','elevation','aspect','slope','northness','profileCurve',...

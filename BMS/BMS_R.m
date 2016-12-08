@@ -34,8 +34,8 @@ for i = 1:3%:runs                              %for number of runs
 
         save mat2R.mat sweG topoG
         % Run BMS code in R
-        %!R CMD BATCH BMS_matlab.R
-        !/usr/local/bin/R CMD BATCH BMS_matlab.R
+        !R CMD BATCH BMS_matlab.R
+        %!/usr/local/bin/R CMD BATCH BMS_matlab.R
         
         % Make table of coeffs
             load R2mat.mat
