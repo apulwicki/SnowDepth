@@ -34,24 +34,25 @@ rm(aspect, elevation, northness, profileCurve, slope, tangentCurve, Sx, centreD,
         GC_uni = coef(attG,order.by.pip = F,include.constant = T)
     
     ##binomial prior model
-    att_fixedG = bms(G, mprior = "fixed", mprior.size = 2, user.int = T)
-        GC_fix = coef(att_fixedG, order.by.pip = F, include.constant = T)
+#    att_fixedG = bms(G, mprior = "fixed", mprior.size = 2, user.int = T)
+#        GC_fix = coef(att_fixedG, order.by.pip = F, include.constant = T)
     
     ##variable prior model (test how important 'complaints' is)
-    att_pipG = bms(G, mprior = "pip", mprior.size = c(0.01, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5), user.int = F)
-        GC_vari = coef(att_pipG,order.by.pip = F, include.constant = T)
+#    att_pipG = bms(G, mprior = "pip", mprior.size = c(0.01, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5), user.int = F)
+#        GC_vari = coef(att_pipG,order.by.pip = F, include.constant = T)
     
     ##beta-binomial model priors = default BMS
-    att_randomG = bms(G, mprior = "random", mprior.size = 3, user.int = F) #equivalent att_random = bms(G)
-        GC_rand = coef(att_randomG, order.by.pip = F, include.constant = T)
+#    att_randomG = bms(G, mprior = "random", mprior.size = 3, user.int = F) #equivalent att_random = bms(G)
+#        GC_rand = coef(att_randomG, order.by.pip = F, include.constant = T)
     
     ##MCMC sampling
-    #att_mcmcG = bms(G, burn = 50000, iter = 1e+05, g = "BRIC", mprior = "uniform", nmodel = 2000, mcmc = "bd", user.int = F)
-    #    GC_mcmc = coef(att_mcmcG,order.by.pip = F,include.constant = T)
+#    att_mcmcG = bms(G, burn = 50000, iter = 1e+05, g = "BRIC", mprior = "uniform", nmodel = 2000, mcmc = "bd", user.int = F)
+#        GC_mcmc = coef(att_mcmcG,order.by.pip = F,include.constant = T)
 
     ###return coeffs as structure
-    #Gcoeffs = data.frame(GC_uni, GC_fix, GC_rand, GC_vari, GC_mcmc)
-    Gcoeffs = data.frame(GC_uni, GC_fix, GC_rand, GC_vari)
+#    Gcoeffs = data.frame(GC_uni, GC_fix, GC_rand, GC_vari, GC_mcmc)
+#    Gcoeffs = data.frame(GC_uni, GC_fix, GC_rand, GC_vari)
+     Gcoeffs = data.frame(GC_uni)
 
 ###### Saving to matlab file  
   writeMat('/Users/Alexandra/Documents/SFU/Data/SnowDepth/BMS/R2mat.mat',Gcoeffs=Gcoeffs,

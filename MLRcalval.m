@@ -103,7 +103,7 @@ coeffs_final.Properties.RowNames(1,1) = {'Intercept'};
 coeffs_final.Properties.VariableNames = {'Coefficient'};
 
 
-%% Caluclate % variance explained by each variable
+%% Calculate % variance explained by each variable
 
 beta    = coeffs_final.Properties.RowNames; %names of params
 SSt     = sumsqr(y-mean(y));                %total sum of squares

@@ -130,7 +130,7 @@ name = char(options.glacier(i));
     topo_sampled.(name).(field) = (topo_sampled.(name).(field)-...
         mean(topo_sampled.(name).(field)))/std(topo_sampled.(name).(field));
     topo_full.(name).(field) = (topo_full.(name).(field)-...
-        mean(topo_sampled.(name).(field)))/std(topo_sampled.(name).(field));
+        mean(topo_sampled_ns.(name).(field)))/std(topo_sampled_ns.(name).(field));
     end
 end
 
