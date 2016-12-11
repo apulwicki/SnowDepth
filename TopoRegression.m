@@ -156,4 +156,4 @@ for t = 2:9
     end
 end
 
-    clear param sweT *Coeff glacier
+    clear param sweT *Coeff glacier g n t

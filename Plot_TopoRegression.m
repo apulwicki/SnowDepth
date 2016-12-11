@@ -151,41 +151,11 @@ print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],
 
 %% %%%%%%%%%%%%%%%%%%%%% BMS %%%%%%%%%%%%%%%%%%%%%
 
-%% Ploting - BMS coeffs
-clf
-opt = 8;
-II = 1; %To include intercept =1, exclude intercept =2
-heads    = fieldnames(BMS(opt).G4);  heads = heads(1:end-3);
-rowNames = BMS(opt).G4.Properties.RowNames(1:end-II);
-    for j = 1:length(heads)
-        param = char(heads(j));
-        s1 = subplot(1,3,1); title('G4')
-            plot(1:9,BMS(opt).G4.(param)(1:end-II),'o','MarkerSize',10); hold on
-                ylabel('BMA Coefficient')
-        s2 = subplot(1,3,2); title('G2')
-            plot(1:9,BMS(opt).G2.(param)(1:end-II),'o','MarkerSize',10); hold on
-            	ylabel('BMA Coefficient')
-        s3 = subplot(1,3,3); title('G13')
-            plot(1:9,BMS(opt).G13.(param)(1:end-II),'o','MarkerSize',10); hold on
-                ylabel('BMA Coefficient')
-    end
-          linkaxes([s1, s2, s3])
-          legend(heads,'Location','best')
-          set([s1, s2, s3],'XTick', 1:length(rowNames), 'XTickLabel',rowNames); 
-          axes(s1); rotateticklabel(s1,45); 
-          axes(s2); rotateticklabel(s2,45);   
-          axes(s3); rotateticklabel(s3,45);
-
-        fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',13)
-        fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 14 7];
-filename = 'BMScoeff_compare';
-print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')        
-
 %% Plotting - BMS fit to observed
 
 % Actual vs fitted data  
 % for r = 2:9
-% option = r;
+option = 8;
 r = 8;
 
 figure(1)
@@ -218,27 +188,25 @@ print([options.path1, filename],'-dpng'); print([options.path2, filename],'-dpng
 
 % clf
 % end
+    clear b coeffs dim f fig filename g glacier i line option p r X yModel yObserved
 %% Plots - BMS Box and whisker for coeffs from density options
 clf
 
 %Rearrange to compare density options
-params = BMS(2).G4.Properties.RowNames;
+params = BMS(2).G4.Properties.RowNames(1:end-2);
 box.G4 = []; box.G2 = []; box.G13 = [];
 for i = 2:9
-    box.G4 = [box.G4; table2array(BMS(i).G4(:,2))'];
-    box.G2 = [box.G2; table2array(BMS(i).G2(:,2))'];
-    box.G13 = [box.G13; table2array(BMS(i).G13(:,2))'];
+    box.G4  = [box.G4;  table2array(BMS(i).G4(1:end-2,2))'];
+    box.G2  = [box.G2;  table2array(BMS(i).G2(1:end-2,2))'];
+    box.G13 = [box.G13; table2array(BMS(i).G13(1:end-2,2))'];
 end
 
 % box.G4 = log(box.G4); box.G2 = log(box.G2); box.G13 = log(box.G13);
 
-%No intercept option
-box.G4 = box.G4(:,2:end); box.G2 = box.G2(:,2:end); box.G13 = box.G13(:,2:end); params = params(2:end);
-
 h = cat(1, reshape(box.G4,[1 size(box.G4)]), reshape(box.G2,[1 size(box.G2)]),...
             reshape(box.G13,[1 size(box.G13)]));
 
-aboxplot(h,'labels',options.topoVars2, ...
+aboxplot(h,'labels',options.topoVars, ...
     'Colormap',                 options.RGB,...
     'OutlierMarkerSize',        10,...
     'OutlierMarkerEdgeColor',   [0 0 0]); % Advanced box plot
@@ -246,7 +214,7 @@ aboxplot(h,'labels',options.topoVars2, ...
         ylabel('Variance Explained (%)'); hold on 
 
         for i = 1:7
-        line([i+0.5 i+0.5],[0 100],'Color',[0 0 0],'LineStyle','--','LineWidth', 0.5)
+        line([i+0.5 i+0.5],[0 70],'Color',[0 0 0],'LineStyle','--','LineWidth', 0.5)
         end
 
 
@@ -255,7 +223,7 @@ aboxplot(h,'labels',options.topoVars2, ...
 
 filename = 'BMSCoeffs_DensityOpts';
 print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
-
+    clear box fig filename h i params
 %% Plots - BMS fit for all SWE options
 
 R2value = [];
@@ -268,13 +236,13 @@ for i = 1:3
     name	= char(options.glacier(i));
     y       = SWE(i).swe;
     X       = topo_sampled.(name);
-        params = BMS(option).(name).Properties.RowNames; 
-        for j = 2:length(params)
+        params = BMS(option).(name).Properties.RowNames(1:end-2); 
+        for j = 1:length(params)
             field       = char(params(j));
             X.(field)   = X.(field)*BMS(option).(name){j,1};
         end
 	X       = struct2table(X);
-    X       = sum(X{:,:},2)+BMS(option).(name){1,1};
+    X       = sum(X{:,:},2)+BMS(option).(name){end-1,1};
 
     subplot(1,3,i)
     axis([0 1.2 0 1.2]);    line = refline(1,0);    line.Color = 'k'; line.LineStyle = '--'; hold on
@@ -296,6 +264,7 @@ filename = 'BMSfit_allLines';
 print([options.path1, filename],'-dpng'); print([options.path2, filename],'-dpng')
 
 end
+        clear b p R2value dim f g j r fig filename h i params X y
 
 %% Plots - Residuals
 
@@ -316,7 +285,7 @@ for i = 1:3
     end
         legend('Option 1', 'Option 2','Option 3','Option 4','Option 5',...
             'Option 6','Option 7','Option 8')
-        xlim([0 40]); ylim([0 180]);
+        xlim([0 40]); ylim([0 190]);
         xlabel('Residual (m w.e.)');         title(name) 
         if i == 1; ylabel('Frequency');
         else     ylabel('');        end
@@ -325,7 +294,7 @@ end
     fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 14 4];
 filename = 'BMSresiduals_all';
 print([options.path1, filename],'-dpng'); print([options.path2, filename],'-dpng')
-
+    clear edges field line N name option
 %% %%%%%%%%%%%%%%%%%%%%% OTHER %%%%%%%%%%%%%%%%%%%%%
 
 %% Distirbution of # of params from all possible combos 
@@ -374,3 +343,34 @@ end
 
     close all
     clear v i r name header glacier N* a filename edges* param fig units
+    
+    
+%% Ploting - MLR and BMS coeffs
+clf
+II = 2; %Include intercept =1, exlude =2
+%Rearrange to compare density options
+params = BMS(2).G4.Properties.RowNames(1:end-II);
+box.G4 = []; box.G2 = []; box.G13 = [];
+for i = 2:9
+    box.G4  = [box.G4;  table2array(BMS(i).G4(1:end-II,1))'; table2array(MLR(i).G4(1:end-II,1))'];
+    box.G2  = [box.G2;  table2array(BMS(i).G2(1:end-II,1))'; table2array(MLR(i).G2(1:end-II,1))'];
+    box.G13 = [box.G13; table2array(BMS(i).G13(1:end-II,1))'; table2array(MLR(i).G13(1:end-II,1))'];
+end
+h = cat(1, reshape(box.G4,[1 size(box.G4)]), reshape(box.G2,[1 size(box.G2)]),...
+            reshape(box.G13,[1 size(box.G13)]));
+
+aboxplot(h,'labels',options.topoVars, ...
+    'Colormap',                 options.RGB,...
+    'OutlierMarkerSize',        10,...
+    'OutlierMarkerEdgeColor',   [0 0 0]); % Advanced box plot
+        legend('Glacier 4','Glacier 2','Glacier 13'); % Add a legend
+        ylabel('Coefficient Value'); hold on 
+    
+        for i = 1:7
+        line([i+0.5 i+0.5],ylim,'Color',[0 0 0],'LineStyle','--','LineWidth', 0.5)
+        end
+        
+        fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',22) 
+        fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 13 10];
+filename = 'Coeff_compare';
+print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')        

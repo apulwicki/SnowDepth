@@ -36,7 +36,7 @@ figure(1)
                 s(i).Position   = pos_axis(i,:);
                 s(i).Box        = 'off';  axis off
             %Scale bar
-            if      i ==1; %scalebar('ScaleLength', 2000, 'Unit', 'm', 'Location','northwest');  
+            if      i ==1; scalebar('ScaleLength', 2000, 'Unit', 'm', 'Location','northwest');  
             %elseif  i ==2; title(param);             
             elseif  i ==3; c = colorbar('location','eastoutside');  ylabel(c,char(options.topoVars(r))); 
             end 
@@ -171,5 +171,125 @@ filename = ['SWEmap_opt',num2str(opt)];
 print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
     
 end
+
+%% Modelled vs observed SWE
+modelled = sweBMS;
+
+pos_axis    = [0 0 .4 1; 0.19 0 .4 1; 0.50 0 .4 1];
+opt = 8;
+
+    x_min = nanmin([modelled(opt).G4(:);modelled(opt).G2(:);modelled(opt).G13(:)]);
+    x_max = nanmax([modelled(opt).G4(:);modelled(opt).G2(:);modelled(opt).G13(:)]);
+
+figure(1)      
+for i = 1:3
+    name    = char(options.glacier(i)); 
+    G13size = size(modelled(opt).G13);
+    Gsize   = size(modelled(opt).(name));
+    data    = [ nan(G13size(1,1)-Gsize(1,1),Gsize(1,2)); modelled(opt).(name)];
+    data    = [data, nan(G13size(1,1), G13size(1,2)-Gsize(1,2))];
+
+    s(i) = subplot(1,3,i);
+        h = imagesc(data); hold on
+            caxis([x_min max([x_max,max(data)])]); 
+            set(h,'alphadata',~isnan(data))
+            E = (SWE(i).utm(:,1)-min(SWE(i).utm(:,1)))/40;
+            Na = SWE(i).utm(:,2)-min(SWE(i).utm(:,2)); N = (max(Na)-Na)/40;                
+            if      i==1; E = E+25; N = N+78;
+            elseif  i==2; E = E+10; N = N+47;
+            elseif  i==3; E = E+17; N = N+21; 
+            end
+        %SWE
+        Ns = (SWE(i).utm(:,2) - min(rig.(name)(:,2)))/40-14;  Ns = 140-Ns;
+        Es = (SWE(i).utm(:,1) - min(rig.(name)(:,1)))/40; 
+        plot(Es,Ns,'k.')
+        scatter(Es,Ns , 13, SWE(i).swe,'filled');            
+            axis equal
+            s(i).Position   = pos_axis(i,:);
+            s(i).Box        = 'off';  axis off
+            %Scale bar
+            if      i ==1; scalebar('ScaleLength', 2000, 'Unit', 'm', 'Location','northwest');  
+            elseif  i ==3; c = colorbar('location','eastoutside');  ylabel(c,'Modelled SWE (m w.e.)'); 
+            end 
+end
+            s1Pos = get(s(1),'position');   s3Pos = get(s(3),'position');   
+            s3Pos(3:4) = s1Pos(3:4);        set(s(3),'position',s3Pos);
+
+     % North arrow
+    Narrow = imread('Narrow.jpg');
+    a = axes('position',[-0.02,0.65,0.12,0.12]); 
+    Nshow = imshow(Narrow, parula);   
+    colormap(a,gray)    
+
+    set(c,'Position',[0.84 0.2 0.036 0.6])
+
+        
+        fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',13)
+        fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 13 6];
+filename = ['SWEmap_Modelled_Observed',char(opt)];
+%print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
+%clf 
+
+%    clear i r name header glacier fig param s* x* data colordata
+    
+%% Modelled SWE Difference
+modelled = sweBMS;
+
+    %Differencing modelled SWE
+for g = 1:3
+    glacier = char(options.glacier(g));
+    
+    for i = 2:9
+    stackSWE.(glacier)(:,:,i-1)   = modelled(i).(glacier);
+    end
+
+minSWE.(glacier)  = nanmin(stackSWE.(glacier),[],3);
+maxSWE.(glacier)  = nanmax(stackSWE.(glacier),[],3);
+
+diffSWE.(glacier) = maxSWE.(glacier)-minSWE.(glacier);
+end
+    
+    %Maps
+pos_axis    = [0 0 .4 1; 0.19 0 .4 1; 0.50 0 .4 1];
+    x_min = nanmin([diffSWE.G4(:);diffSWE.G2(:);diffSWE.G13(:)]);
+    x_max = nanmax([diffSWE.G4(:);diffSWE.G2(:);diffSWE.G13(:)]);
+        
+for i = 1:3
+    name    = char(options.glacier(i)); 
+    G13size = size(diffSWE.G13);
+    Gsize   = size(diffSWE.(name));
+    data    = [ nan(G13size(1,1)-Gsize(1,1),Gsize(1,2)); diffSWE.(name)];
+    data    = [data, nan(G13size(1,1), G13size(1,2)-Gsize(1,2))];
+
+    s(i) = subplot(1,3,i);
+            h = imagesc(data); hold on
+            caxis([x_min max([x_max,max(data)])]); 
+            set(h,'alphadata',~isnan(data))
+            axis equal
+            s(i).Position   = pos_axis(i,:);
+            s(i).Box        = 'off';  axis off
+        %Scale bar
+        if      i ==1; scalebar('ScaleLength', 2000, 'Unit', 'm', 'Location','northwest');  
+        %elseif  i ==2; title(param);             
+        elseif  i ==3; c = colorbar('location','eastoutside');  ylabel('Difference in modelled SWE values (m w.e)'); 
+        end 
+end
+        s1Pos = get(s(1),'position');   s3Pos = get(s(3),'position');   
+        s3Pos(3:4) = s1Pos(3:4);        set(s(3),'position',s3Pos);
+
+     % North arrow
+    Narrow = imread('Narrow.jpg');
+    a = axes('position',[-0.02,0.65,0.12,0.12]); 
+    Nshow = imshow(Narrow, parula);   
+    colormap(a,gray)    
+
+    set(c,'Position',[0.84 0.2 0.036 0.6])
+
+        
+        fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',13)
+        fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 13 6];
+filename = 'SWEdifferenceMap';
+%print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
+ 
 
 

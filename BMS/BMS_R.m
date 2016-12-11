@@ -23,7 +23,7 @@ for g = 1:length(SWE) %For all glaciers
     y = SWE(g).swe;
 
  %Choose number of runs
-runs = 10;        
+runs = 1000;        
 
  %Cross validation random number matrix
 [~, cal_ind] = sort(rand(runs,length(y)),2);      %create matrix of random numbers
