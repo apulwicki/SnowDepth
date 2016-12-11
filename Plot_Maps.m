@@ -172,8 +172,9 @@ print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],
     
 end
 
-%% Modelled vs observed SWE
-modelled = sweBMS;
+%% Modelled and observed SWE
+modelled = sweMLR;
+type     = 'MLR';
 
 pos_axis    = [0 0 .4 1; 0.19 0 .4 1; 0.50 0 .4 1];
 opt = 8;
@@ -226,11 +227,11 @@ end
         
         fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',13)
         fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 13 6];
-filename = ['SWEmap_Modelled_Observed',char(opt)];
-%print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
-%clf 
+filename = [type,'map_Modelled_Observed',char(opt)];
+print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
 
-%    clear i r name header glacier fig param s* x* data colordata
+    clear i r name header glacier fig param s x* data colordata filename Es a c N*
+    clear data E g G13size Gsize h modelled N Na name opt pos_axis t type s1Pos s3Pos
     
 %% Modelled SWE Difference
 modelled = sweBMS;

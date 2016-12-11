@@ -23,12 +23,12 @@ run MAIN
 
     for i = 1:3
         y       = SWE(i).swe;
-        name    = char(options.glacier(i)); 
+        glacier = char(options.glacier(i)); 
             display(['option = ',num2str(t), ', glacier = ',name]);
         X       = topo_sampled.(name);
 
-        [MLR(t).(name), residualsMLR(t).(name)] = MLRcalval(y, X);
-        MLR(t).(name).Properties.VariableNames = strcat(MLR(t).(name).Properties.VariableNames, num2str(t));
+        [MLR(t).(glacier), residualsMLR(t).(glacier)] = MLRcalval(y, X);
+        MLR(t).(glacier).Properties.VariableNames = {['MLRCoefficient', num2str(t)],['MLRPercentVarExplaned', num2str(t)]};
     end
 end
         clear best i name X y t glacier
@@ -103,6 +103,8 @@ end
     
 %% BMS
 
+for g = 1:3
+    glacier = char(options.glacier(g));
 for t = 2:9
     run OPTIONS
     options.DensitySWE  = t;
@@ -113,11 +115,13 @@ for t = 2:9
     cd BMS
     [BMSinit, BMSres] = BMS_R(SWE, topo_sampled);
     cd ..
-BMS(t).G4     = BMSinit.G4;   residualsBMS(t).G4    = BMSres.G4;
-BMS(t).G2     = BMSinit.G2;   residualsBMS(t).G2    = BMSres.G2;
-BMS(t).G13    = BMSinit.G13;  residualsBMS(t).G13   = BMSres.G13;
+BMS(t).(glacier)     = BMSinit.(glacier);   
+BMS(t).(glacier).Properties.VariableNames = {['BMSCoefficient', num2str(t)],['BMSPercentVarExplaned', num2str(t)]};
+
+residualsBMS(t).(glacier) = BMSres.(glacier);
 end
-    clear BMSinit BMSres t
+end
+    clear BMSinit BMSres t g
 
 
 %% Predicting
@@ -157,3 +161,27 @@ for t = 2:9
 end
 
     clear param sweT *Coeff glacier g n t
+
+%% Return min and max regression coeffs
+
+%Rearrange to compare density options
+box.G4 = []; box.G2 = []; box.G13 = [];
+for i = 2:9
+    box.G4  = [box.G4,  BMS(i).G4(1:end-1,1),  MLR(i).G4(1:end-1,1)];
+    box.G2  = [box.G2,  BMS(i).G2(1:end-1,1),  MLR(i).G2(1:end-1,1)];
+    box.G13 = [box.G13, BMS(i).G13(1:end-1,1), MLR(i).G13(1:end-1,1)];
+end
+
+for g = 1:3
+    glacier = char(options.glacier(g));
+RegressC.(glacier) = table(mean(box.(glacier){:,:},2), min(box.(glacier){:,:},[],2), max(box.(glacier){:,:},[],2),...
+                'VariableNames',{'Mean', 'Min','Max'}, 'RowNames',BMS(2).G4.Properties.RowNames(1:end-1));
+end
+    
+    clear g i box glacier
+
+
+
+
+
+

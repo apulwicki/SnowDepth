@@ -27,7 +27,7 @@ runs = 1000;
 
  %Cross validation random number matrix
 [~, cal_ind] = sort(rand(runs,length(y)),2);      %create matrix of random numbers
-cal_ind      = cal_ind(:,1:floor(length(y)*3/4)); %Choose 3/4 for the calibration component
+cal_ind      = cal_ind(:,1:floor(length(y)*2/3)); %Choose 2/3 for the calibration component
 
  % Run BMS code in R with cross validation
 for i = 1:runs                                  %for number of runs

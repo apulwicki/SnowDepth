@@ -26,11 +26,11 @@ n = size(M,2);
 c = logical(dec2bin(0:(2^n)-1)=='1');      c = c(2:end,:);
 
  %Choose number of runs
-runs = 1000;        
+runs = 10;        
 
  %Cross validation random number matrix
 [~, cal_ind] = sort(rand(runs,length(y)),2); %create matrix of random numbers
-cal_ind = cal_ind(:,1:floor(length(y)*3/4)); %Choose 3/4 for the calibration component
+cal_ind = cal_ind(:,1:floor(length(y)*2/3)); %Choose 2/3 for the calibration component
 
  %Initialize matrices
 mlr_best = cell(length(c),1);    rmse_best = zeros(length(c),1);    BIC_best = rmse_best;
@@ -128,7 +128,7 @@ coeffs_final = coeffs_final(index,:);
 %% Find rmse of coefficients
 
  %Predict all data at sampling locations
-y_regress   = sum(X1{:,:}.*repmat(coeffs_final{:,1}(2:end)',height(X1),1),2) + coeffs_final{1,1};      %predict validation data
+y_regress   = sum(X1{:,:}.*repmat(coeffs_final{1:end-1,1}',height(X1),1),2) + coeffs_final{end,1};      %predict validation data
 rmse_final  = sqrt(sum((y-y_regress).^2)/numel(y_regress));  %get the RMSE between observed and predicted values
 
 coeffs_final = [coeffs_final; table(rmse_final, 0, ...

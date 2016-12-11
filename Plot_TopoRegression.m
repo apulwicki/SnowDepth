@@ -374,3 +374,7 @@ aboxplot(h,'labels',options.topoVars, ...
         fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 13 10];
 filename = 'Coeff_compare';
 print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')        
+     
+
+
+    clear box fig filename h i II params
