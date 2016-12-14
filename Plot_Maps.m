@@ -2,65 +2,17 @@
 %run Import_Topo.m
 
 %% Maps of topographic params for each glacier
-header      = fieldnames(topo_full.G4);
-pos_axis    = [0 0 .4 1; 0.19 0 .4 1; 0.51 0 .4 1];
+
+header      = fieldnames(topo_full_ns.G4);
 
 for r = 1:length(header)
-figure(1)
     param = char(header(r));
-    x_min = nanmin([topo_full.G4.(param)(:);topo_full.G2.(param)(:);topo_full.G13.(param)(:)]);
-    x_max = nanmax([topo_full.G4.(param)(:);topo_full.G2.(param)(:);topo_full.G13.(param)(:)]);
-        
-    for i = 1:3
-        name    = char(options.glacier(i)); 
-        G13size = size(topo_full.G13.(param));
-        Gsize   = size(topo_full.(name).(param));
-        data    = [ nan(G13size(1,1)-Gsize(1,1),Gsize(1,2)); topo_full.(name).(param)];
-        data    = [data, nan(G13size(1,1), G13size(1,2)-Gsize(1,2))];
-        
-        s(i) = subplot(1,3,i);
-                h = imagesc(data); hold on
-                    if r == 2 || r == 4; Cmap = phasemap; %need circular colourmap
-                    else; Cmap = parula; end
-                caxis([x_min max([x_max,max(data)])]); 
-                set(h,'alphadata',~isnan(data))
-                %colormap hsv
-                E = (SWE(i).utm(:,1)-min(SWE(i).utm(:,1)))/40;
-                Na = SWE(i).utm(:,2)-min(SWE(i).utm(:,2)); N = (max(Na)-Na)/40;                
-                if      i==1; E = E+25; N = N+78;
-                elseif  i==2; E = E+10; N = N+47;
-                elseif  i==3; E = E+17; N = N+21; 
-                end
-                plot(E,N,'k.');
-                axis equal
-                s(i).Position   = pos_axis(i,:);
-                s(i).Box        = 'off';  axis off
-            %Scale bar
-            if      i ==1; scalebar('ScaleLength', 2000, 'Unit', 'm', 'Location','northwest');  
-            %elseif  i ==2; title(param);             
-            elseif  i ==3; c = colorbar('location','eastoutside');  ylabel(c,char(options.topoVars(r))); 
-            end 
-    end
-            s1Pos = get(s(1),'position');   s3Pos = get(s(3),'position');   
-            s3Pos(3:4) = s1Pos(3:4);        set(s(3),'position',s3Pos);
-
-     % North arrow
-    Narrow = imread('Narrow.jpg');
-    a = axes('position',[-0.02,0.65,0.12,0.12]); 
-    Nshow = imshow(Narrow, Cmap);   
-    colormap(a,gray)    
-
-set(c,'Position',[0.84 0.2 0.036 0.6])
-
-        
-        fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',13)
-        fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 13 6];
-filename = ['Map_',header{r}];
-print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
-%clf
+    topoParam.G4 = topo_full_ns.G4.(param);
+    topoParam.G2 = topo_full_ns.G2.(param);
+    topoParam.G13 = topo_full_ns.G13.(param);
+    
+    PlotTopoParameter(topoParam,param, options.topoVarsUnits(r), SWE)
 end 
-
-%    clear i r name header glacier fig param s* x* data colordata
     
 %% SWE at sampling locations
 

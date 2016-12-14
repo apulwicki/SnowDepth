@@ -3,7 +3,7 @@
 % measurements along transects
 %%%%%%%%%%%%%%%%%%
 
-load TopoMLR.mat
+load TopoParams.mat
 %run Import_Topo.m
 
 %% MLR - Topo Regression

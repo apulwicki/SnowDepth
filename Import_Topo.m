@@ -14,24 +14,21 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% Importing DEMs
-files = dir('/home/glaciology1/Documents/Data/GlacierTopos/*.asc');
-%files = dir('/home/glaciology1/Documents/Data/GlacierTopos/*.asc');
-v = cell(0,0);
+run OPTIONS
+
+files   = dir('/home/glaciology1/Documents/Data/GlacierTopos/*.asc');
+v       = cell(0,0);
+SxIndex         = 1:3;
+slopeORaspect   = [4:6,13:15];
 for i = 1:length(files)
-    if i >=10 && i<=12
-        filename = ['/home/glaciology1/Documents/Data/GlacierTopos/', files(i).name];
-        startRow = 8;
-        formatSpec = '%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%27f%f%[^\n\r]';
-        fileID = fopen(filename,'r');
-        dataArray = textscan(fileID, formatSpec, 'Delimiter', '', 'WhiteSpace', '', 'EmptyValue' ,NaN,'HeaderLines' ,startRow-1, 'ReturnOnError', false);
-        fclose(fileID);
-        A.data = [dataArray{1:end-1}]; A.data(A.data<-3e+38) = NaN;
-        clearvars filename startRow formatSpec fileID dataArray ans;  
-    elseif i >=7 && i<=9
+    if      ismember(i,SxIndex)
         A = importdata(['/home/glaciology1/Documents/Data/GlacierTopos/', files(i).name],' ',6);
+        A.data(A.data==-9999) = NaN; 
+    elseif  ismember(i,slopeORaspect)   
+        A = importdata(['/home/glaciology1/Documents/Data/GlacierTopos/', files(i).name],' ',8);
         A.data(A.data==0) = NaN; 
     else
-        A = importdata(['/home/glaciology1/Documents/Data/GlacierTopos/', files(i).name],' ',6);
+        A = importdata(['/home/glaciology1/Documents/Data/GlacierTopos/', files(i).name],' ',8);
         A.data(A.data==-9999) = NaN; 
     end
     A.data(~any(~isnan(A.data), 2),:)=[];
@@ -41,7 +38,7 @@ end
 
 %Create structure with full raster of data
 for i = 1:length(v)/3
-    param = char(v(i*3)); param = param(1:end-4);
+    param = char(v(i*3)); param = param(1:end-3);
     eval(['topo_full.G4.(param) = ',v{3*i-1,1},';']);
     eval(['topo_full.G2.(param) = ',v{3*i-2,1}],';');
     eval(['topo_full.G13.(param) = ',v{3*i,1}],';');
@@ -57,7 +54,7 @@ end
 %% Import Topo Params
 
 %Import topos
-[topo, ~, ~] = xlsread('SPOT_TopoParams_noZZ.xlsx','Sheet1','A1:G2353');
+[topo, ~, ~] = xlsread('SPOT_TopoParams_noZZ.xlsx','Sheet1','A1:F2353');
 
 %Remove zigzag values (they skew the MLR results)
 run OPTIONS.m; options.ZZ = 2;
@@ -70,25 +67,23 @@ div = [1, length(SWE(1).swe); length(SWE(1).swe)+1, length(SWE(1).swe)+length(SW
 %Create structure of topo params for each glacier
 for i = 1:3
 name = char(options.glacier(i));
-    aspect           = topo(div(i,1):div(i,2),2);
-    northness        = topo(div(i,1):div(i,2),3);
-    profileCurve     = topo(div(i,1):div(i,2),4);
-    tangentCurve     = topo(div(i,1):div(i,2),5);
-    slope            = topo(div(i,1):div(i,2),6);
-    elevation        = topo(div(i,1):div(i,2),7);
+    slope            = topo(div(i,1):div(i,2),2);
+    profileCurve     = topo(div(i,1):div(i,2),3);
+    tangentCurve     = topo(div(i,1):div(i,2),4);
+    aspect           = topo(div(i,1):div(i,2),5);
+    elevation        = topo(div(i,1):div(i,2),6);
     
     topo_sampled.(name) = struct('aspect',aspect, 'elevation',elevation,...
-        'northness',northness, 'profileCurve',profileCurve, 'slope',slope,...
-        'tangentCurve',tangentCurve);
+        'profileCurve',profileCurve, 'slope',slope,'tangentCurve',tangentCurve);
 end
 
 % Sx import
-[d300, d300text] = xlsread('d300_h0.xlsx','sampling_d300_h0','B1:BU3936');
-[d200, d200text] = xlsread('d200_h0.xlsx','sampling_d200_h0','A1:BT3936');
-[d100, d100text] = xlsread('d100_h0.xlsx','sampling_d100_h0','A1:BT3936');
-    d300text = strcat('d300',d300text);
-    d200text = strcat('d200',d200text);
-    d100text = strcat('d100',d100text);
+[d300, d300text] = xlsread('d300_h0.xlsx','sampling_d300_h0','B1:BU2353');
+[d200, d200text] = xlsread('d200_h0.xlsx','sampling_d200_h0','A1:BU2353');
+[d100, d100text] = xlsread('d100_h0.xlsx','sampling_d100_h0','A1:BU2353');
+    d300text = strcat('d300',d300text(1,:));
+    d200text = strcat('d200',d200text(1,:));
+    d100text = strcat('d100',d100text(1,:));
     
     %Sx stepwise regression
     for i = 1:3
@@ -109,6 +104,11 @@ end
     end
             clear best d300* d200* d100* i inmodel mlr* name text X* y
 
+%Northness caluclation
+    for i = 1:3
+        glacier = char(options.glacier(i));
+        topo_sampled.(glacier).northness = sin(topo_sampled.(glacier).slope).*cos(topo_sampled.(glacier).aspect);
+    end
         
 %Distance from centreline import
 run CentrelineDistance.m
