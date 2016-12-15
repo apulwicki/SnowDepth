@@ -36,7 +36,7 @@ corner = [593915 6739280; 598000 6751320; 602040 6760040]; %Coordinates of NW co
 
 for i = 1:3
     G = char(options.glacier(i));    
-    a = topo_full.(G).Sx;    a = flipud(a);     rasterSize = size(a); %get example raster for NaN locations and it's size
+    a = topo_full.(G).elevation;    a = flipud(a);     rasterSize = size(a); %get example raster for NaN locations and it's size
     
     rasterX = corner(i,1):40:(40*rasterSize(1,2)+corner(i,1)-1); %create new raster with easting locatiosn of cells
     rasterX = repmat(rasterX, rasterSize(1,1),1);    

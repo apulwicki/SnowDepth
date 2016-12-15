@@ -23,7 +23,7 @@ for g = 1:length(SWE) %For all glaciers
     y = SWE(g).swe;
 
  %Choose number of runs
-runs = 1000;        
+runs = 10;        
 
  %Cross validation random number matrix
 [~, cal_ind] = sort(rand(runs,length(y)),2);      %create matrix of random numbers
@@ -48,8 +48,8 @@ for i = 1:runs                                  %for number of runs
         save mat2R.mat sweG topoG
         
          %Run BMS code in R though the terminal
-        %!R CMD BATCH BMS_matlab.R
-        !/usr/local/bin/R CMD BATCH BMS_matlab.R
+        !R CMD BATCH BMS_matlab.R
+        %!/usr/local/bin/R CMD BATCH BMS_matlab.R
         
          %Load data from R
         load R2mat.mat                                  

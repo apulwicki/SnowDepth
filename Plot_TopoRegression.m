@@ -9,15 +9,10 @@ figure(1)
 for i = 1:3
     name	= char(options.glacier(i));
     y       = SWE(i).swe;
-    X       = topo_sampled.(name);
-        params = MLR(option).(name).Properties.RowNames; 
-        for j = 2:length(params)
-            field       = char(params(j));
-            X.(field)   = X.(field)*MLR(option).(name){j,1};
-        end
-	X       = struct2table(X);
-    X       = sum(X{:,:},2)+MLR(option).(name){1,1};
-
+    X       = struct2table(topo_sampled.(name));    X = X{:,:};
+    C       = repmat(MLR(option).(name){1:end-2,1}',length(y),1);
+    X       = sum(X.*C,2)+MLR(option).(name){end-1,1};
+   
     subplot(1,3,i)
     axis([0 1.2 0 1.2]);    line = refline(1,0);    line.Color = 'k'; line.LineStyle = '--'; hold on
         plot(y, X, '.', 'Color', options.RGB(i,:),'MarkerSize',13); hold on
@@ -26,7 +21,7 @@ for i = 1:3
         p = plot(f.(name)); hold on
         set(p,'Color',options.RGB(i,:)); set(p, 'LineWidth',1.5);     
         xlabel('Measured Winter Balance (m w.e.)'); ylabel('Modelled Winter Balance (m w.e.)');
-        title(['Glacier ',num2str(glacier(i))])
+        title(name)
                 axis square;    box on
         b = gca; legend(b,'off');
         dim = [b.Position(1)+0.01 b.Position(2)+.37 .3 .3];
@@ -41,6 +36,7 @@ print([options.path1, filename],'-dpng'); print([options.path2, filename],'-dpng
 clf
 end
 
+    clear ans b C dim f* g h i j line name option p* r X y
 %% Plots - MLR fit for all SWE options
 
 R2value = [];
@@ -324,7 +320,7 @@ figure
     for i = 1:3
         name = char(options.glacier(i)); 
         a(i) = subplot(1,3,i);
-            h(i).f = histogram(topo_full.(name).(param)(:),25); hold on
+            h(i).f = histogram(topo_full_ns.(name).(param)(:),25); hold on
             h(i).s = histogram(topo_sampled_ns.(name).(param),25); 
             
             dim = [a(i).Position(1)+0.01 a(i).Position(2)*5.41 .3 .3];
@@ -342,8 +338,7 @@ print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],
 end 
 
     close all
-    clear v i r name header glacier N* a filename edges* param fig units
-    
+    clear v i r name header glacier N* a filename edges* param fig units dim h 
     
 %% Ploting - MLR and BMS coeffs
 clf

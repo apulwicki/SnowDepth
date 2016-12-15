@@ -5,8 +5,8 @@
 library(BMS)
 library(R.matlab)
 
-#T = readMat('/home/glaciology1/Documents/Data/SnowDepth/BMS/mat2R.mat')
-importG = readMat('/Users/Alexandra/Documents/SFU/Data/SnowDepth/BMS/mat2R.mat')
+importG = readMat('/home/glaciology1/Documents/Data/SnowDepth/BMS/mat2R.mat')
+#importG = readMat('/Users/Alexandra/Documents/SFU/Data/SnowDepth/BMS/mat2R.mat')
 
 #Glacier data
     params = attr(importG$topoG, "dimnames")[[1]]
@@ -55,9 +55,10 @@ rm(aspect, elevation, northness, profileCurve, slope, tangentCurve, Sx, centreD,
      Gcoeffs = data.frame(GC_uni)
 
 ###### Saving to matlab file  
-  writeMat('/Users/Alexandra/Documents/SFU/Data/SnowDepth/BMS/R2mat.mat',Gcoeffs=Gcoeffs,
+  writeMat('/home/glaciology1/Documents/Data/SnowDepth/BMS/R2mat.mat',Gcoeffs=Gcoeffs,
            fixNames=TRUE, matVersion="5", onWrite=NULL, verbose=FALSE)
-
+#  writeMat('/Users/Alexandra/Documents/SFU/Data/SnowDepth/BMS/R2mat.mat',Gcoeffs=Gcoeffs,
+#           fixNames=TRUE, matVersion="5", onWrite=NULL, verbose=FALSE)
     
     
     

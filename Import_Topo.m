@@ -43,14 +43,14 @@ for i = 1:length(v)/3
     eval(['topo_full.G2.(param) = ',v{3*i-2,1}],';');
     eval(['topo_full.G13.(param) = ',v{3*i,1}],';');
 end
-    clear aspect* elev* north* profil* slope* Sx* tangent* files A i param v
     
-%Northness caluclation
-    for i = 1:3
-        glacier = char(options.glacier(i));
-        topo_full.(glacier).northness = sin(topo_full.(glacier).slope).*cos(topo_full.(glacier).aspect);
-    end
-    
+% %Sx is one row too big. Remove the first one -> doesn't exactly match the other params...
+   topo_full.G4.Sx      = topo_full.G4.Sx(2:end,:);
+   topo_full.G2.Sx      = topo_full.G2.Sx(2:end-1,:);
+   topo_full.G13.Sx     = topo_full.G13.Sx(2:end,:);
+
+        clear aspect* elev* north* profil* slope* Sx* tangent* files A i param v glacier ans
+
 %% Import Topo Params
 
 %Import topos
@@ -79,40 +79,41 @@ end
 
 % Sx import
 [d300, d300text] = xlsread('d300_h0.xlsx','sampling_d300_h0','B1:BU2353');
-[d200, d200text] = xlsread('d200_h0.xlsx','sampling_d200_h0','A1:BU2353');
-[d100, d100text] = xlsread('d100_h0.xlsx','sampling_d100_h0','A1:BU2353');
+[d200, d200text] = xlsread('d200_h0.xlsx','sampling_d200_h0','B1:BU2353');
+[d100, d100text] = xlsread('d100_h0.xlsx','sampling_d100_h0','B1:BU2353');
     d300text = strcat('d300',d300text(1,:));
     d200text = strcat('d200',d200text(1,:));
     d100text = strcat('d100',d100text(1,:));
     
-    %Sx stepwise regression
+    %Sx correlation to SWE
     for i = 1:3
-        y       = SWE(i).swe; %get swe data
         name    = char(options.glacier(i));
         X       = [d100(div(i,1):div(i,2),:), d200(div(i,1):div(i,2),:), d300(div(i,1):div(i,2),:)]; %get Sx for all distances
+        y       = SWE(i).swe; %get swe data
         text    = [d100text, d200text, d300text];
-        [~, ~, ~, inmodel] = stepwisefit(X,y); %stepwise regression for all directions and all distances
-        text    = text(1,inmodel);
         
-        X1      = [ones(length(X),1), X(:,inmodel)]; %take only the parameters that were significant
-        mlr_Sx  = regress(y,X1); mlr_sort = real(sort(complex(mlr_Sx))); %do an MLR and find the most significant one
-
-        best            = find(mlr_Sx == mlr_sort(end-1,1)); %find best Sx
-        winddir.(name)  = text(best); %create structure with info on best wind direction and distance
-        Sx              = X1(:,best); %chose Sx data from best correlation
-        topo_sampled.(name).Sx = Sx; %add Sx with best correlation to structure
+        CC      = corr([y,X]);    CC = CC(2:end,1);
+        
+        best    = find(abs(CC)==max(abs(CC)));  best = best(1,1);
+      
+        winddir(i,:)            = [text(best), num2cell(CC(best))]; %create structure with info on best wind direction and distance
+        topo_sampled.(name).Sx  = X(:,best); %add Sx with best correlation to structure
     end
-            clear best d300* d200* d100* i inmodel mlr* name text X* y
-
-%Northness caluclation
-    for i = 1:3
-        glacier = char(options.glacier(i));
-        topo_sampled.(glacier).northness = sin(topo_sampled.(glacier).slope).*cos(topo_sampled.(glacier).aspect);
-    end
+            clear best d300* d200* d100* i name text X* y CC
         
 %Distance from centreline import
 run CentrelineDistance.m
 
+    clear aspect centreline corner distance dive elevation G glacier i profileCurve slope Sx tangentCurve topo X Y
+
+%% Northness calculation  
+
+    for i = 1:3
+        glacier = char(options.glacier(i));
+        topo_full.(glacier).northness    = cosd(topo_full.(glacier).aspect).*sind(topo_full.(glacier).slope);
+        topo_sampled.(glacier).northness = cosd(topo_sampled.(glacier).aspect).*sind(topo_sampled.(glacier).slope);
+    end
+    
 %% Standardizing variables
 
 %Keep a copy of non-standardized variables for range of params sampled
@@ -134,43 +135,8 @@ name = char(options.glacier(i));
     end
 end
 
-    clear i name topo field j params div glacier G t X1 Y1 min_dist fields distance centreline corner
-    clear aspect* elev* north* profil* slope* Sx* tangent*    
-
-%Put zigzags back in the final SWE structure (not related to topo)
-run OPTIONS.m; options.ZZ = 1;
-run MAIN.m   
-
-
-%% Get topo params for zigzag locations
-
-topo_sampled_wZZ = topo_sampled;
-
-%Find the zigzag label in the sampled topo structure and match it with the 
-%zigzag values that are missing for the full matrix
-for i = 1:3;
-    name = char(options.glacier(i));
-
-    zz = SWE(i).pattern =='ZZ';
-    zz_lab = char(SWE(i).label(:)); zz_lab = cellstr(zz_lab(:,1:8));
-
-    zz_vals = find(~cellfun(@isempty,strfind(cellstr(SWE(i).label),'SWE')));
-    zz_valsName = char(SWE(i).label(zz_vals)); zz_valsName = zz_valsName(:,1:8);
-
-    params = fieldnames(topo_sampled_wZZ.(name));
-    for k = 1:length(params)
-        topo = char(params(k));
-        
-        for j = 1:size(zz_valsName,1)
-            TT = ~cellfun(@isempty,strfind(zz_lab,zz_valsName(j,:)));
-            topo_sampled_wZZ.(name).(topo)(TT) = topo_sampled.(name).(topo)(zz_vals(j));
-        end
-
-    end
-end
-
-    clear j k fields params topo TT zz*
-
+    clear i name topo field j param* div glacier G t X1 Y1 min_dist fields distance centreline corner r
+    
 %% Sort all topo param structures
 
 order = {'centreD','elevation','aspect','slope','northness','profileCurve',...
@@ -183,3 +149,37 @@ for i = 1:3
    topo_sampled_ns.(name)   = orderfields(topo_sampled_ns.(name),order);
 end
     clear i name order
+    
+%% Get topo params for zigzag locations
+%Put zigzags back in the final SWE structure (not related to topo)
+% run OPTIONS.m; options.ZZ = 1;
+% run MAIN.m
+% 
+% topo_sampled_wZZ = topo_sampled;
+% 
+% %Find the zigzag label in the sampled topo structure and match it with the 
+% %zigzag values that are missing for the full matrix
+% for i = 1:3;
+%     name = char(options.glacier(i));
+% 
+%     zz = SWE(i).pattern =='ZZ';
+%     zz_lab = char(SWE(i).label(:)); zz_lab = cellstr(zz_lab(:,1:8));
+% 
+%     zz_vals = find(~cellfun(@isempty,strfind(cellstr(SWE(i).label),'SWE')));
+%     zz_valsName = char(SWE(i).label(zz_vals)); zz_valsName = zz_valsName(:,1:8);
+% 
+%     params = fieldnames(topo_sampled_wZZ.(name));
+%     for k = 1:length(params)
+%         topo = char(params(k));
+%         
+%         for j = 1:size(zz_valsName,1)
+%             TT = ~cellfun(@isempty,strfind(zz_lab,zz_valsName(j,:)));
+%             topo_sampled_wZZ.(name).(topo)(TT) = topo_sampled.(name).(topo)(zz_vals(j));
+%         end
+% 
+%     end
+% end
+% 
+%     clear j k fields params topo TT zz*
+
+

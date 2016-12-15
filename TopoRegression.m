@@ -24,8 +24,8 @@ run MAIN
     for i = 1:3
         y       = SWE(i).swe;
         glacier = char(options.glacier(i)); 
-            display(['option = ',num2str(t), ', glacier = ',name]);
-        X       = topo_sampled.(name);
+            display(['option = ',num2str(t), ', glacier = ',glacier]);
+        X       = topo_sampled.(glacier);
 
         [MLR(t).(glacier), residualsMLR(t).(glacier)] = MLRcalval(y, X);
         MLR(t).(glacier).Properties.VariableNames = {['MLRCoefficient', num2str(t)],['MLRPercentVarExplaned', num2str(t)]};
@@ -103,14 +103,14 @@ end
     
 %% BMS
 
-for g = 1:3
-    glacier = char(options.glacier(g));
 for t = 2:9
     run OPTIONS
     options.DensitySWE  = t;
     options.ZZ          = 2; %exclude zigzags
     run MAIN
     display(['Option ', num2str(t)]);
+for g = 1:3
+    glacier = char(options.glacier(g));
     
     cd BMS
     [BMSinit, BMSres] = BMS_R(SWE, topo_sampled);
@@ -121,7 +121,7 @@ BMS(t).(glacier).Properties.VariableNames = {['BMSCoefficient', num2str(t)],['BM
 residualsBMS(t).(glacier) = BMSres.(glacier);
 end
 end
-    clear BMSinit BMSres t g
+    clear BMSinit BMSres t g glacier
 
 
 %% Predicting
@@ -171,6 +171,24 @@ for i = 2:9
     box.G2  = [box.G2,  BMS(i).G2(1:end-1,1),  MLR(i).G2(1:end-1,1)];
     box.G13 = [box.G13, BMS(i).G13(1:end-1,1), MLR(i).G13(1:end-1,1)];
 end
+
+%Rearrange to compare density options
+boxVar.G4 = []; boxVar.G2 = []; boxVar.G13 = [];
+for i = 2:9
+    boxVar.G4  = [boxVar.G4,  BMS(i).G4(1:end-1,2)];%,  MLR(i).G4(1:end-1,2)];
+    boxVar.G2  = [boxVar.G2,  BMS(i).G2(1:end-1,2)];%,  MLR(i).G2(1:end-1,2)];
+    boxVar.G13 = [boxVar.G13, BMS(i).G13(1:end-1,2)];%, MLR(i).G13(1:end-1,2)];
+end
+
+%Rearrange to compare density options
+boxVarMLR.G4 = []; boxVarMLR.G2 = []; boxVarMLR.G13 = [];
+for i = 2:9
+    boxVarMLR.G4  = [boxVarMLR.G4,    MLR(i).G4(1:end-1,2)];
+    boxVarMLR.G2  = [boxVarMLR.G2,    MLR(i).G2(1:end-1,2)];
+    boxVarMLR.G13 = [boxVarMLR.G13,  MLR(i).G13(1:end-1,2)];
+end
+
+boxplot(boxVarMLR.G4{1:end-1,:}','labels',options.topoVars)
 
 for g = 1:3
     glacier = char(options.glacier(g));

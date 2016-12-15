@@ -3,17 +3,17 @@
 
 %% Maps of topographic params for each glacier
 
-header      = fieldnames(topo_full_ns.G4);
+header  = fieldnames(topo_full_ns.G4);
 
 for r = 1:length(header)
     param = char(header(r));
-    topoParam.G4 = topo_full_ns.G4.(param);
-    topoParam.G2 = topo_full_ns.G2.(param);
+    topoParam.G4  = topo_full_ns.G4.(param);
+    topoParam.G2  = topo_full_ns.G2.(param);
     topoParam.G13 = topo_full_ns.G13.(param);
     
     PlotTopoParameter(topoParam,param, options.topoVarsUnits(r), SWE)
 end 
-    
+    clear r topoParam param header
 %% SWE at sampling locations
 
 % rig.G4 = csvread('/Users/Alexandra/Documents/SFU/Data/glaciershapefiles/RIG_G4.csv');
