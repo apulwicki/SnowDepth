@@ -91,21 +91,21 @@ end
 
 %Colour bar
     c = colorbar('location','eastoutside');  ylabel(c,cLabel)
-    set(c,'Position',[0.88 0.13 0.03 0.6]);
+    set(c,'Position',[0.88 0.2 0.03 0.55]);
 
 % North arrow
     Narrow = imread('Narrow.jpg');
-    a = axes('position',[0.855,0.8,0.12,0.12]); 
+    a = axes('position',[0.855,0.82,0.12,0.12]); 
     Nshow = imshow(Narrow, Cmap);
     colormap(a,gray)    
     axis off; 
 
 %Scale bar
     a = axes(subfig); axis off; 
-    scalebar('ScaleLength', .12, 'Location',[0.9,0.93])
-    annotation(gcf,'textbox',[0.8,0.817,.08,.05],...
+    scalebar('ScaleLength', .12, 'Location',[0.9,0.95])
+    annotation(gcf,'textbox',[0.8,0.83,.08,.05],...
                 'String',{'2 km'}, 'LineStyle','none','FitBoxToText','off','EdgeColor',[1 1 1],'BackgroundColor',[1 1 1]); hold on
-    annotation(gcf,'textbox',[0.725,0.817,.05,.05],...
+    annotation(gcf,'textbox',[0.725,0.83,.05,.05],...
                 'String',{'0'}, 'LineStyle','none','FitBoxToText','off','EdgeColor',[1 1 1],'BackgroundColor',[1 1 1]); hold on
 
 %Font size and image size           

@@ -150,7 +150,7 @@ end
     fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 14 4];
 filename = [type,'residuals_all'];
 print([options.path1, filename],'-dpng'); print([options.path2, filename],'-dpng')
-    clear edges field line N name option
+    clear edges field line N name option fig filename i r 
     
 %% %%%%%%%%%%%%%%%%%%%%% OTHER %%%%%%%%%%%%%%%%%%%%%
 
@@ -202,36 +202,42 @@ end
     clear v i r name header glacier N* a filename edges* param fig units dim h 
     
 %% Ploting - MLR and BMS coeffs
-clf
 II = 2; %Include intercept =1, exlude =2
 %Rearrange to compare density options
 params = BMS(2).G4.Properties.RowNames(1:end-II);
-box.G4 = []; box.G2 = []; box.G13 = [];
+for g = 1:3
+    boxtemp.MLR = []; boxtemp.BMS = [];
+    glacier = char(options.glacier(g)); 
 for i = 2:9
-    box.G4  = [box.G4;  table2array(BMS(i).G4(1:end-II,1))'; table2array(MLR(i).G4(1:end-II,1))'];
-    box.G2  = [box.G2;  table2array(BMS(i).G2(1:end-II,1))'; table2array(MLR(i).G2(1:end-II,1))'];
-    box.G13 = [box.G13; table2array(BMS(i).G13(1:end-II,1))'; table2array(MLR(i).G13(1:end-II,1))'];
-end
-h = cat(1, reshape(box.G4,[1 size(box.G4)]), reshape(box.G2,[1 size(box.G2)]),...
-            reshape(box.G13,[1 size(box.G13)]));
+    boxtemp.MLR  = [boxtemp.MLR;  table2array(MLR(i).(glacier)(1:end-II,1))']; 
+    boxtemp.BMS  = [boxtemp.BMS;  table2array(BMS(i).(glacier)(1:end-II,1))'];
+    h.(glacier) = cat(1, reshape(boxtemp.MLR,[1 size(boxtemp.MLR)]),...
+                         reshape(boxtemp.BMS,[1 size(boxtemp.BMS)]));
+end        
+end        
 
-aboxplot(h,'labels',options.topoVars, ...
-    'Colormap',                 options.RGB,...
+clf
+for g = 1:3
+    glacier = char(options.glacier(g));
+subplot(1,3,g)
+aboxplot(h.(glacier),'labels',options.topoVars, ...
+    'Colormap',                 [144 195 212; 245 177 29]/255,...
     'OutlierMarkerSize',        10,...
     'OutlierMarkerEdgeColor',   [0 0 0]); % Advanced box plot
-        legend('Glacier 4','Glacier 2','Glacier 13'); % Add a legend
+        legend('MLR','BMA'); % Add a legend
         ylabel('Coefficient Value'); hold on 
     
         for i = 1:7
         line([i+0.5 i+0.5],ylim,'Color',[0 0 0],'LineStyle','--','LineWidth', 0.5)
         line(xlim,[0 0],'Color',[0 0 0],'LineStyle','--','LineWidth', 0.5)
         end
-        
-        fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',22) 
-        fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 13 10];
-filename = 'Coeff_compare';
-print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')        
-     
 
+end
+        fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',15)
+        fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 14 4];
+filename = 'CoeffBoxplot_BMSMLRcompare';
+print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')    
 
-    clear box fig filename h i II params
+    clear boxtemp fig filename h i II params g glacier
+    
+

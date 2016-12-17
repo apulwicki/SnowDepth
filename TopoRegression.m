@@ -75,26 +75,31 @@ end
 for i = 1:3
 X = [];
 glacier = char(options.glacier(i));
-params = fieldnames(topo_sampled.(glacier));
+params = fieldnames(topo_sampled_ns.(glacier));
     for p = 1:length(params)
         PP = char(params(p));
-        X = [X, topo_sampled.(glacier).(PP)];
+        X = [X, topo_sampled_ns.(glacier).(PP)];
     end
     [pearson.(glacier) Ppearson.(glacier)] = corr(X); 
     pearson.(glacier)   = round(triu(pearson.(glacier)),2); 
     Ppearson.(glacier)  = round(triu(Ppearson.(glacier)),2);
-%     matrix2latex(pearson.(glacier),'/home/glaciology1/Documents/MastersDocuments/Methods/temp.txt',...
-%         'rowLabels',options.topoVars_xunit,'columnLabels',options.topoVars_xunit, 'alignment','c')
+    
+    pearsonT.(glacier)  = table(pearson.(glacier)(:,1),pearson.(glacier)(:,2),...
+                                pearson.(glacier)(:,3),pearson.(glacier)(:,4),...
+                                pearson.(glacier)(:,5),pearson.(glacier)(:,6),...
+                                pearson.(glacier)(:,7),pearson.(glacier)(:,8),...
+                            'RowNames', options.topoVars);
+    writetable(pearsonT.(glacier),['/home/glaciology1/Downloads/corr',glacier])
 end
     
 %Full topo
 for i = 1:3
 X = [];
 glacier = char(options.glacier(i));
-params = fieldnames(topo_full.(glacier));
+params = fieldnames(topo_full_ns.(glacier));
     for p = 1:length(params)
         PP = char(params(p));
-        X = [X, topo_full.(glacier).(PP)(:)];
+        X = [X, topo_full_ns.(glacier).(PP)(:)];
     end
     [pearson.(glacier) Ppearson.(glacier)] = corr(X); 
     pearson.(glacier)   = round(triu(pearson.(glacier)),2); 
@@ -167,36 +172,76 @@ end
 %Rearrange to compare density options
 for g = 1:3
     glacier = char(options.glacier(g));
-    boxVarBMS.(glacier) = [];
-    boxVarMLR.(glacier) = [];
+    boxBMS.(glacier) = [];
+    boxMLR.(glacier) = [];
+    boxALL.(glacier)    = [];
 for i = 2:9
-        BMS(i).(glacier).Properties.VariableNames(1,1) = {['Option', num2str(i-1)]};
-    boxVarBMS.(glacier)  = [boxVarBMS.(glacier),  BMS(i).(glacier)(1:end-2,2)];%,  MLR(i).G4(1:end-1,2)];
+        BMS(i).(glacier).Properties.VariableNames(1,1) = {['BMSOption', num2str(i-1)]};
+    boxBMS.(glacier)  = [boxBMS.(glacier),  BMS(i).(glacier)(1:end-2,1)];%,  MLR(i).G4(1:end-1,2)];
     
-        MLR(i).(glacier).Properties.VariableNames(1,1) = {['Option', num2str(i-1)]};
-    boxVarMLR.(glacier)  = [boxVarMLR.(glacier),    MLR(i).(glacier)(1:end-2,2)];
+        MLR(i).(glacier).Properties.VariableNames(1,1) = {['MLROption', num2str(i-1)]};
+    boxMLR.(glacier)  = [boxMLR.(glacier),    MLR(i).(glacier)(1:end-2,1)];
+        
+    boxALL.(glacier)    = [boxALL.(glacier),  BMS(i).(glacier)(1:end-1,1),  MLR(i).(glacier)(1:end-1,1)];
+
 end
-        boxVarBMS.(glacier).Properties.RowNames = strcat(boxVarBMS.(glacier).Properties.RowNames,glacier);
-        boxVarMLR.(glacier).Properties.RowNames = strcat(boxVarMLR.(glacier).Properties.RowNames,glacier);
+        boxBMS.(glacier).Properties.RowNames = strcat(boxBMS.(glacier).Properties.RowNames,glacier);
+        boxMLR.(glacier).Properties.RowNames = strcat(boxMLR.(glacier).Properties.RowNames,glacier);
 end
 
 %Save to table
-    writetable([boxVarMLR.G4;boxVarMLR.G2;boxVarMLR.G13] ,'/home/glaciology1/Downloads/MLR')
-    writetable([boxVarBMS.G4;boxVarBMS.G2;boxVarBMS.G13] ,'/home/glaciology1/Downloads/BMS')
-
-
-%boxplot(boxVarMLR.G4{1:end-1,:}','labels',options.topoVars)
+%     writetable([boxMLR.G4;boxMLR.G2;boxMLR.G13] ,'/home/glaciology1/Downloads/MLR')
+%     writetable([boxBMS.G4;boxBMS.G2;boxBMS.G13] ,'/home/glaciology1/Downloads/BMS')
 
 for g = 1:3
     glacier = char(options.glacier(g));
-RegressC.(glacier) = table(mean(box.(glacier){:,:},2), min(box.(glacier){:,:},[],2), max(box.(glacier){:,:},[],2),...
-                'VariableNames',{'Mean', 'Min','Max'}, 'RowNames',BMS(2).G4.Properties.RowNames(1:end-1));
+RegressC.(glacier) = table(mean(boxALL.(glacier){:,:},2), min(boxALL.(glacier){:,:},[],2), max(boxALL.(glacier){:,:},[],2),...
+                'VariableNames',{'Mean', 'Min','Max'}, ...
+                'RowNames',BMS(2).G4.Properties.RowNames(1:end-1));
 end
-    
-    clear g i box glacier
+%     writetable([RegressC.G4;RegressC.G2;RegressC.G13] ,'/home/glaciology1/Downloads/Coeffs')
+% 'RowNames',strcat(BMS(2).G4.Properties.RowNames(1:end-1),glacier))
+    clear g i glacier
 
+%Predict swe with new coeffs    
+for g = 1:3
+    glacier = char(options.glacier(g));
+        %MEAN
+         %Intercept
+        sweMEAN.(glacier) = repmat(RegressC.(glacier){end,1}, size(topo_full.(glacier).centreD));
+         %multiply coeffs and add them
+        coeff = RegressC.(glacier).Properties.RowNames(1:end-1);
+        for n = 1:length(coeff)
+            param               = char(coeff(n));  
+            sweT                = topo_full.(glacier).(param)*RegressC.(glacier){n,1};
+            sweMEAN.(glacier)   = sweMEAN.(glacier) + sweT;
+        end
+        
+        %MIN
+         %Intercept
+        sweMIN.(glacier) = repmat(RegressC.(glacier){end,2}, size(topo_full.(glacier).centreD));
+         %multiply coeffs and add them
+        coeff = RegressC.(glacier).Properties.RowNames(1:end-1);
+        for n = 1:length(coeff)
+            param               = char(coeff(n));  
+            sweT                = topo_full.(glacier).(param)*RegressC.(glacier){n,2};
+            sweMIN.(glacier)    = sweMIN.(glacier) + sweT;
+        end
+        
+        %MAX
+         %Intercept
+        sweMAX.(glacier) = repmat(RegressC.(glacier){end,3}, size(topo_full.(glacier).centreD));
+         %multiply coeffs and add them
+        coeff = RegressC.(glacier).Properties.RowNames(1:end-1);
+        for n = 1:length(coeff)
+            param               = char(coeff(n));  
+            sweT                = topo_full.(glacier).(param)*RegressC.(glacier){n,3};
+            sweMAX.(glacier)    = sweMAX.(glacier) + sweT;
+        end
+        
+        %RANGE
+        sweRANGE.(glacier)      = sweMAX.(glacier)-sweMIN.(glacier);
+end
 
-
-
-
+    clear param sweT *Coeff glacier g n t
 
