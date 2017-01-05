@@ -1,4 +1,4 @@
-%% Plotting zigzag data
+%% Plotting zigzag data - all zigs for each G
 
 run OPTIONS.m
 options.ZZ = 3; %only zigzags
@@ -53,6 +53,41 @@ print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],
 end
 
 %dlmwrite('/home/glaciology1/Documents/QGIS/Data/TestPoints.csv',closest, 'delimiter', ',', 'precision', 9); %Write matrix with new waypoints to csv file for QGIS
+
+
+%% Plotting zigzag data - compare location calc options
+clf
+    run OPTIONS.m
+    options.ZZ = 3; %only zigzags
+    options.ZigzagLocation  = 1; %location based on vertex
+    run MAIN
+    i = 3;
+thatZZ = SWE(i).ZZ == SWE(i).ZZ(end,1);
+minX = min(SWE(i).utm(thatZZ,1)); minY = min(SWE(i).utm(thatZZ,2));
+
+x = SWE(i).utm(thatZZ,1) - minX;     
+y = SWE(i).utm(thatZZ,2) - minY;   
+plot(x, y,'.k','MarkerSize',10); hold on
+
+    run OPTIONS.m
+    options.ZZ = 3; %only zigzags
+    options.ZigzagLocation  = 2; %location based on last point
+    run MAIN
+    i = 3;
+x = SWE(i).utm(thatZZ,1) - minX;     
+y = SWE(i).utm(thatZZ,2) - minY;   
+plot(x, y,'ob','MarkerSize',6); hold on
+
+	axis([0 45 0 45]); axis square; box on; ax = gca;
+    ax.YTick = 0:10:40;
+    xlabel('Distance (m)'); ylabel('Distance (m)'); 
+
+fig=gcf;  fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 6 6];
+
+      set(findall(fig,'-property','FontSize'),'FontSize',16)
+filename = 'Zigzag_calOptions';
+print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')         
+ 
 
 %% Boxplot to compare zigzags
 run OPTIONS.m
