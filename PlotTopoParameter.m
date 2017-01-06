@@ -2,10 +2,7 @@ function [ ] = PlotTopoParameter( topoParam, paramName, cLabel, SWE, sweDOTS )
 %UNTITLED3 Summary of this function goes here
 %   Detailed explanation goes here
 run OPTIONS.m
-rig.G4 = csvread('/home/glaciology1/Documents/Data/GlacierShapeFiles/RIG_G4.csv');
-rig.G2 = csvread('/home/glaciology1/Documents/Data/GlacierShapeFiles/RIG_G2.csv');
-rig.G13 = csvread('/home/glaciology1/Documents/Data/GlacierShapeFiles/RIG_G13.csv');
-rig.ELA = csvread('/home/glaciology1/Documents/Data/GlacierShapeFiles/ELA.csv');
+    rig = topoParam.rig;
     ELA_d = [1 7; 16 23; 8 15];
 clf
 
@@ -93,6 +90,11 @@ end
     c = colorbar('location','eastoutside');  ylabel(c,cLabel)
     set(c,'Position',[0.88 0.2 0.03 0.55]);
 
+%Flow direction
+    annotation('arrow',[.11 .14],[.57 .47]) %G4
+    annotation('arrow',[.38 .30],[.55 .62]) %G2
+    annotation('arrow',[.77 .70],[.47 .59]) %G13
+   
 % North arrow
     Narrow = imread('Narrow.jpg');
     a = axes('position',[0.855,0.82,0.12,0.12]); 

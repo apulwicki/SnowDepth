@@ -21,17 +21,22 @@ end
 %% SWE at sampling locations
 
 param = 'empty';
-opt = 8;
+for opt = 2:9
+    clf
+    run OPTIONS
+    options.DensitySWE = opt;
+    run MAIN
 
 topoParam.G4  = NaN(size(topo_full_ns.G4.elevation));
 topoParam.G2  = NaN(size(topo_full_ns.G2.elevation));
 topoParam.G13 = NaN(size(topo_full_ns.G13.elevation));
+topoParam.rig = rig;
 
 PlotTopoParameter(topoParam,param, 'SWE (m w.e.)', SWE, 'colour')
 
     filename = ['SWEmap_opt',num2str(opt)];
 print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
-
+end
 %% Modelled and observed SWE
 
 % modelled = sweBMS;
