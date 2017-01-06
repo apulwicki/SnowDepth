@@ -6,7 +6,7 @@ rig.G4 = csvread('/home/glaciology1/Documents/Data/GlacierShapeFiles/RIG_G4.csv'
 rig.G2 = csvread('/home/glaciology1/Documents/Data/GlacierShapeFiles/RIG_G2.csv');
 rig.G13 = csvread('/home/glaciology1/Documents/Data/GlacierShapeFiles/RIG_G13.csv');
 rig.ELA = csvread('/home/glaciology1/Documents/Data/GlacierShapeFiles/ELA.csv');
-    ELA_d = [1 7; 16 23; 8 15];
+   ELA_d = [1 7; 16 23; 8 15];
 clf
 
 %get colour min max
