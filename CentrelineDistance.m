@@ -11,7 +11,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% Import centreline points
-centreline = csvread('centrelinepoints.csv');
+centreline = csvread('centrelinepoints2.csv');
 
 %% Distance of sampled points from centre line
 

@@ -5,12 +5,13 @@ load TopoBMS_MLR
 
 header  = fieldnames(topo_full_ns.G4);
 
-for r = 1%:length(header)
+for r = 1%1:length(header)
     param = char(header(r));
     topoParam.G4  = topo_full_ns.G4.(param);
     topoParam.G2  = topo_full_ns.G2.(param);
     topoParam.G13 = topo_full_ns.G13.(param);
-    
+    topoParam.rig = rig;
+
     PlotTopoParameter(topoParam,param, options.topoVarsUnits(r), SWE, 'black')
     
     %Save figure
@@ -22,7 +23,6 @@ end
 
 param = 'empty';
 for opt = 2:9
-    clf
     run OPTIONS
     options.DensitySWE = opt;
     run MAIN

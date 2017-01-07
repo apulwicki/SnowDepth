@@ -14,8 +14,8 @@ maxSWE  = nanmax([SWE(1).swe(:);SWE(2).swe(:);SWE(3).swe(:)]);
 G13size = size(topoParam.G13);
 
 width  = 0.41;
-height = 2.2;
-ystart = -0.58;
+height = 2.3;
+ystart = -0.64;
 pos_axis    = [0        ystart   width     height; 
                0.15     ystart   width     height; 
                0.48     ystart   width     height];
@@ -91,10 +91,16 @@ end
     set(c,'Position',[0.88 0.2 0.03 0.55]);
 
 %Flow direction
-    annotation('arrow',[.11 .14],[.57 .47]) %G4
-    annotation('arrow',[.38 .30],[.55 .62]) %G2
-    annotation('arrow',[.77 .70],[.47 .59]) %G13
-   
+    annotation('arrow',[.15 .19],[.32 .22]) %G4
+    annotation('arrow',[.39 .31],[.55 .61]) %G2
+    annotation('arrow',[.81 .74],[.47 .59]) %G13
+
+%Glacier labels
+    annotation('textbox',[.02 .02 .1 .1],'String', 'Glacier 4','EdgeColor','none')
+    annotation('textbox',[.32 .02 .1 .1],'String', 'Glacier 2','EdgeColor','none')
+    annotation('textbox',[.6 .02 .1 .1],'String', 'Glacier 13','EdgeColor','none')
+
+    
 % North arrow
     Narrow = imread('Narrow.jpg');
     a = axes('position',[0.855,0.82,0.12,0.12]); 

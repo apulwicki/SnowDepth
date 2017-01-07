@@ -184,6 +184,15 @@ figure
             h(i).f = histogram(topo_full_ns.(name).(param)(:),25); hold on
             h(i).s = histogram(topo_sampled_ns.(name).(param),25); 
             
+            hist_stats_full.(name)(r,:) = [nanmean(topo_full_ns.(name).(param)(:)),...
+                                            nanstd(topo_full_ns.(name).(param)(:)),...
+                                            skewness(topo_full_ns.(name).(param)(:)),...
+                                            kurtosis(topo_full_ns.(name).(param)(:))];
+            hist_stats_sample.(name)(r,:) = [nanmean(topo_sampled_ns.(name).(param)(:)),...
+                                            nanstd(topo_sampled_ns.(name).(param)(:)),...
+                                            skewness(topo_sampled_ns.(name).(param)(:)),...
+                                            kurtosis(topo_sampled_ns.(name).(param)(:))];                            
+                                        
             dim = [a(i).Position(1)+0.01 a(i).Position(2)*5.41 .3 .3];
             annotation('textbox',dim,'String', name,'EdgeColor','none','FontWeight','bold')
             xlabel(char(options.topoVars(r)));     ylabel('Frequency')
@@ -194,8 +203,8 @@ figure
     linkaxes(flip(a));
         fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',13)
         fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 14 4];
-filename = ['SampledRangeTopo_',header{r}];
-print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
+% filename = ['SampledRangeTopo_',header{r}];
+% print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
 end 
 
     close all

@@ -305,7 +305,7 @@ end
 %% Elevation and SD (McGrath style plots of depth)
 
 % Depth vs Elevation (GPS elev)
-
+clf
 glacier = 'G02';
 
 glacier_list = ['G04';'G02';'G13']; %select data from chosen glacier
@@ -323,7 +323,7 @@ for j = 1:3;
     depthBin = zeros(length(bins)-1,1);
     for i = 1:length(bins)-1
         logiEL = elev>bins(i) & elev<=bins(i+1);
-        depthBin(i) = std(depth(logiEL))/mean(depth(logiEL))*100;
+        depthBin(i) = std(depth(logiEL))%/mean(depth(logiEL))*100;
     end
 
     binsPlot.(glacier) = bins(~isnan(depthBin))-binSize/2;
@@ -336,20 +336,21 @@ for j = 1:3;
 end
 
 %Elevation span lines
-plot([1573 2854], [98 98], 'Color',options.RGB(1,:), 'LineWidth', 4);
-plot([1906 3098], [96 96], 'Color',options.RGB(2,:), 'LineWidth', 4);
-plot([1775 3037], [94 94], 'Color',options.RGB(3,:), 'LineWidth', 4);
-ylim([0 100]); xlim([1500 3100])
+plot([nanmin(nanmin(topo_full_ns.G4.elevation)) nanmax(nanmax(topo_full_ns.G4.elevation))], [68 68], 'Color',options.RGB(1,:), 'LineWidth', 4);
+plot([nanmin(nanmin(topo_full_ns.G2.elevation)) nanmax(nanmax(topo_full_ns.G2.elevation))], [66 66], 'Color',options.RGB(2,:), 'LineWidth', 4);
+plot([nanmin(nanmin(topo_full_ns.G13.elevation)) nanmax(nanmax(topo_full_ns.G13.elevation))], [64 64], 'Color',options.RGB(3,:), 'LineWidth', 4);
+ylim([0 70]); %ylim([0 100]); 
+xlim([1900 3100])
 
 xlabel('Elevation (m a.s.l.)'); ylabel([{'Standard deviation as percent'}, {'of mean snow depth (%)'}])
 legend([p.G04(1,1) p.G02(1,1) p.G13(1,1)], ...
     {['G04 R^2 = ', num2str(round(gof.G04.rsquare,2))],...
     ['G02 R^2 = ', num2str(round(gof.G02.rsquare,2))],...
-    ['G13 R^2 = ', num2str(round(gof.G13.rsquare,2))]}, 'Location', 'west');
+    ['G13 R^2 = ', num2str(round(gof.G13.rsquare,2))]}, 'Location', 'east');
 
     fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',13)
     fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 8 4.5];
-filename = 'binned_std_percent';
+filename = 'binned_std';%_percent';
 print([options.path1, filename],'-dpng'); print([options.path2, filename],'-dpng')
 
 
