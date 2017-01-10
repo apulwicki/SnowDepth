@@ -14,7 +14,7 @@ for r = 1%1:length(header)
 
     PlotTopoParameter(topoParam,param, options.topoVarsUnits(r), SWE, 'black')
     
-    %Save figure
+%     %Save figure
     filename = ['Map_',param];
     print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
 end 

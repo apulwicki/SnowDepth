@@ -32,22 +32,24 @@ end
 %% Raster distance from centreline
 
 %Create matrix with x and y locations of raster cells
-corner = [593915 6739280; 598000 6751320; 602040 6760040]; %Coordinates of NW corner of rasters
+corner = [min(rig.G4(:,1)) min(rig.G4(:,2)); ...
+          min(rig.G2(:,1)) min(rig.G2(:,2)); ...
+          min(rig.G13(:,1)) min(rig.G13(:,2))]; %Coordinates of SW corner of rasters
 
 for i = 1:3
     G = char(options.glacier(i));    
-    a = topo_full.(G).elevation;    a = flipud(a);     rasterSize = size(a); %get example raster for NaN locations and it's size
+    a = topo_full.(G).elevation;    rasterSize = size(a); %get example raster for NaN locations and it's size
     
     rasterX = corner(i,1):40:(40*rasterSize(1,2)+corner(i,1)-1); %create new raster with easting locatiosn of cells
     rasterX = repmat(rasterX, rasterSize(1,1),1);    
     rasterX(isnan(a)) = NaN;    rasterX = rasterX(:); %put NaNs where they need to be
 
-    rasterY = corner(i,2):40:(40*rasterSize(1,1)+corner(i,2)-1); %create new raster with northing locatiosn of cells
+    rasterY = (40*rasterSize(1,1)+corner(i,2)-1):-40:corner(i,2); %create new raster with northing locatiosn of cells
     rasterY = repmat(rasterY', 1, rasterSize(1,2));  
     rasterY(isnan(a)) = NaN;    rasterY = rasterY(:); %put NaNs where they need to be
 
 %     plot(rasterX,rasterY,'.'); hold on
-%     plot(centreline(:,1),centreline(:,2),'k.');
+%     plot(centreline(1:4000,1),centreline(1:4000,2),'k.');
 
 Ecentre = repmat(centreline(:,1)',length(rasterX),1); %repeating centreline easting
 Ncentre = repmat(centreline(:,2)',length(rasterY),1); %repeating centreline northing
@@ -56,7 +58,7 @@ Nloc = repmat(rasterY,1,length(centreline(:,1))); %repeating raster cell locatio
     
 X = Eloc-Ecentre; Y = Nloc-Ncentre; %separation between locations and cells
 distance = sqrt(X.^2+Y.^2); %calculate distance
-topo_full.(G).centreD = flipud(reshape(nanmin(distance,[],2),rasterSize)); %chose the minimum distance
+topo_full.(G).centreD = reshape(nanmin(distance,[],2),rasterSize); %chose the minimum distance
 
 clear E* N* raster* a
 end

@@ -195,7 +195,7 @@ figure
                                         
             dim = [a(i).Position(1)+0.01 a(i).Position(2)*5.41 .3 .3];
             annotation('textbox',dim,'String', name,'EdgeColor','none','FontWeight','bold')
-            xlabel(char(options.topoVars(r)));     ylabel('Frequency')
+            xlabel(char(options.topoVarsUnits(r)));     ylabel('Frequency')
             axis tight
             legend('Full range','Sampled');
     end
@@ -203,8 +203,8 @@ figure
     linkaxes(flip(a));
         fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',13)
         fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 14 4];
-% filename = ['SampledRangeTopo_',header{r}];
-% print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
+filename = ['SampledRangeTopo_',header{r}];
+print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
 end 
 
     close all
