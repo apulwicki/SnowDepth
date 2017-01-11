@@ -21,7 +21,7 @@ pos_axis    = [0        ystart   width     height;
                0.48     ystart   width     height];
 
 %phasemap needs
-if strcmp(paramName, 'aspect') || strcmp(paramName, 'northness')
+if  strcmp(paramName, 'banana') %None need circular phase map, the option remains though
     Cmap = phasemap;
 else
     Cmap = parula;

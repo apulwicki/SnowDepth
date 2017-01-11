@@ -16,24 +16,26 @@
 %% Importing DEMs
 run OPTIONS
 
-files   = dir('/home/glaciology1/Documents/Data/GlacierTopos/*.asc');
+files   = dir('/home/glaciology1/Documents/Data/GlacierTopos/*.tif'); 
 v       = cell(0,0);
-SxIndex         = 1:3;
-slopeORaspect   = [4:6,13:15];
+Index9999   = [1:3,7:12,16:18];
+Index0      = [4:6,13:15];
+IndexSize   = 4:18;
 for i = 1:length(files)
-    if      ismember(i,SxIndex)
+    if      ismember(i,Index9999)
         A = importdata(['/home/glaciology1/Documents/Data/GlacierTopos/', files(i).name],' ',6);
-        A.data(A.data==-9999) = NaN; 
-    elseif  ismember(i,slopeORaspect)   
+        A = double(A);  A(A==-9999) = NaN; 
+    elseif  ismember(i,Index0)   
         A = importdata(['/home/glaciology1/Documents/Data/GlacierTopos/', files(i).name],' ',8);
-        A.data(A.data==0) = NaN; 
-    else
-        A = importdata(['/home/glaciology1/Documents/Data/GlacierTopos/', files(i).name],' ',8);
-        A.data(A.data==-9999) = NaN; 
+        A = double(A);  A(A==0) = NaN; 
     end
-    A.data(~any(~isnan(A.data), 2),:)=[];
-    A.data(:,~any(~isnan(A.data), 1))=[];
-    v(i,1) = cellstr(files(i).name(1:end-4)); eval([v{i,1} '= A.data;']);
+    
+    A(~any(~isnan(A), 2),:) =[];
+    A(:,~any(~isnan(A), 1)) =[];
+    if      ismember(i,IndexSize)
+        A = A(2:end,:);
+    end
+    v(i,1) = cellstr(files(i).name(1:end-4)); eval([v{i,1} '= A;']);
 end
 
 %Create structure with full raster of data
@@ -48,10 +50,10 @@ end
    topo_full.G4.Sx      = topo_full.G4.Sx(2:end,:);
    topo_full.G2.Sx      = topo_full.G2.Sx(2:end-1,:);
    topo_full.G13.Sx     = topo_full.G13.Sx(2:end,:);
+   
+        clear aspect* elev* north* profil* slope* Sx* tangent* files A i param v glacier ans Index*
 
-        clear aspect* elev* north* profil* slope* Sx* tangent* files A i param v glacier ans
-
-%% Import Topo Params
+%% Import Sampled Topo Params
 
 %Import topos
 [topo, ~, ~] = xlsread('SPOT_TopoParams_noZZ.xlsx','Sheet1','A1:F2353');
@@ -100,20 +102,42 @@ end
         topo_sampled.(name).Sx  = X(:,best); %add Sx with best correlation to structure
     end
             clear best d300* d200* d100* i name text X* y CC
-        
+
 %Distance from centreline import
 run CentrelineDistance.m
 
     clear aspect centreline corner distance dive elevation G glacier i profileCurve slope Sx tangentCurve topo X Y
 
-%% Northness calculation  
+%% Calculations
 
+%Aspect correction -> 0degrees is N and goes clockwise
+    for i = 1:3
+        glacier = char(options.glacier(i));
+        
+        aspect = topo_full.(glacier).aspect;
+            aspect = aspect -90;    aspect(aspect<0) = aspect(aspect<0)+360;   aspect = 360-aspect; 
+        topo_full.(glacier).aspect = aspect;
+        
+        aspect = topo_sampled.(glacier).aspect;
+            aspect = aspect -90;    aspect(aspect<0) = aspect(aspect<0)+360;   aspect = 360-aspect;             
+        topo_sampled.(glacier).aspect = aspect;
+    end
+
+%Northness
     for i = 1:3
         glacier = char(options.glacier(i));
         topo_full.(glacier).northness    = cosd(topo_full.(glacier).aspect).*sind(topo_full.(glacier).slope);
         topo_sampled.(glacier).northness = cosd(topo_sampled.(glacier).aspect).*sind(topo_sampled.(glacier).slope);
     end
+
+%Aspect -> get North South components
+    for i = 1:3
+        glacier = char(options.glacier(i));
+        topo_full.(glacier).aspect    = cosd(topo_full.(glacier).aspect);
+        topo_sampled.(glacier).aspect = cosd(topo_sampled.(glacier).aspect);
+    end    
     
+    clear aspect
 %% Standardizing variables
 
 %Keep a copy of non-standardized variables for range of params sampled
