@@ -1,5 +1,5 @@
 %% %%%%%%%%%%%%%%%%%%%%% BMS and MLR Plots %%%%%%%%%%%%%%%%%%%%%
-
+% 
 % data            = BMS;
 % residualsdata   = residualsBMS;
 % type            = 'BMS';
@@ -81,7 +81,7 @@ aboxplot(h,'labels',options.topoVars, ...
 filename = [type,'Coeffs_DensityOpts'];
 print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
     clear box fig filename h i params
-%% Plots - BMS fit for all SWE options
+%% Plots - fit for all SWE options
 clf
 R2value = [];
 
@@ -110,6 +110,7 @@ for i = 1:3
         title(name)
                 axis square;    box on        
         R2value = mean([R2value g.(name).rsquare]);
+        if r == 8; p.Color = [0 0 0]; end
     end
         b = gca; legend(b,'off');
         dim = [b.Position(1)+0.01 b.Position(2)+.37 .3 .3];
@@ -131,8 +132,10 @@ for i = 1:3
     option = r;    name	= char(options.glacier(i));
     
     subplot(1,3,i)
-    [N, ~] = histcounts(residualsdata(r).(name)); hold on
-    plot(N,'-o')
+    [N, edges] = histcounts(residualsdata(r).(name)); hold on
+    edges = mean([edges(1:end-1); edges(2:end)],1);
+    plot(edges,N,'-', 'LineWidth',2)
+    %ax = gca; ax.XTick = edges;
     %hist(residuals(r).(name)); hold on
         %b = gca; 
         %dim = [b.Position(1)+0.01 b.Position(2)+.5 .3 .3];
@@ -141,13 +144,13 @@ for i = 1:3
     end
         legend('Option 1', 'Option 2','Option 3','Option 4','Option 5',...
             'Option 6','Option 7','Option 8')
-        xlim([0 40]); ylim([0 190]);
+        xlim([-0.6 0.6]); ylim([0 180]);
         xlabel('Residual (m w.e.)');         title(name) 
         if i == 1; ylabel('Frequency');
         else     ylabel('');        end
 end
     fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',13)
-    fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 14 4];
+    fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 15 5];
 filename = [type,'residuals_all'];
 print([options.path1, filename],'-dpng'); print([options.path2, filename],'-dpng')
     clear edges field line N name option fig filename i r 

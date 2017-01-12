@@ -50,9 +50,15 @@ for opt = 2:9
     topoParam.G4  = modelled(opt).G4;
     topoParam.G2  = modelled(opt).G2;
     topoParam.G13 = modelled(opt).G13;
-    
+    topoParam.rig = rig;
+
     PlotTopoParameter(topoParam, 'modelledSWE', 'SWE (m w.e.)', SWE, 'colour')
 
+    %Integrated specific winter balance
+        annotation('textbox',[.02 .02 .1 .1],'String', ...
+            num2str(nansum(modelled(opt).G4(:))/(sum(~isnan(modelled(opt).G4(:)))*40*40)),'EdgeColor','none')
+
+    
     filename = [type,'map_Modelled_Observed_Opt',num2str(opt-1)];
         print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
 end
@@ -77,26 +83,29 @@ maxSWE.(glacier)  = nanmax(stackSWE.(glacier),[],3);
     minSWE.(glacier)(hereNan) = NaN;    maxSWE.(glacier)(hereNan) = NaN;   meanSWE.(glacier)(hereNan) = NaN; 
 
 diffSWE.(glacier) = maxSWE.(glacier)-minSWE.(glacier);
-diffSWE_p.(glacier) = (maxSWE.(glacier)-minSWE.(glacier))./modelled(i).(glacier)*100;
+diffSWE_p.(glacier) = (maxSWE.(glacier)-minSWE.(glacier))./maxSWE.(glacier)*100;%modelled(i).(glacier)*100;
 
-weirdsmall = diffSWE_p.(glacier)<100;
+weirdsmall = diffSWE_p.(glacier)<10;
+diffSWE_p.(glacier)(weirdsmall) = 10;
+
+weirdsmall = diffSWE_p.(glacier)>100;
 diffSWE_p.(glacier)(weirdsmall) = 100;
-
-weirdsmall = diffSWE_p.(glacier)>150;
-diffSWE_p.(glacier)(weirdsmall) = 150;
 
 end
 
-PlotTopoParameter(diffSWE, 'modelledSWE', 'SWE (m w.e.)', SWE, 'black')
-    filename = [type,'_SWEdifferenceMap'];
-    print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
-PlotTopoParameter(diffSWE_p, 'modelledSWE', 'Modelled SWE Difference (%)', SWE, 'black')
+diffSWE.rig = rig;    diffSWE_p.rig = rig;
+
+
+% PlotTopoParameter(diffSWE, 'modelledSWE', 'SWE (m w.e.)', SWE, 'black')
+%     filename = [type,'_SWEdifferenceMap'];
+%     print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
+PlotTopoParameter(diffSWE_p, 'modelledSWE', {'Predicted SWE range as ','percent of maximum SWE (%)'}, SWE, 'black')
     filename = [type,'_SWEdifferenceMap_percent'];
     print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
      
     
     
-    clear g* i maxSWE minSWE filename modelled  type diffSWE
+    clear g* i maxSWE minSWE filename modelled  type diffSWE*
 
 %% Min/Max/Mean of modelled SWE and total difference
 

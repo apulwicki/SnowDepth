@@ -152,6 +152,8 @@ for t = 2:9
             sweT                = topo_full.(glacier).(param)*MLR(t).(glacier){n,1};
             sweMLR(t).(glacier) = sweMLR(t).(glacier) + sweT;
         end
+         %Set min to 0
+        sweMLR(t).(glacier)(sweMLR(t).(glacier)<0) = 0;
         
         %BMS
          %Intercept
@@ -162,6 +164,8 @@ for t = 2:9
             sweT                = topo_full.(glacier).(param)*BMS(t).(glacier){n,1};
             sweBMS(t).(glacier) = sweBMS(t).(glacier) + sweT;
         end
+         %Set min to 0
+        sweBMS(t).(glacier)(sweMLR(t).(glacier)<0) = 0;
     end
 end
 
