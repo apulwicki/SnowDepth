@@ -39,12 +39,12 @@ print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],
 end
 %% Modelled and observed SWE
 
+modelled = sweMLR;
+type     = 'MLR';
+
 % modelled = sweBMS;
-% opt      = 8;
 % type     = 'BMS';
 
-modelled = sweBMS;
-type     = 'BMS';
 %opt      = 8;
 for opt = 2:9
     topoParam.G4  = modelled(opt).G4;
@@ -55,10 +55,15 @@ for opt = 2:9
     PlotTopoParameter(topoParam, 'modelledSWE', 'SWE (m w.e.)', SWE, 'colour')
 
     %Integrated specific winter balance
-        annotation('textbox',[.02 .02 .1 .1],'String', ...
-            num2str(nansum(modelled(opt).G4(:))/(sum(~isnan(modelled(opt).G4(:)))*40*40)),'EdgeColor','none')
-
+       for g = 1:3; glacier = char(options.glacier(g)); 
+        ISWbalance(opt).(glacier) = round(nanmean(modelled(opt).(glacier)(:)),2);
+       end
+       
+    annotation('textbox',[.17 .22 .1 .1],'String',[num2str(ISWbalance(opt).G4, '%.2f'),' m w.e.'],'EdgeColor','none')    
+    annotation('textbox',[.34 .55 .1 .1],'String',[num2str(ISWbalance(opt).G2, '%.2f'),' m w.e.'],'EdgeColor','none')    
+    annotation('textbox',[.75 .53 .1 .1],'String',[num2str(ISWbalance(opt).G13, '%.2f'),' m w.e.'],'EdgeColor','none')    
     
+    fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18)
     filename = [type,'map_Modelled_Observed_Opt',num2str(opt-1)];
         print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
 end
@@ -83,13 +88,15 @@ maxSWE.(glacier)  = nanmax(stackSWE.(glacier),[],3);
     minSWE.(glacier)(hereNan) = NaN;    maxSWE.(glacier)(hereNan) = NaN;   meanSWE.(glacier)(hereNan) = NaN; 
 
 diffSWE.(glacier) = maxSWE.(glacier)-minSWE.(glacier);
-diffSWE_p.(glacier) = (maxSWE.(glacier)-minSWE.(glacier))./maxSWE.(glacier)*100;%modelled(i).(glacier)*100;
+diffSWE_p.(glacier) = (maxSWE.(glacier)-minSWE.(glacier))./maxSWE.(glacier)*100;
 
 weirdsmall = diffSWE_p.(glacier)<10;
 diffSWE_p.(glacier)(weirdsmall) = 10;
 
 weirdsmall = diffSWE_p.(glacier)>100;
 diffSWE_p.(glacier)(weirdsmall) = 100;
+
+diffSWE_p.(glacier)(all(stackSWE.(glacier)==0,3)) = 0;
 
 end
 
