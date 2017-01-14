@@ -213,7 +213,7 @@ end
     close all
     clear v i r name header glacier N* a filename edges* param fig units dim h 
     
-%% Ploting - MLR and BMS coeffs
+%% Plotting - MLR and BMS coeffs
 II = 2; %Include intercept =1, exlude =2
 %Rearrange to compare density options
 params = BMS(2).G4.Properties.RowNames(1:end-II);
@@ -245,6 +245,12 @@ aboxplot(h.(glacier),'labels',options.topoVars, ...
         end
 
 end
+
+        annotation('textbox',[0.22 0.8 0.2 0.2],'String', 'G4', 'EdgeColor','none')
+        annotation('textbox',[0.5 0.8 0.2 0.2],'String', 'G2', 'EdgeColor','none')
+        annotation('textbox',[0.78 0.8 0.2 0.2],'String', 'G13', 'EdgeColor','none')
+
+
         fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',15)
         fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 14 4];
 filename = 'CoeffBoxplot_BMSMLRcompare';

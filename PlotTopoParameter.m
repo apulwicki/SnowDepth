@@ -1,4 +1,4 @@
-function [ ] = PlotTopoParameter( topoParam, paramName, cLabel, SWE, sweDOTS )
+function [ ] = PlotTopoParameter( topoParam, paramName, cLabel, SWE, sweDOTS)
 %UNTITLED3 Summary of this function goes here
 %   Detailed explanation goes here
 run OPTIONS.m
@@ -7,10 +7,18 @@ run OPTIONS.m
 clf
 
 %get colour min max
-x_min   = nanmin([topoParam.G4(:);topoParam.G2(:);topoParam.G13(:)]);
-x_max   = nanmax([topoParam.G4(:);topoParam.G2(:);topoParam.G13(:)]);
+     %Manual colour range
+    fixed_color = 0;
+if fixed_color == 0 
+    x_min   = nanmin([topoParam.G4(:);topoParam.G2(:);topoParam.G13(:)]);
+    x_max   = nanmax([topoParam.G4(:);topoParam.G2(:);topoParam.G13(:)]);
+elseif fixed_color == 1
+    x_min = 0;
+    x_max = 2;
+end
 minSWE  = nanmin([SWE(1).swe(:);SWE(2).swe(:);SWE(3).swe(:)]);
 maxSWE  = nanmax([SWE(1).swe(:);SWE(2).swe(:);SWE(3).swe(:)]);
+
 G13size = size(topoParam.G13);
 
 width  = 0.41;

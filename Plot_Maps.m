@@ -138,34 +138,30 @@ diffSWE_p.(glacier) = (maxSWE.(glacier)-minSWE.(glacier))./meanSWE.(glacier)*100
     weirdsmall = diffSWE_p.(glacier)>180;
     diffSWE_p.(glacier)(weirdsmall) = 180;
 end
+minSWE.rig = rig;   maxSWE.rig = rig;   meanSWE.rig = rig;
+sweMEAN.rig = rig;  sweMIN.rig = rig;   sweMAX.rig = rig;   sweRANGE.rig = rig;
+diffSWE.rig = rig;  diffSWE_p.rig = rig;
+
 
 %Plots from cell values
-PlotTopoParameter(minSWE, 'modelledSWE', 'SWE (m w.e.)', SWE, 'black')
-    filename = 'SWEmin';
-    print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
+PlotTopoParameter(minSWE, 'modelledSWE', 'SWE (m w.e.)', SWE, 'black'); 
+    saveFIG('SWEmin');
 PlotTopoParameter(maxSWE, 'modelledSWE', 'SWE (m w.e.)', SWE, 'black')
-    filename = 'SWEmax';    
-    print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')  
+    saveFIG('SWEmax');    
 PlotTopoParameter(diffSWE, 'modelledSWE', 'SWE (m w.e.)', SWE, 'black')
-    filename = 'SWEdiff';
-    print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')   
+    saveFIG('SWEdiff');
 PlotTopoParameter(diffSWE_p, 'modelledSWE', 'Percent of Mean SWE (%)', SWE, 'black')
-    filename = 'SWEdiff_percentMean';
-    print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')     
+    saveFIG('SWEdiff_percentMean');
 
 %Plots from coefficients
-PlotTopoParameter(sweMEAN, 'modelledSWE', 'SWE (m w.e.)', SWE, 'black')
-    filename = 'SWEmeanModelled';    
-    print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')  
+PlotTopoParameter(sweMEAN, 'modelledSWE', 'SWE (m w.e.)', SWE, 'black');
+    saveFIG('SWEmeanModelled');
 PlotTopoParameter(sweMIN, 'modelledSWE', 'SWE (m w.e.)', SWE, 'black')
-    filename = 'SWEminModelled';
-    print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
+    saveFIG('SWEminModelled');
 PlotTopoParameter(sweMAX, 'modelledSWE', 'SWE (m w.e.)', SWE, 'black')
-    filename = 'SWEmaxModelled';    
-    print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
+    saveFIG('SWEmaxModelled');    
 PlotTopoParameter(sweRANGE, 'modelledSWE', 'SWE (m w.e.)', SWE, 'black')
-    filename = 'SWErangeModelled';    
-    print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
+    saveFIG('SWErangeModelled');    
       
 
 clear g* i maxSWE minSWE filename modelled  type diffSWE
