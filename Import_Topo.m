@@ -106,6 +106,19 @@ end
 %Distance from centreline import
 run CentrelineDistance.m
 
+    %-> 
+    s = [1, length(topo_sampled.G4.profileCurve)];  s(2,:) = s(1,2) + [1, length(topo_sampled.G2.profileCurve)];
+     s(3,:) = s(2,2) + [1, length(topo_sampled.G13.profileCurve)];
+     
+    topo_sampled.G4.profileCurve = mean([e2(s(1,1):s(1,2)),n2(s(1,1):s(1,2))],2);
+    topo_sampled.G4.tangentCurve = mean([Profilecu(s(1,1):s(1,2)),Tangential(s(1,1):s(1,2))],2);
+        
+    topo_sampled.G2.profileCurve = mean([e2(s(2,1):s(2,2)),n2(s(2,1):s(2,2))],2);
+    topo_sampled.G2.tangentCurve = mean([Profilecu(s(2,1):s(2,2)),Tangential(s(2,1):s(2,2))],2);
+    
+    topo_sampled.G13.profileCurve = mean([e2(s(3,1):s(3,2)),n2(s(3,1):s(3,2))],2);
+    topo_sampled.G13.tangentCurve = mean([Profilecu(s(3,1):s(3,2)),Tangential(s(3,1):s(3,2))],2);
+    
     clear aspect centreline corner distance dive elevation G glacier i profileCurve slope Sx tangentCurve topo X Y
 
 %% Calculations

@@ -22,7 +22,7 @@ options.ZZ              = 2;
 
 %%%%%%%%%%%%%%%%%%%%%% DETREND FED. SAMPLER DENSITY %%%%%%%%%%%%%%%%%%%%%%%
 
-options.TubeDensity     = 1;
+options.TubeDensity     = 2;
                 % 1 original fed. sampler density values
                 % 2 depth detrended fed. sampler density values
 

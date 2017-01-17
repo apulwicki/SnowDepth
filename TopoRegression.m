@@ -15,13 +15,13 @@ load TopoParams.mat
 %    topo_sampled.(name) = rmfield(topo_sampled.(name),'aspect');
 % end
 
-for t = 2:9
+for t = 8%2:9
 run OPTIONS.m
 options.DensitySWE  = t;
 options.ZZ          = 2; %exclude zigzags
 run MAIN
 
-    for i = 1:3
+    for i = 1%:3
         y       = SWE(i).swe;
         glacier = char(options.glacier(i)); 
             display(['option = ',num2str(t), ', glacier = ',glacier]);
