@@ -118,6 +118,46 @@ subplot(2,2,4)
  %%
  
 %  uiopen('/home/glaciology1/Documents/QGIS/Data/sampled_curvetest.csv',1) 
+% clear topo*
+
+clear curve
+ s = [1, length(SWE(1).swe)];  s(2,:) = s(1,2) + [1, length(SWE(2).swe)];
+     s(3,:) = s(2,2) + [1, length(SWE(3).swe)];
+
+for g = 1:3 
+    glacier = char(options.glacier(g));
+%       curve.(glacier).E  = e2(s(g,1):s(g,2));
+%       curve.(glacier).N  = n2(s(g,1):s(g,2));
+      curve.(glacier).meanEN = mean([e2(s(g,1):s(g,2)),n2(s(g,1):s(g,2))],2);
+
+%      curve.(glacier).P  = Profilecu(s(g,1):s(g,2));
+%      curve.(glacier).T  = Tangential(s(g,1):s(g,2));
+     curve.(glacier).meanPT = mean([Profilecu(s(g,1):s(g,2)),Tangential(s(g,1):s(g,2))],2);
+ 
+end
+%     clear e2 n2 Profilecu Tangential s g glacier
+
+%Standardizing variables
+params = fieldnames(curve.G4);
+for i = 1:3
+name = char(options.glacier(i));
+    for t = 1:length(params)
+    field = char(params(t));
+    
+    curve.(name).(field) = (curve.(name).(field)-...
+        mean(curve.(name).(field)))/std(curve.(name).(field));
+    end
+end    
+    
+for i = 1:3
+    y       = SWE(i).swe;
+    glacier = char(options.glacier(i)); 
+        display(['glacier = ',glacier]);
+    X       = curve.(glacier);
+
+    [MLR.(glacier), residualsMLR.(glacier)] = MLRcalval(y, X);
+    MLR.(glacier).Properties.VariableNames = {'MLRCoefficient','MLRPercentVarExplaned'};
+end
 
  subplot(1,2,1)
  plot(Profilecu,swe_opt8,'.')
@@ -130,8 +170,49 @@ subplot(2,2,4)
  
  
  X = [ones(length(e2),1), mean([e2,n2],2)];
- y = swe_opt1;
-[b,bint,r,rint,stats] = regress(y,X);
+ X = [ones(length(e2),1), mean([Profilecu,Tangential],2)];
+ X = [ones(length(e2),1), e2];
+ X = [ones(length(e2),1), n2];
+ X = [ones(length(e2),1), Profilecu];
+ X = [ones(length(e2),1), Tangential];
+ 
+
+y = [SWE(1).swe;SWE(2).swe;SWE(3).swe];
+[b,~,~,~,stats] = regress(y,X);
+ stats
+ 
+ %%
+ j = 3;
+         glacier = char(options.glacier(j)); 
+        X       = topo_sampled.(glacier);
+
+ M = struct2table(X);
+
+ %Everyone
+ xE = [ones(size(M,1),1), M{:,:}];
+ y = SWE(j).swe;
+
+ [b,~, ~, ~, stats] = regress(y,xE);
+ y_hatE = sum(repmat(b',size(xE,1),1).*xE,2);
+ SSE_E = sumsqr(y_hatE-y);
+ 
+ for i = 1:size(M,2)
+     M1=M{:,:}; M1(:,i)=[]; 
+ %No one
+ xN = [ones(size(M1,1),1), M1];
+
+ [bN,~, ~, ~, stats] = regress(y,xN);
+ y_hatN = sum(repmat(bN',size(xE,1),1).*xN,2);
+ SSE_N = sumsqr(y-y_hatN);
+ 
+ partR(i) = (SSE_N-SSE_E)/SSE_N;
+ end
+ 
+ partR'
+ 
+ r02 = corr(y,
+ 
+ 
  
  
  

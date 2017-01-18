@@ -21,7 +21,7 @@ options.DensitySWE  = t;
 options.ZZ          = 2; %exclude zigzags
 run MAIN
 
-    for i = 1%:3
+    for i = 1:3
         y       = SWE(i).swe;
         glacier = char(options.glacier(i)); 
             display(['option = ',num2str(t), ', glacier = ',glacier]);
@@ -30,6 +30,7 @@ run MAIN
         [MLR(t).(glacier), residualsMLR(t).(glacier)] = MLRcalval(y, X);
         MLR(t).(glacier).Properties.VariableNames = {['MLRCoefficient', num2str(t)],['MLRPercentVarExplaned', num2str(t)]};
     end
+display('Done');
 end
         clear best i name X y t glacier
         
