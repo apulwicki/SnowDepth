@@ -1,10 +1,11 @@
 %% Plotting zigzag data - all zigs for each G
 
-run OPTIONS.m
-options.ZZ = 3; %only zigzags
-run MAIN
+% run OPTIONS.m
+% options.ZZ = 3; %only zigzags
+% run MAIN
 
-MinMaxC = [0 220];
+FS = 16; %fontsize
+MinMaxC = [0 220]; ABC = ['a','b','c','d'];
 
 for i = 1:3
    labels = categories(SWE(i).ZZ);
@@ -23,6 +24,8 @@ for i = 1:3
                 if j == length(labels); 
                 caxis(MinMaxC);     c = colorbar;   c.Label.String = 'Snow depth (cm)';  %colormap(flipud(cool))
                 end
+            text(41, 42, ABC(j),'FontSize',FS,'Interpreter','Latex')
+            text(5, 3, ['$$\bar{z}=$$',num2str(round(mean(z),0)),' cm'],'FontSize',FS,'Interpreter','Latex')
       end
       s1Pos = get(s(1),'position');   s3Pos = get(s(end),'position');   
       s3Pos(3:4) = s1Pos(3:4);        set(s(end),'position',s3Pos);
@@ -41,15 +44,17 @@ for i = 1:3
                 if j == length(labels); 
                 caxis(MinMaxC);     c = colorbar;   c.Label.String = 'Snow depth (cm)';  %colormap(flipud(cool))
                 end
+             text(41, 42, ABC(j),'FontSize',FS,'Interpreter','Latex')   
+             text(5, 3, ['$$\bar{z}=$$',num2str(round(mean(z),0)),' cm'],'FontSize',FS,'Interpreter','Latex')
+
       end
       s1Pos = get(s(1),'position');   s3Pos = get(s(end),'position');   
       s3Pos(3:4) = s1Pos(3:4);        set(s(end),'position',s3Pos);
       fig=gcf;  fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 10 8];
    end 
 
-   set(findall(fig,'-property','FontSize'),'FontSize',16)
-filename = ['ZigzagDepth_', char(SWE(i).glacier(1,1))];
-print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')         
+   set(findall(fig,'-property','FontSize'),'FontSize',FS)
+saveFIG(['ZigzagDepth_', char(SWE(i).glacier(1,1))])         
 end
 
 %dlmwrite('/home/glaciology1/Documents/QGIS/Data/TestPoints.csv',closest, 'delimiter', ',', 'precision', 9); %Write matrix with new waypoints to csv file for QGIS
@@ -90,25 +95,40 @@ print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],
  
 
 %% Boxplot to compare zigzags
-run OPTIONS.m
-options.ZZ = 3; %only zigzags
-run MAIN
+% run OPTIONS.m
+% options.ZZ = 3; %only zigzags
+% run MAIN
 
+clf
 yaxis = [min([SWE(1).depth; SWE(2).depth; SWE(3).depth]) max([SWE(1).depth; SWE(2).depth; SWE(3).depth])];
-text_dim = [.16 .58 .3 .3;   .45 .58 .3 .3;     .73 .58 .3 .3];
+text_dim = [.157 .61 .3 .3;   .446 .61 .3 .3;     .726 .61 .3 .3];
 
 for i = 1:3
    s(i) = subplot(1,3,i);
    boxplot(SWE(i).depth,SWE(i).ZZ)
       ylabel('Depth (cm)');     ylim(yaxis)
       set(gca,'FontSize',10,'XTickLabelRotation',90)
-      annotation('textbox',text_dim(i,:),'String',char(options.glacier(i)),'FitBoxToText','on');
+      annotation('textbox',text_dim(i,:),'String',char(options.glacier(i)),'FitBoxToText','on','EdgeColor',[1 1 1]);
 end
+    fig=gcf;  fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 15 5];
+      set(findall(fig,'-property','FontSize'),'FontSize',16)
+saveFIG('Zigzag_Boxplot')
+%%
+% Glacier maps overlay
+subplot(1,3,1)
+    mapG4 = imread('/home/glaciology1/Documents/MastersDocuments/Methods/map_zigzaglocation_G4.jpeg');
+     Nshow = imshow(mapG4);
+subplot(1,3,2)
+    mapG2 = imread('/home/glaciology1/Documents/MastersDocuments/Methods/map_zigzaglocation_G2.jpeg');
+    Nshow = imshow(mapG2);
+subplot(1,3,3)   
+    mapG13 = imread('/home/glaciology1/Documents/MastersDocuments/Methods/map_zigzaglocation_G13.jpeg');
+    Nshow = imshow(mapG13); 
+
       fig=gcf;  fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 15 5];
       set(findall(fig,'-property','FontSize'),'FontSize',16)
-filename = 'Zigzag_Boxplot';
-print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')         
-end
+saveFIG('Zigzag_Location_Map')         
+
 %% Variogram - zigzag
 
 GZZlabel = ['G04 Z3A'; 'G04 Z2A'; 'G04 Z5B'; 'G02 Z5C'; 'G02 Z7A';'G02 Z3B'; 'G13 Z7C';'G13 Z4C'; 'G13 Z3B'; 'G13 Z5A'];

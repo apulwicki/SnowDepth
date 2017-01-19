@@ -10,7 +10,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% Snowpit vs SWE tube density (all glaciers)
-
+clf
     x = cell2mat(Density.pitANDtube(:,7)); %Snowpit
     y = cell2mat(Density.pitANDtube(:,2)); %SWE tube
     errory = [cell2mat(Density.pitANDtube(:,2))-cell2mat(Density.pitANDtube(:,4)), ...
@@ -18,7 +18,7 @@
     errorx = [cell2mat(Density.pitANDtube(:,7))-cell2mat(Density.pitANDtube(:,9)), ...
         cell2mat(Density.pitANDtube(:,10))-cell2mat(Density.pitANDtube(:,7))]; %min and max SP
 errorbarxy(x,y,errorx(:,2),errory(:,2),errorx(:,1),errory(:,1),'Color','k','LineStyle','none','Marker','s',...
-   'MarkerFaceColor','k','LineWidth',1,'MarkerSize',8); hold on
+   'MarkerFaceColor','k','LineWidth',1,'MarkerSize',7); hold on
     
     P = polyfit(x,y,1); yfit = P(1)*x+P(2);
     LM = fitlm(x,y); %fit is not significant (p = 0.1)
@@ -30,24 +30,26 @@ errorbarxy(x,y,errorx(:,2),errory(:,2),errorx(:,1),errory(:,1),'Color','k','Line
 %     annotation('textbox',dim,'String', str,'FitBoxToText','on')
 %     %text(x+2, y+3, Density.pitANDtube(:,1))
     axis([220 400 220 400])
-    xlabel('Snowpit density (kg m^{-3})')
-    ylabel('SWE tube density (kg m^{-3})')
+    xlabel('Snowpit-derived integrated density (kg m^{-3})')
+    ylabel('Federal Sampler-derived density (kg m^{-3})')
     line = refline(1,0);
         line.Color = 'k'; line.LineStyle = '--'; hold on
-        
-    fig=gcf;
-    set(findall(fig,'-property','FontSize'),'FontSize',12) 
+     
+    %Label points
+    for i = 1:length(x)
+        strG = char(Density.pitANDtube(i,1));
+        text(x(i,1)-1, y(i,1)-4, strG,'HorizontalAlignment','right');
+    end
+    
+    fig=gcf;    set(findall(fig,'-property','FontSize'),'FontSize',11) 
     ax = gca; ax.XTick = [220:40:400]; ax.YTick = [220:40:400];
 
-
-    filename = 'SnowpitVsSWEtube_all';
-print([options.path1, filename],'-dpng'); print([options.path2, filename],'-dpng')
-
+    saveFIG('SnowpitVsSWEtube_all');
 
     %clear P LM x y index* i j count yfit str dim filename error* ans
     
 %% SWEtube density vs elevation (all glaciers)
-
+clf; clc;
     y = cell2mat(Density.tube(1:7,2)); %Glacier 4
     x = cell2mat(Density.tube(1:7,9));
     errory = [cell2mat(Density.tube(1:7,2))-cell2mat(Density.tube(1:7,4)),...
@@ -87,22 +89,23 @@ l3 = plot(SPfit3,'k'); l3.Color = options.RGB(3,:); hold on
     fig=gcf;set(findall(fig,'-property','FontSize'),'FontSize',16)
     fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 7.3 7];
     
- filename = 'ElevationVsSWEtube_all';
-print([options.path1, filename],'-dpng'); print([options.path2, filename],'-dpng')
+ saveFIG('ElevationVsSWEtube_all');
    
     clear P LM x y index* i j count yfit str dim filename error
 
     
-display('G04 SP'); 
-display([num2str(round(SPfit1.p1,3)),'x + ',num2str(round(SPfit1.p2,1))])
+display('G04 FS'); 
+display([num2str(round(SPfit1.p1,2)),'x + ',num2str(round(SPfit1.p2,0))])
 
-display('G02 SP'); 
-display([num2str(round(SPfit2.p1,3)),'x + ',num2str(round(SPfit2.p2,1))])
+display('G02 FS'); 
+display([num2str(round(SPfit2.p1,2)),'x + ',num2str(round(SPfit2.p2,0))])
 
-display('G13 SP');
-display([num2str(round(SPfit3.p1,3)),'x + ',num2str(round(SPfit3.p2,1))])
+display('G13 FS');
+display([num2str(round(SPfit3.p1,2)),'x + ',num2str(round(SPfit3.p2,0))])
     
 %% Snowpit density vs elevation (all glaciers)
+clf; clc
+
 figure(3)
     y = cell2mat(Density.snowpit(1:4,2));
     x = cell2mat(Density.snowpit(1:4,5));
@@ -138,24 +141,24 @@ l3 = plot(SPfit3,'r'); l3.Color = options.RGB(3,:); hold on
     xlabel('Elevation(m)')
     legend([h1(1) l1 h2(1) l2 h3(1) l3], {'G04',['G04 fit R^2=',num2str(round(gof1.rsquare,2))], ...
             'G02',['G02 fit R^2=',num2str(round(gof2.rsquare,2))],...
-            'G13',['G13 fit R^2=',num2str(round(gof3.rsquare,2))]},'Location','best')
+            'G13',['G13 fit R^2>0.99']},'Location','northeast')
     
     fig = gcf; set(findall(fig,'-property','FontSize'),'FontSize',12)
     fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 7 6.5];
-    filename = 'ElevationVsSnowpit_all';
-print([options.path1, filename],'-dpng'); print([options.path2, filename],'-dpng')
+    
+    saveFIG('ElevationVsSnowpit_all')
 
     clear P LM x y index* i j count yfit str dim filename error
 
     
 display('G04 SP'); 
-display([num2str(round(SPfit1.p1,3)),'x + ',num2str(round(SPfit1.p2,1))])
+display([num2str(round(SPfit1.p1,2)),'x + ',num2str(round(SPfit1.p2,0))])
     
 display('G02 SP'); 
-display([num2str(round(SPfit2.p1,3)),'x + ',num2str(round(SPfit2.p2,1))])
+display([num2str(round(SPfit2.p1,2)),'x + ',num2str(round(SPfit2.p2,0))])
 
 display('G13 SP');
-display([num2str(round(SPfit3.p1,3)),'x + ',num2str(round(SPfit3.p2,1))])
+display([num2str(round(SPfit3.p1,2)),'x + ',num2str(round(SPfit3.p2,0))])
 %% Depth vs Density - all
 
 figure(1); clf
@@ -268,23 +271,26 @@ for j = 1:3
     depth = SWE(j).depth;
     elev = SWE(j).utm(:,3);
     i = ['n',num2str(j)];
-    [f.(i), g.(i)] = fit(depth,elev,'poly1');
+    [f.(i), g.(i)] = fit(elev,depth,'poly1');
     subplot(1,3,j)
-        h = plot(depth,elev,'.','Color',options.RGB(j,:),'MarkerSize',13); hold on
+        h = plot(elev,depth,'.','Color',options.RGB(j,:),'MarkerSize',13); hold on
         p = plot(f.(i)); hold on
         set(p,'Color',options.RGB(j,:)); set(p, 'LineWidth',1.5);
         
         b = gca; legend(b,'off');
         dim = [b.Position(1)+0.01 b.Position(2)+.5 .3 .3];
-        annotation('textbox',dim,'String', {char(options.glacier(j)),['R^2=',num2str(round(g.(i).rsquare,2))]},'FitBoxToText','on')
-    axis([0 350 2000 2600])
-    xlabel('Depth (cm)'); ylabel('Elevation (m a.s.l.)');
+        if j ==1;
+            annotation('textbox',dim,'String', {char(options.glacier(j)),['R^2<0.01']},'FitBoxToText','on')
+        else        
+            annotation('textbox',dim,'String', {char(options.glacier(j)),['R^2=',num2str(g.(i).rsquare,'%.2f')]},'FitBoxToText','on')
+        end
+    axis([2000 2600 0 350 ])
+    ylabel('Depth (cm)'); xlabel('Elevation (m a.s.l.)');
 end 
     fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',12) 
     fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 13 5];
 
-    filename = 'DepthElevation';
-print([options.path1, filename],'-dpng'); print([options.path2, filename],'-dpng')
+    saveFIG('DepthElevation')
 %% Basic stats
 
 % Snowpit

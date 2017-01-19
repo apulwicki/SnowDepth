@@ -103,132 +103,28 @@ coeffs_final.Properties.RowNames(1,1) = {'Intercept'};
 coeffs_final.Properties.VariableNames = {'Coefficient'};
 
 
-%%SSEfull
-Xfit_full   = coeffs_final{1,1} + sum(repmat(coeffs_final{2:end,1}',size(M,1),1).*M{:,:},2);
-SSE_full    = sumsqr(Xfit_full-y); 
-
-%% %Var - reduced
-clear mlr* coeff* BIC*
-
-%SSEreduced 
-
-beta    = coeffs_final.Properties.RowNames; %names of params
-Pvar = table(zeros(length(beta),1),'RowNames',beta);    %initalize
-Pvar.Properties.VariableNames = {'PercentVarExplained'};
-
-c = logical(dec2bin(0:(2^(n-1))-1)=='1');      c = c(2:end,:);
-
-for i = 2:length(beta)                      %only coeffs, no intercept
-    rm_beta = char(beta(i));
-M1 = M;     M1.(rm_beta) = [];
-
-
-% MLR with cross validation
-
-for j = 1:length(c)                             %all linear combos of params
-    X1 = M1(:,c(j,:));                           %create matrix with one combo of params
-    rmse = zeros(runs,1);   mlr = cell(runs,1); %initialize output matrices
-
-    for k = 1:runs                              %for number of runs
-        cal_ind_temp    = cal_ind(k,:);         %get random numbers for choosing obs
-        val_ind         = setdiff(1:length(y),cal_ind_temp); %get random numbers for validating
-        
-        mlr{k,1}        = regress(y(cal_ind_temp,1), ...     %MLR between calibration data and chosen topo params
-            [ones(length(cal_ind_temp),1), X1{cal_ind_temp,:}])'; %(need to include a row of ones for getting intercept)
-        
-        y_regress   = sum(X1{val_ind,:}.*repmat(mlr{k,1}(2:end),length(val_ind),1),2) + mlr{k,1}(1);      %predict validation data
-        rmse(k,1)   = sqrt(sum((y(val_ind,1)-y_regress).^2)/numel(y_regress));  %get the RMSE between observed and predicted values
-
-    end
-
-    %plot(rmse,'.')    %hist(rmse)
-    %[h, p]=chi2gof(rmse);    display(['j = ',num2str(j),' h = ',num2str(h), ' p = ',num2str(p)])
-    
-    rmse_best(j,1)  = min(rmse);                        %lowest rmse value
-
-     %Do fitlm for best set of calibration data
-    min_rmse        = rmse==min(rmse);                  %find best set
-    swe_obs         = table(y(cal_ind(min_rmse,:)), 'VariableNames',{'swe'}); %create table of input data
-    topo_obs        = M1(cal_ind(min_rmse,:),c(j,:));    %create table of topo params
-    mlr_best{j,1}   = fitlm([topo_obs, swe_obs]);       %do thorough MLR using fitlm
-    BIC_best(j,1)   = mlr_best{j,1}.ModelCriterion.BIC; %BIC of best MLR run
-
-end
-
-% Weighting models 
-
- %Calculate weight for each model based on BIC value
-BICweight = exp(-(BIC_best-min(BIC_best))/2);   %exponential weighting compared to best (min) BIC
-BICweight = BICweight/sum(BICweight);           %normlize weights
-
- %Get the coefficients for each param and weight them 
-coeffs_w{j,1} = cell(length(mlr_best),1);                       %initialize
-for j = 1:length(mlr_best)
-    coeffs_w{j,1} = mlr_best{j,1}.Coefficients(:,1);            %get coeffs
-    coeffs_w{j,1}.Properties.VariableNames = {['C',num2str(j)]};%name column with combo number
-    coeffs_w{j,1}{:,1} = coeffs_w{j,1}{:,1}*BICweight(j,1);     %weights the coefficients
-end
-
- %Fill in missing coefficients (the zeors ones)
-all = coeffs_w{end,1}.Properties.RowNames;                      %get param names 
-coeffs_full = table();                                          %initialize
-for j = 1:length(mlr_best)
-    missing = all(~ismember(all,coeffs_w{j,1}.Properties.RowNames)); %determine which ones are zeros
-    T = table(zeros(length(missing),1),'RowNames',missing,...   %create a table with full coefficients
-        'VariableNames',coeffs_w{j,1}.Properties.VariableNames);
-    coeffs_w{j,1} = [coeffs_w{j,1};T];                          
-
-    coeffs_full = [coeffs_full,coeffs_w{j,1}];                  %append to the table
-end
-
- %Sum over all weighted coefficients and return nice table with final
- %coeffs
-for i = 1:height(coeffs_full)
-    coeffs_final_r(i,1) = table(sum(coeffs_full{i,:}));
-end
-coeffs_final_r.Properties.RowNames = coeffs_full.Properties.RowNames;
-coeffs_final_r.Properties.RowNames(1,1) = {'Intercept'};
-coeffs_final_r.Properties.VariableNames = {'Coefficient'};
-
-
-    Xfit_reduced    = coeffs_final_r{1,1} + sum(repmat(coeffs_final_r{2:end,1}',size(M1,1),1).*M1{:,:},2); %topo params times their coeffs
-    SSE_reduced     = sumsqr(Xfit_reduced-y); %residual sum of squares
-    
-    Pvar{i,1}       = (SSE_reduced-SSE_full)/SSE_reduced*100;          %percent var exmaplined
-end
-
 %% Calculate % variance explained by each variable
     %Partial R-squared (aka coefficient of partial determination)
     %   = (SSE(reduced)−SSE(full))/SSE(reduced)
 
-beta    = coeffs_final.Properties.RowNames; %names of params
-    %SSt     = sumsqr(y-mean(y));                %total sum of squares
+beta        = coeffs_final.Properties.RowNames; %names of params
+partialR    = table(zeros(length(beta),1),'RowNames',beta);    %initalize
+partialR.Properties.VariableNames = {'PartialR2'};
 
+%All params included (A)
+SSE_A = mlr_best{end,1}.SSE;
 
+%Param of interest excluded (E)
+for i = 2:length(beta) 
+    c_var   = c(end,:);    c_var(1,i-1) = 0;
 
-%SSEreduced 
-Pvar = table(zeros(length(beta),1),'RowNames',beta);    %initalize
-Pvar.Properties.VariableNames = {'PercentVarExplained'};
-for i = 2:length(beta)                      %only coeffs, no intercept
-    coeff_temp = coeffs_final;
-    coeff_temp{i,1} = 0;
-    Xfit_reduced    = coeffs_final{1,1} + sum(repmat(coeff_temp{2:end,1}',size(M,1),1).*M{:,:},2); %topo params times their coeffs
-    SSE_reduced     = sumsqr(Xfit_reduced-y); %residual sum of squares
+    c_row   = ismember(c,c_var,'rows');
+    SSE_E   = mlr_best{c_row,1}.SSE;
     
-    Pvar{i,1}       = (SSE_reduced-SSE_full)/SSE_reduced*100;          %percent var exmaplined
+    partialR{i,1} = (SSE_E-SSE_A)/SSE_E;          %percent var exmaplined
 end
-coeffs_final = [coeffs_final, Pvar];        %add to final table
 
-
-% Pvar = table(zeros(length(beta),1),'RowNames',beta);    %initalize
-% Pvar.Properties.VariableNames = {'PercentVarExplained'};
-% for i = 2:length(beta)                      %only coeffs, no intercept
-%     rowname         = char(beta(i));        %coeff name
-%     Xfit            = coeffs_final{1,1} + coeffs_final{i,1}*X.(rowname); %topo params times their coeffs
-%     SSr             = sumsqr(Xfit-mean(y)); %residual sum of squares
-%     Pvar{i,1}       = SSr/SSt*100;          %percent var exmaplined
-% end
-
+coeffs_final = [coeffs_final, partialR];        %add to final table
 
  %Sort final tabel of coefficients
 row          = coeffs_final.Properties.RowNames;
@@ -236,15 +132,20 @@ order        = [M.Properties.VariableNames, {'Intercept'}];
 [~, index]   = ismember(order, row);
 coeffs_final = coeffs_final(index,:);
 
-%% Find rmse of coefficients
+%% Find goodness of fit values
 
  %Predict all data at sampling locations
 y_regress   = sum(X1{:,:}.*repmat(coeffs_final{1:end-1,1}',height(X1),1),2) + coeffs_final{end,1};      %predict validation data
+
+%RMSE
 rmse_final  = sqrt(sum((y-y_regress).^2)/numel(y_regress));  %get the RMSE between observed and predicted values
+    coeffs_final = [coeffs_final; table(rmse_final, 0, ...
+                'VariableName',{'Coefficient', 'PartialR2'},'RowNames',{'rmse'})];
 
-coeffs_final = [coeffs_final; table(rmse_final, 0, ...
-                'VariableName',{'Coefficient', 'PercentVarExplained'},'RowNames',{'rmse'})];
-
+%R^2
+R2 = corr(y,y_regress)^2;
+    coeffs_final = [coeffs_final; table(0, R2, ...
+                'VariableName',{'Coefficient', 'PartialR2'},'RowNames',{'R2_full'})];
 %% Residuals
 
  %Get residual

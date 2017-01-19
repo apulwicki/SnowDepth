@@ -126,12 +126,12 @@ clear curve
 
 for g = 1:3 
     glacier = char(options.glacier(g));
-%       curve.(glacier).E  = e2(s(g,1):s(g,2));
-%       curve.(glacier).N  = n2(s(g,1):s(g,2));
-      curve.(glacier).meanEN = mean([e2(s(g,1):s(g,2)),n2(s(g,1):s(g,2))],2);
+        curve.(glacier).E  = e2(s(g,1):s(g,2));
+%        curve.(glacier).N  = n2(s(g,1):s(g,2));
+       curve.(glacier).meanEN = mean([e2(s(g,1):s(g,2)),n2(s(g,1):s(g,2))],2);
 
-%      curve.(glacier).P  = Profilecu(s(g,1):s(g,2));
-%      curve.(glacier).T  = Tangential(s(g,1):s(g,2));
+      curve.(glacier).P  = Profilecu(s(g,1):s(g,2));
+      curve.(glacier).T  = Tangential(s(g,1):s(g,2));
      curve.(glacier).meanPT = mean([Profilecu(s(g,1):s(g,2)),Tangential(s(g,1):s(g,2))],2);
  
 end
@@ -149,14 +149,25 @@ name = char(options.glacier(i));
     end
 end    
     
+
+
+
+
+
+t=1;
 for i = 1:3
     y       = SWE(i).swe;
     glacier = char(options.glacier(i)); 
         display(['glacier = ',glacier]);
     X       = curve.(glacier);
 
-    [MLR.(glacier), residualsMLR.(glacier)] = MLRcalval(y, X);
-    MLR.(glacier).Properties.VariableNames = {'MLRCoefficient','MLRPercentVarExplaned'};
+    MLRcurve.(glacier) = MLRcalval(y, X);
+
+    cd BMS
+    [BMSinit, BMSres] = BMS_R(SWE, topo_sampled);
+    cd ..
+    BMS(t).(glacier)     = BMSinit.(glacier);   
+
 end
 
  subplot(1,2,1)

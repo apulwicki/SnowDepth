@@ -28,7 +28,7 @@ run MAIN
         X       = topo_sampled.(glacier);
 
         [MLR(t).(glacier), residualsMLR(t).(glacier)] = MLRcalval(y, X);
-        MLR(t).(glacier).Properties.VariableNames = {['MLRCoefficient', num2str(t)],['MLRPercentVarExplaned', num2str(t)]};
+        MLR(t).(glacier).Properties.VariableNames = {['MLRCoefficient_', num2str(t)],['MLRpartialR2_', num2str(t)]};
     end
 display('Done');
 end
