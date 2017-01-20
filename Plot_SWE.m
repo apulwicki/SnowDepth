@@ -205,7 +205,7 @@ end
         annotation('textbox',[0.16 0.885 0.1 0.1], 'String', textA,'EdgeColor','none')
         annotation('textbox',[0.16 0.870 0.1 0.1], 'String', textB,'EdgeColor','none')
         annotation('textbox',[0.16 0.855 0.1 0.1], 'String', textC,'EdgeColor','none')
-        annotation('textbox',[0.05 0.855 0.1 0.1], 'String', '(a)','EdgeColor','none')
+        annotation('textbox',[0.01 0.855 0.1 0.1], 'String', '(a)','EdgeColor','none')
 %Glacier 2
     textA = 'A          A          A                     A                      A         ';
     textB = 'B          B          B                     B          B          B         B';
@@ -215,7 +215,7 @@ end
         annotation('textbox',[0.16 0.51 0.1 0.1], 'String', textB,'EdgeColor','none')
         annotation('textbox',[0.16 0.495 0.1 0.1], 'String', textC,'EdgeColor','none')
         annotation('textbox',[0.16 0.48 0.1 0.1], 'String', textD,'EdgeColor','none')
-        annotation('textbox',[0.05 0.53 0.1 0.1], 'String', '(b)','EdgeColor','none')
+        annotation('textbox',[0.01 0.53 0.1 0.1], 'String', '(b)','EdgeColor','none')
 %Glacier 13
     textA = 'A                     A                                            A         ';
     textB = '            B                      B                     B                    B';
@@ -225,12 +225,11 @@ end
         annotation('textbox',[0.16 0.21 0.1 0.1], 'String', textB,'EdgeColor','none')
         annotation('textbox',[0.16 0.195 0.1 0.1], 'String', textC,'EdgeColor','none')
         annotation('textbox',[0.16 0.18 0.1 0.1], 'String', textD,'EdgeColor','none')
-        annotation('textbox',[0.05 0.23 0.1 0.1], 'String', '(c)','EdgeColor','none')
+        annotation('textbox',[0.01 0.23 0.1 0.1], 'String', '(c)','EdgeColor','none')
           
 
     fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',13)
     fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 7 11];
-filename = 'AllSWEopts_boxplot';
-print([options.path1, filename],'-dpng'); print([options.path2, filename],'-dpng')
+saveFIG('AllSWEopts_boxplot')
 
 clear text* fig filename cats swedata group g opt stats p t glacier

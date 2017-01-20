@@ -1,4 +1,34 @@
+%% Geotiff histogram
+maxH = 30;
+minH = -30;
 
+corr = geotiffread('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/diff13-3_corrected.tif');
+    corr(corr>maxH) = NaN;    corr(corr<minH) = NaN;
+
+OG = geotiffread('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/diff13-3_original.tif');
+    OG(OG>maxH) = NaN;   OG(OG<minH) = NaN;
+
+    clf
+hist(OG(:),50); hold on
+hist(corr(:),50); 
+
+ho = findobj(gca,'Type','patch');
+
+ho(2,1).FaceColor = rgb('DarkBlue');  ho(2,1).EdgeColor = 'w';
+ho(1,1).FaceColor = rgb('MediumTurquoise');  ho(1,1).EdgeColor = 'w';
+    ho(1,1).FaceAlpha = 0.6;
+
+    xlabel('Vertical Difference (m)');  ylabel('Frequency');
+    legend('Original DEMs','Corrected DEMs', 'Location','NorthWest');
+        
+    fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18)
+    fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 7.3 7];
+    saveFIG('DEMcorrection_hist')
+    
+display(['original mean difference = ', num2str(nanmean(OG(:)))])
+display(['corrected mean difference = ', num2str(nanmean(corr(:)))])
+
+%%
 %2D derivative
 h = 40; % step size
 f = topo_full_ns.G2.elevation;

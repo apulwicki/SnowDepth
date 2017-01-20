@@ -1,23 +1,24 @@
 function [ ] = PlotTopoParameter( topoParam, paramName, cLabel, SWE, sweDOTS)
 %UNTITLED3 Summary of this function goes here
 %   Detailed explanation goes here
-run OPTIONS.m
+global options
     rig = topoParam.rig;
     ELA_d = [1 7; 16 23; 8 15];
 clf
 
 %get colour min max
      %Manual colour range
-    fixed_color = 0;
+    fixed_color = 1;
 if fixed_color == 0 
     x_min   = nanmin([topoParam.G4(:);topoParam.G2(:);topoParam.G13(:)]);
     x_max   = nanmax([topoParam.G4(:);topoParam.G2(:);topoParam.G13(:)]);
+    minSWE  = nanmin([SWE(1).swe(:);SWE(2).swe(:);SWE(3).swe(:)]);
+    maxSWE  = nanmax([SWE(1).swe(:);SWE(2).swe(:);SWE(3).swe(:)]);
 elseif fixed_color == 1
-    x_min = 0;
-    x_max = 2;
+    x_min = 0;      minSWE  = x_min;
+    x_max = 1.2;    maxSWE  = x_max;
 end
-minSWE  = nanmin([SWE(1).swe(:);SWE(2).swe(:);SWE(3).swe(:)]);
-maxSWE  = nanmax([SWE(1).swe(:);SWE(2).swe(:);SWE(3).swe(:)]);
+
 
 G13size = size(topoParam.G13);
 
@@ -42,10 +43,10 @@ for i = 1:3
         data    = [data, nan(G13size(1,1), G13size(1,2)-Gsize(1,2))];
         
         s = subplot(1,3,i);
-                if ~isnan(x_min)
+                if ~all(isnan(topoParam.(name)(:)))
                 h = imagesc(data); hold on
                 set(h,'alphadata',~isnan(data))
-                elseif isnan(x_min)
+                elseif all(isnan(topoParam.(name)(:)))
                         minE = min(rig.(name)(:,1));
                         minN = min(rig.(name)(:,2));
                     Eg = (rig.(name)(:,1) - minE)/40;
@@ -99,9 +100,15 @@ end
     set(c,'Position',[0.88 0.2 0.03 0.55]);
 
 %Flow direction
-    annotation('arrow',[.15 .19],[.32 .22]) %G4
+if ~all(isnan(topoParam.(name)(:)))
+    annotation('arrow',[.16 .20],[.32 .22]) %G4
     annotation('arrow',[.39 .31],[.55 .61]) %G2
     annotation('arrow',[.81 .74],[.47 .59]) %G13
+elseif all(isnan(topoParam.(name)(:)))
+    annotation('arrow',[.13 .17],[.52 .42]) %G4
+    annotation('arrow',[.39 .31],[.55 .61]) %G2
+    annotation('arrow',[.76 .70],[.47 .59]) %G13
+end  
 
 %Glacier labels
     annotation('textbox',[.02 .02 .1 .1],'String', 'Glacier 4','EdgeColor','none')

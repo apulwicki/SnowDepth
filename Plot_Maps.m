@@ -34,8 +34,7 @@ topoParam.rig = rig;
 
 PlotTopoParameter(topoParam,param, 'SWE (m w.e.)', SWE, 'colour')
 
-    filename = ['SWEmap_opt',num2str(opt)];
-print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
+    saveFIG(['SWEmap_opt',num2str(opt)])
 end
 %% Modelled and observed SWE
 

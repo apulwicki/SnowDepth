@@ -372,3 +372,54 @@ disp = [disp, num2cell(cell2mat(disp(:,4))-cell2mat(disp(:,3)))];
 disp2 = [Density.tube(:,1), Density.tube(:,6), Density.tube(:,2), Density.tube(:,4:5)...
     num2cell(round((cell2mat(Density.tube(:,5))-cell2mat(Density.tube(:,4)))/cell2mat(Density.tube(:,2))*100))];
 disp2(:,6:11) = [];
+
+
+
+%% DETRENDED SWEtube density vs elevation (all glaciers)
+options.TubeDensity     = 2;
+run MAIN
+
+
+clf;
+    y = cell2mat(Density.tube(1:7,2)); %Glacier 4
+    x = cell2mat(Density.tube(1:7,9));
+    errory = [cell2mat(Density.tube(1:7,2))-cell2mat(Density.tube(1:7,4)),...
+        cell2mat(Density.tube(1:7,5))-cell2mat(Density.tube(1:7,2))];
+    errorx = [zeros(length(y),1),zeros(length(y),1)];
+    [SPfit1, gof1] = fit(x,y,'poly1');
+h1 = errorbarxy(x,y,errorx(:,2),errory(:,2),errorx(:,1),errory(:,1),'Color','k','LineStyle','none','Marker','o',...
+   'MarkerFaceColor',options.RGB(1,:),'LineWidth',1,'MarkerSize',11); hold on
+l1 = plot(SPfit1,'k'); l1.Color = options.RGB(1,:); hold on
+
+    y = cell2mat(Density.tube(8:14,2)); %Glacier 2
+    x = cell2mat(Density.tube(8:14,9));
+    errory = [cell2mat(Density.tube(8:14,2))-cell2mat(Density.tube(8:14,4)),...
+        cell2mat(Density.tube(8:14,5))-cell2mat(Density.tube(8:14,2))];
+    errorx = [zeros(length(y),1),zeros(length(y),1)];
+    [SPfit2, gof2] = fit(x,y,'poly1');
+h2 = errorbarxy(x,y,errorx(:,2),errory(:,2),errorx(:,1),errory(:,1),'Color','k','LineStyle','none','Marker','o',...
+   'MarkerFaceColor',options.RGB(2,:),'LineWidth',1,'MarkerSize',11); hold on
+l2 = plot(SPfit2,'k'); l2.Color = options.RGB(2,:); hold on
+
+    y = cell2mat(Density.tube(15:end,2)); %Glacier 13
+    x = cell2mat(Density.tube(15:end,9));
+    errory = [cell2mat(Density.tube(15:end,2))-cell2mat(Density.tube(15:end,4)),...
+        cell2mat(Density.tube(15:end,5))-cell2mat(Density.tube(15:end,2))];
+    errorx = [zeros(length(y),1),zeros(length(y),1)];
+    [SPfit3, gof3] = fit(x,y,'poly1');
+h3 = errorbarxy(x,y,errorx(:,2),errory(:,2),errorx(:,1),errory(:,1),'Color','k','LineStyle','none','Marker','o',...
+   'MarkerFaceColor',options.RGB(3,:),'LineWidth',1,'MarkerSize',11); hold on
+l3 = plot(SPfit3,'k'); l3.Color = options.RGB(3,:); hold on
+
+
+    ylabel('SWE tube density (kg m^{-3})')
+    xlabel('Elevation(m)')
+    legend([h1(1) l1 h2(1) l2 h3(1) l3], {'G04',['G04 fit R^2=',num2str(round(gof1.rsquare,2))], ...
+        'G02',['G02 fit R^2<0.01'],...
+        'G13',['G13 fit R^2=',num2str(round(gof3.rsquare,2))]}, 'Location','best')
+    fig=gcf;set(findall(fig,'-property','FontSize'),'FontSize',16)
+    fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 7.3 7];
+    
+ saveFIG('ElevationVsSWEtube_all_DETRENDED');
+   
+    clear P LM x y index* i j count yfit str dim filename error
