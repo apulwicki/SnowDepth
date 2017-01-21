@@ -107,6 +107,7 @@ coeffs_final.Properties.VariableNames = {'Coefficient'};
     %Partial R-squared (aka coefficient of partial determination)
     %   = (SSE(reduced)−SSE(full))/SSE(reduced)
 
+%--------Try 1    
 beta        = coeffs_final.Properties.RowNames; %names of params
 partialR    = table(zeros(length(beta),1),'RowNames',beta);    %initalize
 partialR.Properties.VariableNames = {'PartialR2'};
@@ -117,14 +118,30 @@ SSE_A = mlr_best{end,1}.SSE;
 %Param of interest excluded (E)
 for i = 2:length(beta) 
     c_var   = c(end,:);    c_var(1,i-1) = 0;
-
     c_row   = ismember(c,c_var,'rows');
+    
     SSE_E   = mlr_best{c_row,1}.SSE;
     
-    partialR{i,1} = (SSE_E-SSE_A)/SSE_E;          %percent var exmaplined
+    partialR{i,3} = (SSE_E-SSE_A)/SSE_E;          
 end
 
 coeffs_final = [coeffs_final, partialR];        %add to final table
+
+
+%--------Try 2
+beta    = coeffs_final.Properties.RowNames; %names of params
+
+Pvar = table(zeros(length(beta),1),'RowNames',beta);    %initalize
+Pvar.Properties.VariableNames = {'PercentVarExplained'};
+for i = 2:length(beta)                      %only coeffs, no intercept
+    c_var   = false(1,size(c,2));    c_var(1,i-1) = 1;
+    c_row   = ismember(c,c_var,'rows');
+
+    SSt     = mlr_best{c_row,1}.SST;                %total sum of squares
+    SSr     = mlr_best{c_row,1}.SSR; %residual sum of squares
+    Pvar{i,1}       = SSr/SSt*100;          %percent var explined
+end
+
 
  %Sort final tabel of coefficients
 row          = coeffs_final.Properties.RowNames;
