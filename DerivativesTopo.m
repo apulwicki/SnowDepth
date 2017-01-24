@@ -1,52 +1,4 @@
-%% Geotiff histogram
-maxH = 30;
-minH = -30;
-
-corr = geotiffread('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/diff13-3_corrected.tif');
-    corr(corr>maxH) = NaN;    corr(corr<minH) = NaN;
-
-OG = geotiffread('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/diff13-3_original.tif');
-    OG(OG>maxH) = NaN;   OG(OG<minH) = NaN;
-
-    clf
-hist(OG(:),50); hold on
-hist(corr(:),50); 
-
-ho = findobj(gca,'Type','patch');
-
-ho(2,1).FaceColor = rgb('DarkBlue');  ho(2,1).EdgeColor = 'w';
-ho(1,1).FaceColor = rgb('MediumTurquoise');  ho(1,1).EdgeColor = 'w';
-    ho(1,1).FaceAlpha = 0.6;
-
-    xlabel('Vertical Difference (m)');  ylabel('Frequency');
-    legend('Original DEMs','Corrected DEMs', 'Location','NorthWest');
-        
-    fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18)
-    fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 7.3 7];
-    saveFIG('DEMcorrection_hist')
-    
-display(['original mean difference = ', num2str(nanmean(OG(:)))])
-display(['corrected mean difference = ', num2str(nanmean(corr(:)))])
-
-%%
-%2D derivative
-h = 40; % step size
-f = topo_full_ns.G2.elevation;
-
-order = 1;
-Yn = diff(f,order,1)/h;
-Ye = diff(f,order,2)/h;
-
-figure(1)
-    subplot(1,3,1)
-    imagesc(f); colorbar
-    
-    subplot(1,3,2)
-    imagesc(Yn); colorbar
-    
-    subplot(1,3,3)
-    imagesc(Ye); colorbar
-    
+   
     
 %% Central Difference
 
@@ -54,15 +6,9 @@ h = 40; % step size
 [f, R] = geotiffread('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Glacier Topo Maps/DonjekDEM_mini.tif');
 
 %Smoothing grid
-sizeG = 3; C = (sizeG+1)/2;
-grid = ones(C);
-for i = 1:C;
-    for j = 1:C
-        grid(i,j) = 1;%sqrt(((C-i)*h)^2+((C-j)*h)^2);
-    end
-end
-grid = [grid, fliplr(grid(:,1:C-1))];     grid = [grid; flipud(grid(1:C-1,:))];
-grid = 1./grid;     grid(C,C) = 1;
+sizeG = 9; C = (sizeG+1)/2;
+
+grid = ones(sizeG);
 grid = grid/(sum(grid(:)));
 
 f_filt = nan(size(f));
@@ -74,184 +20,85 @@ for i = C:size(f,1)-C
 end
 f_filt(f_filt<min(f(:))) = NaN;
 
-%Stencil N = 3
+%Derivative
     Fmn = f_filt(1:end-2,:);  Fme = f_filt(:,1:end-2);
     F0n = f_filt(2:end-1,:);  F0e = f_filt(:,2:end-1);  
     Fpn = f_filt(3:end,:);    Fpe = f_filt(:,3:end);
 Y3n_1 = (Fpn-Fmn)/(2*h);            Y3e_1 = (Fpe-Fme)/(2*h);
 Y3n_2 = (Fmn-2*F0n+Fpn)/h^2;        Y3e_2 = (Fme-2*F0e+Fpe)/h^2;
+    Y3n_1 = [nan(1,size(Y3n_1,2));  Y3n_1; nan(1,size(Y3n_1,2))];
+    Y3e_1 = [nan(size(Y3e_1,1),1),  Y3e_1, nan(size(Y3e_1,1),1)];
     Y3n_2 = [nan(1,size(Y3n_2,2));  Y3n_2; nan(1,size(Y3n_2,2))];
     Y3e_2 = [nan(size(Y3e_2,1),1),  Y3e_2, nan(size(Y3e_2,1),1)];
+meanM  = (Y3n_1+Y3e_1)/2;
+meanNE = (Y3n_2+Y3e_2)/2;    
 
 figure(2); clf
-    subplot(3,2,1)
+    subplot(2,2,1)
     imagesc(f); colorbar
         title('Original')
     
-    subplot(3,2,2)
-        imagesc(f_filt); colorbar; caxis([1900 3100])
+    subplot(2,2,2)
+        imagesc(f_filt); colorbar; caxis([1400 3100])
         title(['Smoothed, window size = ',num2str(sizeG)]);
     
-    subplot(3,2,3)
-        imagesc(Y3n_1); colorbar; caxis([-1 1.5])
-        title('1st Derivative - N')
+    subplot(2,2,3)
+        imagesc(meanM); colorbar; caxis([-1 1.5])
+        title('1st Derivative Average')
     
-    subplot(3,2,4)
-        imagesc(Y3e_1); colorbar; caxis([-1 1.5])
-        title('1st Derivative - E')
+    subplot(2,2,4)
+        imagesc(meanNE); colorbar; caxis([-0.01 0.01])
+        title('2nd Derivative Average')
+ g = num2str(sizeG);
+ saveFIG(['TopoDerivative',g,'x',g]);
 
-    subplot(3,2,5)
-        imagesc(Y3n_2); colorbar; caxis([-0.01 0.01])
-        title('2nd Derivative - N')
-    
-    subplot(3,2,6)
-        imagesc(Y3e_2); colorbar; caxis([-0.01 0.01])
-        title('2nd Derivative - E')
- 
-figure(1)
-    imagesc((Y3n_2(:,3:end)+Y3e_2(3:end,:))/2); colorbar; caxis([-0.01 0.01])
-    title({'2nd Derivative (average)','Inverse-distance weighted 3x3 grid'})
-    filename = ['2ndDerivative_grid',num2str(sizeG)];
-    print([options.path1, filename],'-dpng','-r0');
+%Save to geotiff 
+location = '/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Glacier Topo Maps/Donjek_';   
 
-    g = num2str(sizeG);
-filename = ['/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Glacier Topo Maps/Donjek_',g,'x',g,'smooth.tif'];
-filenamen2 = ['/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Glacier Topo Maps/Donjek_',g,'x',g,'smooth_n2.tif'];
-filenamee2 = ['/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Glacier Topo Maps/Donjek_',g,'x',g,'smooth_e2.tif'];
+filename_og     = [location,g,'x',g,'smooth.tif'];
+filename_1n     = [location,g,'x',g,'slopeN.tif'];
+filename_1e     = [location,g,'x',g,'slopeE.tif'];
+filename_1mean  = [location,g,'x',g,'slopeMEAN.tif'];
+filename_2n     = [location,g,'x',g,'curveN.tif'];
+filename_2e     = [location,g,'x',g,'curveE.tif'];
+filename_2mean  = [location,g,'x',g,'curveMEAN.tif'];
 
 info = geotiffinfo('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Glacier Topo Maps/DonjekDEM_mini.tif');
 
-geotiffwrite(filename,f_filt,R,'GeoKeyDirectoryTag',info.GeoTIFFTags.GeoKeyDirectoryTag);
-geotiffwrite(filenamen2,Y3n_2,R,'GeoKeyDirectoryTag',info.GeoTIFFTags.GeoKeyDirectoryTag);
-geotiffwrite(filenamee2,Y3e_2,R,'GeoKeyDirectoryTag',info.GeoTIFFTags.GeoKeyDirectoryTag);
+geotiffwrite(filename_og,f_filt,R,'GeoKeyDirectoryTag',info.GeoTIFFTags.GeoKeyDirectoryTag);
+geotiffwrite(filename_1n,Y3n_1,R,'GeoKeyDirectoryTag',info.GeoTIFFTags.GeoKeyDirectoryTag);
+geotiffwrite(filename_1e,Y3e_1,R,'GeoKeyDirectoryTag',info.GeoTIFFTags.GeoKeyDirectoryTag);
+geotiffwrite(filename_1mean,meanM,R,'GeoKeyDirectoryTag',info.GeoTIFFTags.GeoKeyDirectoryTag);
+geotiffwrite(filename_2n,Y3n_2,R,'GeoKeyDirectoryTag',info.GeoTIFFTags.GeoKeyDirectoryTag);
+geotiffwrite(filename_2e,Y3e_2,R,'GeoKeyDirectoryTag',info.GeoTIFFTags.GeoKeyDirectoryTag);
+geotiffwrite(filename_2mean,meanNE,R,'GeoKeyDirectoryTag',info.GeoTIFFTags.GeoKeyDirectoryTag);
 
-%% Matlab raster analysis
-
-[Z, R] = geotiffread('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Glacier Topo Maps/Smoothed5x5/Donjek5x5_latlong.tif');
-[ASPECT, SLOPE, gradN, gradE] = gradientm(Z, R);
     
-figure(3)
-subplot(2,2,1)
-    imagesc(cosd(ASPECT)); colorbar
-    title('Aspect')
-subplot(2,2,2)
-    imagesc(SLOPE); colorbar
-    title('Slope')
-subplot(2,2,3)
-    imagesc(gradN); colorbar; caxis([-10 0])
-    title('gradN')
-subplot(2,2,4)
-    imagesc(gradE); colorbar; caxis([0 10])    
-    title('gradE')
-    
-    
- %%
+ %% Finding highest correlation
  
-%  uiopen('/home/glaciology1/Documents/QGIS/Data/sampled_curvetest.csv',1) 
-% clear topo*
+%  uiopen('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Sampling/curve_sampled.csv',1) 
+%  uiopen('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Sampling/slope_sampled.csv',1) 
 
-clear curve
  s = [1, length(SWE(1).swe)];  s(2,:) = s(1,2) + [1, length(SWE(2).swe)];
      s(3,:) = s(2,2) + [1, length(SWE(3).swe)];
+     
+swe =  [SWE(1).swe; SWE(2).swe;  SWE(3).swe];   
 
-for g = 1:3 
-    glacier = char(options.glacier(g));
-        curve.(glacier).E  = e2(s(g,1):s(g,2));
-%        curve.(glacier).N  = n2(s(g,1):s(g,2));
-       curve.(glacier).meanEN = mean([e2(s(g,1):s(g,2)),n2(s(g,1):s(g,2))],2);
 
-      curve.(glacier).P  = Profilecu(s(g,1):s(g,2));
-      curve.(glacier).T  = Tangential(s(g,1):s(g,2));
-     curve.(glacier).meanPT = mean([Profilecu(s(g,1):s(g,2)),Tangential(s(g,1):s(g,2))],2);
- 
-end
-%     clear e2 n2 Profilecu Tangential s g glacier
+allC    = corr(swe, curvesampled{:,:}).^2';
+allS    = corr(swe, slopesampled{:,:}).^2';
+G4C     = corr(SWE(1).swe, curvesampled{s(1,1):s(1,2),:}).^2';
+G2C     = corr(SWE(2).swe, curvesampled{s(2,1):s(2,2),:}).^2';
+G13C    = corr(SWE(3).swe, curvesampled{s(3,1):s(3,2),:}).^2';
+G4S     = corr(SWE(1).swe, slopesampled{s(1,1):s(1,2),:}).^2';
+G2S     = corr(SWE(2).swe, slopesampled{s(2,1):s(2,2),:}).^2';
+G13S    = corr(SWE(3).swe, slopesampled{s(3,1):s(3,2),:}).^2';
 
-%Standardizing variables
-params = fieldnames(curve.G4);
-for i = 1:3
-name = char(options.glacier(i));
-    for t = 1:length(params)
-    field = char(params(t));
-    
-    curve.(name).(field) = (curve.(name).(field)-...
-        mean(curve.(name).(field)))/std(curve.(name).(field));
-    end
-end    
-    
+curve_corr = table(allC, G4C, G2C, G13C, 'RowNames',curvesampled.Properties.VariableNames);
+slope_corr = table(allS, G4S, G2S, G13S, 'RowNames',slopesampled.Properties.VariableNames);
 
 
 
-
-
-t=1;
-for i = 1:3
-    y       = SWE(i).swe;
-    glacier = char(options.glacier(i)); 
-        display(['glacier = ',glacier]);
-    X       = curve.(glacier);
-
-    MLRcurve.(glacier) = MLRcalval(y, X);
-
-    cd BMS
-    [BMSinit, BMSres] = BMS_R(SWE, topo_sampled);
-    cd ..
-    BMS(t).(glacier)     = BMSinit.(glacier);   
-
-end
-
- subplot(1,2,1)
- plot(Profilecu,swe_opt8,'.')
-  subplot(1,2,2)
- plot(Tangential,swe_opt8,'.')
-    
- 
- P_LR = fitlm(Profilecu,swe_opt8);
- figure; plot(P_LR)
- 
- 
- X = [ones(length(e2),1), mean([e2,n2],2)];
- X = [ones(length(e2),1), mean([Profilecu,Tangential],2)];
- X = [ones(length(e2),1), e2];
- X = [ones(length(e2),1), n2];
- X = [ones(length(e2),1), Profilecu];
- X = [ones(length(e2),1), Tangential];
- 
-
-y = [SWE(1).swe;SWE(2).swe;SWE(3).swe];
-[b,~,~,~,stats] = regress(y,X);
- stats
- 
- %%
- j = 3;
-         glacier = char(options.glacier(j)); 
-        X       = topo_sampled.(glacier);
-
- M = struct2table(X);
-
- %Everyone
- xE = [ones(size(M,1),1), M{:,:}];
- y = SWE(j).swe;
-
- [b,~, ~, ~, stats] = regress(y,xE);
- y_hatE = sum(repmat(b',size(xE,1),1).*xE,2);
- SSE_E = sumsqr(y_hatE-y);
- 
- for i = 1:size(M,2)
-     M1=M{:,:}; M1(:,i)=[]; 
- %No one
- xN = [ones(size(M1,1),1), M1];
-
- [bN,~, ~, ~, stats] = regress(y,xN);
- y_hatN = sum(repmat(bN',size(xE,1),1).*xN,2);
- SSE_N = sumsqr(y-y_hatN);
- 
- partR(i) = (SSE_N-SSE_E)/SSE_N;
- end
- 
- partR'
- 
- r02 = corr(y,
  
  
  

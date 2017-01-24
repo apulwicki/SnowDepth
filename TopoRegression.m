@@ -74,14 +74,10 @@ end
 
 %Sampled
 for i = 1:3
-X = [];
-glacier = char(options.glacier(i));
-params = fieldnames(topo_sampled_ns.(glacier));
-    for p = 1:length(params)
-        PP = char(params(p));
-        X = [X, topo_sampled_ns.(glacier).(PP)];
-    end
-    [pearson.(glacier) Ppearson.(glacier)] = corr(X); 
+glacier = char(options.glacier(i));    
+X = struct2table(topo_sampled_ns.(glacier));
+    
+    [pearson.(glacier) Ppearson.(glacier)] = corr(X{:,:}); 
     pearson.(glacier)   = round(triu(pearson.(glacier)),2); 
     Ppearson.(glacier)  = round(triu(Ppearson.(glacier)),2);
     
@@ -95,13 +91,9 @@ end
     
 %Full topo
 for i = 1:3
-X = [];
 glacier = char(options.glacier(i));
-params = fieldnames(topo_full_ns.(glacier));
-    for p = 1:length(params)
-        PP = char(params(p));
-        X = [X, topo_full_ns.(glacier).(PP)(:)];
-    end
+X = struct2table(topo_sampled_ns.(glacier));
+
     [pearson.(glacier) Ppearson.(glacier)] = corr(X); 
     pearson.(glacier)   = round(triu(pearson.(glacier)),2); 
     Ppearson.(glacier)  = round(triu(Ppearson.(glacier)),2);
@@ -250,3 +242,32 @@ end
 
     clear param sweT *Coeff glacier g n t
 
+%% Geotiff histogram
+maxH = 30;
+minH = -30;
+
+corr = geotiffread('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/diff13-3_corrected.tif');
+    corr(corr>maxH) = NaN;    corr(corr<minH) = NaN;
+
+OG = geotiffread('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/diff13-3_original.tif');
+    OG(OG>maxH) = NaN;   OG(OG<minH) = NaN;
+
+    clf
+hist(OG(:),50); hold on
+hist(corr(:),50); 
+
+ho = findobj(gca,'Type','patch');
+
+ho(2,1).FaceColor = rgb('DarkBlue');  ho(2,1).EdgeColor = 'w';
+ho(1,1).FaceColor = rgb('MediumTurquoise');  ho(1,1).EdgeColor = 'w';
+    ho(1,1).FaceAlpha = 0.6;
+
+    xlabel('Vertical Difference (m)');  ylabel('Frequency');
+    legend('Original DEMs','Corrected DEMs', 'Location','NorthWest');
+        
+    fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18)
+    fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 7.3 7];
+    saveFIG('DEMcorrection_hist')
+    
+display(['original mean difference = ', num2str(nanmean(OG(:)))])
+display(['corrected mean difference = ', num2str(nanmean(corr(:)))])

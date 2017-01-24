@@ -23,10 +23,10 @@ Index0      = [4:6,13:15];
 IndexSize   = 4:18;
 for i = 1:length(files)
     if      ismember(i,Index9999)
-        A = importdata(['/home/glaciology1/Documents/Data/GlacierTopos/', files(i).name],' ',6);
+        A = importdata(['/home/glaciology1/Documents/Data/GlacierTopos/Final/', files(i).name],' ',6);
         A = double(A);  A(A==-9999) = NaN; 
     elseif  ismember(i,Index0)   
-        A = importdata(['/home/glaciology1/Documents/Data/GlacierTopos/', files(i).name],' ',8);
+        A = importdata(['/home/glaciology1/Documents/Data/GlacierTopos/Final/', files(i).name],' ',8);
         A = double(A);  A(A==0) = NaN; 
     end
     
@@ -46,7 +46,7 @@ for i = 1:length(v)/3
     eval(['topo_full.G13.(param) = ',v{3*i,1}],';');
 end
     
-% %Sx is one row too big. Remove the first one -> doesn't exactly match the other params...
+%Sx is one row too big. Remove the first one -> doesn't exactly match the other params...
    topo_full.G4.Sx      = topo_full.G4.Sx(2:end,:);
    topo_full.G2.Sx      = topo_full.G2.Sx(2:end-1,:);
    topo_full.G13.Sx     = topo_full.G13.Sx(2:end,:);
@@ -105,21 +105,8 @@ end
 
 %Distance from centreline import
 run CentrelineDistance.m
-
-    %-> 
-    s = [1, length(topo_sampled.G4.profileCurve)];  s(2,:) = s(1,2) + [1, length(topo_sampled.G2.profileCurve)];
-     s(3,:) = s(2,2) + [1, length(topo_sampled.G13.profileCurve)];
-     
-    topo_sampled.G4.profileCurve = mean([e2(s(1,1):s(1,2)),n2(s(1,1):s(1,2))],2);
-    topo_sampled.G4.tangentCurve = mean([Profilecu(s(1,1):s(1,2)),Tangential(s(1,1):s(1,2))],2);
-        
-    topo_sampled.G2.profileCurve = mean([e2(s(2,1):s(2,2)),n2(s(2,1):s(2,2))],2);
-    topo_sampled.G2.tangentCurve = mean([Profilecu(s(2,1):s(2,2)),Tangential(s(2,1):s(2,2))],2);
-    
-    topo_sampled.G13.profileCurve = mean([e2(s(3,1):s(3,2)),n2(s(3,1):s(3,2))],2);
-    topo_sampled.G13.tangentCurve = mean([Profilecu(s(3,1):s(3,2)),Tangential(s(3,1):s(3,2))],2);
-    
-    clear aspect centreline corner distance dive elevation G glacier i profileCurve slope Sx tangentCurve topo X Y
+  
+    clear centreline corner distance dive elevation G glacier i profileCurve slope Sx tangentCurve topo X Y
 
 %% Calculations
 
@@ -135,6 +122,7 @@ run CentrelineDistance.m
             aspect = aspect -90;    aspect(aspect<0) = aspect(aspect<0)+360;   aspect = 360-aspect;             
         topo_sampled.(glacier).aspect = aspect;
     end
+    clear aspect
 
 %Northness
     for i = 1:3
@@ -150,7 +138,6 @@ run CentrelineDistance.m
         topo_sampled.(glacier).aspect = cosd(topo_sampled.(glacier).aspect);
     end    
     
-    clear aspect
 %% Standardizing variables
 
 %Keep a copy of non-standardized variables for range of params sampled

@@ -106,9 +106,9 @@ coeffs_final.Properties.VariableNames = {'Coefficient'};
 %% Calculate % variance explained by each variable
     %Partial R-squared (aka coefficient of partial determination)
     %   = (SSE(reduced)−SSE(full))/SSE(reduced)
-
-%--------Try 1    
 beta        = coeffs_final.Properties.RowNames; %names of params
+
+%--------Partial R-squared    
 partialR    = table(zeros(length(beta),1),'RowNames',beta);    %initalize
 partialR.Properties.VariableNames = {'PartialR2'};
 
@@ -125,23 +125,14 @@ for i = 2:length(beta)
     partialR{i,3} = (SSE_E-SSE_A)/SSE_E;          
 end
 
-coeffs_final = [coeffs_final, partialR];        %add to final table
-
-
-%--------Try 2
-beta    = coeffs_final.Properties.RowNames; %names of params
-
-Pvar = table(zeros(length(beta),1),'RowNames',beta);    %initalize
-Pvar.Properties.VariableNames = {'PercentVarExplained'};
+%--------Univariate R-squared
+uniR = table(zeros(length(beta),1),'RowNames',beta);    %initalize
+uniR.Properties.VariableNames = {'UnivarR2'};
 for i = 2:length(beta)                      %only coeffs, no intercept
-    c_var   = false(1,size(c,2));    c_var(1,i-1) = 1;
-    c_row   = ismember(c,c_var,'rows');
-
-    SSt     = mlr_best{c_row,1}.SST;                %total sum of squares
-    SSr     = mlr_best{c_row,1}.SSR; %residual sum of squares
-    Pvar{i,1}       = SSr/SSt*100;          %percent var explined
+    uniR{i,1}   = corr(y, M{:,i-1})^2;          %percent var explined
 end
 
+coeffs_final = [coeffs_final, partialR, uniR];        %add to final table
 
  %Sort final tabel of coefficients
 row          = coeffs_final.Properties.RowNames;
