@@ -98,9 +98,3 @@ curve_corr = table(allC, G4C, G2C, G13C, 'RowNames',curvesampled.Properties.Vari
 slope_corr = table(allS, G4S, G2S, G13S, 'RowNames',slopesampled.Properties.VariableNames);
 
 
-
- 
- 
- 
- 
- 

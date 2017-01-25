@@ -104,35 +104,39 @@ coeffs_final.Properties.VariableNames = {'Coefficient'};
 
 
 %% Calculate % variance explained by each variable
-    %Partial R-squared (aka coefficient of partial determination)
-    %   = (SSE(reduced)−SSE(full))/SSE(reduced)
-beta        = coeffs_final.Properties.RowNames; %names of params
 
-%--------Partial R-squared    
-partialR    = table(zeros(length(beta),1),'RowNames',beta);    %initalize
-partialR.Properties.VariableNames = {'PartialR2'};
+beta = coeffs_final.Properties.RowNames; %names of params
 
-%All params included (A)
-SSE_A = mlr_best{end,1}.SSE;
+%--------Semi-partial (Part) correlation squared
+    %Code adapted from "ppcor: An R Package for a Fast Calculation to  
+    %       Semi-partial Correlation Coefficients" Kim 2015
+semiR = table(zeros(length(beta),1),'RowNames',beta);    %initalize
+semiR.Properties.VariableNames = {'SemiR2'};
 
-%Param of interest excluded (E)
-for i = 2:length(beta) 
-    c_var   = c(end,:);    c_var(1,i-1) = 0;
-    c_row   = ismember(c,c_var,'rows');
-    
-    SSE_E   = mlr_best{c_row,1}.SSE;
-    
-    partialR{i,3} = (SSE_E-SSE_A)/SSE_E;          
-end
+cx = cov([y,M{:,:}]);   %Covariance matrix of data
+dx = inv(cx);           %Inverse covariance matrix
+pc = -corrcov(dx);      %Convert correlations to covariance
+    n = size(pc,1);     pc(1:(n+1):end) = 1; %Set diagonal elements to 1
+
+kk  = pc./repmat(sqrt(diag(cx)),1,n)./...   %Semi-partial correlation (Eq. 2.6) 
+    sqrt(abs(repmat(diag(dx),1,n)-((dx.^2).'./repmat(diag(dx),1,n)).'));
+kk(1:(n+1):end) = 1;    %Set diagonal elements to 1
+kk = kk.^2;             %Square correlations
+
+semiR{2:end,1} = kk(1,2:end)';  %Assign to table
+    %Alternative method = calculate residuals of var of interest with other
+    %vars and then correlate residuals with y {res = fitlm([deg',disp'],BC); 
+    %corr(hl',res.Residuals.Raw)}
 
 %--------Univariate R-squared
 uniR = table(zeros(length(beta),1),'RowNames',beta);    %initalize
 uniR.Properties.VariableNames = {'UnivarR2'};
-for i = 2:length(beta)                      %only coeffs, no intercept
-    uniR{i,1}   = corr(y, M{:,i-1})^2;          %percent var explined
-end
 
-coeffs_final = [coeffs_final, partialR, uniR];        %add to final table
+uniR{2:end,1}   = corr(M{:,:},y).^2;      %Squared raw correlation between
+                                           %regressors and y data
+
+ %Add to final table
+coeffs_final = [coeffs_final, semiR, uniR];        
 
  %Sort final tabel of coefficients
 row          = coeffs_final.Properties.RowNames;
@@ -147,13 +151,13 @@ y_regress   = sum(X1{:,:}.*repmat(coeffs_final{1:end-1,1}',height(X1),1),2) + co
 
 %RMSE
 rmse_final  = sqrt(sum((y-y_regress).^2)/numel(y_regress));  %get the RMSE between observed and predicted values
-    coeffs_final = [coeffs_final; table(rmse_final, 0, ...
-                'VariableName',{'Coefficient', 'PartialR2'},'RowNames',{'rmse'})];
+    coeffs_final = [coeffs_final; table(rmse_final, 0, 0, ...
+                'VariableName',coeffs_final.Properties.VariableNames,'RowNames',{'rmse'})];
 
 %R^2
 R2 = corr(y,y_regress)^2;
-    coeffs_final = [coeffs_final; table(0, R2, ...
-                'VariableName',{'Coefficient', 'PartialR2'},'RowNames',{'R2_full'})];
+    coeffs_final = [coeffs_final; table(0, R2, 0, ...
+                'VariableName',coeffs_final.Properties.VariableNames,'RowNames',{'R2_full'})];
 %% Residuals
 
  %Get residual
