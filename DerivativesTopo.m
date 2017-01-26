@@ -6,7 +6,7 @@ h = 40; % step size
 [f, R] = geotiffread('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Glacier Topo Maps/DonjekDEM_mini.tif');
 
 %Smoothing grid
-sizeG = 9; C = (sizeG+1)/2;
+sizeG = 3; C = (sizeG+1)/2;
 
 grid = ones(sizeG);
 grid = grid/(sum(grid(:)));
@@ -74,6 +74,18 @@ geotiffwrite(filename_2e,Y3e_2,R,'GeoKeyDirectoryTag',info.GeoTIFFTags.GeoKeyDir
 geotiffwrite(filename_2mean,meanNE,R,'GeoKeyDirectoryTag',info.GeoTIFFTags.GeoKeyDirectoryTag);
 
     
+n = 1;
+cell_num = zeros(size(f));
+for i = 1:size(f,1)
+    for j = 1:size(f,2)
+    cell_num(i,j) = n;
+    n = n+1;
+    end
+end
+
+filename_cellnum = [location,'cell_num.tif'];
+geotiffwrite(filename_cellnum,cell_num,R,'GeoKeyDirectoryTag',info.GeoTIFFTags.GeoKeyDirectoryTag);
+
  %% Finding highest correlation
  
 %  uiopen('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Sampling/curve_sampled.csv',1) 
@@ -83,6 +95,9 @@ geotiffwrite(filename_2mean,meanNE,R,'GeoKeyDirectoryTag',info.GeoTIFFTags.GeoKe
      s(3,:) = s(2,2) + [1, length(SWE(3).swe)];
      
 swe =  [SWE(1).swe; SWE(2).swe;  SWE(3).swe];   
+
+curvesampled(:,1:8) = [];   curvesampled(:,5:12) = [];
+slopesampled(:,5:12) = [];   
 
 
 allC    = corr(swe, curvesampled{:,:}).^2';
@@ -98,3 +113,100 @@ curve_corr = table(allC, G4C, G2C, G13C, 'RowNames',curvesampled.Properties.Vari
 slope_corr = table(allS, G4S, G2S, G13S, 'RowNames',slopesampled.Properties.VariableNames);
 
 
+%% same cell
+
+%  uiopen('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Sampling/same_cell.csv',1) 
+
+div = [1, length(SWE(1).swe); length(SWE(1).swe)+1, length(SWE(1).swe)+length(SWE(2).swe);...
+        length(SWE(1).swe)+length(SWE(2).swe)+1, length(SWE(1).swe)+length(SWE(2).swe)+length(SWE(3).swe)];
+
+for g = 1:3
+   glacier  = char(options.glacier(g));
+   sameG = same_cell(div(g,1):div(g,2));
+
+[A1, I]  = sort(sameG);
+
+%sort everyone
+swe     = SWE(g).swe(I);
+topo    = struct2table(topo_sampled.(glacier));
+topo    = topo(I,:);
+
+T = diff(A1)==0;
+
+   %not unique
+   ind_no   = diff(A1)==0;
+   swe_no   = swe(ind_no);
+   sameG_no = unique(A1(ind_no));
+   %unique
+   ind_uni  = diff(A1)~=0;
+   swe_uni  = swe(ind_uni);
+   sameG_uni = A1(ind_uni);
+
+for i = 1:length(sameG_no)
+   ind      = sameG_no(i)==A1;
+   swe_new(i,1) = mean(swe(ind));
+   
+   temp     = find(ind);   temp1    = temp(1,1);
+   topo_new(i,:) = topo(temp1,:);
+end
+topo_new = topo(swe_new~=0,:);
+swe_new  = swe_new(swe_new~=0,1);
+
+swe = [swe_new;swe_uni];
+topo = [topo_new;topo(ind_uni,:)];
+
+data = [topo, table(swe,'VariableName',{'swe'})];
+fitlm(data)
+display(num2str(length(swe)))
+end
+   
+   
+   
+
+J      = find(diff(A1)==0);
+
+JJ=unique([J(:)',J(:)'+1])';
+
+ss_r    = [false(1,1);ss(1:end-1)];
+ss_mean = mean([swe(1:end-1),swe(2:end)],2);
+swe(ss) = ss_mean(ss);
+swe(ss_r) = [];
+
+topo(ss_r,:) = [];
+display(num2str(length(swe)))
+
+data = [topo, table(swe,'VariableName',{'swe'})];
+
+fitlm(data)
+
+end
+
+
+
+ss = same_cell(1:end-1)==same_cell(2:end);
+ss_r = [false(1,1);ss(1:end-1)];
+
+uniqueSWE = [SWE(1).swe; SWE(2).swe; SWE(3).swe];
+
+    ss_mean = mean([uniqueSWE(1:end-1),uniqueSWE(2:end)],2);
+    
+    uniqueSWE(ss) = ss_mean(ss);
+    uniqueSWE(ss_r) = [];
+
+
+divN(1,:) = [1,             sum(~ss_r(div(1,1):div(1,2)))];
+divN(2,:) = [divN(1,2)+1    divN(1,2)+sum(~ss_r(div(2,1):div(2,2)))];
+divN(3,:) = [divN(2,2)+1    divN(2,2)+sum(~ss_r(div(3,1):div(3,2)-1))+1];
+
+
+for g = 1:3
+   glacier  = char(options.glacier(g));
+
+   data = struct2table(topo_sampled.(glacier));
+   data(ss_r(div(g,1):div(g,2)-1),:) = [];
+   uniqueTOPO.(glacier) = [data,table(uniqueSWE(divN(g,1):divN(g,2)),'VariableName',{'swe'})];
+        clear data
+   fitlm(uniqueTOPO.(glacier))
+   
+end
+clc
