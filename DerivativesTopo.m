@@ -5,8 +5,10 @@
 h = 40; % step size
 [f, R] = geotiffread('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Glacier Topo Maps/DonjekDEM_mini.tif');
 
+for sizeG = 3:2:9
 %Smoothing grid
-sizeG = 3; C = (sizeG+1)/2;
+%sizeG = 9; 
+C = (sizeG+1)/2;
 
 grid = ones(sizeG);
 grid = grid/(sum(grid(:)));
@@ -31,7 +33,10 @@ Y3n_2 = (Fmn-2*F0n+Fpn)/h^2;        Y3e_2 = (Fme-2*F0e+Fpe)/h^2;
     Y3n_2 = [nan(1,size(Y3n_2,2));  Y3n_2; nan(1,size(Y3n_2,2))];
     Y3e_2 = [nan(size(Y3e_2,1),1),  Y3e_2, nan(size(Y3e_2,1),1)];
 meanM  = (Y3n_1+Y3e_1)/2;
-meanNE = (Y3n_2+Y3e_2)/2;    
+meanNE = (Y3n_2+Y3e_2)/2; 
+
+meanM2(:,:,1) = abs(Y3n_1); meanM2(:,:,2) = abs(Y3e_1); 
+meanM2(:,:,1) = nanmax(meanM2,[],3); meanM2(:,:,2) = [];
 
 figure(2); clf
     subplot(2,2,1)
@@ -43,8 +48,8 @@ figure(2); clf
         title(['Smoothed, window size = ',num2str(sizeG)]);
     
     subplot(2,2,3)
-        imagesc(meanM); colorbar; caxis([-1 1.5])
-        title('1st Derivative Average')
+        imagesc(meanM2); colorbar; caxis([-1 1.5])
+        title('1st Derivative Max')
     
     subplot(2,2,4)
         imagesc(meanNE); colorbar; caxis([-0.01 0.01])
@@ -58,7 +63,7 @@ location = '/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Glacier Topo Maps/D
 filename_og     = [location,g,'x',g,'smooth.tif'];
 filename_1n     = [location,g,'x',g,'slopeN.tif'];
 filename_1e     = [location,g,'x',g,'slopeE.tif'];
-filename_1mean  = [location,g,'x',g,'slopeMEAN.tif'];
+filename_1mean  = [location,g,'x',g,'slopeMAX.tif'];
 filename_2n     = [location,g,'x',g,'curveN.tif'];
 filename_2e     = [location,g,'x',g,'curveE.tif'];
 filename_2mean  = [location,g,'x',g,'curveMEAN.tif'];
@@ -68,12 +73,12 @@ info = geotiffinfo('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Glacier Top
 geotiffwrite(filename_og,f_filt,R,'GeoKeyDirectoryTag',info.GeoTIFFTags.GeoKeyDirectoryTag);
 geotiffwrite(filename_1n,Y3n_1,R,'GeoKeyDirectoryTag',info.GeoTIFFTags.GeoKeyDirectoryTag);
 geotiffwrite(filename_1e,Y3e_1,R,'GeoKeyDirectoryTag',info.GeoTIFFTags.GeoKeyDirectoryTag);
-geotiffwrite(filename_1mean,meanM,R,'GeoKeyDirectoryTag',info.GeoTIFFTags.GeoKeyDirectoryTag);
+geotiffwrite(filename_1mean,meanM2,R,'GeoKeyDirectoryTag',info.GeoTIFFTags.GeoKeyDirectoryTag);
 geotiffwrite(filename_2n,Y3n_2,R,'GeoKeyDirectoryTag',info.GeoTIFFTags.GeoKeyDirectoryTag);
 geotiffwrite(filename_2e,Y3e_2,R,'GeoKeyDirectoryTag',info.GeoTIFFTags.GeoKeyDirectoryTag);
 geotiffwrite(filename_2mean,meanNE,R,'GeoKeyDirectoryTag',info.GeoTIFFTags.GeoKeyDirectoryTag);
 
-    
+end    
 n = 1;
 cell_num = zeros(size(f));
 for i = 1:size(f,1)
@@ -97,7 +102,7 @@ geotiffwrite(filename_cellnum,cell_num,R,'GeoKeyDirectoryTag',info.GeoTIFFTags.G
 swe =  [SWE(1).swe; SWE(2).swe;  SWE(3).swe];   
 
 curvesampled(:,1:8) = [];   curvesampled(:,5:12) = [];
-slopesampled(:,5:12) = [];   
+slopesampled = slopesampled1; slopesampled(:,5:12) = [];   
 
 
 allC    = corr(swe, curvesampled{:,:}).^2';
@@ -112,13 +117,14 @@ G13S    = corr(SWE(3).swe, slopesampled{s(3,1):s(3,2),:}).^2';
 curve_corr = table(allC, G4C, G2C, G13C, 'RowNames',curvesampled.Properties.VariableNames);
 slope_corr = table(allS, G4S, G2S, G13S, 'RowNames',slopesampled.Properties.VariableNames);
 
-
+    clear all* G*
 %% same cell
 
 %  uiopen('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Sampling/same_cell.csv',1) 
 
 div = [1, length(SWE(1).swe); length(SWE(1).swe)+1, length(SWE(1).swe)+length(SWE(2).swe);...
         length(SWE(1).swe)+length(SWE(2).swe)+1, length(SWE(1).swe)+length(SWE(2).swe)+length(SWE(3).swe)];
+std_cell = [];
 
 for g = 1:3
    glacier  = char(options.glacier(g));
@@ -131,82 +137,28 @@ swe     = SWE(g).swe(I);
 topo    = struct2table(topo_sampled.(glacier));
 topo    = topo(I,:);
 
-T = diff(A1)==0;
-
-   %not unique
-   ind_no   = diff(A1)==0;
-   swe_no   = swe(ind_no);
-   sameG_no = unique(A1(ind_no));
-   %unique
-   ind_uni  = diff(A1)~=0;
-   swe_uni  = swe(ind_uni);
-   sameG_uni = A1(ind_uni);
-
-for i = 1:length(sameG_no)
-   ind      = sameG_no(i)==A1;
-   swe_new(i,1) = mean(swe(ind));
-   
-   temp     = find(ind);   temp1    = temp(1,1);
-   topo_new(i,:) = topo(temp1,:);
+T = diff(A1)==0;    T1 = [0;T(1:end-1)]; T = any([T,T1],2);
+sameG_not = unique(A1(T));
+for i = length(sameG_not):-1:1
+   ind                  = find(sameG_not(i)==A1);
+   swe(ind(1,1),1)      = mean(swe(ind));
+   std_cell(i,g)        = std(swe(ind));
+   swe(ind(2:end,1))    = [];
+  
+   topo(ind(2:end,1),:) = [];
+   A1(ind(2:end,1))     = [];
 end
-topo_new = topo(swe_new~=0,:);
-swe_new  = swe_new(swe_new~=0,1);
 
-swe = [swe_new;swe_uni];
-topo = [topo_new;topo(ind_uni,:)];
 
 data = [topo, table(swe,'VariableName',{'swe'})];
 fitlm(data)
-display(num2str(length(swe)))
 end
+std_cell(std_cell==0) = NaN;
+
+figure(1)
+    boxplot(std_cell,'Labels',{'G4','G2','G13'})
+    ylabel({'Standard Deviation with',' one DEM cell (m w.e.)'})
+
+
    
    
-   
-
-J      = find(diff(A1)==0);
-
-JJ=unique([J(:)',J(:)'+1])';
-
-ss_r    = [false(1,1);ss(1:end-1)];
-ss_mean = mean([swe(1:end-1),swe(2:end)],2);
-swe(ss) = ss_mean(ss);
-swe(ss_r) = [];
-
-topo(ss_r,:) = [];
-display(num2str(length(swe)))
-
-data = [topo, table(swe,'VariableName',{'swe'})];
-
-fitlm(data)
-
-end
-
-
-
-ss = same_cell(1:end-1)==same_cell(2:end);
-ss_r = [false(1,1);ss(1:end-1)];
-
-uniqueSWE = [SWE(1).swe; SWE(2).swe; SWE(3).swe];
-
-    ss_mean = mean([uniqueSWE(1:end-1),uniqueSWE(2:end)],2);
-    
-    uniqueSWE(ss) = ss_mean(ss);
-    uniqueSWE(ss_r) = [];
-
-
-divN(1,:) = [1,             sum(~ss_r(div(1,1):div(1,2)))];
-divN(2,:) = [divN(1,2)+1    divN(1,2)+sum(~ss_r(div(2,1):div(2,2)))];
-divN(3,:) = [divN(2,2)+1    divN(2,2)+sum(~ss_r(div(3,1):div(3,2)-1))+1];
-
-
-for g = 1:3
-   glacier  = char(options.glacier(g));
-
-   data = struct2table(topo_sampled.(glacier));
-   data(ss_r(div(g,1):div(g,2)-1),:) = [];
-   uniqueTOPO.(glacier) = [data,table(uniqueSWE(divN(g,1):divN(g,2)),'VariableName',{'swe'})];
-        clear data
-   fitlm(uniqueTOPO.(glacier))
-   
-end
-clc
