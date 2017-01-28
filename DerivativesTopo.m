@@ -102,22 +102,94 @@ geotiffwrite(filename_cellnum,cell_num,R,'GeoKeyDirectoryTag',info.GeoTIFFTags.G
 swe =  [SWE(1).swe; SWE(2).swe;  SWE(3).swe];   
 
 curvesampled(:,1:8) = [];   curvesampled(:,5:12) = [];
-slopesampled = slopesampled1; slopesampled(:,5:12) = [];   
+slopesampled(:,5:12) = [];   
 
 
-allC    = corr(swe, curvesampled{:,:}).^2';
-allS    = corr(swe, slopesampled{:,:}).^2';
-G4C     = corr(SWE(1).swe, curvesampled{s(1,1):s(1,2),:}).^2';
-G2C     = corr(SWE(2).swe, curvesampled{s(2,1):s(2,2),:}).^2';
-G13C    = corr(SWE(3).swe, curvesampled{s(3,1):s(3,2),:}).^2';
-G4S     = corr(SWE(1).swe, slopesampled{s(1,1):s(1,2),:}).^2';
-G2S     = corr(SWE(2).swe, slopesampled{s(2,1):s(2,2),:}).^2';
-G13S    = corr(SWE(3).swe, slopesampled{s(3,1):s(3,2),:}).^2';
+allC    = corr(swe, curvesampled{:,:})';
+allS    = corr(swe, slopesampled{:,:})';
+G4C     = corr(SWE(1).swe, curvesampled{s(1,1):s(1,2),:})';
+G2C     = corr(SWE(2).swe, curvesampled{s(2,1):s(2,2),:})';
+G13C    = corr(SWE(3).swe, curvesampled{s(3,1):s(3,2),:})';
+G4S     = corr(SWE(1).swe, slopesampled{s(1,1):s(1,2),:})';
+G2S     = corr(SWE(2).swe, slopesampled{s(2,1):s(2,2),:})';
+G13S    = corr(SWE(3).swe, slopesampled{s(3,1):s(3,2),:})';
 
 curve_corr = table(allC, G4C, G2C, G13C, 'RowNames',curvesampled.Properties.VariableNames);
 slope_corr = table(allS, G4S, G2S, G13S, 'RowNames',slopesampled.Properties.VariableNames);
 
     clear all* G*
+ %%
+clf    
+figure(1)
+% subplot(1,4,1)
+%         D = [curvesampled{:,7},swe];
+%     plot(D(:,1),D(:,2),'.'); hold on
+%         T = fitlm(D(:,1),D(:,2));
+% %     plot(D(:,1), T.Coefficients{1,1}+T.Coefficients{2,1}*D(:,2))
+%     xlabel(char(curvesampled.Properties.VariableNames(7)))
+%     ylabel('All SWE')
+%     T.Rsquared.Ordinary
+% subplot(1,4,2)
+        D = [curvesampled{s(1,1):s(1,2),7},SWE(1).swe];
+    plot(D(:,1),D(:,2),'.'); hold on
+        T = fitlm(D(:,2),D(:,1));
+%     plot(D(:,1), T.Coefficients{1,1}+T.Coefficients{2,1}*D(:,2))
+    xlabel(char(curvesampled.Properties.VariableNames(7)))
+    ylabel('G4 SWE')
+    T.Rsquared.Ordinary
+% subplot(1,4,3)
+        D = [curvesampled{s(2,1):s(2,2),7},SWE(2).swe];
+    plot(D(:,1),D(:,2),'.'); hold on
+        T = fitlm(D(:,1),D(:,2));
+%     plot(D(:,1), T.Coefficients{1,1}+T.Coefficients{2,1}*D(:,2))
+    xlabel(char(curvesampled.Properties.VariableNames(7)))
+    ylabel('G2 SWE')
+    T.Rsquared.Ordinary
+% subplot(1,4,4)
+        D = [curvesampled{s(3,1):s(3,2),7},SWE(3).swe];
+    plot(D(:,1),D(:,2),'.'); hold on
+        T = fitlm(D(:,1),D(:,2));
+%     plot(D(:,1), T.Coefficients{1,1}+T.Coefficients{2,1}*D(:,2))
+    xlabel(char(curvesampled.Properties.VariableNames(7)))
+    ylabel('G2 SWE')   
+    T.Rsquared.Ordinary
+    
+    legend('G4','G2','G13')
+    
+    %%
+    clf
+    figure(2)
+    subplot(2,2,1); i = 5;
+    plot(curvesampled{s(1,1):s(1,2),i},SWE(1).swe,'.'); hold on
+    plot(curvesampled{s(2,1):s(2,2),i},SWE(2).swe,'.'); hold on
+    plot(curvesampled{s(3,1):s(3,2),i},SWE(3).swe,'.'); hold on
+        title(char(curvesampled.Properties.VariableNames(i)))
+        legend('G4','G2','G13')
+        xlim([-300 300])
+    
+    subplot(2,2,2); i = 6;
+    plot(curvesampled{s(1,1):s(1,2),i},SWE(1).swe,'.'); hold on
+    plot(curvesampled{s(2,1):s(2,2),i},SWE(2).swe,'.'); hold on
+    plot(curvesampled{s(3,1):s(3,2),i},SWE(3).swe,'.'); hold on
+        title(char(curvesampled.Properties.VariableNames(i)))
+        legend('G4','G2','G13')
+        xlim([-300 300])
+        
+    subplot(2,2,3); i = 7;
+    plot(curvesampled{s(1,1):s(1,2),i},SWE(1).swe,'.'); hold on
+    plot(curvesampled{s(2,1):s(2,2),i},SWE(2).swe,'.'); hold on
+    plot(curvesampled{s(3,1):s(3,2),i},SWE(3).swe,'.'); hold on
+        title(char(curvesampled.Properties.VariableNames(i)))
+        legend('G4','G2','G13')
+        xlim([-300 300])
+        
+    subplot(2,2,4); i = 8;
+    plot(curvesampled{s(1,1):s(1,2),i},SWE(1).swe,'.'); hold on
+    plot(curvesampled{s(2,1):s(2,2),i},SWE(2).swe,'.'); hold on
+    plot(curvesampled{s(3,1):s(3,2),i},SWE(3).swe,'.'); hold on
+        title(char(curvesampled.Properties.VariableNames(i)))
+        xlim([-300 300])
+        legend('G4','G2','G13')        
 %% same cell
 
 %  uiopen('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Sampling/same_cell.csv',1) 
