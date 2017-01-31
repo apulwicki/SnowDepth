@@ -15,25 +15,32 @@
 
 %% Importing DEMs
 run OPTIONS
+clear topo*
+load('TopoBMS_MLR.mat','rig')
 
 files   = dir('/home/glaciology1/Documents/Data/GlacierTopos/*.tif'); 
 v       = cell(0,0);
-Index9999   = [1:3,7:12,16:18];
-Index0      = [4:6,13:15];
-IndexSize   = 4:18;
+Index9999   = [1:3,10:12];
+IndexA      = 4:6;
+IndexC      = 7:9;
+IndexS      = 13:15;
+IndexSizeI  = [1,3,12];
+IndexSizeII = 9;
 for i = 1:length(files)
-    if      ismember(i,Index9999)
-        A = importdata(['/home/glaciology1/Documents/Data/GlacierTopos/Final/', files(i).name],' ',6);
-        A = double(A);  A(A==-9999) = NaN; 
-    elseif  ismember(i,Index0)   
-        A = importdata(['/home/glaciology1/Documents/Data/GlacierTopos/Final/', files(i).name],' ',8);
-        A = double(A);  A(A==0) = NaN; 
+        A = importdata(['/home/glaciology1/Documents/Data/GlacierTopos/', files(i).name],' ',6);
+        A = double(A);
+    if      ismember(i,Index9999);  A(A==-9999) = NaN; 
+    elseif  ismember(i,IndexA);     A(A==65535) = NaN; 
+    elseif  ismember(i,IndexC);     A(A<-10^10) = NaN; 
+    elseif  ismember(i,IndexS);     A(A==255) = NaN; 
     end
     
     A(~any(~isnan(A), 2),:) =[];
     A(:,~any(~isnan(A), 1)) =[];
-    if      ismember(i,IndexSize)
+    if      ismember(i,IndexSizeI)
         A = A(2:end,:);
+    elseif  ismember(i,IndexSizeII)
+        A = [A, nan(size(A,1),1)];   
     end
     v(i,1) = cellstr(files(i).name(1:end-4)); eval([v{i,1} '= A;']);
 end
@@ -45,22 +52,21 @@ for i = 1:length(v)/3
     eval(['topo_full.G2.(param) = ',v{3*i-2,1}],';');
     eval(['topo_full.G13.(param) = ',v{3*i,1}],';');
 end
-    
-%Sx is one row too big. Remove the first one -> doesn't exactly match the other params...
-   topo_full.G4.Sx      = topo_full.G4.Sx(2:end,:);
-   topo_full.G2.Sx      = topo_full.G2.Sx(2:end-1,:);
-   topo_full.G13.Sx     = topo_full.G13.Sx(2:end,:);
-   
-        clear aspect* elev* north* profil* slope* Sx* tangent* files A i param v glacier ans Index*
+  
+        clear aspect* elev* north* curva* slope* Sx* files A i param v glacier ans Index*
 
 %% Import Sampled Topo Params
 
 %Import topos
-[topo, ~, ~] = xlsread('SPOT_TopoParams_noZZ.xlsx','Sheet1','A1:F2353');
+[topo, ~, ~] = xlsread('SPOT_TopoParams_noZZ.xlsx','Sheet1','A1:E2353');
 
 %Remove zigzag values (they skew the MLR results)
-run OPTIONS.m; options.ZZ = 2;
+run OPTIONS.m;
+obspercell_temp = options.ObsPerCell;
+options.ZZ = 2; options.ObsPerCell = 1;
 run MAIN.m
+
+options.ObsPerCell = obspercell_temp;
 
 %Get divisions for each glacier of the continous file imported
 div = [1, length(SWE(1).swe); length(SWE(1).swe)+1, length(SWE(1).swe)+length(SWE(2).swe);...
@@ -69,14 +75,13 @@ div = [1, length(SWE(1).swe); length(SWE(1).swe)+1, length(SWE(1).swe)+length(SW
 %Create structure of topo params for each glacier
 for i = 1:3
 name = char(options.glacier(i));
-    slope            = topo(div(i,1):div(i,2),2);
-    profileCurve     = topo(div(i,1):div(i,2),3);
-    tangentCurve     = topo(div(i,1):div(i,2),4);
-    aspect           = topo(div(i,1):div(i,2),5);
-    elevation        = topo(div(i,1):div(i,2),6);
+    elevation        = topo(div(i,1):div(i,2),2);
+    aspect           = topo(div(i,1):div(i,2),3);
+    slope            = topo(div(i,1):div(i,2),4);
+    curvature        = topo(div(i,1):div(i,2),5);
     
     topo_sampled.(name) = struct('aspect',aspect, 'elevation',elevation,...
-        'profileCurve',profileCurve, 'slope',slope,'tangentCurve',tangentCurve);
+        'curvature',curvature, 'slope',slope);
 end
 
 % Sx import
@@ -105,8 +110,8 @@ end
 
 %Distance from centreline import
 run CentrelineDistance.m
-  
-    clear centreline corner distance dive elevation G glacier i profileCurve slope Sx tangentCurve topo X Y
+
+    clear centreline corner distance div elevation G glacier i profileCurve slope Sx tangentCurve topo X Y
 
 %% Calculations
 
@@ -136,7 +141,44 @@ run CentrelineDistance.m
         glacier = char(options.glacier(i));
         topo_full.(glacier).aspect    = cosd(topo_full.(glacier).aspect);
         topo_sampled.(glacier).aspect = cosd(topo_sampled.(glacier).aspect);
-    end    
+    end 
+    
+%% Keep only one param value in one cell
+
+if options.ObsPerCell==2
+    
+    same_cell = csvread('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Sampling/same_cell.csv', 1, 2);
+
+    div = [1, length(SWE(1).swe); length(SWE(1).swe)+1, length(SWE(1).swe)+length(SWE(2).swe);...
+            length(SWE(1).swe)+length(SWE(2).swe)+1, length(SWE(1).swe)+length(SWE(2).swe)+length(SWE(3).swe)];
+    std_cell = [];
+
+    for g = 1:3
+       glacier  = char(options.glacier(g));
+       sameG = same_cell(div(g,1):div(g,2));
+
+    fields = fieldnames(topo_sampled.(glacier));
+        for f = 1:length(fields)
+             [A1, I]  = sort(sameG);
+        param = char(fields(f));
+        %sort everyone
+        topo_sampled.(glacier).(param)      = topo_sampled.(glacier).(param)(I,:);
+
+        T = diff(A1)==0;    T1 = [0;T(1:end-1)]; T = any([T,T1],2);
+        sameG_not = unique(A1(T));
+        for i = length(sameG_not):-1:1
+           ind                  = find(sameG_not(i)==A1);
+           topo_sampled.(glacier).(param)(ind(2:end,1),:) = [];
+           A1(ind(2:end,1))     = [];
+        end
+        end
+    end
+
+end
+        
+    
+    
+    
     
 %% Standardizing variables
 
@@ -163,8 +205,7 @@ end
     
 %% Sort all topo param structures
 
-order = {'centreD','elevation','aspect','slope','northness','profileCurve',...
-            'tangentCurve','Sx'};
+order = {'elevation','centreD','aspect','slope','northness','curvature','Sx'};
 for i = 1:3
    name     = char(options.glacier(i));
    topo_full.(name)         = orderfields(topo_full.(name),order);

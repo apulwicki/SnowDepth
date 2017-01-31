@@ -95,6 +95,7 @@ geotiffwrite(filename_cellnum,cell_num,R,'GeoKeyDirectoryTag',info.GeoTIFFTags.G
  
 %  uiopen('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Sampling/curve_sampled.csv',1) 
 %  uiopen('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Sampling/slope_sampled.csv',1) 
+%  uiopen('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Sampling/aspect_sampled.csv',1) 
 
  s = [1, length(SWE(1).swe)];  s(2,:) = s(1,2) + [1, length(SWE(2).swe)];
      s(3,:) = s(2,2) + [1, length(SWE(3).swe)];
@@ -103,19 +104,34 @@ swe =  [SWE(1).swe; SWE(2).swe;  SWE(3).swe];
 
 curvesampled(:,1:8) = [];   curvesampled(:,5:12) = [];
 slopesampled(:,5:12) = [];   
+aspectsampled(:,:) = [aspectsampled(:,2:4),aspectsampled(:,1)]; 
+    aspectsampled.Properties.VariableNames = [aspectsampled.Properties.VariableNames(2:4), aspectsampled.Properties.VariableNames(1)];
+    aspect = aspectsampled{:,:} -90;    
+    aspect(aspect<0) = aspect(aspect<0)+360;   
+    aspect = 360-aspect; 
+    aspectsampled{:,:} = cosd(aspect);
 
 
 allC    = corr(swe, curvesampled{:,:})';
 allS    = corr(swe, slopesampled{:,:})';
+allA    = corr(swe, aspectsampled{:,:})';
 G4C     = corr(SWE(1).swe, curvesampled{s(1,1):s(1,2),:})';
 G2C     = corr(SWE(2).swe, curvesampled{s(2,1):s(2,2),:})';
 G13C    = corr(SWE(3).swe, curvesampled{s(3,1):s(3,2),:})';
 G4S     = corr(SWE(1).swe, slopesampled{s(1,1):s(1,2),:})';
 G2S     = corr(SWE(2).swe, slopesampled{s(2,1):s(2,2),:})';
 G13S    = corr(SWE(3).swe, slopesampled{s(3,1):s(3,2),:})';
+G4A     = corr(SWE(1).swe, aspectsampled{s(1,1):s(1,2),:})';
+G2A     = corr(SWE(2).swe, aspectsampled{s(2,1):s(2,2),:})';
+G13A    = corr(SWE(3).swe, aspectsampled{s(3,1):s(3,2),:})';
 
 curve_corr = table(allC, G4C, G2C, G13C, 'RowNames',curvesampled.Properties.VariableNames);
 slope_corr = table(allS, G4S, G2S, G13S, 'RowNames',slopesampled.Properties.VariableNames);
+aspect_corr = table(allA, G4A, G2A, G13A, 'RowNames',aspectsampled.Properties.VariableNames);
+
+smoothing_corr.aspect = aspect_corr;    
+smoothing_corr.slope = slope_corr;
+smoothing_corr.curvature = curve_corr;
 
     clear all* G*
  %%

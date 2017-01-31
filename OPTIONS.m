@@ -55,19 +55,29 @@ options.DensitySWE     = 8;
                 % 8 Inverse distance weighted mean (variable)   Snowpit
                 % 9 Inverse distance weighted mean (variable)   SWE tube
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% OBS. PER CELL %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Number of observations in DEM cell
+
+options.ObsPerCell     = 2;
+                % 1 all transect measurement
+                % 2 average of all observation in a DEM cell
+                
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% GLACIER RGB %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Colour scheme for glaciers
-options.RGB            = [9, 132, 103; 224, 187, 2; 130, 75, 135]/255;
+options.RGB            = [9, 132, 103; ...
+                          224, 187, 2; ...
+                          130, 75, 135]/255;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% EASE OF USE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 
                 
 options.glacier        = {'G4','G2','G13'};
-options.topoVarsUnits  = {'{\itd_C} (m)', '{\itz} (m a.s.l)','\alpha','{\itm}',...
-                            '{\itN}','{\kappa_P} (m^{-1})','{\kappa_T} (m^{-1})','{\itSx}'};
-options.topoVars       = {'{\itd_C}', '{\itz}','\alpha','{\itm}',...
-                            '{\itN}','{\kappa_P}','{\kappa_T}','{\itSx}'};
+options.topoVarsUnits  = { '{\itz} (m a.s.l)','{\itd_C} (m)','\alpha','{\itm} (^{\circ})',...
+                            '{\itN}','{\kappa} (m^{-1})','Sx'};
+options.topoVars       = { '{\itz}','{\itd_C}','\alpha','{\itm}',...
+                            '{\itN}','{\kappa}','Sx'};
 
  
                    

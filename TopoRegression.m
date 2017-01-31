@@ -3,9 +3,7 @@
 % measurements along transects
 %%%%%%%%%%%%%%%%%%
 
-load TopoParams.mat
-%run Import_Topo.m
-
+load('TopoBMS_MLR.mat','topo*')
 %% MLR - Topo Regression
 
 % %remove aspect
@@ -28,7 +26,9 @@ run MAIN
         X       = topo_sampled.(glacier);
 
         [MLR(t).(glacier), residualsMLR(t).(glacier)] = MLRcalval(y, X);
-        MLR(t).(glacier).Properties.VariableNames = {['MLRCoefficient_', num2str(t)],['MLRpartialR2_', num2str(t)]};
+        MLR(t).(glacier).Properties.VariableNames = {['MLRCoefficient_', num2str(t)],...
+                                                     ['MLRsemiR2_', num2str(t)],...
+                                                     ['MLRunivarR2_', num2str(t)]};
     end
 display('Done');
 end
