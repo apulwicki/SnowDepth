@@ -26,7 +26,7 @@ n = size(M,2);
 c = logical(dec2bin(0:(2^n)-1)=='1');      c = c(2:end,:);
 
  %Choose number of runs
-runs = 10;        
+runs = 1000;        
 
  %Cross validation random number matrix
 [~, cal_ind] = sort(rand(runs,length(y)),2); %create matrix of random numbers
@@ -105,7 +105,7 @@ coeffs_final.Properties.VariableNames = {'Coefficient'};
 
 %% Calculate % variance explained by each variable
 
-beta = coeffs_final.Properties.RowNames; %names of params
+beta = M.Properties.VariableNames; %names of params
 
 %--------Semi-partial (Part) correlation squared
     %Code adapted from "ppcor: An R Package for a Fast Calculation to  
@@ -123,7 +123,7 @@ kk  = pc./repmat(sqrt(diag(cx)),1,n)./...   %Semi-partial correlation (Eq. 2.6)
 kk(1:(n+1):end) = 1;    %Set diagonal elements to 1
 kk = kk.^2;             %Square correlations
 
-semiR{2:end,1} = kk(1,2:end)';  %Assign to table
+semiR{:,1} = kk(1,2:end)';  %Assign to table
     %Alternative method = calculate residuals of var of interest with other
     %vars and then correlate residuals with y {res = fitlm([deg',disp'],BC); 
     %corr(hl',res.Residuals.Raw)}
@@ -132,11 +132,18 @@ semiR{2:end,1} = kk(1,2:end)';  %Assign to table
 uniR = table(zeros(length(beta),1),'RowNames',beta);    %initalize
 uniR.Properties.VariableNames = {'UnivarR2'};
 
-uniR{2:end,1}   = corr(M{:,:},y).^2;      %Squared raw correlation between
+uniR{:,1}   = corr(M{:,:},y).^2;      %Squared raw correlation between
                                            %regressors and y data
-
+ %Metrics
+metric      = [semiR, uniR];   
+row         = metric.Properties.RowNames;
+order       = coeffs_final.Properties.RowNames(2:end);
+[~, index]  = ismember(order, row);
+metric      = [table(0, 0, 'RowNames', {'Intercept'}, 'VariableNames', metric.Properties.VariableNames);...
+                metric(index,:)];
+                                           
  %Add to final table
-coeffs_final = [coeffs_final, semiR, uniR];        
+coeffs_final = [coeffs_final, metric];        
 
  %Sort final tabel of coefficients
 row          = coeffs_final.Properties.RowNames;

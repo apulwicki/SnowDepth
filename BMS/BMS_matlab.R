@@ -11,18 +11,17 @@ importG = readMat('/home/glaciology1/Documents/Data/SnowDepth/BMS/mat2R.mat')
 #Glacier data
     params = attr(importG$topoG, "dimnames")[[1]]
     params = c("swe",params)
-    centreD = importG$topoG[1]
-    elevation = importG$topoG[2]
+    elevation = importG$topoG[1]
+    centreD = importG$topoG[2]
     aspect = importG$topoG[3]
     slope = importG$topoG[4]
     northness = importG$topoG[5]
-    profileCurve = importG$topoG[6]
-    tangentCurve = importG$topoG[7]
-    Sx = importG$topoG[8]
-G = data.frame(importG$sweG, centreD, elevation, aspect, slope, northness, profileCurve, tangentCurve, Sx)
+    curvature = importG$topoG[6]
+    Sx = importG$topoG[7]
+G = data.frame(importG$sweG,  elevation, centreD, aspect, slope, northness, curvature, Sx)
 colnames(G) = params
 
-rm(aspect, elevation, northness, profileCurve, slope, tangentCurve, Sx, centreD, params, importG)
+rm(aspect, elevation, northness, curvature, slope, Sx, centreD, params, importG)
   
 
 ####### Glacier BMS ##########

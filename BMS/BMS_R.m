@@ -1,4 +1,4 @@
-function [ BMSbest, residuals ] = BMS_R( SWE, topoSampled )
+function [ BMSbest, residuals ] = BMS_R( swe, topoSampled )
 % Bayesian model averaging with cross validation 
 %       This script uses a BMA R package to compute coefficients for the 
 %       linear regression with cross validation for some number
@@ -15,15 +15,15 @@ function [ BMSbest, residuals ] = BMS_R( SWE, topoSampled )
 %                           Updated: December 2016
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-for g = 1:length(SWE) %For all glaciers
+for g = 1:3 %For all glaciers
 %% Make Cal Val data sets
  %Initialize
     GG = {'G4','G2','G13'};
-    glacier = char(GG(g));
-    y = SWE(g).swe;
+    glacier = char(GG(g)); display(['glacier = ', glacier]);
+    y = swe.(glacier)(:,1);
 
  %Choose number of runs
-runs = 10;        
+runs = 1000;        
 
  %Cross validation random number matrix
 [~, cal_ind] = sort(rand(runs,length(y)),2);      %create matrix of random numbers
@@ -34,7 +34,7 @@ for i = 1:runs                                  %for number of runs
         cal_ind_temp    = cal_ind(i,:);         %get random numbers for choosing obs
         val_ind         = setdiff(1:length(y),cal_ind_temp); %get random numbers for validating
 
-        sweG = SWE(g).swe(cal_ind_temp);        %select calibration swe values
+        sweG = y(cal_ind_temp);        %select calibration swe values
 
          %Select calibration and validation topographic data
             heads           = fieldnames(topoSampled.G4);   %get parameter names
@@ -62,41 +62,66 @@ for i = 1:runs                                  %for number of runs
          %RMSE
         y_regress = sum(Vtopo.(glacier).*repmat(BMSg{i,g}{1:end-1,1}',...
                        length(Vtopo.(glacier)),1),2) + BMSg{i,g}{end,1};  %modelled values   
-        rmse.(glacier)(i,1) = sqrt(sum((SWE(g).swe(val_ind)-...
+        rmse.(glacier)(i,1) = sqrt(sum((y(val_ind)-...
                         y_regress).^2)/numel(y_regress)); %RMSE between modelled and observed
 
         %BMS coeffs with lowest RMSE
         rmse_min.(glacier)    = rmse.(glacier)==min(rmse.(glacier));  %min RMSE value
-        BMSbest.(glacier)             = [BMSg{rmse_min.(glacier),g}(:,1); ... %coeffs for that run
+        BMSbest.(glacier)     = [BMSg{rmse_min.(glacier),g}(:,1); ... %coeffs for that run
                 table(min(rmse.(glacier)),'VariableNames',{'Coefficient'},'RowNames',{'rmse'})];         
 end    
    
 %% Calculate % variance explained by each variable
 
 beta    = BMSbest.(glacier).Properties.RowNames(1:end-2);   %names of params
-SSt     = sumsqr(y-mean(y));                %total sum of squares
 
-Pvar = table(zeros(length(beta),1),'RowNames',beta);        %initalize
-Pvar.Properties.VariableNames = {'PercentVarExplained'};
-for i = 1:length(beta)                      %only coeffs, no intercept
-    rowname         = char(beta(i));        %coeff name
-    Xfit            = BMSbest.(glacier){end-1,1} + ...
-                        BMSbest.(glacier){i,1}*topoSampled.(glacier).(rowname); %topo params times their coeffs
-    SSr             = sumsqr(Xfit-mean(y)); %residual sum of squares
-    Pvar{i,1}       = SSr/SSt*100;          %percent var exmaplined
-end
+%--------Semi-partial (Part) correlation squared
+    %Code adapted from "ppcor: An R Package for a Fast Calculation to  
+    %       Semi-partial Correlation Coefficients" Kim 2015
+semiR = table(zeros(length(beta),1),'RowNames',beta);    %initalize
+semiR.Properties.VariableNames = {'SemiR2'};
 
-Pvar = [Pvar; table([0; 0], 'RowNames',BMSbest.(glacier).Properties.RowNames(end-1:end),...
-                            'VariableNames',{'PercentVarExplained'})];
+    M = struct2table(topoSampled.(glacier));
+cx = cov([y,M{:,:}]);   %Covariance matrix of data
+dx = inv(cx);           %Inverse covariance matrix
+pc = -corrcov(dx);      %Convert correlations to covariance
+    n = size(pc,1);     pc(1:(n+1):end) = 1; %Set diagonal elements to 1
+
+kk  = pc./repmat(sqrt(diag(cx)),1,n)./...   %Semi-partial correlation (Eq. 2.6) 
+    sqrt(abs(repmat(diag(dx),1,n)-((dx.^2).'./repmat(diag(dx),1,n)).'));
+kk(1:(n+1):end) = 1;    %Set diagonal elements to 1
+kk = kk.^2;             %Square correlations
+
+semiR{:,1} = kk(1,2:end)';  %Assign to table
+    %Alternative method = calculate residuals of var of interest with other
+    %vars and then correlate residuals with y {res = fitlm([deg',disp'],BC); 
+    %corr(hl',res.Residuals.Raw)}
+
+%--------Univariate R-squared
+uniR = table(zeros(length(beta),1),'RowNames',beta);    %initalize
+uniR.Properties.VariableNames = {'UnivarR2'};
+
+uniR{:,1}   = corr(M{:,:},y).^2;      %Squared raw correlation between
+                                           %regressors and y data
+
+ %Add to final table
+Pvar = [semiR, uniR];        
+Pvar = [Pvar; table([0; 0], [0; 0], 'RowNames',BMSbest.(glacier).Properties.RowNames(end-1:end),...
+                            'VariableNames',Pvar.Properties.VariableNames)];
 BMSbest.(glacier) = [BMSbest.(glacier), Pvar];              %add to final table
+BMSbest.(glacier) = [BMSbest.(glacier); table(0,0,0, 'RowNames',{'R2'},...
+                            'VariableNames',BMSbest.(glacier).Properties.VariableNames)];
 
 %% Residuals
  %Predict all data at sampling locations
-X1 = struct2table(topoSampled.(glacier));   %topo data
-y_regress = sum(X1{:,:}.*...                %modelled swe
-    repmat(BMSbest.(glacier){1:end-2,1}',height(X1),1),2) + BMSbest.(glacier){end-1,1};      %predict validation data
+y_regress = sum(M{:,:}.*...                %modelled swe
+    repmat(BMSbest.(glacier){1:end-3,1}',height(M),1),2) + BMSbest.(glacier){end-2,1};      %predict validation data
 
  %Residual
 residuals.(glacier) = y-y_regress;
+
+ %R2 of fit
+BMSbest.(glacier){end,2} = corr(y_regress,y)^2;                        
+
 end
 

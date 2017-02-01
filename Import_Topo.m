@@ -54,7 +54,7 @@ for i = 1:length(v)/3
 end
   
         clear aspect* elev* north* curva* slope* Sx* files A i param v glacier ans Index*
-
+        
 %% Import Sampled Topo Params
 
 %Import topos
@@ -151,7 +151,6 @@ if options.ObsPerCell==2
 
     div = [1, length(SWE(1).swe); length(SWE(1).swe)+1, length(SWE(1).swe)+length(SWE(2).swe);...
             length(SWE(1).swe)+length(SWE(2).swe)+1, length(SWE(1).swe)+length(SWE(2).swe)+length(SWE(3).swe)];
-    std_cell = [];
 
     for g = 1:3
        glacier  = char(options.glacier(g));
@@ -175,10 +174,7 @@ if options.ObsPerCell==2
     end
 
 end
-        
-    
-    
-    
+        clear A1 data curvature div f fields glacier g i I ind obspercell_temp param T T1 same*
     
 %% Standardizing variables
 

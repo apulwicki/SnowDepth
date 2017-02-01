@@ -3,7 +3,7 @@
 % measurements along transects
 %%%%%%%%%%%%%%%%%%
 
-load('TopoBMS_MLR.mat','topo*')
+load('TopoSWE.mat')
 %% MLR - Topo Regression
 
 % %remove aspect
@@ -13,26 +13,34 @@ load('TopoBMS_MLR.mat','topo*')
 %    topo_sampled.(name) = rmfield(topo_sampled.(name),'aspect');
 % end
 
-for t = 8%2:9
-run OPTIONS.m
-options.DensitySWE  = t;
-options.ZZ          = 2; %exclude zigzags
-run MAIN
-
+for t = 2:9
     for i = 1:3
-        y       = SWE(i).swe;
         glacier = char(options.glacier(i)); 
+        swe       = sweOPT(t).(glacier)(:,1);
             display(['option = ',num2str(t), ', glacier = ',glacier]);
         X       = topo_sampled.(glacier);
 
-        [MLR(t).(glacier), residualsMLR(t).(glacier)] = MLRcalval(y, X);
+        [MLR(t).(glacier), residualsMLR(t).(glacier)] = MLRcalval(swe, X);
         MLR(t).(glacier).Properties.VariableNames = {['MLRCoefficient_', num2str(t)],...
                                                      ['MLRsemiR2_', num2str(t)],...
                                                      ['MLRunivarR2_', num2str(t)]};
     end
-display('Done');
 end
-        clear best i name X y t glacier
+
+for g = 1:3
+    glacier = char(options.glacier(g)); 
+        for i = 2:9
+        stackMLR(:,:,i-1) = MLR(i).(glacier){:,:}; end
+        meanMLR = mean(stackMLR, 3);
+
+MLR(10).(glacier) = table(meanMLR(:,1),meanMLR(:,2),meanMLR(:,3),...
+                    'RowNames',MLR(9).G4.Properties.RowNames,...
+                    'VariableNames',{'MLRmeanCoeff','MLRmeanSemiR2','MLRmeanUniR2'});
+end
+
+display('Done');
+
+        clear best i name X y t glacier stackMLR meanMLR g
         
 %% Export all values
 G4_mlrDensity = []; G2_mlrDensity = []; G13_mlrDensity = [];
@@ -58,7 +66,7 @@ clear A box centreline d distance f* G* h i min_dist NoZZ param* RGB X1 Y1
 %% ANOVA between topographic params
 
 for i = 1:3
-    y  = SWE(i).swe;
+    swe  = SWE(i).swe;
     name    = ['G', num2str(glacier(i))];
     topo    = [aspect.(name); northness.(name); profileCurve.(name); ...
                 tangentCurve.(name); slope.(name); elevation.(name); Sx.(name)];
@@ -102,24 +110,25 @@ end
 %% BMS
 
 for t = 2:9
-    run OPTIONS
-    options.DensitySWE  = t;
-    options.ZZ          = 2; %exclude zigzags
-    run MAIN
-    display(['Option ', num2str(t)]);
+    swe       = sweOPT(t);
+        display(['option = ',num2str(t)]);
+
+    cd BMS
+    [BMSinit, BMSres] = BMS_R(swe, topo_sampled);
+    cd ..
+    
 for g = 1:3
     glacier = char(options.glacier(g));
-    
-    cd BMS
-    [BMSinit, BMSres] = BMS_R(SWE, topo_sampled);
-    cd ..
-BMS(t).(glacier)     = BMSinit.(glacier);   
-BMS(t).(glacier).Properties.VariableNames = {['BMSCoefficient', num2str(t)],['BMSPercentVarExplaned', num2str(t)]};
-
+BMS(t).(glacier) = BMSinit.(glacier);   
+BMS(t).(glacier).Properties.VariableNames = {['BMSCoefficient_', num2str(t)],...
+                                             ['BMSsemiR2_', num2str(t)],...
+                                             ['BMSunivarR2_', num2str(t)]};
 residualsBMS(t).(glacier) = BMSres.(glacier);
 end
 end
-    clear BMSinit BMSres t g glacier
+display('Done');
+
+    clear BMSinit BMSres t g glacier swe
 
 
 %% Predicting
