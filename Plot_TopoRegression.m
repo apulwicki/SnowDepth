@@ -46,16 +46,19 @@ print([options.path1, filename],'-dpng'); print([options.path2, filename],'-dpng
 % clf
 % end
     clear b coeffs dim f fig filename g glacier i line option p r X yModel yObserved
-%% Plots - BMS Box and whisker for coeffs from density options
+%% Plots - Box and whisker for coeffs/semi partial from density options
 clf
 
+%val = 1; Lval = 'coeff';  %coeff value
+ val = 2; Lval = 'semiR2'; %semi-partial correlation
+
 %Rearrange to compare density options
-params = data(2).G4.Properties.RowNames(1:end-2);
+params = data(2).G4.Properties.RowNames(1:end-3);
 box.G4 = []; box.G2 = []; box.G13 = [];
 for i = 2:9
-    box.G4  = [box.G4;  table2array(data(i).G4(1:end-2,2))'];
-    box.G2  = [box.G2;  table2array(data(i).G2(1:end-2,2))'];
-    box.G13 = [box.G13; table2array(data(i).G13(1:end-2,2))'];
+    box.G4  = [box.G4;  table2array(data(i).G4(1:end-3,val))'];
+    box.G2  = [box.G2;  table2array(data(i).G2(1:end-3,val))'];
+    box.G13 = [box.G13; table2array(data(i).G13(1:end-3,val))'];
 end
 
 % box.G4 = log(box.G4); box.G2 = log(box.G2); box.G13 = log(box.G13);
@@ -68,19 +71,23 @@ aboxplot(h,'labels',options.topoVars, ...
     'OutlierMarkerSize',        10,...
     'OutlierMarkerEdgeColor',   [0 0 0]); % Advanced box plot
         legend('Glacier 4','Glacier 2','Glacier 13'); % Add a legend
-        ylabel('Variance Explained (%)'); hold on 
+        
+        if val==1
+            ylabel('Regression coefficient'); hold on 
+            line(xlim,[0 0],'Color',[0 0 0],'LineStyle','--','LineWidth', 0.5)
+        elseif val==2
+            ylabel('Semi-partial R^2'); hold on; end 
 
         for i = 1:7
-        line([i+0.5 i+0.5],[0 70],'Color',[0 0 0],'LineStyle','--','LineWidth', 0.5)
+        line([i+0.5 i+0.5],ylim,'Color',[0 0 0],'LineStyle','--','LineWidth', 0.5)
         end
 
 
         fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',22) 
         fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 13 10];
 
-filename = [type,'Coeffs_DensityOpts'];
-print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
-    clear box fig filename h i params
+saveFIG([type,Lval,'_DensityOpts'])
+     clear box fig filename h i params
 %% Plots - fit for all SWE options
 clf
 R2value = [];
@@ -93,13 +100,13 @@ for i = 1:3
     name	= char(options.glacier(i));
     y       = SWE(i).swe;
     X       = topo_sampled.(name);
-        params = data(option).(name).Properties.RowNames(1:end-2); 
+        params = data(option).(name).Properties.RowNames(1:end-3); 
         for j = 1:length(params)
             field       = char(params(j));
             X.(field)   = X.(field)*data(option).(name){j,1};
         end
 	X       = struct2table(X);
-    X       = sum(X{:,:},2)+data(option).(name){end-1,1};
+    X       = sum(X{:,:},2)+data(option).(name){end-2,1};
 
     subplot(1,3,i)
     axis([0 1.2 0 1.2]);    line = refline(1,0);    line.Color = 'k'; line.LineStyle = '--'; hold on
@@ -258,4 +265,30 @@ print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],
 
     clear boxtemp fig filename h i II params g glacier
     
+
+%% Stats for predicted SWE
+
+% method = 'BMS';
+method = 'MLR';
+
+
+for g = 1:3
+    glacier = char(options.glacier(g));
+     display([glacier,' ', num2str(round(nanmean(nanmean(stackSWE.(method).(glacier)(:),3)),2)),' ',...
+                num2str(round(nanmin(nanmin(stackSWE.(method).(glacier)(:),[],3)),2)),' ',...
+                num2str(round(nanmax(nanmax(stackSWE.(method).(glacier)(:),[],3)),2))])
+end    
+
+clf
+ %Boxplot
+    T = [stackSWE.(method).G4(:); stackSWE.(method).G2(:); stackSWE.(method).G13(:)];
+    G = [repmat('G04',length(stackSWE.(method).G4(:)),1); ...
+         repmat('G02',length(stackSWE.(method).G2(:)),1);...
+         repmat('G13',length(stackSWE.(method).G13(:)),1)];
+boxplot(T,G,'Labels',{'Glacier 4','Glacier 2','Glacier 13'})
+    ylabel('SWE (m w.e)')
+    fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18)
+    saveFIG(['ModelledSWE_box_',method])
+    
+
 

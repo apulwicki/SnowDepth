@@ -126,7 +126,21 @@ BMS(t).(glacier).Properties.VariableNames = {['BMSCoefficient_', num2str(t)],...
 residualsBMS(t).(glacier) = BMSres.(glacier);
 end
 end
+
+for g = 1:3
+    glacier = char(options.glacier(g)); 
+        for i = 2:9
+        stackMLR(:,:,i-1) = BMS(i).(glacier){:,:}; end
+        meanMLR = mean(stackMLR, 3);
+
+BMS(10).(glacier) = table(meanMLR(:,1),meanMLR(:,2),meanMLR(:,3),...
+                    'RowNames',BMS(9).G4.Properties.RowNames,...
+                    'VariableNames',{'BMSmeanCoeff','BMSmeanSemiR2','BMSmeanUniR2'});
+end
+
 display('Done');
+
+        clear best i name X y t glacier stackMLR meanMLR g
 
     clear BMSinit BMSres t g glacier swe
 
@@ -135,11 +149,11 @@ display('Done');
 
 for t = 2:9
     %check coeff order - MLR
-    mlrCoeff = MLR(t).G4.Properties.RowNames(1:end-2);   topoCoeff = fieldnames(topo_full_ns.G4);
+    mlrCoeff = MLR(t).G4.Properties.RowNames(1:end-3);   topoCoeff = fieldnames(topo_full_ns.G4);
     if ~isequal(mlrCoeff, topoCoeff)
         disp('Different order of coefficients between MLR and topo'); return; end
     %check coeff order - BMS
-    bmaCoeff = BMS(t).G4.Properties.RowNames(1:end-2);   topoCoeff = fieldnames(topo_full_ns.G4);
+    bmaCoeff = BMS(t).G4.Properties.RowNames(1:end-3);   topoCoeff = fieldnames(topo_full_ns.G4);
     if ~isequal(bmaCoeff, topoCoeff)
         disp('Different order of coefficients between BMS and topo'); return; end
     
@@ -147,7 +161,7 @@ for t = 2:9
     glacier = char(options.glacier(g));
         %MLR
          %Intercept
-        sweMLR(t).(glacier) = repmat(MLR(t).(glacier){end-1,1}, size(topo_full.(glacier).centreD));
+        sweMLR(t).(glacier) = repmat(MLR(t).(glacier){end-2,1}, size(topo_full.(glacier).centreD));
          %multiply coeffs and add them
         for n = 1:length(mlrCoeff)
             param               = char(mlrCoeff(n));
@@ -159,7 +173,7 @@ for t = 2:9
         
         %BMS
          %Intercept
-        sweBMS(t).(glacier) = repmat(BMS(t).(glacier){end-1,1}, size(topo_full.(glacier).centreD));
+        sweBMS(t).(glacier) = repmat(BMS(t).(glacier){end-2,1}, size(topo_full.(glacier).centreD));
          %multiply coeffs and add them
         for n = 1:length(bmaCoeff)
             param               = char(bmaCoeff(n));
@@ -173,6 +187,17 @@ end
 
     clear param sweT *Coeff glacier g n t
 
+for g = 1:3
+    glacier = char(options.glacier(g));
+    
+    for i = 2:9
+    stackSWE.MLR.(glacier)(:,:,i-1)   = sweMLR(i).(glacier);
+    stackSWE.BMS.(glacier)(:,:,i-1)   = sweBMS(i).(glacier);
+    end
+
+end    
+    clear g i glacier
+    
 %% Return min and max regression coeffs
 
 %Rearrange to compare density options
@@ -216,40 +241,66 @@ for g = 1:3
          %Intercept
         sweMEAN.(glacier) = repmat(RegressC.(glacier){end,1}, size(topo_full.(glacier).centreD));
          %multiply coeffs and add them
-        coeff = RegressC.(glacier).Properties.RowNames(1:end-1);
+        coeff = RegressC.(glacier).Properties.RowNames(1:end-2);
         for n = 1:length(coeff)
             param               = char(coeff(n));  
             sweT                = topo_full.(glacier).(param)*RegressC.(glacier){n,1};
             sweMEAN.(glacier)   = sweMEAN.(glacier) + sweT;
         end
         
+            sweMEAN.(glacier)(sweMEAN.(glacier)<0) = 0;
+
+        
         %MIN
          %Intercept
         sweMIN.(glacier) = repmat(RegressC.(glacier){end,2}, size(topo_full.(glacier).centreD));
          %multiply coeffs and add them
-        coeff = RegressC.(glacier).Properties.RowNames(1:end-1);
+        coeff = RegressC.(glacier).Properties.RowNames(1:end-2);
         for n = 1:length(coeff)
             param               = char(coeff(n));  
             sweT                = topo_full.(glacier).(param)*RegressC.(glacier){n,2};
             sweMIN.(glacier)    = sweMIN.(glacier) + sweT;
         end
-        
+            sweMIN.(glacier)(sweMIN.(glacier)<0) = 0;
+
         %MAX
          %Intercept
         sweMAX.(glacier) = repmat(RegressC.(glacier){end,3}, size(topo_full.(glacier).centreD));
          %multiply coeffs and add them
-        coeff = RegressC.(glacier).Properties.RowNames(1:end-1);
+        coeff = RegressC.(glacier).Properties.RowNames(1:end-2);
         for n = 1:length(coeff)
             param               = char(coeff(n));  
             sweT                = topo_full.(glacier).(param)*RegressC.(glacier){n,3};
             sweMAX.(glacier)    = sweMAX.(glacier) + sweT;
         end
+            sweMAX.(glacier)(sweMAX.(glacier)<0) = 0;
         
         %RANGE
         sweRANGE.(glacier)      = sweMAX.(glacier)-sweMIN.(glacier);
 end
 
-    clear param sweT *Coeff glacier g n t
+    clear param sweT *Coeff glacier g n t i coeff 
+
+%% Anova between MLR and BMS
+
+ %Predicted SWE
+for g = 1:3
+    glacier = char(options.glacier(g));
+    for r = 2:9
+    p(r,g) = anova1([sweBMS(r).(glacier)(:), sweMLR(r).(glacier)(:)],[],'off');   
+    end
+end
+
+ %Coeffs with density options
+for g = 1:3
+    glacier = char(options.glacier(g));
+    for r = 1:length(boxMLR.(glacier){:,:})
+    yBMS = boxBMS.(glacier){r,:}'; 
+    yMLR = boxMLR.(glacier){r,:}'; 
+    p(r,g) = anova1([yMLR,yBMS],[],'off');   
+    end
+end    
+
 
 %% Geotiff histogram
 maxH = 30;

@@ -50,7 +50,7 @@ for opt = 2:9
     topoParam.G13 = modelled(opt).G13;
     topoParam.rig = rig;
 
-    PlotTopoParameter(topoParam, 'modelledSWE', 'SWE (m w.e.)', SWE, 'colour')
+    PlotTopoParameter(topoParam, 'modelledSWE', 'SWE (m w.e.)', SWE, 'sweONswe')
 
     %Integrated specific winter balance
        for g = 1:3; glacier = char(options.glacier(g)); 
@@ -62,15 +62,14 @@ for opt = 2:9
     annotation('textbox',[.75 .53 .1 .1],'String',[num2str(ISWbalance(opt).G13, '%.2f'),' m w.e.'],'EdgeColor','none')    
     
     fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18)
-    filename = [type,'map_Modelled_Observed_Opt',num2str(opt-1)];
-        print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
+%     saveFIG([type,'map_Modelled_Observed',num2str(opt-1)])
 end
     clear filename modelled opt type
 %% Modelled SWE Difference as %
-modelled = sweMLR;
-type = 'MLR';
-% modelled = sweBMS;
-% type = 'BMS';
+% modelled = sweMLR;
+% type = 'MLR';
+modelled = sweBMS;
+type = 'BMS';
 
     %Differencing modelled SWE
 for g = 1:3
@@ -86,28 +85,23 @@ maxSWE.(glacier)  = nanmax(stackSWE.(glacier),[],3);
     minSWE.(glacier)(hereNan) = NaN;    maxSWE.(glacier)(hereNan) = NaN;   meanSWE.(glacier)(hereNan) = NaN; 
 
 diffSWE.(glacier) = maxSWE.(glacier)-minSWE.(glacier);
-diffSWE_p.(glacier) = (maxSWE.(glacier)-minSWE.(glacier))./maxSWE.(glacier)*100;
-
-weirdsmall = diffSWE_p.(glacier)<10;
-diffSWE_p.(glacier)(weirdsmall) = 10;
-
-weirdsmall = diffSWE_p.(glacier)>100;
-diffSWE_p.(glacier)(weirdsmall) = 100;
-
-diffSWE_p.(glacier)(all(stackSWE.(glacier)==0,3)) = 0;
+diffSWE_p.(glacier) = (maxSWE.(glacier)-minSWE.(glacier))./minSWE.(glacier)*100;
+    diffSWE_p.(glacier)(sweMIN.(glacier)==0) = 0;    
+    diffSWE_p.(glacier)(diffSWE_p.(glacier)>100) = NaN;
 
 end
+diffSWE.rig = rig;   diffSWE_p.rig = rig;   
 
-diffSWE.rig = rig;    diffSWE_p.rig = rig;
-
-
-% PlotTopoParameter(diffSWE, 'modelledSWE', 'SWE (m w.e.)', SWE, 'black')
-%     filename = [type,'_SWEdifferenceMap'];
-%     print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
+PlotTopoParameter(diffSWE, 'modelledSWE', 'SWE (m w.e.)', SWE, 'black')
+   saveFIG([type,'_SWEdifferenceMap'])
 PlotTopoParameter(diffSWE_p, 'modelledSWE', {'Predicted SWE range as ','percent of maximum SWE (%)'}, SWE, 'black')
-    filename = [type,'_SWEdifferenceMap_percent'];
-    print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
-     
+    saveFIG([type,'_SWEdifferenceMap_percent'])
+
+display(char(type))
+for g = 1:3
+    glacier = char(options.glacier(g));
+    display([glacier,' ', num2str(round(nanmean(diffSWE_p.(glacier)(:))))])
+end
     
     
     clear g* i maxSWE minSWE filename modelled  type diffSWE*
