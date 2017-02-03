@@ -16,7 +16,7 @@ if fixed_color == 0
     maxSWE  = nanmax([SWE(1).swe(:);SWE(2).swe(:);SWE(3).swe(:)]);
 elseif fixed_color == 1
     x_min = 0;      minSWE  = x_min;
-    x_max = 1.2;    maxSWE  = x_max;
+    x_max = 1.4;    maxSWE  = x_max;
 end
 
 
@@ -101,7 +101,7 @@ end
 
 %Flow direction
 if ~all(isnan(topoParam.(name)(:)))
-    annotation('arrow',[.16 .20],[.32 .22]) %G4
+    annotation('arrow',[.15 .19],[.32 .22]) %G4
     annotation('arrow',[.39 .31],[.55 .61]) %G2
     annotation('arrow',[.81 .74],[.47 .59]) %G13
 elseif all(isnan(topoParam.(name)(:)))

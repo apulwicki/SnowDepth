@@ -1,27 +1,27 @@
 %% %%%%%%%%%%%%%%%%%%%%% BMS and MLR Plots %%%%%%%%%%%%%%%%%%%%%
 % 
-% data            = BMS;
-% residualsdata   = residualsBMS;
-% type            = 'BMS';
-
-data            = MLR;
-residualsdata   = residualsMLR;
-type            = 'MLR';
+data            = BMS;
+residualsdata   = residualsBMS;
+type            = 'BMS';
+% 
+% data            = MLR;
+% residualsdata   = residualsMLR;
+% type            = 'MLR';
 
 %% Plotting - fit to observed
 
 % Actual vs fitted data  
-% for r = 2:9
-option = 8;
-r = 8;
+ for r = 2:9
+ option = r;
+%r = 8;
 
 figure(1)
 for i = 1:3
     glacier     = char(options.glacier(i));
     yObserved   = SWE(i).swe;
     X           = struct2table(topo_sampled.(glacier));	X = X{:,:};
-    coeffs      = repmat(data(option).(glacier){1:end-2,1}',length(X),1);   
-    yModel      = sum(X.*coeffs,2) + data(option).(glacier){end-1,1};      
+    coeffs      = repmat(data(option).(glacier){1:end-3,1}',length(X),1);   
+    yModel      = sum(X.*coeffs,2) + data(option).(glacier){end-2,1};      
   
     subplot(1,3,i)
     axis([0 1.2 0 1.2]);    line = refline(1,0);    line.Color = 'k'; line.LineStyle = '--'; hold on
@@ -40,17 +40,16 @@ end
 
     fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',13)
     fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 12 4];
-filename = [type,'fit_opt',num2str(r)];
-print([options.path1, filename],'-dpng'); print([options.path2, filename],'-dpng')
+saveFIG([type,'fit_opt',num2str(r)])
 
-% clf
-% end
+ clf
+ end
     clear b coeffs dim f fig filename g glacier i line option p r X yModel yObserved
 %% Plots - Box and whisker for coeffs/semi partial from density options
 clf
 
-%val = 1; Lval = 'coeff';  %coeff value
- val = 2; Lval = 'semiR2'; %semi-partial correlation
+val = 1; Lval = 'coeff';  %coeff value
+%  val = 2; Lval = 'semiR2'; %semi-partial correlation
 
 %Rearrange to compare density options
 params = data(2).G4.Properties.RowNames(1:end-3);
@@ -191,8 +190,8 @@ figure
     for i = 1:3
         name = char(options.glacier(i)); 
         a(i) = subplot(1,3,i);
-            h(i).f = histogram(topo_full_ns.(name).(param)(:),25); hold on
-            h(i).s = histogram(topo_sampled_ns.(name).(param),25); 
+            h(i).f = histogram(topo_full_ns.(name).(param)(:),25,'FaceColor','w'); hold on
+            h(i).s = histogram(topo_sampled_ns.(name).(param),25,'FaceColor','k'); 
             
             hist_stats_full.(name)(r,:) = [nanmean(topo_full_ns.(name).(param)(:)),...
                                             nanstd(topo_full_ns.(name).(param)(:)),...
@@ -213,15 +212,14 @@ figure
     linkaxes(flip(a));
         fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',13)
         fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 14 4];
-filename = ['SampledRangeTopo_',header{r}];
-print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
+% saveFIG(['SampledRangeTopo_',header{r}])
 end 
 
     close all
     clear v i r name header glacier N* a filename edges* param fig units dim h 
     
 %% Plotting - MLR and BMS coeffs
-II = 2; %Include intercept =1, exlude =2
+II = 3; %Include intercept =2, exlude = 3
 %Rearrange to compare density options
 params = BMS(2).G4.Properties.RowNames(1:end-II);
 for g = 1:3
@@ -236,39 +234,39 @@ end
 end        
 
 clf
+figure(1)
+fig=gcf; fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 14 4];
 for g = 1:3
     glacier = char(options.glacier(g));
-subplot(1,3,g)
+s(1) = subplot(1,3,g)
 aboxplot(h.(glacier),'labels',options.topoVars, ...
     'Colormap',                 [144 195 212; 245 177 29]/255,...
     'OutlierMarkerSize',        10,...
     'OutlierMarkerEdgeColor',   [0 0 0]); % Advanced box plot
-        legend('MLR','BMA'); % Add a legend
         ylabel('Coefficient Value'); hold on 
-    
-        for i = 1:7
-        line([i+0.5 i+0.5],ylim,'Color',[0 0 0],'LineStyle','--','LineWidth', 0.5)
+        legend('MLR','BMA', 'Location','north'); % Add a legend
+        
+        YY = ylim
+        for i = 1:6
+                ylim_temp = YY;
+        line([i+0.5 i+0.5],[ylim_temp(1,1)-0.01 ylim_temp(1,2)+0.01],'Color',[0 0 0],'LineStyle','--','LineWidth', 0.5)
         line(xlim,[0 0],'Color',[0 0 0],'LineStyle','--','LineWidth', 0.5)
         end
 
 end
 
-        annotation('textbox',[0.22 0.8 0.2 0.2],'String', 'G4', 'EdgeColor','none')
-        annotation('textbox',[0.5 0.8 0.2 0.2],'String', 'G2', 'EdgeColor','none')
-        annotation('textbox',[0.78 0.8 0.2 0.2],'String', 'G13', 'EdgeColor','none')
-
-
-        fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',15)
-        fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 14 4];
-filename = 'CoeffBoxplot_BMSMLRcompare';
-print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')    
+        annotation('textbox',[0.21 0.8 0.2 0.2],'String', 'Glacier 4', 'EdgeColor','none')
+        annotation('textbox',[0.49 0.8 0.2 0.2],'String', 'Glacier 2', 'EdgeColor','none')
+        annotation('textbox',[0.76 0.8 0.2 0.2],'String', 'Glacier 13', 'EdgeColor','none')
+       set(findall(fig,'-property','FontSize'),'FontSize',15)
+saveFIG('CoeffBoxplot_BMSMLRcompare')    
 
     clear boxtemp fig filename h i II params g glacier
     
 
 %% Stats for predicted SWE
 
-% method = 'BMS';
+%  method = 'BMS';
 method = 'MLR';
 
 
@@ -286,7 +284,7 @@ clf
          repmat('G02',length(stackSWE.(method).G2(:)),1);...
          repmat('G13',length(stackSWE.(method).G13(:)),1)];
 boxplot(T,G,'Labels',{'Glacier 4','Glacier 2','Glacier 13'})
-    ylabel('SWE (m w.e)')
+    ylabel([{'SWE estimated with'},{[method,' coefficients (m w.e)']}])
     fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18)
     saveFIG(['ModelledSWE_box_',method])
     

@@ -89,12 +89,12 @@ X = struct2table(topo_sampled_ns.(glacier));
     pearson.(glacier)   = round(triu(pearson.(glacier)),2); 
     Ppearson.(glacier)  = round(triu(Ppearson.(glacier)),2);
     
-    pearsonT.(glacier)  = table(pearson.(glacier)(:,1),pearson.(glacier)(:,2),...
-                                pearson.(glacier)(:,3),pearson.(glacier)(:,4),...
-                                pearson.(glacier)(:,5),pearson.(glacier)(:,6),...
-                                pearson.(glacier)(:,7),pearson.(glacier)(:,8),...
-                            'RowNames', options.topoVars);
-    writetable(pearsonT.(glacier),['/home/glaciology1/Downloads/corr',glacier])
+%     pearsonT.(glacier)  = table(pearson.(glacier)(:,1),pearson.(glacier)(:,2),...
+%                                 pearson.(glacier)(:,3),pearson.(glacier)(:,4),...
+%                                 pearson.(glacier)(:,5),pearson.(glacier)(:,6),...
+%                                 pearson.(glacier)(:,7),pearson.(glacier)(:,8),...
+%                             'RowNames', options.topoVars);
+%     writetable(pearsonT.(glacier),['/home/glaciology1/Downloads/corr',glacier])
 end
     
 %Full topo
@@ -181,7 +181,7 @@ for t = 2:9
             sweBMS(t).(glacier) = sweBMS(t).(glacier) + sweT;
         end
          %Set min to 0
-        sweBMS(t).(glacier)(sweMLR(t).(glacier)<0) = 0;
+        sweBMS(t).(glacier)(sweBMS(t).(glacier)<0) = 0;
     end
 end
 
@@ -208,10 +208,10 @@ for g = 1:3
     boxALL.(glacier)    = [];
 for i = 2:9
         BMS(i).(glacier).Properties.VariableNames(1,1) = {['BMSOption', num2str(i-1)]};
-    boxBMS.(glacier)  = [boxBMS.(glacier),  BMS(i).(glacier)(1:end-2,1)];%,  MLR(i).G4(1:end-1,2)];
+    boxBMS.(glacier)  = [boxBMS.(glacier),  BMS(i).(glacier)(1:end-1,1)];%,  MLR(i).G4(1:end-1,2)];
     
         MLR(i).(glacier).Properties.VariableNames(1,1) = {['MLROption', num2str(i-1)]};
-    boxMLR.(glacier)  = [boxMLR.(glacier),    MLR(i).(glacier)(1:end-2,1)];
+    boxMLR.(glacier)  = [boxMLR.(glacier),    MLR(i).(glacier)(1:end-1,1)];
         
     boxALL.(glacier)    = [boxALL.(glacier),  BMS(i).(glacier)(1:end-1,1),  MLR(i).(glacier)(1:end-1,1)];
 
@@ -284,6 +284,7 @@ end
 %% Anova between MLR and BMS
 
  %Predicted SWE
+ clear p
 for g = 1:3
     glacier = char(options.glacier(g));
     for r = 2:9

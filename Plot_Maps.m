@@ -37,14 +37,14 @@ PlotTopoParameter(topoParam,param, 'SWE (m w.e.)', SWE, 'colour')
 end
 %% Modelled and observed SWE
 
-modelled = sweMLR;
-type     = 'MLR';
+% modelled = sweMLR;
+% type     = 'MLR';
 
-% modelled = sweBMS;
-% type     = 'BMS';
+modelled = sweBMS;
+type     = 'BMS';
 
-%opt      = 8;
-for opt = 2:9
+% opt      = 8;
+ for opt = 2:9
     topoParam.G4  = modelled(opt).G4;
     topoParam.G2  = modelled(opt).G2;
     topoParam.G13 = modelled(opt).G13;
@@ -62,9 +62,9 @@ for opt = 2:9
     annotation('textbox',[.75 .53 .1 .1],'String',[num2str(ISWbalance(opt).G13, '%.2f'),' m w.e.'],'EdgeColor','none')    
     
     fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18)
-%     saveFIG([type,'map_Modelled_Observed',num2str(opt-1)])
-end
-    clear filename modelled opt type
+     saveFIG([type,'map_Modelled_Observed',num2str(opt-1)])
+ end
+    clear filename modelled opt type fig glacier g 
 %% Modelled SWE Difference as %
 % modelled = sweMLR;
 % type = 'MLR';
@@ -85,12 +85,16 @@ maxSWE.(glacier)  = nanmax(stackSWE.(glacier),[],3);
     minSWE.(glacier)(hereNan) = NaN;    maxSWE.(glacier)(hereNan) = NaN;   meanSWE.(glacier)(hereNan) = NaN; 
 
 diffSWE.(glacier) = maxSWE.(glacier)-minSWE.(glacier);
+    diffSWE.(glacier) = [nan(2,size(diffSWE.(glacier),2));diffSWE.(glacier);nan(2,size(diffSWE.(glacier),2))];
+    diffSWE.(glacier) = [nan(size(diffSWE.(glacier),1),2),diffSWE.(glacier),nan(size(diffSWE.(glacier),1),2)];
 diffSWE_p.(glacier) = (maxSWE.(glacier)-minSWE.(glacier))./minSWE.(glacier)*100;
-    diffSWE_p.(glacier)(sweMIN.(glacier)==0) = 0;    
-    diffSWE_p.(glacier)(diffSWE_p.(glacier)>100) = NaN;
+    diffSWE_p.(glacier)(minSWE.(glacier)==0) = 0;    
+    diffSWE_p.(glacier)(diffSWE_p.(glacier)>70) = 70;
+    diffSWE_p.(glacier) = [nan(2,size(diffSWE_p.(glacier),2));diffSWE_p.(glacier);nan(2,size(diffSWE_p.(glacier),2))];
+    diffSWE_p.(glacier) = [nan(size(diffSWE_p.(glacier),1),2),diffSWE_p.(glacier),nan(size(diffSWE_p.(glacier),1),2)];
 
 end
-diffSWE.rig = rig;   diffSWE_p.rig = rig;   
+diffSWE.rig = rig;   diffSWE_p.rig = rig; 
 
 PlotTopoParameter(diffSWE, 'modelledSWE', 'SWE (m w.e.)', SWE, 'black')
    saveFIG([type,'_SWEdifferenceMap'])
