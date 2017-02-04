@@ -287,6 +287,5 @@ boxplot(T,G,'Labels',{'Glacier 4','Glacier 2','Glacier 13'})
     ylabel([{'SWE estimated with'},{[method,' coefficients (m w.e)']}])
     fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18)
     saveFIG(['ModelledSWE_box_',method])
-    
-
+   
 

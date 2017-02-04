@@ -233,3 +233,17 @@ end
 saveFIG('AllSWEopts_boxplot')
 
 clear text* fig filename cats swedata group g opt stats p t glacier
+
+
+%% Std in one DEM cell
+
+clf
+ %Boxplot
+    T = [SWE(1).cellstd; SWE(2).cellstd; SWE(3).cellstd];
+    G = [repmat('G04',length(SWE(1).cellstd),1); ...
+         repmat('G02',length(SWE(2).cellstd),1);...
+         repmat('G13',length(SWE(3).cellstd),1)];
+boxplot(T,G,'Labels',{'Glacier 4','Glacier 2','Glacier 13'})
+    ylabel([{'Standard deviation of SWE'},{'within DEM cell'}])
+    fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',16)
+     saveFIG('DEMcellSTD')
