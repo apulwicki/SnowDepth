@@ -266,8 +266,10 @@ saveFIG('CoeffBoxplot_BMSMLRcompare')
 
 %% Stats for predicted SWE
 
-%  method = 'BMS';
-method = 'MLR';
+ method = 'BMS';
+res = residualsBMS(8);
+% method = 'MLR';
+%res = residualsMLR;
 
 
 for g = 1:3
@@ -278,7 +280,7 @@ for g = 1:3
 end    
 
 clf
- %Boxplot
+ %Boxplot of estimated SWE
     T = [stackSWE.(method).G4(:); stackSWE.(method).G2(:); stackSWE.(method).G13(:)];
     G = [repmat('G04',length(stackSWE.(method).G4(:)),1); ...
          repmat('G02',length(stackSWE.(method).G2(:)),1);...
@@ -288,4 +290,13 @@ boxplot(T,G,'Labels',{'Glacier 4','Glacier 2','Glacier 13'})
     fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18)
     saveFIG(['ModelledSWE_box_',method])
    
-
+ %Boxplot of residuals
+    T = [res.G4(:); res.G2(:); res.G13(:)];
+    G = [repmat('G04',length(res.G4(:)),1); ...
+         repmat('G02',length(res.G2(:)),1);...
+         repmat('G13',length(res.G13(:)),1)];
+boxplot(T,G,'Labels',{'Glacier 4','Glacier 2','Glacier 13'})
+    ylabel('Residuals of S4 (m w.e.)')
+    fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18)
+%     saveFIG(['ModelledSWE_box_',method])
+   
