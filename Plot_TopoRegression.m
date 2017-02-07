@@ -1,5 +1,5 @@
 %% %%%%%%%%%%%%%%%%%%%%% BMS and MLR Plots %%%%%%%%%%%%%%%%%%%%%
-% 
+% % % 
 data            = BMS;
 residualsdata   = residualsBMS;
 type            = 'BMS';
@@ -11,9 +11,9 @@ type            = 'BMS';
 %% Plotting - fit to observed
 
 % Actual vs fitted data  
- for r = 2:9
+%  for r = 2:9
+r = 8;
  option = r;
-%r = 8;
 
 figure(1)
 for i = 1:3
@@ -43,7 +43,7 @@ end
 saveFIG([type,'fit_opt',num2str(r)])
 
  clf
- end
+%  end
     clear b coeffs dim f fig filename g glacier i line option p r X yModel yObserved
 %% Plots - Box and whisker for coeffs/semi partial from density options
 clf
@@ -124,8 +124,7 @@ for i = 1:3
     
     fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',13)
     fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 12 4];
-filename = [type,'fit_allLines'];
-print([options.path1, filename],'-dpng'); print([options.path2, filename],'-dpng')
+saveFIG([type,'fit_allLines'])
 
 end
         clear b p R2value dim f g j r fig filename h i params X y
@@ -266,10 +265,10 @@ saveFIG('CoeffBoxplot_BMSMLRcompare')
 
 %% Stats for predicted SWE
 
- method = 'BMS';
-res = residualsBMS(8);
-% method = 'MLR';
-%res = residualsMLR;
+%  method = 'BMS';
+% res = residualsBMS(8);
+method = 'MLR';
+res = residualsMLR(8);
 
 
 for g = 1:3
@@ -281,10 +280,12 @@ end
 
 clf
  %Boxplot of estimated SWE
-    T = [stackSWE.(method).G4(:); stackSWE.(method).G2(:); stackSWE.(method).G13(:)];
-    G = [repmat('G04',length(stackSWE.(method).G4(:)),1); ...
-         repmat('G02',length(stackSWE.(method).G2(:)),1);...
-         repmat('G13',length(stackSWE.(method).G13(:)),1)];
+    T = [reshape(stackSWE.(method).G4(:,:,7),[],1);...
+        reshape(stackSWE.(method).G2(:,:,7),[],1);...
+        reshape(stackSWE.(method).G13(:,:,7),[],1)];
+    G = [repmat('G04',length(reshape(stackSWE.(method).G4(:,:,7),[],1)),1); ...
+         repmat('G02',length(reshape(stackSWE.(method).G2(:,:,7),[],1)),1);...
+         repmat('G13',length(reshape(stackSWE.(method).G13(:,:,7),[],1)),1)];
 boxplot(T,G,'Labels',{'Glacier 4','Glacier 2','Glacier 13'})
     ylabel([{'SWE estimated with'},{[method,' coefficients (m w.e)']}])
     fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18)
@@ -296,7 +297,24 @@ boxplot(T,G,'Labels',{'Glacier 4','Glacier 2','Glacier 13'})
          repmat('G02',length(res.G2(:)),1);...
          repmat('G13',length(res.G13(:)),1)];
 boxplot(T,G,'Labels',{'Glacier 4','Glacier 2','Glacier 13'})
-    ylabel('Residuals of S4 (m w.e.)')
+    ylabel([method,' Residuals (m w.e.)'])
     fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18)
-%     saveFIG(['ModelledSWE_box_',method])
-   
+     saveFIG(['residuals_box_',method])
+ 
+%Map of residuals at sampling locations
+
+param = 'empty';
+for g = 1:3
+    glacier = char(options.glacier(g));
+topoParam.(glacier)  = NaN(size(topo_full_ns.(glacier).elevation));
+topoParam.rig = rig;
+
+resZ(g).swe = res.(glacier); 
+resZ(g).utm = SWE(g).utm;
+end
+
+figure(3)
+PlotTopoParameter(topoParam,param, 'BMS Residuals (m w.e.)', resZ, 'colour')
+    C = cbrewer('div', 'RdYlBu', 20, 'PCHIP');
+    colormap(flipud(C))
+        saveFIG(['residualsMap_',method])

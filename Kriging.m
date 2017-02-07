@@ -4,34 +4,23 @@
 
 %%
 clear
+close all
 load TopoBMS_MLR.mat
 
-%%******MAKE UTM COORDINATES MEAN FOR AVEREGD IN CELL!!*****
 
-%% Residuals at sampling locations
 
-param = 'empty';
-
-for g = 1:3
-    glacier = char(options.glacier(g));
-topoParam.(glacier)  = NaN(size(topo_full_ns.(glacier).elevation));
-topoParam.rig = rig;
-
-res(g).swe = residualsBMS(8).(glacier); 
-res(g).utm = SWE(g).utm;
-end
-
-PlotTopoParameter(topoParam,param, 'BMS Residuals (m w.e.)', res, 'colour')
-%      saveFIG('residualsMap')
-close all
 
 
 %% Variograms
+clear
+close all
+load TopoBMS_MLR.mat
+
 for g = 1:3
     glacier = char(options.glacier(g));
 
-x = SWE(g).utm(:,1)-min(SWE(g).utm(:,1));
-y = SWE(g).utm(:,2)-min(SWE(g).utm(:,2));
+x = SWE(g).utm(:,1);%-min(SWE(g).utm(:,1));
+y = SWE(g).utm(:,2);%-min(SWE(g).utm(:,2));
 z = residualsBMS(8).(glacier);
 %z = SWE(g).swe;
 
@@ -53,11 +42,11 @@ z = residualsBMS(8).(glacier);
 % Assign diagonal of D to value of NaN (to remove zeros)    
   D2 = D + D.*diag(x*NaN);  
   
-  lag = mean(min(D2))
+  lag = mean(min(D2));
   
 % Max lag: half max distance between points
   hmd = max(max(D))/2;           % Find max distance between points/2
-  max_lags = floor(hmd/lag)     % Calculate a number of lags
+  max_lags = floor(hmd/lag);     % Calculate a number of lags
   
 % Bin calculated distances as integers according to lag  
   all_lags = ceil(D/lag);
@@ -73,20 +62,21 @@ z = residualsBMS(8).(glacier);
   varz = var(z);
 
 % Plot semivariogram and variance of data 
-figure(1)
-subplot(1,3,g)
-plot(mean_lag,vario,'o','Markerfacecolor','b')
-  hold on
-  plot([0 max(mean_lag)],[varz varz],'--k')
-  grid on
-  ylim([0 1.1*max(vario)]);
-  xlabel('Lag')
-  ylabel('Semivariance')
-  title(glacier)
+% figure(1)
+% subplot(1,3,g)
+% plot(mean_lag,vario,'o','Markerfacecolor','b')
+%   hold on
+%   plot([0 max(mean_lag)],[varz varz],'--k')
+%   grid on
+%   ylim([0 1.05*max(vario)]);
+%   xlabel('Lag')
+%   ylabel('Semivariance')
+%   title(glacier)
+%       saveFIG('Variogram_BMSresiduals');
 
 
 
-%%
+% Kriging**
     glacier = char(options.glacier(g));  
 % Create lags vector for model that extends to max expt lag
   lags = [0:1:ceil(max(mean_lag))];
@@ -135,9 +125,10 @@ plot(mean_lag,vario,'o','Markerfacecolor','b')
   Winv = inv(W);
   
 % Construct regular grid over which interpolated values are required
-  H = max(max([x,y]));
-  xgrid = [0:40:H];
-  ygrid = [0:40:H];
+  H = size(topo_full.(glacier).elevation);
+  gridS = 40;
+  xgrid = [min(rig.(glacier)(:,1)):gridS:max(rig.(glacier)(:,1))];
+  ygrid = [min(rig.(glacier)(:,2)):gridS:max(rig.(glacier)(:,2))];
   
   [Xgrid,Ygrid] = meshgrid(xgrid,ygrid);
   
@@ -168,22 +159,29 @@ plot(mean_lag,vario,'o','Markerfacecolor','b')
   end
   
 % Reshape results and plot  
-  M  = length(xgrid);
-  Z  = reshape(Zvec,M,M);
-  S2 = reshape(S2vec,M,M);
+  Mx  = length(xgrid); My = length(ygrid);
+  Z  = reshape(Zvec,My,Mx); 
+        dataN = flipud(topo_full.(glacier).elevation);
+        sizeZ = size(Z);    sizedataN = size(dataN);
+        if sizeZ(1,1) ~= sizedataN(1,1)
+           Z = Z(2:end,:); 
+        elseif sizeZ(1,2) ~= sizedataN(1,2)
+           Z = Z(:,2:end); 
+        end
+        Z(isnan(dataN)) = NaN;
+  S2 = reshape(S2vec,My,Mx);
 
 figure(2)
 subplot(1,3,g)
-  imagesc(xgrid,ygrid,Z)
-  hold on
-  plot(x,y,'w.')
+  imagesc(xgrid,ygrid,Z);  hold on
+  plot(x,y,'w.'); hold on
+  plot(rig.(glacier)(:,1),rig.(glacier)(:,2),'k')
   axis('xy')
   axis image
   xlabel('x coordinate')
   ylabel('y coordinate') 
   colorbar('vert')
   title('Kriged estimate z_{hat}')
-
   end
 %   figure
 %   imagesc(xgrid,ygrid,S2)
@@ -198,10 +196,10 @@ subplot(1,3,g)
 % **********************************************************
   
 
-
-
-
-
+% figure(1)
+%     saveFIG('Variogram_BMSresiduals','3G');
+% figure(2)
+%     saveFIG('Kriging_BMSresiduals');
 
 
 
