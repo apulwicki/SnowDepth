@@ -8,8 +8,11 @@ close all
 load TopoBMS_MLR.mat
 
 
-
-
+utm(:,1) = SWE(2).utm(:,1)-min(SWE(2).utm(:,1));
+utm(:,2) = SWE(2).utm(:,2)-min(SWE(2).utm(:,2));
+%res = residualsBMS(8).G2;
+res = SWE(2).swe;
+save('residuals.mat','res','utm')
 
 %% Variograms
 clear
