@@ -5,13 +5,13 @@ library(DiceOptim)
 
 # 1D Example with known parameters -> simple kriging
 inputs = c(-1,-0.5,0,0.5,1)
-output = c(-9,-5,-1,9,11)
+output = c(9,-5,1,-9,11)
 theta = 0.4
 sigma = 5
 trend = c(0,11,2)
-model = km(formula = ~x+I(x^2), design = data.frame(x=inputs), 
-           response = output, covtype = "matern5_2",
-           coef.trend = trend, coef.cov = theta, coef.var = sigma^2)
+model = km(formula = ~., design = data.frame(x=inputs), 
+           response = output, covtype = "matern5_2")
+           #coef.trend = trend, coef.cov = theta, coef.var = sigma^2)
 model
 
 t = seq(from = -2, to = 2, length = 200)
@@ -84,20 +84,21 @@ plot(m)
 ## My data
 library(R.matlab)
 
-residuals = readMat('/Users/Alexandra/Documents/SFU/Data/SnowDepth/Kriging/residuals.mat')
+#residuals = readMat('/Users/Alexandra/Documents/SFU/Data/SnowDepth/Kriging/residuals.mat')
+residuals = readMat('/home/glaciology1/Documents/Data/SnowDepth/Kriging/residuals.mat')
 res = residuals$res
 utm = residuals$utm
 
-X <- data.frame(utm)
-y <- res
+X <- data.frame(utm[1:100,])
+y <- res[1:100]
 m = km(~.,design = X, response = y, covtype = "matern5_2")
-m = km(~., design = X, response = y, covtype = "gauss", nugget = 1e-8 * var(y))
-plot(m)
+m = km(~.^2, design = X, response = y, covtype = "gauss", nugget = 1e-8 * var(y))
+#plot(m)
 m
 
- #concentrates likelihood
-n.grid = 30+1
-x.grid = seq(0,30,length = n.grid)
+ #concentrated likelihood
+n.grid = 30
+x.grid = seq(0,300,length = n.grid)
 X.grid = expand.grid(x.grid,x.grid)
 logLik.grid = apply(X.grid,1,logLikFun,m)
 
@@ -111,13 +112,11 @@ n.grid = 51
 x.grid = seq(0,3000,length = n.grid)
 X.grid = expand.grid(X1=x.grid, X2 = x.grid)
 pred.m = predict(m,X.grid,"SK")
-par(mfrow = c(1,3))
-
 
 #contour(x.grid, x.grid, matrix(y.grid, n.grid, n.grid), 50,
  #       main = "Branin")
 #points(X[ , 1], X[ , 2], pch = 19, cex = 1.5, col = "red")
-contour(x.grid, x.grid, matrix(pred.m$mean, n.grid, n.grid), 20,
+contour(x.grid, x.grid, matrix(pred.m$mean, n.grid, n.grid), 60,
         main = "Kriging mean")
 points(X[ , 1], X[ , 2], pch = 19, cex = 1.5, col = "red")
 #contour(x.grid, x.grid, matrix(pred.m$sd^2, n.grid, n.grid), 15,
@@ -127,37 +126,37 @@ points(X[ , 1], X[ , 2], pch = 19, cex = 1.5, col = "red")
 
 ### 1D attempt
 # 1D Example with known parameters -> simple kriging
-inputs = data.frame(utm[1:5 ,1])
+inputs = data.frame(utm[ ,1])
 colnames(inputs) = c("V1")
-output = res[1:5]
+output = res
+theta <- 0.04
 model = km(formula = ~., design = inputs, 
-           response = output, covtype = "gauss", nugget = 1e-8 * var(output))
+           response = output, covtype = "gauss", nugget = 1e-8 * var(output), coef.cov = theta)
 model
 
-t = seq(from = 0, to = max(inputs), length = 5)
-new.data = data.frame(x=utm[5:9 ,1])
-colnames(new.data) <- c("V1")
-p = predict(model, newdata = new.data, type = "SK")
+t = seq(from = 0, to = max(inputs), length = nrow(inputs)+1)
+t.full = data.frame(t)
+colnames(t.full) = c("V1")
+p = predict(model, newdata = t.full, type = "SK")
 
-plot(t, p$mean, type = "l", xlab = "x", ylab = "y", ylim = c(0, 0.3))
+plot(t, p$mean, type = "l", xlab = "x", ylab = "y", ylim = c(-0.1, max(res)+0.1), xlim = c(1,max(inputs)))
   lines(t, p$lower95, col = "black", lty = 2)
   lines(t, p$upper95, col = "black", lty = 2)
-  points(utm[1:5 ,1], output, col = "red", pch = 19)
+  points(inputs[ ,1], output, col = "red", pch = 19)
 
 #Simulations of Gaussian processes underlying Kringing
-#Unconditional
-y = simulate(model, nsim = 5, newdata = data.frame(x=t))
-
-ytrend = trend[1]+trend[2]*t+trend[3]*t^2
-par(mfrow = c(1, 1))
-plot(t, ytrend, type = "l", col = "black", ylab = "y", lty = "dashed",
-     ylim = c(min(ytrend) - 2 * sigma, max(ytrend) + 2 * sigma))
-for(i in 1:5) lines(t, y[i, ], col = i)
-
 #Conditional (known points)
 y = simulate(model, nsim = 5, newdata = data.frame(x=t), cond = TRUE)
+ytrend = trend[1]+trend[2]*t+trend[3]*t^2
+par(mfrow = c(1, 1))
 
 plot(t, ytrend, type = "l", col = "black", ylab = "y", lty = "dashed",
      ylim = c(min(ytrend) - 2 * sigma, max(ytrend) + 2 * sigma))
 for(i in 1:5) lines(t, y[i, ], col = i)
 points(inputs, output, col = "red", pch = 19)
+
+
+##############################################################################################
+#GP fit
+#install.packages('GPfit')
+library(GPfit)
