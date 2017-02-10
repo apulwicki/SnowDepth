@@ -7,12 +7,16 @@ clear
 close all
 load TopoBMS_MLR.mat
 
+g = 2;
+glacier = char(options.glacier(g));
 
 utm(:,1) = SWE(2).utm(:,1)-min(SWE(2).utm(:,1));
 utm(:,2) = SWE(2).utm(:,2)-min(SWE(2).utm(:,2));
 %res = residualsBMS(8).G2;
 res = SWE(2).swe;
-save('residuals.mat','res','utm')
+sizexy = size(topo_full.(glacier).elevation);
+
+save('residuals.mat','res','utm','sizexy')
 
 %% Variograms
 clear
