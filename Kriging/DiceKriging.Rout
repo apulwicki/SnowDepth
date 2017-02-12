@@ -1,0 +1,144 @@
+
+R version 3.3.1 (2016-06-21) -- "Bug in Your Hair"
+Copyright (C) 2016 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin13.4.0 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[Previously saved workspace restored]
+
+> ############################################################################
+> #Dice Kriging
+> ############################################################################
+> 
+> ## Libraries
+> library(R.matlab)
+R.matlab v3.6.1 (2016-10-19) successfully loaded. See ?R.matlab for help.
+
+Attaching package: ‘R.matlab’
+
+The following objects are masked from ‘package:base’:
+
+    getOption, isOpen
+
+> library(DiceKriging)
+> library(DiceOptim)
+> 
+> 
+> ## Load my data ##
+> residuals = readMat('/Users/Alexandra/Documents/SFU/Data/SnowDepth/Kriging/residuals.mat')
+> #residuals = readMat('/home/glaciology1/Documents/Data/SnowDepth/Kriging/residuals.mat')
+> res = residuals$res
+> utm = data.frame(residuals$utm)
+> sizexy = residuals$sizexy
+> 
+> ## Model ##
+> m = km(~1,design = utm, response = res, covtype = "matern5_2", nugget.estim = TRUE)
+
+optimisation start
+------------------
+* estimation method   : MLE 
+* optimisation method : BFGS 
+* analytical gradient : used
+* trend model : ~1
+* covariance model : 
+  - type :  matern5_2 
+  - nugget : unknown homogenous nugget effect 
+  - parameters lower bounds :  1e-10 1e-10 
+  - parameters upper bounds :  7422.816 9197.05 
+  - upper bound for alpha   :  1 
+  - best initial criterion value(s) :  -238.2412 
+
+N = 3, M = 5 machine precision = 2.22045e-16
+At X0, 0 variables are exactly at the bounds
+At iterate     0  f=       238.24  |proj g|=      0.42497
+At iterate     1  f =       229.69  |proj g|=       0.14078
+At iterate     2  f =       229.07  |proj g|=      0.093728
+At iterate     3  f =       229.07  |proj g|=       0.90884
+At iterate     4  f =       229.07  |proj g|=      0.023905
+At iterate     5  f =       229.07  |proj g|=       0.02391
+At iterate     6  f =       229.07  |proj g|=       0.03253
+At iterate     7  f =       229.07  |proj g|=      0.083574
+At iterate     8  f =       229.07  |proj g|=       0.16692
+At iterate     9  f =       229.06  |proj g|=       0.30178
+At iterate    10  f =       229.06  |proj g|=       0.52121
+At iterate    11  f =       229.06  |proj g|=       0.87905
+At iterate    12  f =       229.06  |proj g|=       0.90942
+At iterate    13  f =       229.06  |proj g|=       0.91059
+At iterate    14  f =       229.05  |proj g|=       0.91252
+At iterate    15  f =       229.04  |proj g|=       0.91569
+At iterate    16  f =       228.99  |proj g|=       0.92082
+At iterate    17  f =       228.85  |proj g|=       0.92881
+At iterate    18  f =       228.47  |proj g|=       0.94009
+At iterate    19  f =       227.46  |proj g|=        0.9527
+At iterate    20  f =       224.91  |proj g|=       0.95892
+At iterate    21  f =       222.26  |proj g|=      0.055344
+At iterate    22  f =          221  |proj g|=      0.048309
+At iterate    23  f =       220.23  |proj g|=       0.97589
+At iterate    24  f =       220.01  |proj g|=      0.032204
+At iterate    25  f =       219.92  |proj g|=      0.028686
+At iterate    26  f =        219.9  |proj g|=       0.97415
+At iterate    27  f =        219.9  |proj g|=       0.14232
+At iterate    28  f =        219.9  |proj g|=     0.0063174
+At iterate    29  f =        219.9  |proj g|=     0.0063169
+
+iterations 29
+function evaluations 33
+segments explored during Cauchy searches 31
+BFGS updates skipped 0
+active bounds at final generalized Cauchy point 0
+norm of the final projected gradient 0.00631685
+final function value 219.904
+
+F = 219.904
+final  value 219.903636 
+converged
+> #plot(m)
+> #m
+> 
+> ## Kriging prediction surface ##
+> x = seq(from = 0, to = (sizexy[1,2]-1)*40, by = 40)
+> y = seq(from = 0, to = (sizexy[1,1]-1)*40, by = 40)
+> grid = expand.grid(X1=x, X2 = y)
+> pred.m = predict(m,grid,"SK")
+> 
+> 
+> pred = matrix(pred.m$mean, sizexy[1,1], sizexy[1,2], byrow = TRUE)
+> lower95 = matrix(pred.m$lower95, sizexy[1,1], sizexy[1,2], byrow = TRUE)
+> upper95 = matrix(pred.m$upper95, sizexy[1,1], sizexy[1,2], byrow = TRUE)
+> 
+> #writeMat('/home/glaciology1/Documents/Data/SnowDepth/Kriging/kriging.mat',pred=pred, lower95=lower95, upper95=upper95,
+> #         fixNames=TRUE, matVersion="5", onWrite=NULL, verbose=FALSE)
+>   writeMat('/Users/Alexandra/Documents/SFU/Data/SnowDepth/Kriging/kriging.mat',pred=pred, lower95=lower95, upper95=upper95,
++            fixNames=TRUE, matVersion="5", onWrite=NULL, verbose=FALSE)
+> 
+> ## Install and load rgl package
+> #library(rgl)
+> 
+> ## Plot surface and observations
+> #plot3d(X[,1],X[,2],res, xlim=c(0,3000),ylim=c(0,3000),zlim=0:1)
+> #surface3d(x.grid,x.grid, matrix(pred.m$mean,n.grid,n.grid),col="light blue", alpha=0.5)
+> 
+> ## Plot surface and observations with intervals
+> #  rglwidget()
+> #plot3d(utm[,1],utm[,2],res, xlim=c(0,3000),ylim=c(0,3000),zlim=0:1)
+> #surface3d(x,y, matrix(pred.m$mean, sizexy[1,1], sizexy[1,2]),col="light blue", alpha=0.5)
+> #surface3d(x.grid,x.grid, matrix(pred.m$upper95,n.grid,n.grid),col="light blue", alpha=0.25)
+> #surface3d(x.grid,x.grid, matrix(pred.m$lower95,n.grid,n.grid),col="light blue", alpha=0.25)
+> #rgl.snapshot("filename.png")
+> 
+> proc.time()
+   user  system elapsed 
+ 16.292   2.233  20.395 

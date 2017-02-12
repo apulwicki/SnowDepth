@@ -162,5 +162,22 @@ PlotTopoParameter(sweRANGE, 'modelledSWE', 'SWE (m w.e.)', SWE, 'black')
 
 clear g* i maxSWE minSWE filename modelled  type diffSWE
 
+%% Residuals at sampling locations
+
+param = 'empty';
+for g = 1:3
+    glacier = char(options.glacier(g));
+topoParam.(glacier)  = NaN(size(topo_full_ns.(glacier).elevation));
+topoParam.rig = rig;
+
+resZ(g).swe = res.(glacier); 
+resZ(g).utm = SWE(g).utm;
+end
+
+figure(3)
+PlotTopoParameter(topoParam,param, 'BMS Residuals (m w.e.)', resZ, 'colour')
+    C = cbrewer('div', 'RdYlBu', 20, 'PCHIP');
+    colormap(flipud(C))
+        saveFIG(['residualsMap_',method])
 
 

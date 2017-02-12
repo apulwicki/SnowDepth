@@ -2,22 +2,183 @@
 % Kriging (based on Trauth, 2006)
 % **********************************************************
 
-%%
 clear
 close all
 load TopoBMS_MLR.mat
+%% Dice Kriging -> SWE
+cd Kriging
+% get data to krig
+sweKRIG(9).G4.pred = 1;
+for g = 1:3
+    for r = 2%:9
+        clear utm res sizexy
+    glacier = char(options.glacier(g));
 
-g = 2;
-glacier = char(options.glacier(g));
+    utm(:,1) = sweOPT(r).(glacier)(:,2)-min(rig.(glacier)(:,1));
+    utm(:,2) = sweOPT(r).(glacier)(:,3)-min(rig.(glacier)(:,2));
+    res = log(sweOPT(r).(glacier)(:,1));
+    sizexy = size(topo_full.(glacier).elevation);
 
-utm(:,1) = SWE(2).utm(:,1)-min(SWE(2).utm(:,1));
-utm(:,2) = SWE(2).utm(:,2)-min(SWE(2).utm(:,2));
-%res = residualsBMS(8).G2;
-res = SWE(2).swe;
-sizexy = size(topo_full.(glacier).elevation);
+    save('residuals.mat','res','utm','sizexy')
 
-save('residuals.mat','res','utm','sizexy')
+    %Run Dice Kriging in R
+    %!R CMD BATCH BMS_matlab.R
+    !/usr/local/bin/R CMD BATCH DiceKriging.R
 
+    % load kriged data
+    load kriging.mat
+
+     %Assign to structure
+    sweKRIG(r).(glacier).pred = exp(flipud(pred));
+    sweKRIG(r).(glacier).lower95 = flipud(lower95);
+    sweKRIG(r).(glacier).upper95 = flipud(upper95);
+        clear pred lower95 upper95
+        
+     %Set glacier boundries
+    nan_it =  isnan(topo_full.(glacier).elevation);
+    sweKRIG(r).(glacier).pred(nan_it) = NaN;
+    sweKRIG(r).(glacier).lower95(nan_it) = NaN;
+    sweKRIG(r).(glacier).upper95(nan_it) = NaN;
+    
+     %Set min value to zero
+    sweKRIG(r).(glacier).pred(sweKRIG(r).(glacier).pred<0) = 0;
+    sweKRIG(r).(glacier).lower95(sweKRIG(r).(glacier).lower95<0) = 0;
+    sweKRIG(r).(glacier).upper95(sweKRIG(r).(glacier).upper95<0) = 0;
+    end
+end
+cd ..
+    clear g ans glacier nan_it r res sizexy utm
+
+    
+for g = 1:3
+    r=2;
+    glacier = char(options.glacier(g)); 
+E.(glacier) = (SWE(g).utm(:,1)-min(rig.(glacier)(:,1)))/40;
+    E.(glacier) = floor(E.(glacier));
+N.(glacier) = (max(rig.(glacier)(:,2))- SWE(g).utm(:,2))/40; 
+    N.(glacier) = floor(N.(glacier));
+end    
+figure(4); clf
+for g = 1:3
+    r=2;
+    glacier = char(options.glacier(g));
+subplot(1,3,g)
+    surf(sweKRIG(2).(glacier).pred, 'FaceAlpha',0.7,'LineStyle','none'); colorbar; hold on
+%     surf(sweKRIG(2).(glacier).upper95, 'FaceColor','r','FaceAlpha',0.3,'LineStyle','none'); colorbar; hold on
+%     surf(sweKRIG(2).(glacier).lower95, 'FaceColor','r','FaceAlpha',0.3,'LineStyle','none'); colorbar; hold on
+    plot3(E.(glacier),N.(glacier),sweOPT(r).(glacier)(:,1),'k.')
+end
+    
+%% Plotting -> SWE
+    param = 'pred';
+    topoParam.G4  = sweKRIG(2).G4.(param);
+    topoParam.G2  = sweKRIG(2).G2.(param);
+    topoParam.G13 = sweKRIG(2).G13.(param);
+    topoParam.rig = rig;
+figure(3)
+    PlotTopoParameter(topoParam,param, 'SWE (m w.e.)', SWE, 'black')
+
+    annotation('textbox',[.17 .22 .1 .1],'String',[num2str(round(nanmean(sweKRIG(2).G4.(param)(:)),2), '%.2f'),' m w.e.'],'EdgeColor','none')    
+    annotation('textbox',[.34 .55 .1 .1],'String',[num2str(round(nanmean(sweKRIG(2).G2.(param)(:)),2), '%.2f'),' m w.e.'],'EdgeColor','none')    
+    annotation('textbox',[.75 .53 .1 .1],'String',[num2str(round(nanmean(sweKRIG(2).G13.(param)(:)),2), '%.2f'),' m w.e.'],'EdgeColor','none')    
+      fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18)
+
+    %saveFIG('sweKriged')
+    
+%% Dice Kriging -> residuals
+cd Kriging
+% get data to krig
+residualsKRIG(9).G4.pred = 1;
+for g = 1:3
+    for r = 2:9
+        clear utm res sizexy
+    glacier = char(options.glacier(g));
+
+    utm(:,1) = sweOPT(r).(glacier)(:,2)-min(rig.(glacier)(:,1));
+    utm(:,2) = sweOPT(r).(glacier)(:,3)-min(rig.(glacier)(:,2));
+    res = residualsBMS(r).(glacier);
+    sizexy = size(topo_full.(glacier).elevation);
+
+    save('residuals.mat','res','utm','sizexy')
+
+    %Run Dice Kriging in R
+    %!R CMD BATCH BMS_matlab.R
+    !/usr/local/bin/R CMD BATCH DiceKriging.R
+
+    % load kriged data
+    load kriging.mat
+
+     %Assign to structure
+    residualsKRIG(r).(glacier).pred = flipud(pred);
+    residualsKRIG(r).(glacier).lower95 = flipud(lower95);
+    residualsKRIG(r).(glacier).upper95 = flipud(upper95);
+        clear pred lower95 upper95
+        
+     %Set glacier boundries
+    nan_it =  isnan(topo_full.(glacier).elevation);
+    residualsKRIG(r).(glacier).pred(nan_it) = NaN;
+    residualsKRIG(r).(glacier).lower95(nan_it) = NaN;
+    residualsKRIG(r).(glacier).upper95(nan_it) = NaN;
+    
+    end
+end    
+cd ..
+    clear g ans glacier nan_it r res sizexy utm
+
+%% Plotting -> residuals
+    param = 'pred';
+    topoParam.G4  = residualsKRIG(2).G4.(param);
+    topoParam.G2  = residualsKRIG(2).G2.(param);
+    topoParam.G13 = residualsKRIG(2).G13.(param);
+    topoParam.rig = rig;
+
+    PlotTopoParameter(topoParam,param, options.topoVarsUnits(r), SWE, 'symmetric')
+
+    annotation('textbox',[.17 .22 .1 .1],'String',[num2str(round(nanmean(residualsKRIG(2).G4.(param)(:)),2), '%.2f'),' m w.e.'],'EdgeColor','none')    
+    annotation('textbox',[.34 .55 .1 .1],'String',[num2str(round(nanmean(residualsKRIG(2).G2.(param)(:)),2), '%.2f'),' m w.e.'],'EdgeColor','none')    
+    annotation('textbox',[.75 .53 .1 .1],'String',[num2str(round(nanmean(residualsKRIG(2).G13.(param)(:)),2), '%.2f'),' m w.e.'],'EdgeColor','none')    
+
+    saveFIG('residualsKriged','3G')
+
+%% Regression Kriging
+sweRK(9).G4 = 1;
+for r = 2%:9
+    for g = 1:3
+        glacier = char(options.glacier(g));
+        sweRK(r).(glacier) = sweBMS(r).(glacier) + residualsKRIG(r).(glacier).pred;
+    end   
+end
+    
+ %Residuals of RK
+for g = 1:3
+    glacier = char(options.glacier(g)); 
+E = (SWE(g).utm(:,1)-min(rig.(glacier)(:,1)))/40;
+    E = floor(E);
+N = (max(rig.(glacier)(:,2))- SWE(g).utm(:,2))/40; 
+    N = floor(N);
+T = sub2ind(size(sweRK(r).(glacier)),N,E);
+sampledRK.(glacier) = sweRK(r).(glacier)(T); 
+residualsRK.(glacier) = SWE(g).swe- sampledRK.(glacier);
+end
+
+clf
+surf(sweRK(2).G13, 'FaceAlpha',0.5,'LineStyle','none'); hold on
+plot(E,N,'.k')
+%% Plotting -> regression kriging
+    param = 'RK';
+    topoParam.G4  = sweRK(2).G4;
+    topoParam.G2  = sweRK(2).G2;
+    topoParam.G13 = [sweRK(2).G13; nan(10,size(sweRK(2).G13,2))];
+    topoParam.G13 = [sweRK(2).G13, nan(size(sweRK(2).G13,1),10)];
+    topoParam.rig = rig;
+
+    PlotTopoParameter(topoParam,param, options.topoVarsUnits(r), SWE, 'sweONswe')
+
+    annotation('textbox',[.17 .22 .1 .1],'String',[num2str(round(nanmean(sweRK(2).G4(:)),2), '%.2f'),' m w.e.'],'EdgeColor','none')    
+    annotation('textbox',[.34 .55 .1 .1],'String',[num2str(round(nanmean(sweRK(2).G2(:)),2), '%.2f'),' m w.e.'],'EdgeColor','none')    
+    annotation('textbox',[.75 .53 .1 .1],'String',[num2str(round(nanmean(sweRK(2).G13(:)),2), '%.2f'),' m w.e.'],'EdgeColor','none')    
+
+    saveFIG('RegressionKriging','3G')
 %% Variograms
 clear
 close all

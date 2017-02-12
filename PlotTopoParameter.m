@@ -5,10 +5,11 @@ global options
     rig = topoParam.rig;
     ELA_d = [1 7; 16 23; 8 15];
 clf
+colormap('default')
 
 %get colour min max
-     %Manual colour range
-    fixed_color = 0;
+     %Manual colour range = 1
+   fixed_color = 0;
 if fixed_color == 0 
     x_min   = nanmin([topoParam.G4(:);topoParam.G2(:);topoParam.G13(:)]);
     x_max   = nanmax([topoParam.G4(:);topoParam.G2(:);topoParam.G13(:)]);
@@ -18,7 +19,6 @@ elseif fixed_color == 1
     x_min = 0;      minSWE  = x_min;
     x_max = 1.4;    maxSWE  = x_max;
 end
-
 
 G13size = size(topoParam.G13);
 
@@ -45,8 +45,9 @@ for i = 1:3
         s = subplot(1,3,i);
                 if ~all(isnan(topoParam.(name)(:)))
                 h = imagesc(data); hold on
-                set(h,'alphadata',~isnan(data))
-                elseif all(isnan(topoParam.(name)(:)))
+                set(h,'alphadata',~isnan(data)); end
+                
+                if all(isnan(topoParam.(name)(:))) || strcmp(sweDOTS,'symmetric')
                         minE = min(rig.(name)(:,1));
                         minN = min(rig.(name)(:,2));
                     Eg = (rig.(name)(:,1) - minE)/40;
@@ -77,16 +78,19 @@ for i = 1:3
                 
                 if      strcmp(sweDOTS,'black')
                     plot(E,N,'k.', 'MarkerSize',5); hold on
-                %curvature limits needs
-                    if strcmp(paramName, 'profileCurve') || strcmp(paramName, 'tangentCurve')
-                        caxis([-500, 500]);                  
-                    else caxis([x_min x_max]); caxis(caxis); end
+                    caxis([x_min x_max]); caxis(caxis); 
                 elseif  strcmp(sweDOTS,'colour')
                     scatter(E,N , 13, SWE(i).swe,'filled'); 
                     caxis([minSWE maxSWE]); caxis(caxis); 
                 elseif  strcmp(sweDOTS,'sweONswe')
                     scatter(E,N , 13, SWE(i).swe,'filled'); 
-                    caxis([x_min x_max]); caxis(caxis);     
+                    caxis([x_min x_max]); caxis(caxis);
+                elseif   strcmp(sweDOTS,'symmetric')
+                    plot(E,N,'k.', 'MarkerSize',5); hold on
+                        mc = max(abs([x_min x_max]));
+                    caxis([-mc mc]); caxis(caxis); 
+                    C = cbrewer('div', 'PRGn', 21, 'PCHIP');
+                        colormap(flipud(C))
                 end        
                 
                 %Axis Properties
