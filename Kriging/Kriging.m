@@ -6,62 +6,17 @@ clear
 close all
 load TopoBMS_MLR.mat
 %% Dice Kriging -> SWE
-cd Kriging
-% get data to krig
+
 sweKRIG(9).G4.pred = 9999; 
-for g = 1:3
-    for r = 2:9
-        clear utm res sizexy
-    glacier = char(options.glacier(g));
-
-    utm(:,1) = sweOPT(r).(glacier)(:,2)-min(rig.(glacier)(:,1));
-    utm(:,2) = sweOPT(r).(glacier)(:,3)-min(rig.(glacier)(:,2));
-    res = sweOPT(r).(glacier)(:,1);
-    sizexy = size(topo_full.(glacier).elevation);
-
-    save('residuals.mat','res','utm','sizexy')
-
-     %Run Dice Kriging in R
-    %!R CMD BATCH BMS_matlab.R
-    !/usr/local/bin/R CMD BATCH DiceKriging.R
-
-     %Load kriged data
-    load kriging.mat
-
-     %Model params
-    sweKRIG(r).Model.(glacier) =  model;
-    sweKRIG(r).LOO.(glacier) = LOO.mean;
-    
-     %Assign to structure
-    sweKRIG(r).(glacier).pred = flipud(pred);
-    sweKRIG(r).(glacier).lower95 = flipud(lower95);
-    sweKRIG(r).(glacier).upper95 = flipud(upper95);
-        clear pred lower95 upper95
-        
-     %Set glacier boundries
-    nan_it =  isnan(topo_full.(glacier).elevation);
-    sweKRIG(r).(glacier).pred(nan_it) = NaN;
-    sweKRIG(r).(glacier).lower95(nan_it) = NaN;
-    sweKRIG(r).(glacier).upper95(nan_it) = NaN;
-    
-     %Set min value to zero
-    sweKRIG(r).(glacier).pred(sweKRIG(r).(glacier).pred<0) = 0;
-    sweKRIG(r).(glacier).lower95(sweKRIG(r).(glacier).lower95<0) = 0;
-    sweKRIG(r).(glacier).upper95(sweKRIG(r).(glacier).upper95<0) = 0;
+for g = 1%:3
+        glacier = char(options.glacier(g));
+    for r = 2%:9
+    sweKRIG(r).(glacier) = KrigingR(sweOPT(r).(glacier)(:,1), SWE(g).utm, glacier);
     end
-end
-cd ..
-    clear g ans glacier nan_it r res sizexy utm LOO model
+end    
+    clear g glacier r
 
 %% 3D plot    
-for g = 1:3
-    r=2;
-    glacier = char(options.glacier(g)); 
-E.(glacier) = (SWE(g).utm(:,1)-min(rig.(glacier)(:,1)))/40;
-    E.(glacier) = floor(E.(glacier));
-N.(glacier) = (max(rig.(glacier)(:,2))- SWE(g).utm(:,2))/40; 
-    N.(glacier) = floor(N.(glacier));
-end    
 figure(4); clf
 for g = 1:3
     r=2;
@@ -70,7 +25,7 @@ subplot(1,3,g)
     surf(sweKRIG(2).(glacier).pred, 'FaceAlpha',0.7,'LineStyle','none'); colorbar; hold on
 %     surf(sweKRIG(2).(glacier).upper95, 'FaceColor','r','FaceAlpha',0.3,'LineStyle','none'); colorbar; hold on
 %     surf(sweKRIG(2).(glacier).lower95, 'FaceColor','r','FaceAlpha',0.3,'LineStyle','none'); colorbar; hold on
-    plot3(E.(glacier),N.(glacier),sweOPT(r).(glacier)(:,1),'k.')
+    plot3(options.E.(glacier),options.N.(glacier),sweOPT(r).(glacier)(:,1),'k.')
 end
     
 %% Plotting -> SWE
@@ -94,54 +49,21 @@ figure(3)
 test = KrigingR(residualsBMS(4).G4, SWE(1).utm, 'G4');
 
 % Dice Kriging -> residuals
-
-res_bma_KRIG(9).G4.pred = 1;
-for g = 1:3
-    for r = 2:9
-    glacier = char(options.glacier(g));
-
-    %res_bma_KRIG(r) = KrigingR(residualsBMS(r).(glacier), SWE(g).utm, glacier);
-    utm(:,1) = sweOPT(r).(glacier)(:,2)-min(rig.(glacier)(:,1));
-    utm(:,2) = sweOPT(r).(glacier)(:,3)-min(rig.(glacier)(:,2));
-    res = residualsBMS(r).(glacier);
-    sizexy = size(topo_full.(glacier).elevation);
-
-    save('residuals.mat','res','utm','sizexy')
-
-    %Run Dice Kriging in R
-    %!R CMD BATCH BMS_matlab.R
-    !/usr/local/bin/R CMD BATCH DiceKriging.R
-
-    % load kriged data
-    load kriging.mat
-    
-     %Model params
-    res_bma_KRIG(r).Model.(glacier) =  model;
-    res_bma_KRIG(r).LOO.(glacier) = LOO.mean;
-
-     %Assign to structure
-    res_bma_KRIG(r).(glacier).pred = flipud(pred);
-    res_bma_KRIG(r).(glacier).lower95 = flipud(lower95);
-    res_bma_KRIG(r).(glacier).upper95 = flipud(upper95);
-        clear pred lower95 upper95
-        
-     %Set glacier boundries
-    nan_it =  isnan(topo_full.(glacier).elevation);
-    res_bma_KRIG(r).(glacier).pred(nan_it) = NaN;
-    res_bma_KRIG(r).(glacier).lower95(nan_it) = NaN;
-    res_bma_KRIG(r).(glacier).upper95(nan_it) = NaN;
-    
+res_bmaKRIG(9).G4.pred = 9999;
+for g = 1%:3
+        glacier = char(options.glacier(g));
+    for r = 2%:9
+    res_bmaKRIG(r).(glacier) = KrigingR(residualsBMS(r).(glacier), SWE(g).utm, glacier);
     end
 end    
-cd ..
-    clear g ans glacier nan_it r res sizexy utm LOO model
+    clear g glacier r
 
-% Regression Kriging
+% Add Regression and Kriged Residuals
 sweRK(9).G4 = 9999;
 for r = 2:9
     for g = 1:3
         glacier = char(options.glacier(g));
-        sweRK(r).(glacier) = sweBMS(r).(glacier) + res_bma_KRIG(r).(glacier).pred;
+        sweRK(r).(glacier) = sweBMS(r).(glacier) + res_bmaKRIG(r).(glacier).pred;
     end   
 end
     
@@ -150,11 +72,7 @@ end
  residualsRK(9).G4 = 9999;  residualsKRIG(9).G4 = 9999;
 for g = 1:3
     glacier = char(options.glacier(g)); 
-E = (SWE(g).utm(:,1)-min(rig.(glacier)(:,1)))/40;
-    E = floor(E);
-N = (max(rig.(glacier)(:,2))- SWE(g).utm(:,2))/40; 
-    N = floor(N);
-T = sub2ind(size(sweRK(2).(glacier)),N,E);
+T = sub2ind(size(sweRK(2).(glacier)),floor(options.N.(glacier)),floor(options.E.(glacier)));
 for r = 2:9
 sampledRK(r).(glacier)      = sweRK(r).(glacier)(T); 
 sampledKRIG(r).(glacier)    = sweKRIG(r).(glacier).pred(T);
@@ -163,7 +81,7 @@ sampledBMA(r).(glacier)     = sweBMS(r).(glacier)(T);
 residualsKRIG(r).(glacier)  = SWE(g).swe - sampledKRIG(r).(glacier);
 residualsRK(r).(glacier)    = SWE(g).swe- sampledRK(r).(glacier);
 
-sweRK(r).LOO.(glacier)         = res_bma_KRIG(r).LOO.(glacier) + sampledBMA(r).(glacier);
+sweRK(r).LOO.(glacier)         = res_bmaKRIG(r).LOO.(glacier) + sampledBMA(r).(glacier);
 end
 end
     clear E g glacier N r T

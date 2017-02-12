@@ -64,7 +64,7 @@ options.ObsPerCell     = 2;
                 % 2 average of all observation in a DEM cell
                 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% GLACIER MAPS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-load('TopoSWE.mat','topo_full_ns', 'rig')
+load('TopoSWE.mat','topo_full_ns', 'rig', 'SWE')
 
 % Size of glacier maps
 options.mapsize        = [size(topo_full_ns.G4.elevation);...
@@ -77,7 +77,16 @@ options.mapNaN.G2      = isnan(topo_full_ns.G2.elevation);...
 options.mapNaN.G13     = isnan(topo_full_ns.G13.elevation);...
 
 % RIG boundary
-options.rig            = rig; clear rig
+options.rig            = rig; 
+
+% E and N for imagesc
+for g = 1:3
+    glacier = char(options.glacier(g)); 
+options.E.(glacier) = (SWE(g).utm(:,1)-min(options.rig.(glacier)(:,1)))/40;
+options.N.(glacier) = (max(options.rig.(glacier)(:,2))- SWE(g).utm(:,2))/40; 
+end
+
+clear topo_full_ns rig SWE
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% EASE OF USE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 
 options.glacier        = {'G4','G2','G13'};
