@@ -63,15 +63,22 @@ options.ObsPerCell     = 2;
                 % 1 all transect measurement
                 % 2 average of all observation in a DEM cell
                 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% GLACIER RGB %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% GLACIER MAPS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+load('TopoSWE.mat','topo_full_ns', 'rig')
 
-% Colour scheme for glaciers
-options.RGB            = [9, 132, 103; ...
-                          224, 187, 2; ...
-                          130, 75, 135]/255;
+% Size of glacier maps
+options.mapsize        = [size(topo_full_ns.G4.elevation);...
+                          size(topo_full_ns.G2.elevation);...
+                          size(topo_full_ns.G13.elevation)];
+                      
+% Where map is NaN
+options.mapNaN.G4      = isnan(topo_full_ns.G4.elevation);...
+options.mapNaN.G2      = isnan(topo_full_ns.G2.elevation);...
+options.mapNaN.G13     = isnan(topo_full_ns.G13.elevation);...
 
+% RIG boundary
+options.rig            = rig; clear rig
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% EASE OF USE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                
                 
 options.glacier        = {'G4','G2','G13'};
 options.topoVarsUnits  = { '{\itz} (m a.s.l)','{\itd_C} (m)','\alpha','{\itm} (^{\circ})',...
@@ -80,6 +87,9 @@ options.topoVars       = { '{\itz}','{\itd_C}','\alpha','{\itm}',...
                             '{\itN}','{\kappa}','Sx'};
 options.densityName    = {'S1','F1','S2','F2','S3','F3','S4','F4'};                        
 
- 
+% Colour scheme for glaciers
+options.RGB            = [9, 132, 103; ...
+                          224, 187, 2; ...
+                          130, 75, 135]/255; 
                    
                 

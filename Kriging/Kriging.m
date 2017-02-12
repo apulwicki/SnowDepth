@@ -89,15 +89,18 @@ figure(3)
 
     saveFIG('sweKriged')
     
-%% Dice Kriging -> residuals
-cd Kriging
-% get data to krig
-residualsKRIG(9).G4.pred = 1;
+%% REGRESSION KRIGING
+
+test = KrigingR(residualsBMS(4).G4, SWE(1).utm, 'G4');
+
+% Dice Kriging -> residuals
+
+res_bma_KRIG(9).G4.pred = 1;
 for g = 1:3
     for r = 2:9
-        clear utm res sizexy
     glacier = char(options.glacier(g));
 
+    %res_bma_KRIG(r) = KrigingR(residualsBMS(r).(glacier), SWE(g).utm, glacier);
     utm(:,1) = sweOPT(r).(glacier)(:,2)-min(rig.(glacier)(:,1));
     utm(:,2) = sweOPT(r).(glacier)(:,3)-min(rig.(glacier)(:,2));
     res = residualsBMS(r).(glacier);
@@ -113,25 +116,61 @@ for g = 1:3
     load kriging.mat
     
      %Model params
-    residualsKRIG(r).Model.(glacier) =  model;
-    residualsKRIG(r).LOO.(glacier) = LOO.mean;
+    res_bma_KRIG(r).Model.(glacier) =  model;
+    res_bma_KRIG(r).LOO.(glacier) = LOO.mean;
 
      %Assign to structure
-    residualsKRIG(r).(glacier).pred = flipud(pred);
-    residualsKRIG(r).(glacier).lower95 = flipud(lower95);
-    residualsKRIG(r).(glacier).upper95 = flipud(upper95);
+    res_bma_KRIG(r).(glacier).pred = flipud(pred);
+    res_bma_KRIG(r).(glacier).lower95 = flipud(lower95);
+    res_bma_KRIG(r).(glacier).upper95 = flipud(upper95);
         clear pred lower95 upper95
         
      %Set glacier boundries
     nan_it =  isnan(topo_full.(glacier).elevation);
-    residualsKRIG(r).(glacier).pred(nan_it) = NaN;
-    residualsKRIG(r).(glacier).lower95(nan_it) = NaN;
-    residualsKRIG(r).(glacier).upper95(nan_it) = NaN;
+    res_bma_KRIG(r).(glacier).pred(nan_it) = NaN;
+    res_bma_KRIG(r).(glacier).lower95(nan_it) = NaN;
+    res_bma_KRIG(r).(glacier).upper95(nan_it) = NaN;
     
     end
 end    
 cd ..
     clear g ans glacier nan_it r res sizexy utm LOO model
+
+% Regression Kriging
+sweRK(9).G4 = 9999;
+for r = 2:9
+    for g = 1:3
+        glacier = char(options.glacier(g));
+        sweRK(r).(glacier) = sweBMS(r).(glacier) + res_bma_KRIG(r).(glacier).pred;
+    end   
+end
+    
+ %Residuals of RK
+ sampledRK(9).G4 = 9999;    sampledKRIG(9).G4 = 9999;   sampledBMA(9).G4 = 9999;
+ residualsRK(9).G4 = 9999;  residualsKRIG(9).G4 = 9999;
+for g = 1:3
+    glacier = char(options.glacier(g)); 
+E = (SWE(g).utm(:,1)-min(rig.(glacier)(:,1)))/40;
+    E = floor(E);
+N = (max(rig.(glacier)(:,2))- SWE(g).utm(:,2))/40; 
+    N = floor(N);
+T = sub2ind(size(sweRK(2).(glacier)),N,E);
+for r = 2:9
+sampledRK(r).(glacier)      = sweRK(r).(glacier)(T); 
+sampledKRIG(r).(glacier)    = sweKRIG(r).(glacier).pred(T);
+sampledBMA(r).(glacier)     = sweBMS(r).(glacier)(T);
+
+residualsKRIG(r).(glacier)  = SWE(g).swe - sampledKRIG(r).(glacier);
+residualsRK(r).(glacier)    = SWE(g).swe- sampledRK(r).(glacier);
+
+sweRK(r).LOO.(glacier)         = res_bma_KRIG(r).LOO.(glacier) + sampledBMA(r).(glacier);
+end
+end
+    clear E g glacier N r T
+
+% clf
+% surf(sweRK(2).G13, 'FaceAlpha',0.5,'LineStyle','none'); hold on
+% plot(E,N,'.k')
 
 %% Plotting -> residuals
     param = 'pred';
@@ -148,35 +187,6 @@ cd ..
 
     saveFIG('residualsKriged','3G')
 
-%% Regression Kriging
-sweRK(9).G4 = 9999;
-for r = 2:9
-    for g = 1:3
-        glacier = char(options.glacier(g));
-        sweRK(r).(glacier) = sweBMS(r).(glacier) + residualsKRIG(r).(glacier).pred;
-    end   
-end
-    
- %Residuals of RK
- sampledRK(9).G4 = 9999;    sampledKRIG(9).G4 = 9999;   
- residualsRK(9).G4 = 9999;  residualsKRIG(9).G4 = 9999;
-for g = 1:3
-    glacier = char(options.glacier(g)); 
-E = (SWE(g).utm(:,1)-min(rig.(glacier)(:,1)))/40;
-    E = floor(E);
-N = (max(rig.(glacier)(:,2))- SWE(g).utm(:,2))/40; 
-    N = floor(N);
-T = sub2ind(size(sweRK(r).(glacier)),N,E);
-for r = 2:9
-sampledRK(r).(glacier) = sweRK(r).(glacier)(T); 
-sampledKRIG(r).(glacier) = sweKRIG(r).(glacier).pred(T);
-residualsKRIG(r).(glacier) = SWE(g).swe - sampledKRIG(r).(glacier);
-residualsRK(r).(glacier) = SWE(g).swe- sampledRK(r).(glacier);
-end
-end
-clf
-surf(sweRK(2).G13, 'FaceAlpha',0.5,'LineStyle','none'); hold on
-plot(E,N,'.k')
 %% Plotting -> regression kriging
     param = 'RK';
     topoParam.G4  = sweRK(2).G4;
@@ -215,8 +225,9 @@ figure(1); clf
 for i = 1:3
     glacier     = char(options.glacier(i));
     yObserved   = SWE(i).swe;
-    yModel      = sampledRK.(glacier);      
-  
+    %yModel      = sampledRK(8).(glacier);      
+    yModel      = sweRK(2).LOO.(glacier);
+    
     subplot(1,3,i)
     axis([0 1.2 0 1.2]);    line = refline(1,0);    line.Color = 'k'; line.LineStyle = '--'; hold on
         plot(yObserved, yModel, '.', 'Color', options.RGB(i,:),'MarkerSize',13); hold on

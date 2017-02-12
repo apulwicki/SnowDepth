@@ -89,10 +89,11 @@ figure(3)
 
     saveFIG('sweKriged')
     
-%% Dice Kriging -> residuals
+%% REGRESSION KRIGING
+% Dice Kriging -> residuals
 cd Kriging
 % get data to krig
-residualsKRIG(9).G4.pred = 1;
+res_bma_KRIG(9).G4.pred = 1;
 for g = 1:3
     for r = 2:9
         clear utm res sizexy
@@ -113,25 +114,59 @@ for g = 1:3
     load kriging.mat
     
      %Model params
-    residualsKRIG(r).Model.(glacier) =  model;
-    residualsKRIG(r).LOO.(glacier) = LOO.mean;
+    res_bma_KRIG(r).Model.(glacier) =  model;
+    res_bma_KRIG(r).LOO.(glacier) = LOO.mean;
 
      %Assign to structure
-    residualsKRIG(r).(glacier).pred = flipud(pred);
-    residualsKRIG(r).(glacier).lower95 = flipud(lower95);
-    residualsKRIG(r).(glacier).upper95 = flipud(upper95);
+    res_bma_KRIG(r).(glacier).pred = flipud(pred);
+    res_bma_KRIG(r).(glacier).lower95 = flipud(lower95);
+    res_bma_KRIG(r).(glacier).upper95 = flipud(upper95);
         clear pred lower95 upper95
         
      %Set glacier boundries
     nan_it =  isnan(topo_full.(glacier).elevation);
-    residualsKRIG(r).(glacier).pred(nan_it) = NaN;
-    residualsKRIG(r).(glacier).lower95(nan_it) = NaN;
-    residualsKRIG(r).(glacier).upper95(nan_it) = NaN;
+    res_bma_KRIG(r).(glacier).pred(nan_it) = NaN;
+    res_bma_KRIG(r).(glacier).lower95(nan_it) = NaN;
+    res_bma_KRIG(r).(glacier).upper95(nan_it) = NaN;
     
     end
 end    
 cd ..
     clear g ans glacier nan_it r res sizexy utm LOO model
+
+% Regression Kriging
+sweRK(9).G4 = 9999;
+for r = 2:9
+    for g = 1:3
+        glacier = char(options.glacier(g));
+        sweRK(r).(glacier) = sweBMS(r).(glacier) + residualsKRIG(r).(glacier).pred;
+    end   
+end
+    
+ %Residuals of RK
+ sampledRK(9).G4 = 9999;    sampledKRIG(9).G4 = 9999;   sampledBMA(9).G4 = 9999;
+ residualsRK(9).G4 = 9999;  residualsKRIG(9).G4 = 9999;
+for g = 1:3
+    glacier = char(options.glacier(g)); 
+E = (SWE(g).utm(:,1)-min(rig.(glacier)(:,1)))/40;
+    E = floor(E);
+N = (max(rig.(glacier)(:,2))- SWE(g).utm(:,2))/40; 
+    N = floor(N);
+T = sub2ind(size(sweRK(2).(glacier)),N,E);
+for r = 2:9
+sampledRK(r).(glacier)      = sweRK(r).(glacier)(T); 
+sampledKRIG(r).(glacier)    = sweKRIG(r).(glacier).pred(T);
+sampledBMA(r).(glacier)     = sweBMS(r).(glacier)(T);
+
+residualsKRIG(r).(glacier)  = SWE(g).swe - sampledKRIG(r).(glacier);
+residualsRK(r).(glacier)    = SWE(g).swe- sampledRK(r).(glacier);
+
+sweRK(r).LOO.(glacier)         = res_bma_KRIG(r).LOO.(glacier) + sampledBMA(r).(glacier);
+end
+end
+% clf
+% surf(sweRK(2).G13, 'FaceAlpha',0.5,'LineStyle','none'); hold on
+% plot(E,N,'.k')
 
 %% Plotting -> residuals
     param = 'pred';
@@ -148,30 +183,6 @@ cd ..
 
     saveFIG('residualsKriged','3G')
 
-%% Regression Kriging
-sweRK(9).G4 = 1;
-for r = 2%:9
-    for g = 1:3
-        glacier = char(options.glacier(g));
-        sweRK(r).(glacier) = sweBMS(r).(glacier) + residualsKRIG(r).(glacier).pred;
-    end   
-end
-    
- %Residuals of RK
-for g = 1:3
-    glacier = char(options.glacier(g)); 
-E = (SWE(g).utm(:,1)-min(rig.(glacier)(:,1)))/40;
-    E = floor(E);
-N = (max(rig.(glacier)(:,2))- SWE(g).utm(:,2))/40; 
-    N = floor(N);
-T = sub2ind(size(sweRK(r).(glacier)),N,E);
-sampledRK.(glacier) = sweRK(r).(glacier)(T); 
-residualsRK.(glacier) = SWE(g).swe- sampledRK.(glacier);
-end
-
-clf
-surf(sweRK(2).G13, 'FaceAlpha',0.5,'LineStyle','none'); hold on
-plot(E,N,'.k')
 %% Plotting -> regression kriging
     param = 'RK';
     topoParam.G4  = sweRK(2).G4;
@@ -206,16 +217,13 @@ end
 writetable(nugget, '/Users/Alexandra/Downloads/modelparam.csv','FileType','text')
 
 %% Actual vs fitted data  
-%  for r = 2:9
-r = 8;
-option = r;
-
-figure(1)
+figure(1); clf
 for i = 1:3
     glacier     = char(options.glacier(i));
     yObserved   = SWE(i).swe;
-    yModel      = sampledRK.(glacier);      
-  
+    %yModel      = sampledRK(8).(glacier);      
+    yModel      = sweRK(2).LOO.(glacier);
+    
     subplot(1,3,i)
     axis([0 1.2 0 1.2]);    line = refline(1,0);    line.Color = 'k'; line.LineStyle = '--'; hold on
         plot(yObserved, yModel, '.', 'Color', options.RGB(i,:),'MarkerSize',13); hold on
@@ -228,12 +236,12 @@ for i = 1:3
                 axis square;    box on
         b = gca; legend(b,'off');
         dim = [b.Position(1)+0.01 b.Position(2)+.37 .3 .3];
-        annotation('textbox',dim,'String', ['R^2=',num2str(round(g.(glacier).rsquare,2))],'FitBoxToText','on')
+        annotation('textbox',dim,'String', ['R^2=',num2str(round(g.(glacier).rsquare,2), '%.2f')],'FitBoxToText','on')
 end
 
     fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',13)
     fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 12 4];
-%saveFIG([type,'fit_opt',num2str(r)], '3G')
+saveFIG('krigSWEfit')
 
     clear b coeffs dim f fig filename g glacier i line option p r X yModel yObserved
    
