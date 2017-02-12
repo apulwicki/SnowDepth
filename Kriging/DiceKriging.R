@@ -19,7 +19,16 @@ sizexy = residuals$sizexy
 m = km(~1,design = utm, response = res, covtype = "matern5_2", nugget.estim = TRUE)
 #plot(m)
 #m
+ #Return model paramaters
+ maxLL = -m@logLik
+ intercept = m@trend.coef
+ nugget = m@covariance@nugget
+ model = data.frame(intercept, nugget, maxLL)
 
+ #Cross validation (leave one out)
+ LOO = leaveOneOut.km(m, "SK",trend.reestim = TRUE)
+ 
+ 
 ## Kriging prediction surface ##
 x = seq(from = 0, to = (sizexy[1,2]-1)*40, by = 40)
 y = seq(from = 0, to = (sizexy[1,1]-1)*40, by = 40)
@@ -31,9 +40,11 @@ pred = matrix(pred.m$mean, sizexy[1,1], sizexy[1,2], byrow = TRUE)
 lower95 = matrix(pred.m$lower95, sizexy[1,1], sizexy[1,2], byrow = TRUE)
 upper95 = matrix(pred.m$upper95, sizexy[1,1], sizexy[1,2], byrow = TRUE)
 
-#writeMat('/home/glaciology1/Documents/Data/SnowDepth/Kriging/kriging.mat',pred=pred, lower95=lower95, upper95=upper95,
+#writeMat('/home/glaciology1/Documents/Data/SnowDepth/Kriging/kriging.mat',
+#         pred=pred, lower95=lower95, upper95=upper95, model = model, LOO = LOO,
 #         fixNames=TRUE, matVersion="5", onWrite=NULL, verbose=FALSE)
-  writeMat('/Users/Alexandra/Documents/SFU/Data/SnowDepth/Kriging/kriging.mat',pred=pred, lower95=lower95, upper95=upper95,
+  writeMat('/Users/Alexandra/Documents/SFU/Data/SnowDepth/Kriging/kriging.mat',
+           pred=pred, lower95=lower95, upper95=upper95, model = model, LOO = LOO,
            fixNames=TRUE, matVersion="5", onWrite=NULL, verbose=FALSE)
 
 ## Install and load rgl package

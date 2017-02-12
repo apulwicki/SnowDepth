@@ -78,6 +78,7 @@ options.topoVarsUnits  = { '{\itz} (m a.s.l)','{\itd_C} (m)','\alpha','{\itm} (^
                             '{\itN}','{\kappa} (m^{-1})','Sx'};
 options.topoVars       = { '{\itz}','{\itd_C}','\alpha','{\itm}',...
                             '{\itN}','{\kappa}','Sx'};
+options.densityName    = {'S1','F1','S2','F2','S3','F3','S4','F4'};                        
 
  
                    
