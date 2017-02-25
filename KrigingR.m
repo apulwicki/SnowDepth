@@ -23,7 +23,7 @@ cd Kriging
     save('residuals.mat','res','utm','sizexy')
 
     %Run Dice Kriging in R
-    %!R CMD BATCH BMS_matlab.R
+    %!R CMD BATCH DiceKriging.R
     !/usr/local/bin/R CMD BATCH DiceKriging.R
 
     % load kriged data
