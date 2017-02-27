@@ -1,7 +1,7 @@
 
-R version 3.3.1 (2016-06-21) -- "Bug in Your Hair"
-Copyright (C) 2016 The R Foundation for Statistical Computing
-Platform: x86_64-apple-darwin13.4.0 (64-bit)
+R version 3.2.3 (2015-12-10) -- "Wooden Christmas-Tree"
+Copyright (C) 2015 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -38,8 +38,8 @@ The following objects are masked from ‘package:base’:
 > 
 > 
 > ## Load my data ##
-> residuals = readMat('/Users/Alexandra/Documents/SFU/Data/SnowDepth/Kriging/residuals.mat')
-> #residuals = readMat('/home/glaciology1/Documents/Data/SnowDepth/Kriging/residuals.mat')
+> #residuals = readMat('/Users/Alexandra/Documents/SFU/Data/SnowDepth/Kriging/residuals.mat')
+> residuals = readMat('/home/glaciology1/Documents/Data/SnowDepth/Kriging/residuals.mat')
 > res = residuals$res
 > utm = data.frame(residuals$utm)
 > sizexy = residuals$sizexy
@@ -57,81 +57,30 @@ optimisation start
   - type :  matern5_2 
   - nugget : unknown homogenous nugget effect 
   - parameters lower bounds :  1e-10 1e-10 
-  - parameters upper bounds :  5116.404 5146.066 
+  - parameters upper bounds :  3638.467 3753.048 
   - upper bound for alpha   :  1 
-  - best initial criterion value(s) :  158.2159 
+  - best initial criterion value(s) :  324.8543 
 
 N = 3, M = 5 machine precision = 2.22045e-16
 At X0, 0 variables are exactly at the bounds
-At iterate     0  f=      -158.22  |proj g|=      0.96544
-At iterate     1  f =      -159.47  |proj g|=       0.38057
-At iterate     2  f =      -159.91  |proj g|=       0.26652
-At iterate     3  f =      -160.12  |proj g|=       0.17792
-At iterate     4  f =      -160.12  |proj g|=      0.036045
-At iterate     5  f =      -160.12  |proj g|=     0.0056316
-At iterate     6  f =      -160.12  |proj g|=     0.0043694
-At iterate     7  f =      -160.12  |proj g|=     0.0043715
-At iterate     8  f =      -160.12  |proj g|=      0.012241
-At iterate     9  f =      -160.12  |proj g|=      0.024981
-At iterate    10  f =      -160.12  |proj g|=      0.046598
-At iterate    11  f =      -160.12  |proj g|=      0.080701
-At iterate    12  f =      -160.12  |proj g|=       0.13559
-At iterate    13  f =      -160.12  |proj g|=       0.16567
-At iterate    14  f =      -160.12  |proj g|=        0.1682
-At iterate    15  f =      -160.13  |proj g|=       0.17262
-At iterate    16  f =      -160.13  |proj g|=       0.18044
-At iterate    17  f =      -160.15  |proj g|=       0.19431
-At iterate    18  f =      -160.18  |proj g|=       0.21724
-At iterate    19  f =      -160.25  |proj g|=       0.23787
-At iterate    20  f =      -160.31  |proj g|=       0.24735
-At iterate    21  f =      -160.32  |proj g|=       0.10525
-At iterate    22  f =      -160.33  |proj g|=       0.24636
-At iterate    23  f =      -160.93  |proj g|=       0.87878
-At iterate    24  f =      -160.94  |proj g|=       0.21096
-At iterate    25  f =      -161.04  |proj g|=       0.88512
-At iterate    26  f =      -161.08  |proj g|=       0.93653
-At iterate    27  f =      -161.08  |proj g|=      0.066456
-At iterate    28  f =      -161.09  |proj g|=      0.019476
-At iterate    29  f =      -161.09  |proj g|=      0.020912
-At iterate    30  f =      -161.09  |proj g|=      0.003001
-At iterate    31  f =      -161.09  |proj g|=      0.059536
-At iterate    32  f =      -161.09  |proj g|=      0.059725
-At iterate    33  f =      -161.09  |proj g|=      0.060091
-At iterate    34  f =      -161.09  |proj g|=      0.060683
-At iterate    35  f =      -161.09  |proj g|=      0.061691
-At iterate    36  f =      -161.09  |proj g|=      0.063275
-At iterate    37  f =       -161.1  |proj g|=      0.065674
-At iterate    38  f =      -161.13  |proj g|=      0.068892
-At iterate    39  f =      -161.21  |proj g|=      0.072558
-At iterate    40  f =      -170.77  |proj g|=       0.91375
-ys=-3.258e+00  -gs= 7.086e-01, BFGS update SKIPPED
-At iterate    41  f =      -170.77  |proj g|=       0.91374
-At iterate    42  f =      -170.83  |proj g|=       0.90923
-At iterate    43  f =      -170.83  |proj g|=      0.094946
-At iterate    44  f =      -171.03  |proj g|=       0.88486
-At iterate    45  f =      -187.66  |proj g|=       0.70279
-At iterate    46  f =      -188.09  |proj g|=       0.68889
-At iterate    47  f =      -189.48  |proj g|=       0.51343
-At iterate    48  f =      -189.79  |proj g|=       0.48185
-At iterate    49  f =      -190.57  |proj g|=        0.4555
-At iterate    50  f =       -190.7  |proj g|=       0.61694
-At iterate    51  f =      -190.87  |proj g|=       0.41842
-At iterate    52  f =      -190.87  |proj g|=      0.026011
-At iterate    53  f =      -190.87  |proj g|=     0.0042562
-At iterate    54  f =      -190.87  |proj g|=     0.0018095
-At iterate    55  f =      -190.87  |proj g|=    7.0068e-05
-At iterate    56  f =      -190.87  |proj g|=    7.1975e-07
+At iterate     0  f=      -324.85  |proj g|=      0.99473
+At iterate     1  f =      -354.24  |proj g|=       0.54382
+At iterate     2  f =      -354.73  |proj g|=       0.48895
+At iterate     3  f =      -355.29  |proj g|=       0.63332
+At iterate     4  f =      -355.29  |proj g|=        0.1486
+At iterate     5  f =      -355.29  |proj g|=     0.0033713
+At iterate     6  f =      -355.29  |proj g|=       0.00301
 
-iterations 56
-function evaluations 96
-segments explored during Cauchy searches 59
-BFGS updates skipped 1
+iterations 6
+function evaluations 9
+segments explored during Cauchy searches 7
+BFGS updates skipped 0
 active bounds at final generalized Cauchy point 0
-norm of the final projected gradient 7.1975e-07
-final function value -190.873
+norm of the final projected gradient 0.00301002
+final function value -355.294
 
-F = -190.873
-final  value -190.873219 
+F = -355.294
+final  value -355.293712 
 converged
 > #plot(m)
 > #m
@@ -156,12 +105,12 @@ converged
 > lower95 = matrix(pred.m$lower95, sizexy[1,1], sizexy[1,2], byrow = TRUE)
 > upper95 = matrix(pred.m$upper95, sizexy[1,1], sizexy[1,2], byrow = TRUE)
 > 
-> #writeMat('/home/glaciology1/Documents/Data/SnowDepth/Kriging/kriging.mat',
-> #         pred=pred, lower95=lower95, upper95=upper95, model = model, LOO = LOO,
-> #         fixNames=TRUE, matVersion="5", onWrite=NULL, verbose=FALSE)
->   writeMat('/Users/Alexandra/Documents/SFU/Data/SnowDepth/Kriging/kriging.mat',
-+            pred=pred, lower95=lower95, upper95=upper95, model = model, LOO = LOO,
-+            fixNames=TRUE, matVersion="5", onWrite=NULL, verbose=FALSE)
+> writeMat('/home/glaciology1/Documents/Data/SnowDepth/Kriging/kriging.mat',
++          pred=pred, lower95=lower95, upper95=upper95, model = model, LOO = LOO,
++          fixNames=TRUE, matVersion="5", onWrite=NULL, verbose=FALSE)
+> #  writeMat('/Users/Alexandra/Documents/SFU/Data/SnowDepth/Kriging/kriging.mat',
+> #           pred=pred, lower95=lower95, upper95=upper95, model = model, LOO = LOO,
+> #           fixNames=TRUE, matVersion="5", onWrite=NULL, verbose=FALSE)
 > 
 > ## Install and load rgl package
 > #library(rgl)
@@ -180,4 +129,4 @@ converged
 > 
 > proc.time()
    user  system elapsed 
- 11.985   2.396  15.015 
+  3.904   0.044   3.947 

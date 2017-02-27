@@ -9,8 +9,8 @@ library(DiceOptim)
 
 
 ## Load my data ##
-residuals = readMat('/Users/Alexandra/Documents/SFU/Data/SnowDepth/Kriging/residuals.mat')
-#residuals = readMat('/home/glaciology1/Documents/Data/SnowDepth/Kriging/residuals.mat')
+#residuals = readMat('/Users/Alexandra/Documents/SFU/Data/SnowDepth/Kriging/residuals.mat')
+residuals = readMat('/home/glaciology1/Documents/Data/SnowDepth/Kriging/residuals.mat')
 res = residuals$res
 utm = data.frame(residuals$utm)
 sizexy = residuals$sizexy
@@ -40,12 +40,12 @@ pred = matrix(pred.m$mean, sizexy[1,1], sizexy[1,2], byrow = TRUE)
 lower95 = matrix(pred.m$lower95, sizexy[1,1], sizexy[1,2], byrow = TRUE)
 upper95 = matrix(pred.m$upper95, sizexy[1,1], sizexy[1,2], byrow = TRUE)
 
-#writeMat('/home/glaciology1/Documents/Data/SnowDepth/Kriging/kriging.mat',
-#         pred=pred, lower95=lower95, upper95=upper95, model = model, LOO = LOO,
-#         fixNames=TRUE, matVersion="5", onWrite=NULL, verbose=FALSE)
-  writeMat('/Users/Alexandra/Documents/SFU/Data/SnowDepth/Kriging/kriging.mat',
-           pred=pred, lower95=lower95, upper95=upper95, model = model, LOO = LOO,
-           fixNames=TRUE, matVersion="5", onWrite=NULL, verbose=FALSE)
+writeMat('/home/glaciology1/Documents/Data/SnowDepth/Kriging/kriging.mat',
+         pred=pred, lower95=lower95, upper95=upper95, model = model, LOO = LOO,
+         fixNames=TRUE, matVersion="5", onWrite=NULL, verbose=FALSE)
+#  writeMat('/Users/Alexandra/Documents/SFU/Data/SnowDepth/Kriging/kriging.mat',
+#           pred=pred, lower95=lower95, upper95=upper95, model = model, LOO = LOO,
+#           fixNames=TRUE, matVersion="5", onWrite=NULL, verbose=FALSE)
 
 ## Install and load rgl package
 #library(rgl)

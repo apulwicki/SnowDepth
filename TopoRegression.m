@@ -107,7 +107,7 @@ X = struct2table(topo_sampled_ns.(glacier));
     Ppearson.(glacier)  = round(triu(Ppearson.(glacier)),2);
 end
     
-%% BMS
+%% BMA
 
 for t = 2:9
     swe       = sweOPT(t);

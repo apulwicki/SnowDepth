@@ -7,6 +7,13 @@ global options
 clf
 colormap('default')
 
+%Set up SWE structure if not corretly formated
+if length(SWE) == 1
+   SWEtemp(1).swe = SWE.G4(:,1);    SWEtemp(2).swe = SWE.G2(:,1);    SWEtemp(3).swe = SWE.G13(:,1); 
+   SWEtemp(1).utm = SWE.G4(:,2:3);  SWEtemp(2).utm = SWE.G2(:,2:3);  SWEtemp(3).utm = SWE.G13(:,2:3); 
+   SWE = SWEtemp;
+end
+
 %get colour min max
      %Manual colour range = 1
    fixed_color = 0;
@@ -69,12 +76,14 @@ for i = 1:3
                 end
                 
                 %Plotting dots
-                E = (SWE(i).utm(:,1)-min(SWE(i).utm(:,1)))/40;
-                Na = SWE(i).utm(:,2)-min(SWE(i).utm(:,2)); N = (max(Na)-Na)/40;                
-                if      i==1; E = E+26; N = N+85;
-                    subfig = gcf;
-                elseif  i==2; E = E+11; N = N+49;
-                elseif  i==3; E = E+17; N = N+21; end
+%                 E = (SWE(i).utm(:,1)-min(SWE(i).utm(:,1)))/40;
+%                 Na = SWE(i).utm(:,2)-min(SWE(i).utm(:,2)); N = (max(Na)-Na)/40;                
+%                 if      i==1; E = E+26; N = N+85;
+%                     subfig = gcf;
+%                 elseif  i==2; E = E+11; N = N+49;
+%                 elseif  i==3; E = E+17; N = N+21; end
+                 E = (SWE(i).utm(:,1)-min(options.rig.(name)(:,1)))/40;
+                 Na = SWE(i).utm(:,2)-min(options.rig.(name)(:,2)); N = (max(Na)-Na)/40;                
                 
                 if      strcmp(sweDOTS,'black')
                     plot(E,N,'k.', 'MarkerSize',5); hold on

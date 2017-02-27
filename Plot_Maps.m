@@ -21,17 +21,13 @@ end
 %% SWE at sampling locations
 
 param = 'empty';
-for opt = 2:9
-    run OPTIONS
-    options.DensitySWE = opt;
-    run MAIN
-
+for opt = 2%:9
 topoParam.G4  = NaN(size(topo_full_ns.G4.elevation));
 topoParam.G2  = NaN(size(topo_full_ns.G2.elevation));
 topoParam.G13 = NaN(size(topo_full_ns.G13.elevation));
-topoParam.rig = rig;
+topoParam.rig = options.rig;
 
-PlotTopoParameter(topoParam,param, 'SWE (m w.e.)', SWE, 'colour')
+PlotTopoParameter(topoParam,param, 'SWE (m w.e.)', sweOPT(opt), 'colour')
 
     saveFIG(['SWEmap_opt',num2str(opt)])
 end

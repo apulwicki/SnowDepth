@@ -2,16 +2,16 @@ global options
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% PLOT SAVING PATH %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     %SFU 
-% options.path1       = '/home/glaciology1/Documents/Data/Plots/'; %Plots folder
-% options.path2       = '/home/glaciology1/Documents/MastersDocuments/Thesis/'; %Latex
-% options.path3       = '/home/glaciology1/Documents/MastersDocuments/Methods/'; %Latex
+options.path1       = '/home/glaciology1/Documents/Data/Plots/'; %Plots folder
+options.path2       = '/home/glaciology1/Documents/MastersDocuments/Thesis/'; %Latex
+options.path3       = '/home/glaciology1/Documents/MastersDocuments/Methods/'; %Latex
 
 
     %Laptop
-options.path1     = '/Users/Alexandra/Documents/SFU/Data/Plots/'; %Plots
-options.path2     = '/Users/Alexandra/Documents/SFU/MastersDocuments/Thesis/'; %Latex
-options.path3     = '/Users/Alexandra/Documents/SFU/MastersDocuments/Methods/'; %Latex
-
+% options.path1     = '/Users/Alexandra/Documents/SFU/Data/Plots/'; %Plots
+% options.path2     = '/Users/Alexandra/Documents/SFU/MastersDocuments/Thesis/'; %Latex
+% options.path3     = '/Users/Alexandra/Documents/SFU/MastersDocuments/Methods/'; %Latex
+% 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% TO ZZ OR NOT TO ZZ %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -86,7 +86,7 @@ options.E.(glacier) = (SWE(g).utm(:,1)-min(options.rig.(glacier)(:,1)))/40;
 options.N.(glacier) = (max(options.rig.(glacier)(:,2))- SWE(g).utm(:,2))/40; 
 end
 
-clear topo_full_ns rig SWE
+clear rig 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% EASE OF USE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 
 options.glacier        = {'G4','G2','G13'};
