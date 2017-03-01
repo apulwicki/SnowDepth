@@ -2,7 +2,7 @@ function [ ] = PlotTopoParameter( topoParam, paramName, cLabel, SWE, sweDOTS)
 %UNTITLED3 Summary of this function goes here
 %   Detailed explanation goes here
 global options
-    rig = topoParam.rig;
+    rig = options.rig;
     ELA_d = [1 7; 16 23; 8 15];
 clf
 colormap('default')
@@ -54,12 +54,13 @@ for i = 1:3
                 h = imagesc(data); hold on
                 set(h,'alphadata',~isnan(data)); end
                 
-                if all(isnan(topoParam.(name)(:))) || strcmp(sweDOTS,'symmetric')
-                        minE = min(rig.(name)(:,1));
+                    minE = min(rig.(name)(:,1));
                         minN = min(rig.(name)(:,2));
                     Eg = (rig.(name)(:,1) - minE)/40;
                     Ng = (rig.(name)(:,2) - minN)/40;  Ng = (max(Ng)-Ng);
                     Ng = Ng + (G13size(1,1)-max(Ng));
+                    
+                if all(isnan(topoParam.(name)(:))) || strcmp(sweDOTS,'symmetric')
                     if i ==3 %Deals with G13 multiple parts
                         plot(Eg(1:304),Ng(1:304),'k'); hold on
                         plot(Eg(305:330),Ng(305:330),'k');
@@ -76,15 +77,8 @@ for i = 1:3
                 end
                 
                 %Plotting dots
-%                 E = (SWE(i).utm(:,1)-min(SWE(i).utm(:,1)))/40;
-%                 Na = SWE(i).utm(:,2)-min(SWE(i).utm(:,2)); N = (max(Na)-Na)/40;                
-%                 if      i==1; E = E+26; N = N+85;
-%                     subfig = gcf;
-%                 elseif  i==2; E = E+11; N = N+49;
-%                 elseif  i==3; E = E+17; N = N+21; end
-                 E = (SWE(i).utm(:,1)-min(options.rig.(name)(:,1)))/40;
-                 Na = SWE(i).utm(:,2)-min(options.rig.(name)(:,2)); N = (max(Na)-Na)/40;                
-                
+                 E = (SWE(i).utm(:,1)-minE)/40;
+                 Na = (SWE(i).utm(:,2)-minN)/40; N = max(Ng)-Na;
                 if      strcmp(sweDOTS,'black')
                     plot(E,N,'k.', 'MarkerSize',5); hold on
                     caxis([x_min x_max]); caxis(caxis); 
@@ -128,20 +122,22 @@ end
     annotation('textbox',[.32 .02 .1 .1],'String', 'Glacier 2','EdgeColor','none')
     annotation('textbox',[.6 .02 .1 .1],'String', 'Glacier 13','EdgeColor','none')
 
+%Winter balance
     
 % North arrow
     Narrow = imread('Narrow.jpg');
     a = axes('position',[0.855,0.82,0.12,0.12]); 
-    Nshow = imshow(Narrow, Cmap);
+    imshow(Narrow, Cmap);
     colormap(a,gray)    
     axis off; 
 
 %Scale bar
-    a = axes(subfig); axis off; 
-    scalebar('ScaleLength', .12, 'Location',[0.9,0.95])
+    %a = axes(subfig); 
+    axes('position',[0.7,0.82,0.2,0.12]); axis off; 
+    scalebar('ScaleLength', 0.4, 'Location',[0.58,0.55])
     annotation(gcf,'textbox',[0.8,0.83,.08,.05],...
                 'String',{'2 km'}, 'LineStyle','none','FitBoxToText','off','EdgeColor',[1 1 1],'BackgroundColor',[1 1 1]); hold on
-    annotation(gcf,'textbox',[0.725,0.83,.05,.05],...
+    annotation(gcf,'textbox',[0.727,0.83,.05,.05],...
                 'String',{'0'}, 'LineStyle','none','FitBoxToText','off','EdgeColor',[1 1 1],'BackgroundColor',[1 1 1]); hold on
 
 %Font size and image size           

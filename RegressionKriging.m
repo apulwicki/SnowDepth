@@ -1,4 +1,4 @@
-function [ sweRK, residualsRK ] = RegressionKriging( SWEdata, TOPOdata, I, topo_full )
+function [ sweRK, residualsRK, BMA ] = RegressionKriging( SWEdata, TOPOdata, I, topo_full, SWE )
 %UNTITLED4 Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -24,7 +24,7 @@ end
 
 % Predicting
    %check coeff order - BMS
-    bmaCoeff = BMA.G4.Properties.RowNames(1:end-3);   topoCoeff = fieldnames(topo_full_ns.G4);
+    bmaCoeff = BMA.G4.Properties.RowNames(1:end-3);   topoCoeff = fieldnames(TOPOdata.G4);
     if ~isequal(bmaCoeff, topoCoeff)
         disp('Different order of coefficients between BMA and topo'); return; end
     

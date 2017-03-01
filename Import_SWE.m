@@ -167,8 +167,10 @@ elseif options.DensitySWE == 9 %Inverse distance weighted mean (variable)   SWE 
     end 
 
 end
+       
+%% Order fields
 
-SWE = orderfields(SWE); %alphabetically order the fields   
+    SWE = orderfields(SWE); %alphabetically order the fields   
 
 clear density count i fitDen gof index j weight x X y Y E* N* D bit
 clear SD ZZ

@@ -10,7 +10,6 @@ for r = 1:length(header)
     topoParam.G4  = topo_full_ns.G4.(param);
     topoParam.G2  = topo_full_ns.G2.(param);
     topoParam.G13 = topo_full_ns.G13.(param);
-    topoParam.rig = rig;
 
     PlotTopoParameter(topoParam,param, options.topoVarsUnits(r), SWE, 'black')
     
