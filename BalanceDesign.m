@@ -1,26 +1,33 @@
 %% Selecting Data from Pattern
 
+load TopoSWE.mat
+
 input.SWE = SWE; input.topo_sampled = topo_sampled; 
 input.topo_sampled_ns = topo_sampled_ns;
 
+balanceRK(5).pattern            = 9999;
+balance_residualsRK(5).pattern  = 9999;
+BMAsubset(5).pattern            = 9999;
+
+for S = 3:5
  %Pattern
 subset           = 'pattern';
-option.clt       = 1;
+option.clt       = S;
 
- %Measurement density
-subset           = 'density';
-option.people    = 2;
-option.density   = 3;
+%  %Measurement density
+% subset           = 'density';
+% option.people    = 2;
+% option.density   = 3;
+% 
+%  %Topographic parameter
+% subset           = 'topoparam';
+% option.topo      = 'elevation';
+% option.lessgreat = 'less';
+% option.value     = 2200;
 
- %Topographic parameter
-subset           = 'topoparam';
-option.topo      = 'elevation';
-option.lessgreat = 'less';
-option.value     = 2200;
+[ SWEdata, TOPOdata ] = DataSubset( subset, option, input );
 
-[ SWEdata, TOPOdata, I ] = DataSubset( subset, option, input );
-
-SWEdata = ObsInCell(SWEdata);
+[ SWEdata, TOPOdata ] = ObsInCell(SWEdata, TOPOdata);
 %% Plot - locations
     param = 'empty';
     topoParam.G4  = NaN(options.mapsize(1,:));
@@ -28,22 +35,20 @@ SWEdata = ObsInCell(SWEdata);
     topoParam.G13 = NaN(options.mapsize(3,:));
 
 PlotTopoParameter(topoParam,param, 'SWE (m w.e.)', SWEdata, 'colour')
-    saveFIG('SamplingLocation_subset')
+    saveFIG(['SamplingLocation_subset',num2str(S)])
 
 %% Regression Kriging
  
-[ balanceRK, balance_residualsRK, BMAsubset ] = ...
-    RegressionKriging( SWEdata, TOPOdata, I, topo_full, SWE );
+[ balanceRK(S).(subset), balance_residualsRK(S).(subset), BMAsubset(S).(subset) ] = ...
+    RegressionKriging( SWEdata, TOPOdata, topo_full, SWE );
 
 %% Plot estimate
 
-    param = 'RegressionKriging_subset';
-    topoParam.G4  = balanceRK.G4;
-    topoParam.G2  = balanceRK.G2;
-    topoParam.G13 = balanceRK.G13;
+    param = 'RK';
+    topoParam.G4  = balanceRK(S).(subset).G4;
+    topoParam.G2  = balanceRK(S).(subset).G2;
+    topoParam.G13 = balanceRK(S).(subset).G13;
 
-    PlotTopoParameter(topoParam,param, 'SWE (m w.e.)', SWEdata, 'black')
-    
-     %Save figure
-    %saveFIG(['Map_',param])
- 
+PlotTopoParameter(topoParam,param, 'SWE (m w.e.)', SWEdata, 'black')
+    saveFIG(['Map_',param, subset,num2str(S)])
+ end

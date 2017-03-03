@@ -61,7 +61,7 @@ for i = 1:runs                                  %for number of runs
                              'RowNames', tableRow, 'VariableNames',tableCol)}; %create table with coefficient values for each run
          %RMSE
         y_regress = sum(Vtopo.(glacier).*repmat(BMSg{i,g}{1:end-1,1}',...
-                       length(Vtopo.(glacier)),1),2) + BMSg{i,g}{end,1};  %modelled values   
+                       size(Vtopo.(glacier),1),1),2) + BMSg{i,g}{end,1};  %modelled values   
         rmse.(glacier)(i,1) = sqrt(sum((y(val_ind)-...
                         y_regress).^2)/numel(y_regress)); %RMSE between modelled and observed
 

@@ -1,4 +1,4 @@
-function [ SWEdata, TOPOdata, outI ] = DataSubset( subset, option, input )
+function [ SWEdata, TOPOdata ] = DataSubset( subset, option, input )
 %UNTITLED2 Summary of this function goes here
 %   Detailed explanation goes here
 global options
@@ -72,9 +72,6 @@ end
        P = char(param(t));
        TOPOdata.(glacier).(P) = topo_sampled.(glacier).(P)(I);
     end
-    
-     %Index
-    outI.(glacier) = I;
     
 clear label T I*
 end 
