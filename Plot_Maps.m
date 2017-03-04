@@ -5,13 +5,13 @@ load TopoBMS_MLR
 
 header  = fieldnames(topo_full_ns.G4);
 
-for r = 1:length(header)
+for r = 1%:length(header)
     param = char(header(r));
     topoParam.G4  = topo_full_ns.G4.(param);
     topoParam.G2  = topo_full_ns.G2.(param);
     topoParam.G13 = topo_full_ns.G13.(param);
 
-    PlotTopoParameter(topoParam,param, options.topoVarsUnits(r), SWE, 'black')
+    PlotTopoParameter(topoParam,param, options.topoVarsUnits(r), SWE, 'black', 'nomassB')
     
 %     %Save figure
     saveFIG(['Map_',param])
@@ -32,33 +32,21 @@ PlotTopoParameter(topoParam,param, 'SWE (m w.e.)', sweOPT(opt), 'colour')
 end
 %% Modelled and observed SWE
 
-% modelled = sweMLR;
-% type     = 'MLR';
+modelled = sweMLR;
+type     = 'MLR';
 
-modelled = sweBMS;
-type     = 'BMS';
+% modelled = sweBMS;
+% type     = 'BMS';
 
 % opt      = 8;
- for opt = 2:9
+for opt = 2:9
     topoParam.G4  = modelled(opt).G4;
     topoParam.G2  = modelled(opt).G2;
     topoParam.G13 = modelled(opt).G13;
-    topoParam.rig = rig;
 
-    PlotTopoParameter(topoParam, 'modelledSWE', 'SWE (m w.e.)', SWE, 'sweONswe')
-
-    %Integrated specific winter balance
-       for g = 1:3; glacier = char(options.glacier(g)); 
-        ISWbalance(opt).(glacier) = round(nanmean(modelled(opt).(glacier)(:)),2);
-       end
-       
-    annotation('textbox',[.17 .22 .1 .1],'String',[num2str(ISWbalance(opt).G4, '%.2f'),' m w.e.'],'EdgeColor','none')    
-    annotation('textbox',[.34 .55 .1 .1],'String',[num2str(ISWbalance(opt).G2, '%.2f'),' m w.e.'],'EdgeColor','none')    
-    annotation('textbox',[.75 .53 .1 .1],'String',[num2str(ISWbalance(opt).G13, '%.2f'),' m w.e.'],'EdgeColor','none')    
-    
-    fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18)
-     saveFIG([type,'map_Modelled_Observed',num2str(opt-1)])
- end
+    PlotTopoParameter(topoParam, 'modelledSWE', 'SWE (m w.e.)', SWE, 'sweONswe', 'massB')
+         saveFIG([type,'map_Modelled_Observed',num2str(opt-1)])
+end
     clear filename modelled opt type fig glacier g 
 %% Modelled SWE Difference as %
 % modelled = sweMLR;

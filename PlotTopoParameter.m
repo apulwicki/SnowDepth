@@ -1,4 +1,4 @@
-function [ ] = PlotTopoParameter( topoParam, paramName, cLabel, SWE, sweDOTS)
+function [ ] = PlotTopoParameter( topoParam, paramName, cLabel, SWE, sweDOTS, massB)
 %UNTITLED3 Summary of this function goes here
 %   Detailed explanation goes here
 global options
@@ -117,13 +117,20 @@ elseif all(isnan(topoParam.(name)(:)))
     annotation('arrow',[.76 .70],[.47 .59]) %G13
 end  
 
-%Glacier labels
-    annotation('textbox',[.02 .02 .1 .1],'String', 'Glacier 4','EdgeColor','none')
-    annotation('textbox',[.32 .02 .1 .1],'String', 'Glacier 2','EdgeColor','none')
-    annotation('textbox',[.6 .02 .1 .1],'String', 'Glacier 13','EdgeColor','none')
+% Glacier labels
+    annotation('textbox',[.02 .05 .1 .1],'String', 'Glacier 4','EdgeColor','none','FontWeight','bold')
+    annotation('textbox',[.32 .05 .1 .1],'String', 'Glacier 2','EdgeColor','none','FontWeight','bold')
+    annotation('textbox',[.59 .05 .1 .1],'String', 'Glacier 13','EdgeColor','none','FontWeight','bold')
 
-%Winter balance
-    
+% Winter balance
+     if strcmp(massB, 'massB')
+     annotation('textbox',[.02 0 .1 .1],'String',...
+         [num2str(round(nanmean(topoParam.G4(:)),2), '%.2f'),' m w.e.'],'EdgeColor','none')    
+     annotation('textbox',[.32 0 .1 .1],'String',...
+         [num2str(round(nanmean(topoParam.G2(:)),2), '%.2f'),' m w.e.'],'EdgeColor','none')    
+     annotation('textbox',[.59 0 .1 .1],'String',...
+         [num2str(round(nanmean(topoParam.G13(:)),2), '%.2f'),' m w.e.'],'EdgeColor','none')    
+     end
 % North arrow
     Narrow = imread('Narrow.jpg');
     a = axes('position',[0.855,0.82,0.12,0.12]); 
@@ -131,7 +138,7 @@ end
     colormap(a,gray)    
     axis off; 
 
-%Scale bar
+% Scale bar
     %a = axes(subfig); 
     axes('position',[0.7,0.82,0.2,0.12]); axis off; 
     scalebar('ScaleLength', 0.4, 'Location',[0.58,0.55])
@@ -140,7 +147,7 @@ end
     annotation(gcf,'textbox',[0.727,0.83,.05,.05],...
                 'String',{'0'}, 'LineStyle','none','FitBoxToText','off','EdgeColor',[1 1 1],'BackgroundColor',[1 1 1]); hold on
 
-%Font size and image size           
+% Font size and image size           
     fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18)
     fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 13 6];
 

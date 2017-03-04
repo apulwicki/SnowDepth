@@ -111,13 +111,8 @@ end
     topoParam.G2  = sweRK(2).G2;
     topoParam.G13 = [sweRK(2).G13; nan(10,size(sweRK(2).G13,2))];
     topoParam.G13 = [sweRK(2).G13, nan(size(sweRK(2).G13,1),10)];
-    topoParam.rig = rig;
 
-    PlotTopoParameter(topoParam,param, 'SWE (m w.e.)', SWE, 'sweONswe')
-
-    annotation('textbox',[.17 .22 .1 .1],'String',[num2str(round(nanmean(sweRK(2).G4(:)),2), '%.2f'),' m w.e.'],'EdgeColor','none')    
-    annotation('textbox',[.34 .55 .1 .1],'String',[num2str(round(nanmean(sweRK(2).G2(:)),2), '%.2f'),' m w.e.'],'EdgeColor','none')    
-    annotation('textbox',[.75 .53 .1 .1],'String',[num2str(round(nanmean(sweRK(2).G13(:)),2), '%.2f'),' m w.e.'],'EdgeColor','none')    
+    PlotTopoParameter(topoParam,param, 'SWE (m w.e.)', SWE, 'sweONswe', 'massB')
 
     saveFIG('RegressionKriging','3G')
 
@@ -201,7 +196,26 @@ for i = 1:3
 end
 saveFIG('sweRKfit_allLines')
         clear b p R2value dim f g j r fig filename h i params X y
-    
+
+%% Plotting -> residual distribution (kriged) as % of regressed SWE    
+
+opt = 8;
+for g = 1:3
+    glacier = char(options.glacier(g));
+residualPer.(glacier) = res_bma_KRIG(opt).(glacier).pred./sweBMS(opt).(glacier)*100;
+
+residualPer.(glacier)(isinf(residualPer.(glacier))) = NaN;
+residualPer.(glacier)(residualPer.(glacier) < -100) = -100;
+residualPer.(glacier)(residualPer.(glacier) > 100)  = 100;
+
+residualPer.(glacier) = abs(residualPer.(glacier));
+end
+        
+    PlotTopoParameter(residualPer, 'residual%', {'Kriged residuals as percent', 'of BMA estimate (%)'},...
+                        SWE, 'black', 'NOmassB')
+        saveFIG('Residuals_Percent_BMA','3G')
+
+
 %% Variograms %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 clear
 close all

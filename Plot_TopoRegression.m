@@ -160,6 +160,7 @@ filename = [type,'residuals_all'];
 print([options.path1, filename],'-dpng'); print([options.path2, filename],'-dpng')
     clear edges field line N name option fig filename i r 
     
+        
 %% %%%%%%%%%%%%%%%%%%%%% OTHER %%%%%%%%%%%%%%%%%%%%%
 
 %% Distirbution of # of params from all possible combos 
@@ -301,3 +302,83 @@ boxplot(T,G,'Labels',{'Glacier 4','Glacier 2','Glacier 13'})
     fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18)
      saveFIG(['residuals_box_',method])
  
+%% ALL INTERPOLATION TYPES - MEAN SWE - bar graph
+
+load TopoSWE.mat
+ %2D - option S4
+for opt = 2:9
+for g = 1:3
+    glacier = char(options.glacier(g));
+meanswe(g,:,opt) = [mean(sweOPT(opt).(glacier)(:,1)), ...
+                nanmean(sweBMS(opt).(glacier)(:)),...
+                nanmean(sweKRIG(opt).(glacier).pred(:)),...
+                nanmean(sweRK(opt).(glacier)(:))];
+end
+end
+meanswe = mean(meanswe,3);
+
+B = bar(meanswe, 'EdgeColor','none');
+    ylabel('Mean SWE (m w.e.)')
+    set(gca,'xticklabel',{'Glacier 4','Glacier2','Glacier 13'})
+    legend('Measurement','Topographic regression','Kriging','Regression Kriging')
+
+    colormap = [rgb('Indigo'); rgb('DarkCyan'); rgb('GoldenRod'); rgb('FireBrick')];
+    for i = 1:4
+    B(i).FaceColor = colormap(i,:); end
+
+    fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18)
+saveFIG('InterpMethod_mean')
+
+ % 3D - all density options
+for opt = 2:9
+for g = 1:3
+    glacier = char(options.glacier(g));
+meanswe3.(glacier)(opt-1,:) = [mean(sweOPT(opt).(glacier)(:,1)), ...
+                nanmean(sweBMS(opt).(glacier)(:)),...
+                nanmean(sweKRIG(opt).(glacier).pred(:)),...
+                nanmean(sweRK(opt).(glacier)(:))];
+end
+end
+
+    colormap = [rgb('Indigo'); rgb('DarkCyan'); rgb('GoldenRod'); rgb('FireBrick')];
+for g = 1:3
+    glacier = char(options.glacier(g));
+subplot(1,3,g)
+B = bar(meanswe3.(glacier), 'EdgeColor','none');
+    ylabel('Mean SWE (m w.e.)')
+    ylim([0 0.75])
+    set(gca,'xticklabel',{'S1','F1','S2','F2','S3','F3','S4','F4'})
+        if g == 3;
+        legend('Measurement','Topographic regression','Kriging','Regression Kriging'); end
+    title(options.glacier(g))
+    for i = 1:4
+    B(i).FaceColor = colormap(i,:); end
+end 
+
+saveFIG('InterpMethod_allopts','3G')
+
+%% ALL INTERPOLATION TYPES - R2 - bar graph
+load Topo_Regress_Krig.mat
+
+for opt = 2:9
+for g = 1:3
+    glacier = char(options.glacier(g));
+meanR2(g,:,opt-1) = [corr(sweOPT(opt).(glacier)(:,1), sampledBMA(opt).(glacier))^2, ...
+                      corr(sweOPT(opt).(glacier)(:,1), sampledKRIG(opt).(glacier))^2, ...
+                      corr(sweOPT(opt).(glacier)(:,1), sampledRK(opt).(glacier))^2];
+                      
+end
+end
+meanR2 = mean(meanR2,3);
+
+B = bar(meanR2, 'EdgeColor','none');
+    ylabel('Mean R^2')
+    set(gca,'xticklabel',{'Glacier 4','Glacier 2','Glacier 13'})
+    legend('Topographic regression','Kriging','Regression Kriging')
+
+    colormap = [rgb('Indigo'); rgb('DarkCyan'); rgb('GoldenRod'); rgb('FireBrick')];
+    for i = 2:4
+    B(i-1).FaceColor = colormap(i,:); end
+
+    fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18)
+saveFIG('InterpMethod_meanR2')

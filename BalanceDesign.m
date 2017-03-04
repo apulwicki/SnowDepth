@@ -9,15 +9,16 @@ balanceRK(5).pattern            = 9999;
 balance_residualsRK(5).pattern  = 9999;
 BMAsubset(5).pattern            = 9999;
 
-for S = 3:5
+for S = 2:3
+    for T = 1:3
  %Pattern
-subset           = 'pattern';
-option.clt       = S;
+% subset           = 'pattern';
+% option.clt       = S;
 
 %  %Measurement density
-% subset           = 'density';
-% option.people    = 2;
-% option.density   = 3;
+subset           = 'density';
+option.density   = S;
+option.people    = T;
 % 
 %  %Topographic parameter
 % subset           = 'topoparam';
@@ -34,7 +35,7 @@ option.clt       = S;
     topoParam.G2  = NaN(options.mapsize(2,:));
     topoParam.G13 = NaN(options.mapsize(3,:));
 
-PlotTopoParameter(topoParam,param, 'SWE (m w.e.)', SWEdata, 'colour')
+PlotTopoParameter(topoParam,param, 'SWE (m w.e.)', SWEdata, 'colour', 'NOmassB')
     saveFIG(['SamplingLocation_subset',num2str(S)])
 
 %% Regression Kriging
@@ -49,6 +50,7 @@ PlotTopoParameter(topoParam,param, 'SWE (m w.e.)', SWEdata, 'colour')
     topoParam.G2  = balanceRK(S).(subset).G2;
     topoParam.G13 = balanceRK(S).(subset).G13;
 
-PlotTopoParameter(topoParam,param, 'SWE (m w.e.)', SWEdata, 'black')
-    saveFIG(['Map_',param, subset,num2str(S)])
- end
+PlotTopoParameter(topoParam,param, 'SWE (m w.e.)', SWEdata, 'black', 'massB')
+    saveFIG(['Map_',param, subset,num2str(S),'_numpeople',num2str(T)])
+    end
+end
