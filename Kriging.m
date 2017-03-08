@@ -35,14 +35,9 @@ end
     topoParam.G13 = sweKRIG(2).G13.(param);
     topoParam.rig = rig;
 figure(3)
-    PlotTopoParameter(topoParam,param, 'SWE (m w.e.)', SWE, 'black')
+    PlotTopoParameter(topoParam,param, 'SWE (m w.e.)', SWE, 'black','massB')
 
-    annotation('textbox',[.17 .22 .1 .1],'String',[num2str(round(nanmean(sweKRIG(2).G4.(param)(:)),2), '%.2f'),' m w.e.'],'EdgeColor','none')    
-    annotation('textbox',[.34 .55 .1 .1],'String',[num2str(round(nanmean(sweKRIG(2).G2.(param)(:)),2), '%.2f'),' m w.e.'],'EdgeColor','none')    
-    annotation('textbox',[.75 .53 .1 .1],'String',[num2str(round(nanmean(sweKRIG(2).G13.(param)(:)),2), '%.2f'),' m w.e.'],'EdgeColor','none')    
-      fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18)
-
-    saveFIG('sweKriged')
+    saveFIG('sweKriged','3G')
     
 %% REGRESSION KRIGING
 
@@ -215,7 +210,49 @@ end
                         SWE, 'black', 'NOmassB')
         saveFIG('Residuals_Percent_BMA','3G')
 
+%% Plotting -> all opts kriged SWE map
 
+glacier = 'G2';
+for i = 1:length(options.densityName)
+subplot(4,2,i)
+imagesc(sweKRIG(i+1).(glacier).pred)
+    caxis([0 1.5])
+    axis equal
+    title([options.densityName(i), num2str(nanmean(sweKRIG(i+1).(glacier).pred(:)))])
+end
+
+
+%% Plot -> CI for kriging
+
+opt = 8;
+for g = 1:3
+   glacier = char(options.glacier(g));
+   CI.(glacier) = (sweKRIG(opt).(glacier).upper95 - sweKRIG(opt).(glacier).lower95)...
+       ./sweKRIG(opt).(glacier).pred*100;
+   
+   CI.(glacier)(isinf(CI.(glacier))) = NaN;
+   CI.(glacier)(CI.(glacier)>400) = 400;
+end
+
+PlotTopoParameter(CI,'uncertainity', {'Confidence Interval as','Percent of Kriged SWE'}, ...
+                    sweOPT(opt), 'black', 'NmassB')
+    saveFIG('KrigingCI_percent','3G')
+    
+    
+    
+data = abs(SWE7(2).swe - SWE9(2).swe);
+TT = data>0.01;
+scatter(SWE(2).utm(TT,1), SWE(2).utm(TT,2),20, data(TT),'filled'); colorbar
+TT = data>0.02;
+scatter(SWE(2).utm(TT,1), SWE(2).utm(TT,2),20, data(TT),'filled'); colorbar
+figure
+plot(SWE7(2).swe(TT),'.')
+figure
+plot(SWE9(2).swe(TT),'.')
+hold on
+plot(SWE9(2).swe(TT),'.')
+SWE(2).label(TT)
+    
 %% Variograms %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 clear
 close all

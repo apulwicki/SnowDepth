@@ -1,6 +1,7 @@
 function [ ] = PlotTopoParameter( topoParam, paramName, cLabel, SWE, sweDOTS, massB)
-%UNTITLED3 Summary of this function goes here
-%   Detailed explanation goes here
+%Inputs: data structure, parameter name, colorbar label, full SWE, color of
+%dots, 'massB'
+%Color of dots: black, colour, sweONswe, symmetric
 global options
     rig = options.rig;
     ELA_d = [1 7; 16 23; 8 15];
@@ -41,6 +42,11 @@ if  strcmp(paramName, 'banana') %None need circular phase map, the option remain
     Cmap = phasemap;
 else
     Cmap = parula;
+end
+
+%other color schemes
+if  strcmp(paramName, 'uncertainity')
+    Cmap = cbrewer('seq','OrRd',50,'PCHIP');
 end
  
 for i = 1:3

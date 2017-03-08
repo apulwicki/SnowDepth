@@ -42,7 +42,7 @@ options.ZigzagSWE       = 2;
 
 % Converting to SWE
 
-options.DensitySWE     = 8;
+options.DensitySWE     = 7;
                 % 1 Depth (raw)
                 
                 % 2 Donjek mean density (uniform)       Snowpit
@@ -59,12 +59,12 @@ options.DensitySWE     = 8;
 
 % Number of observations in DEM cell
 
-options.ObsPerCell     = 2;
+options.ObsPerCell     = 1;
                 % 1 all transect measurement
                 % 2 average of all observation in a DEM cell
                 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% GLACIER MAPS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-load('TopoSWE.mat','topo_full_ns', 'rig', 'SWE')
+load('TopoSWE.mat','topo_full_ns', 'rig', 'E', 'N')
 
 % Size of glacier maps
 options.mapsize        = [size(topo_full_ns.G4.elevation);...
@@ -80,13 +80,10 @@ options.mapNaN.G13     = isnan(topo_full_ns.G13.elevation);...
 options.rig            = rig; 
 
 % E and N for imagesc
-for g = 1:3
-    glacier = char(options.glacier(g)); 
-options.E.(glacier) = (SWE(g).utm(:,1)-min(options.rig.(glacier)(:,1)))/40;
-options.N.(glacier) = (max(options.rig.(glacier)(:,2))- SWE(g).utm(:,2))/40; 
-end
+options.E = E;
+options.N = N; 
 
-clear rig 
+clear rig E N
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% EASE OF USE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 
 options.glacier        = {'G4','G2','G13'};

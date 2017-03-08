@@ -382,3 +382,33 @@ B = bar(meanR2, 'EdgeColor','none');
 
     fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18)
 saveFIG('InterpMethod_meanR2')
+
+% 3D - all density options
+for opt = 2:9
+for g = 1:3
+    glacier = char(options.glacier(g));
+meanR2_3.(glacier)(opt-1,:) = [corr(sweOPT(opt).(glacier)(:,1), sampledBMA(opt).(glacier))^2, ...
+                      corr(sweOPT(opt).(glacier)(:,1), sampledKRIG(opt).(glacier))^2, ...
+                      corr(sweOPT(opt).(glacier)(:,1), sampledRK(opt).(glacier))^2];
+end
+end
+
+    colormap = [rgb('DarkCyan'); rgb('GoldenRod'); rgb('FireBrick')];
+for g = 1:3
+    glacier = char(options.glacier(g));
+subplot(1,3,g)
+B = bar(meanR2_3.(glacier), 'EdgeColor','none');
+    ylabel('R^2')
+    ylim([0 1])
+    set(gca,'xticklabel',{'S1','F1','S2','F2','S3','F3','S4','F4'})
+        if g == 3;
+        legend('Topographic regression','Kriging','Regression Kriging'); end
+    title(options.glacier(g))
+    for i = 1:3
+    B(i).FaceColor = colormap(i,:); end
+end 
+
+saveFIG('InterpMethod_alloptsR2')
+
+
+

@@ -59,26 +59,26 @@ optimisation start
   - parameters lower bounds :  1e-10 1e-10 
   - parameters upper bounds :  2645.429 2840.643 
   - upper bound for alpha   :  1 
-  - best initial criterion value(s) :  227.0672 
+  - best initial criterion value(s) :  226.6625 
 
 N = 3, M = 5 machine precision = 2.22045e-16
 At X0, 0 variables are exactly at the bounds
-At iterate     0  f=      -227.07  |proj g|=      0.72552
-At iterate     1  f =      -227.42  |proj g|=      0.045389
-At iterate     2  f =      -227.42  |proj g|=      0.011175
-At iterate     3  f =      -227.42  |proj g|=     0.0021381
-At iterate     4  f =      -227.42  |proj g|=     0.0021374
+At iterate     0  f=      -226.66  |proj g|=      0.60855
+At iterate     1  f =       -227.4  |proj g|=        0.5949
+At iterate     2  f =      -227.41  |proj g|=       0.13365
+At iterate     3  f =      -227.41  |proj g|=     0.0039783
+At iterate     4  f =      -227.41  |proj g|=     0.0017723
 
 iterations 4
-function evaluations 8
+function evaluations 6
 segments explored during Cauchy searches 5
 BFGS updates skipped 0
 active bounds at final generalized Cauchy point 0
-norm of the final projected gradient 0.0021374
-final function value -227.416
+norm of the final projected gradient 0.00177229
+final function value -227.412
 
-F = -227.416
-final  value -227.415534 
+F = -227.412
+final  value -227.412255 
 converged
 > #plot(m)
 > #m
@@ -127,4 +127,4 @@ converged
 > 
 > proc.time()
    user  system elapsed 
-  2.228   0.024   2.252 
+  2.244   0.024   2.271 

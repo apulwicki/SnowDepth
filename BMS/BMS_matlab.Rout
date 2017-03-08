@@ -85,3 +85,25 @@ The following objects are masked from ‘package:base’:
 > ###### Saving to matlab file  
 >   writeMat('/home/glaciology1/Documents/Data/SnowDepth/BMS/R2mat.mat',Gcoeffs=Gcoeffs,
 +            fixNames=TRUE, matVersion="5", onWrite=NULL, verbose=FALSE)
+> #  writeMat('/Users/Alexandra/Documents/SFU/Data/SnowDepth/BMS/R2mat.mat',Gcoeffs=Gcoeffs,
+> #           fixNames=TRUE, matVersion="5", onWrite=NULL, verbose=FALSE)
+>     
+>     
+>     
+>     
+>     
+>     
+>     
+>     
+>     
+>     
+>     
+>     
+>     
+>     
+>     
+>     
+> 
+> proc.time()
+   user  system elapsed 
+  0.532   0.024   0.553 
