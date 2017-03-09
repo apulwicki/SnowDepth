@@ -354,8 +354,9 @@ B = bar(meanswe3.(glacier), 'EdgeColor','none');
     for i = 1:4
     B(i).FaceColor = colormap(i,:); end
 end 
+    fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',19.5)
 
-saveFIG('InterpMethod_allopts','3G')
+saveFIG('InterpMethod_allopts')
 
 %% ALL INTERPOLATION TYPES - R2 - bar graph
 load Topo_Regress_Krig.mat
@@ -407,7 +408,7 @@ B = bar(meanR2_3.(glacier), 'EdgeColor','none');
     for i = 1:3
     B(i).FaceColor = colormap(i,:); end
 end 
-
+    fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',19.5)
 saveFIG('InterpMethod_alloptsR2')
 
 

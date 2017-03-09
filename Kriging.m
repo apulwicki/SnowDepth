@@ -234,7 +234,7 @@ for g = 1:3
    CI.(glacier)(CI.(glacier)>400) = 400;
 end
 
-PlotTopoParameter(CI,'uncertainity', {'Confidence Interval as','Percent of Kriged SWE'}, ...
+PlotTopoParameter(CI,'uncertainity', {'Confidence Interval as','Percent of Kriged SWE (%)'}, ...
                     sweOPT(opt), 'black', 'NmassB')
     saveFIG('KrigingCI_percent','3G')
     
@@ -247,8 +247,6 @@ TT = data>0.02;
 scatter(SWE(2).utm(TT,1), SWE(2).utm(TT,2),20, data(TT),'filled'); colorbar
 figure
 plot(SWE7(2).swe(TT),'.')
-figure
-plot(SWE9(2).swe(TT),'.')
 hold on
 plot(SWE9(2).swe(TT),'.')
 SWE(2).label(TT)
