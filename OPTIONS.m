@@ -42,7 +42,7 @@ options.ZigzagSWE       = 2;
 
 % Converting to SWE
 
-options.DensitySWE     = 7;
+options.DensitySWE     = 8;
                 % 1 Depth (raw)
                 
                 % 2 Donjek mean density (uniform)       Snowpit
@@ -59,7 +59,7 @@ options.DensitySWE     = 7;
 
 % Number of observations in DEM cell
 
-options.ObsPerCell     = 1;
+options.ObsPerCell     = 2;
                 % 1 all transect measurement
                 % 2 average of all observation in a DEM cell
                 

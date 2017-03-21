@@ -250,6 +250,14 @@ plot(SWE7(2).swe(TT),'.')
 hold on
 plot(SWE9(2).swe(TT),'.')
 SWE(2).label(TT)
+
+
+%% Cross correlation with elevation
+
+[acor,lag] = xcorr(SWE(3).swe,topo_sampled_ns.G13.elevation);
+
+[~,I] = max(abs(acor));
+lagDiff = lag(I)
     
 %% Variograms %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 clear

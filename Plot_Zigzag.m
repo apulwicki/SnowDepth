@@ -1,8 +1,6 @@
 %% Plotting zigzag data - all zigs for each G
 
-% run OPTIONS.m
-% options.ZZ = 3; %only zigzags
-% run MAIN
+load('ZigZagSWE.mat')
 
 FS = 16; %fontsize
 MinMaxC = [0 220]; ABC = ['a','b','c','d'];
@@ -202,78 +200,76 @@ plot([0 size(section_sum,1)],[mean(vertex_spacing(:,1)) mean(vertex_spacing(:,1)
 
 %% Probably density function
 
-%Remove zigzag values
-run OPTIONS.m; options.ZZ = 2;
-run MAIN.m
+load TopoSWE.mat
 
 %Histogram with individal zigzags divided into glaciers
-glacier = {'G4','G2','G13'}; 
+clf
 for i = 1:3
-        name    = char(glacier(i)); 
-        bins    = round(sqrt(length(SWE(i).swe)/3));
+        name    = char(options.glacier(i)); 
+        bins    = round(sqrt(length(SWEzz(i).swe)/3));
         N       = zeros(3,bins); edges = zeros(3,bins+1);
-        zz      = categories(SWE(i).ZZ);
+        zz      = categories(SWEzz(i).ZZ);
         
         subplot(3,1,i)
         for j = 1:length(zz)
-        [N(j,:), edges(j,:)] = histcounts(SWE(i).swe(SWE(i).ZZ==char(zz(j))),bins);
+            ZZdata = SWEzz(i).swe(SWEzz(i).ZZ==char(zz(j)));
+            ZZdata = (ZZdata-mean(ZZdata))/std(ZZdata);
+            display([zz(j), num2str(chi2gof(ZZdata)), num2str(std(SWEzz(i).swe(SWEzz(i).ZZ==char(zz(j)))))])
+        [N(j,:), edges(j,:)] = histcounts(ZZdata,bins);
             plot((edges(j,1:end-1)+edges(j,2:end))/2,N(j,:),'LineWidth',2); hold on 
-            xlabel('SWE (m)');     ylabel('Freq.')
+            xlabel('Standardized SWE');     ylabel('Frequency')
             title(name)
         end
             legend(zz)
-            xlim([0 0.9]);         ylim([0 70]);
+             xlim([-6 6]);         ylim([0 60]);
 end
         fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',13) 
         fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 8 12];
-filename = 'ZigzagHist';
-print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
+saveFIG('ZigzagPDF');
 
-%Histogram of all zigzag data for each glacier
+%% Histogram of all zigzag data for each glacier
 glacier = {'G4','G2','G13'}; 
+clf
 for i = 1:3
         name    = char(glacier(i)); 
         bins    = round(sqrt(length(SWEzz(i).swe)));
         N       = zeros(3,bins); edges = zeros(3,bins+1);
-        
-        [N(i,:), edges(i,:)] = histcounts(SWEzz(i).swe,bins);
+        ZZdata  = (SWEzz(i).swe-mean(SWEzz(i).swe))/std(SWEzz(i).swe);
+            
+        [N(i,:), edges(i,:)] = histcounts(ZZdata,bins);
             plot((edges(i,1:end-1)+edges(i,2:end))/2,N(i,:),'LineWidth',2,'Color',options.RGB(i,:)); hold on 
             xlabel('SWE (m)');     ylabel('Freq.')
+            xlim([-4 4]);         
+
 end
             title('Histogram of Zigzag SWE');    legend(glacier);     
         fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',13) 
         fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 11 8];
-filename = 'ZigzagHist_G';
-print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
+saveFIG('ZigzagPDF_G');
 
 
-
-%Probability Density Function
+%% Probability Density Function -> Fitted
+figure
 %G4
 data = SWEzz(1).swe;
 chi2gof(data(SWEzz(1).ZZ=='G04\_Z2A'))
 chi2gof(data(SWEzz(1).ZZ=='G04\_Z3A'))
 chi2gof(data(SWEzz(1).ZZ=='G04\_Z5B'))
-
-[d pd] = allfitdist(data(SWEzz(1).ZZ=='G04\_Z2A')); d(1)
-[d pd] = allfitdist(data(SWEzz(1).ZZ=='G04\_Z3A')); d(1)
-[d pd] = allfitdist(data(SWEzz(1).ZZ=='G04\_Z5B')); d(1)
+% 
+% [d pd] = allfitdist(data(SWEzz(1).ZZ=='G04\_Z2A')); d(1)
+% [d pd] = allfitdist(data(SWEzz(1).ZZ=='G04\_Z3A')); d(1)
+% [d pd] = allfitdist(data(SWEzz(1).ZZ=='G04\_Z5B')); d(1)
 
 [pdca,gn,~] = fitdist(data,'Normal','By',SWEzz(1).ZZ);
 Z2A = pdca{1};      Z3A = pdca{2};      Z5B = pdca{3};
 x_values = 0:0.01:1;
 Z2Apdf = pdf(Z2A,x_values);     Z3Apdf = pdf(Z3A,x_values);     Z5Bpdf = pdf(Z5B,x_values);
-    figure
+    subplot(3,1,1)
     plot(x_values,Z2Apdf,'LineWidth',2); hold on
     plot(x_values,Z3Apdf,'LineWidth',2); hold on
     plot(x_values,Z5Bpdf,'LineWidth',2);
     legend(gn,'Location','NorthEast')
     title('G4'); xlabel('SWE (m)'); ylabel('Probability density (m^{-1})');
-    hold off
-        fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',13) 
-        fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 10 10];
-    filename = 'PDFG4_';
-    print([options.path1, filename],'-dpng','-r0'); print([options.path2, filename],'-dpng','-r0')
 
 %G2
 data = SWEzz(2).swe;
@@ -281,33 +277,40 @@ chi2gof(data(SWEzz(2).ZZ=='G02\_Z3B'))
 chi2gof(data(SWEzz(2).ZZ=='G02\_Z5C'))
 chi2gof(data(SWEzz(2).ZZ=='G02\_Z7A'))
 
-[d, pd] = allfitdist(data(SWEzz(2).ZZ=='G02\_Z3B')); d(1)
+% [d, pd] = allfitdist(data(SWEzz(2).ZZ=='G02\_Z3B')); d(1)
 
 
 [pdca,gn,~] = fitdist(data,'Normal','By',SWEzz(2).ZZ);
 x_values = 0:0.01:1;
 Z3B = pdca{1};                  Z5C = pdca{2};                  Z7A = pdca{3};
 Z3Bpdf = pdf(Z3B,x_values);     Z5Cpdf = pdf(Z5C,x_values);     Z7Apdf = pdf(Z7A,x_values);
-    figure
+    subplot(3,1,2)
     plot(x_values,Z3Bpdf,'LineWidth',2); hold on
     plot(x_values,Z5Cpdf,'LineWidth',2); hold on
     plot(x_values,Z7Apdf,'LineWidth',2);
     legend(gn,'Location','NorthEast')
     title('G2')
-    hold off
     
 %G13
+data = SWEzz(3).swe;
+    chi2gof(data(SWEzz(3).ZZ=='G13\_Z3B'))
+    chi2gof(data(SWEzz(3).ZZ=='G13\_Z4C'))
+    chi2gof(data(SWEzz(3).ZZ=='G13\_Z5A'))
+    chi2gof(data(SWEzz(3).ZZ=='G13\_Z7C'))
+
 data = SWEzz(3).swe;
 [pdca,gn,~] = fitdist(data,'Normal','By',SWEzz(3).ZZ);
 x_values = 0:0.01:1;
 Z3B = pdca{1};              Z4C = pdca{2};              Z5A = pdca{3};              Z7C = pdca{4};
 Z3Bpdf = pdf(Z3B,x_values); Z4Cpdf = pdf(Z4C,x_values);	Z5Apdf = pdf(Z5A,x_values); Z7Cpdf = pdf(Z7C,x_values); 
-    figure
+    subplot(3,1,3)
     plot(x_values,Z3Bpdf,'LineWidth',2); hold on
     plot(x_values,Z4Cpdf,'LineWidth',2); hold on
     plot(x_values,Z5Apdf,'LineWidth',2); hold on
     plot(x_values,Z7Cpdf,'LineWidth',2);
     legend(gn,'Location','NorthEast')
     title('G13')
-    hold off    
-    
+
+        fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',13) 
+        fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 10 10];
+

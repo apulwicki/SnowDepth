@@ -218,6 +218,50 @@ end
     close all
     clear v i r name header glacier N* a filename edges* param fig units dim h 
     
+%% Percent area of glacier reprented by sampled topo
+
+param = fieldnames(topo_sampled_ns.G4);
+Pcovered = zeros(length(param),3);
+
+for g = 1:3
+    glacier = char(options.glacier(g));
+for f = 1:length(param)
+    F = char(param(f));
+
+    smin = min(topo_sampled_ns.(glacier).(F));
+    smax = max(topo_sampled_ns.(glacier).(F));
+    
+    I = topo_full_ns.(glacier).(F) >= smin & topo_full_ns.(glacier).(F) <= smax; 
+
+    Pcovered(f,g) = sum(I(:))/sum(~isnan(topo_full_ns.(glacier).(F)(:)))*100;
+end
+end
+
+ %Plot as bar graph
+b = bar(Pcovered);
+    for i = 1:3
+    b(i).FaceColor = options.RGB(i,:); 
+    b(i).EdgeColor = 'none';     end
+    set(gca,'xticklabel',options.topoVars)
+    ylabel('Percent area (%)')
+    legend('Glacier 4','Glacier 2','Glacier 13')
+        saveFIG('Percent_area_sampled_param')
+        
+ %Plot maps of area covered
+header  = fieldnames(IP.G4);
+for r = 1%:length(header)
+    param = char(header(r));
+    topoParam.G4  = IP.G4.(param);
+    topoParam.G2  = IP.G2.(param);
+    topoParam.G13 = IP.G13.(param);
+
+    PlotTopoParameter(topoParam,param, options.topoVarsUnits(r), SWE, 'black', 'nomassB')
+    
+     %Save figure
+    %saveFIG(['Map_',param])
+end 
+    clear r topoParam param header
+        
 %% Plotting - MLR and BMS coeffs
 II = 3; %Include intercept =2, exlude = 3
 %Rearrange to compare density options

@@ -39,19 +39,23 @@ if length(SWE) == 3;
            data(ind(1,1),1)      = mean(data(ind));
                 if strcmp(param,'swe')
                     data(ind(1,1),2) = std(data(ind)); 
-                    data(data(:,2)==0,2) = NaN;
+                     data(data(:,2)==0,2) = NaN;
+                    data(ind,3) = (data(ind)-mean(data(ind)))/std(data(ind));
+                     data(data(:,3)==0,3) = NaN;
                 end
            end
            data(ind(2:end,1),:)    = [];
            A1(ind(2:end,1))     = [];
         end
         SWE(g).(param) = data;     
-        end    
+        end
+        
     end
     
     for g = 1:3
-       SWE(g).cellstd = SWE(g).swe(:,2);
-       SWE(g).swe(:,2) = [];
+       SWE(g).cellstd  = SWE(g).swe(:,2);
+       SWE(g).standard = SWE(g).swe(:,3);
+       SWE(g).swe(:,2:3) = [];       
     end
     
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

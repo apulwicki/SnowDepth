@@ -235,6 +235,28 @@ saveFIG('AllSWEopts_boxplot')
 clear text* fig filename cats swedata group g opt stats p t glacier
 
 
+%% PDF for one measurement locations
+clear SWE Density
+
+run MeasurementLocations.m  %This program determines the easting and northing of transect measurements
+run Import_Density.m        %Imports snow density values
+run Import_Transect.m       %Imports transect snow depth and measurement location data
+
+clf
+cats = {'G04','G02','G13'};
+for i = 1:3
+data = [];
+for g = 1:3
+   data = [data; SD(g).depth(SD(g).glacier == cats(i),1:4)]; 
+end   
+   data = (data - repmat(nanmean(data,2),1,4))./repmat(nanstd(data, [], 2),1,4);
+   bins = round(sqrt(numel(data))/3);
+   [N, edges] = histcounts(data(:),bins);
+figure(1);    plot((edges(:,1:end-1)+edges(:,2:end))/2,N,'LineWidth',2); hold on
+end
+            xlabel('Standardized SWE in measurement location'); ylabel('Frequency')
+            legend(options.glacier)
+% xlim([-1.5 1.5])
 %% Std in one DEM cell
 
 clf
@@ -247,3 +269,51 @@ boxplot(T,G,'Labels',{'Glacier 4','Glacier 2','Glacier 13'})
     ylabel([{'Standard deviation of SWE'},{'within DEM cell'}])
     fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',16)
      saveFIG('DEMcellSTD')
+     
+%% PDF in one DEM cell
+
+clf
+for g = 1:3;
+glacier = char(options.glacier(g));
+
+data = SWE(g).standard(~isnan(SWE(g).standard));
+
+bins = round(sqrt(numel(data))/3);
+    [N, edges] = histcounts(data(:),bins);
+figure(1);    plot((edges(:,1:end-1)+edges(:,2:end))/2,N,'LineWidth',2); hold on
+              xlabel('Standardized SWE in one DEM cell'); ylabel('Frequency')
+end
+legend(options.glacier)
+xlim([-1.5 1.5])
+     
+%% Density Options for SWE PDF
+
+clf
+for g = 1:3;
+glacier = char(options.glacier(g));
+clear data M S
+    for i = 2:9
+        data(:,i-1) = sweOPT(i).(glacier)(:,1);  
+    end
+ M = mean(data,2);      M = repmat(M,1,8);
+ S = std(data,[],2);    S = repmat(S,1,8);
+ data = (data-M)./S;
+ 
+ bins = round(sqrt(numel(data))/3);
+    [N, edges] = histcounts(data(:),bins);
+figure(1);    plot((edges(:,1:end-1)+edges(:,2:end))/2,N,'LineWidth',2); hold on
+              xlabel('Standardized SWE'); ylabel('Frequency')
+
+bins = round(sqrt(length(S))/3);
+    [N, edges] = histcounts(S(:,1),bins);
+figure(2);    plot((edges(:,1:end-1)+edges(:,2:end))/2,N,'LineWidth',2); hold on
+              xlabel('Standard Deviation due to Density Option'); ylabel('Frequency')
+mean(S(:,1))
+end
+legend(options.glacier)
+% for j = 1:length(data)
+%     DD = data(:);%(data(j,:)-mean(data(j,:)))/std(data(j,:));
+%     [N, edges] = histcounts(DD,bins);
+%     plot((edges(:,1:end-1)+edges(:,2:end))/2,N,'LineWidth',2); hold on
+% end
+
