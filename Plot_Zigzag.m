@@ -203,50 +203,31 @@ plot([0 size(section_sum,1)],[mean(vertex_spacing(:,1)) mean(vertex_spacing(:,1)
 load TopoSWE.mat
 
 %Histogram with individal zigzags divided into glaciers
-clf
+figure(3)
+clf; clc
 for i = 1:3
         name    = char(options.glacier(i)); 
-        bins    = round(sqrt(length(SWEzz(i).swe)/3));
-        N       = zeros(3,bins); edges = zeros(3,bins+1);
         zz      = categories(SWEzz(i).ZZ);
         
         subplot(3,1,i)
         for j = 1:length(zz)
+            if j ==1;
+                bins    = round(sqrt(length(SWEzz(i).swe)/3));
+                N       = zeros(3,bins); edges = zeros(3,bins+1);   end
             ZZdata = SWEzz(i).swe(SWEzz(i).ZZ==char(zz(j)));
-            ZZdata = (ZZdata-mean(ZZdata))/std(ZZdata);
+            ZZdata = (ZZdata-mean(ZZdata));%/std(ZZdata);
             display([zz(j), num2str(chi2gof(ZZdata)), num2str(std(SWEzz(i).swe(SWEzz(i).ZZ==char(zz(j)))))])
         [N(j,:), edges(j,:)] = histcounts(ZZdata,bins);
             plot((edges(j,1:end-1)+edges(j,2:end))/2,N(j,:),'LineWidth',2); hold on 
-            xlabel('Standardized SWE');     ylabel('Frequency')
+            xlabel('SWE about local mean (m w.e.)');     ylabel('Frequency')
             title(name)
         end
             legend(zz)
-             xlim([-6 6]);         ylim([0 60]);
+ %            xlim([-6 6]);         ylim([0 60]);
 end
         fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',13) 
         fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 8 12];
 saveFIG('ZigzagPDF');
-
-%% Histogram of all zigzag data for each glacier
-glacier = {'G4','G2','G13'}; 
-clf
-for i = 1:3
-        name    = char(glacier(i)); 
-        bins    = round(sqrt(length(SWEzz(i).swe)));
-        N       = zeros(3,bins); edges = zeros(3,bins+1);
-        ZZdata  = (SWEzz(i).swe-mean(SWEzz(i).swe))/std(SWEzz(i).swe);
-            
-        [N(i,:), edges(i,:)] = histcounts(ZZdata,bins);
-            plot((edges(i,1:end-1)+edges(i,2:end))/2,N(i,:),'LineWidth',2,'Color',options.RGB(i,:)); hold on 
-            xlabel('SWE (m)');     ylabel('Freq.')
-            xlim([-4 4]);         
-
-end
-            title('Histogram of Zigzag SWE');    legend(glacier);     
-        fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',13) 
-        fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 11 8];
-saveFIG('ZigzagPDF_G');
-
 
 %% Probability Density Function -> Fitted
 figure
@@ -314,3 +295,103 @@ Z3Bpdf = pdf(Z3B,x_values); Z4Cpdf = pdf(Z4C,x_values);	Z5Apdf = pdf(Z5A,x_value
         fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',13) 
         fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 10 10];
 
+%% Chi squared normal distribution test
+figure(1); clf
+figure(2); clf
+ %Prob that normal and ZZ dist are different (>0.05 means ZZ data is
+ %normal)
+clc
+for g = 1:3
+    allZZ = categories(SWEzz(g).ZZ);
+    for z = 1:length(allZZ)
+        tempZZ = allZZ(z);
+        data = SWEzz(g).swe(SWEzz(g).ZZ == tempZZ);
+             cv = std(data)/mean(data);
+        data = (data-mean(data));%/std(data);
+        [~,chiP] = chi2gof(data);
+           
+        display([tempZZ, num2str(chiP), num2str(cv)])
+    end
+end
+
+ % Glacier wide ZZ data compiled
+figure(1); clf
+fullZZ = []; 
+for g = 1:3
+    allZZ = categories(SWEzz(g).ZZ);
+    gZZ = [];
+    for z = 1:length(allZZ)
+        tempZZ = allZZ(z);
+        if ~strcmp(tempZZ,'G02\_Z7A')
+        data = SWEzz(g).swe(SWEzz(g).ZZ == tempZZ);
+        data = (data-mean(data));%/std(data);
+        gZZ = [gZZ; data];
+        fullZZ = [fullZZ; data];
+        end
+    end
+    
+    glacier = char(options.glacier(g));
+    [~,chiP] = chi2gof(gZZ);
+    display([glacier, ' ', num2str(chiP)])
+     figure(1); 
+    if g ==1;
+     bins    = round(sqrt(length(gZZ))); end
+    N       = zeros(3,bins); edges = zeros(3,bins+1);
+    [N(g,:), edges(g,:)] = histcounts(gZZ,bins);
+            plot((edges(g,1:end-1)+edges(g,2:end))/2,N(g,:),'LineWidth',2,'Color',options.RGB(g,:)); hold on 
+
+     figure(2);
+    normALL = normpdf(gZZ,mean(gZZ),std(gZZ));
+    [gZZ, I] = sort(gZZ);
+    plot(gZZ,normALL(I),'LineWidth',2,'Color',options.RGB(g,:)); hold on
+
+end
+    [~,chiP] = chi2gof(fullZZ);
+    display(['All zigzags ', num2str(chiP)])
+     figure(1)
+%     bins    = round(sqrt(length(fullZZ)));
+    N       = zeros(3,bins); edges = zeros(3,bins+1);
+    [N(g,:), edges(g,:)] = histcounts(fullZZ,bins);
+            plot((edges(g,1:end-1)+edges(g,2:end))/2,N(g,:),'LineWidth',2,'Color','k','LineStyle','--');
+            xlabel('SWE about local mean (m w.e.)');     ylabel('Frequency')
+%             xlim([-6 6]);         
+            
+        legend([options.glacier,{'All zigzags'}]);     
+        fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',13) 
+        fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 11 8];
+saveFIG('ZigzagPDF_G');
+
+ 
+ %Normal Dist
+  figure(2);
+normALL = normpdf(fullZZ,mean(fullZZ),std(fullZZ));
+[fullZZ, I] = sort(fullZZ);
+plot(fullZZ,normALL(I),'LineWidth',2,'Color','k','LineStyle','--')
+        legend([options.glacier,{'All zigzags'}]);     
+        xlabel('SWE about local mean (m w.e.)');     ylabel('Freqency')
+        fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',13) 
+        fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 11 8];
+
+ 
+ %Confidence Interval
+[mu,s,muci,sci] = normfit(fullZZ);
+muci
+
+%% Kruskal Wallis Test
+
+clc; close all
+S = 200;
+data = nan(S,1);
+for g = 1:3
+    allZZ = categories(SWEzz(g).ZZ);
+    for z = 1:length(allZZ)
+        tempZZ = allZZ(z);
+        D = SWEzz(g).swe(SWEzz(g).ZZ == tempZZ)-mean(SWEzz(g).swe(SWEzz(g).ZZ == tempZZ));
+        data = [data, [D; nan(S-length(D),1)]];
+    end
+end
+data = data(:,2:end);
+%data(:,6) = [];
+
+[kw, ~, stats] = kruskalwallis(data)
+multcompare(stats)

@@ -40,8 +40,10 @@ if length(SWE) == 3;
                 if strcmp(param,'swe')
                     data(ind(1,1),2) = std(data(ind)); 
                      data(data(:,2)==0,2) = NaN;
-                    data(ind,3) = (data(ind)-mean(data(ind)))/std(data(ind));
+                    data(ind,3) = (data(ind)-mean(data(ind)));%/std(data(ind));
                      data(data(:,3)==0,3) = NaN;
+                    data(ind,4) = length(ind);
+                     data(data(:,4)==0,4) = NaN;
                 end
            end
            data(ind(2:end,1),:)    = [];
@@ -53,9 +55,11 @@ if length(SWE) == 3;
     end
     
     for g = 1:3
-       SWE(g).cellstd  = SWE(g).swe(:,2);
-       SWE(g).standard = SWE(g).swe(:,3);
-       SWE(g).swe(:,2:3) = [];       
+       SWE(g).cellstd   = SWE(g).swe(:,2);
+       SWE(g).standard  = SWE(g).swe(:,3);
+       SWE(g).numObs    = SWE(g).swe(:,4); 
+        SWE(g).numObs(isnan(SWE(g).numObs)) = 1;
+       SWE(g).swe(:,2:4) = [];       
     end
     
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

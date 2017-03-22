@@ -235,29 +235,36 @@ saveFIG('AllSWEopts_boxplot')
 clear text* fig filename cats swedata group g opt stats p t glacier
 
 
-%% PDF for one measurement locations
-clear SWE Density
+%% Variability for one measurement location
 
+clf;clc
 run MeasurementLocations.m  %This program determines the easting and northing of transect measurements
 run Import_Density.m        %Imports snow density values
 run Import_Transect.m       %Imports transect snow depth and measurement location data
-
-clf
-cats = {'G04','G02','G13'};
-for i = 1:3
-data = [];
-for g = 1:3
-   data = [data; SD(g).depth(SD(g).glacier == cats(i),1:4)]; 
-end   
-   data = (data - repmat(nanmean(data,2),1,4))./repmat(nanstd(data, [], 2),1,4);
-   bins = round(sqrt(numel(data))/3);
+glacier_list = ['G04';'G02';'G13']; %for selecting data from chosen glacier
+for i = 1:3 %go through each glacier
+    glacier = glacier_list(i,:);    
+    G = char(options.glacier(i));
+        %z = pulldata(data, book, glacier, person, pattern, quality, format)
+    z = pulldata(SD,'all',glacier,'all','all',1,'fat'); % pull transect data  
+   
+   data = z(5).depth(:,1:4);
+   data = (data - repmat(nanmean(data,2),1,4))/100*mean(cell2mat(Density.snowpit(:,2)))/1000;%./repmat(nanstd(data, [], 2),1,4);
+        chi2gof(data(:))
+   VARoneloc.(G) = data;
+   if i==1;     bins = round(sqrt(numel(data))/3);  end
    [N, edges] = histcounts(data(:),bins);
 figure(1);    plot((edges(:,1:end-1)+edges(:,2:end))/2,N,'LineWidth',2); hold on
 end
-            xlabel('Standardized SWE in measurement location'); ylabel('Frequency')
+            xlabel('SWE about local mean (m)'); ylabel('Frequency')
             legend(options.glacier)
-% xlim([-1.5 1.5])
-%% Std in one DEM cell
+            title('SWE (S1) variation at single measurement location')
+            xlim([-0.4 0.4])
+ saveFIG('SWEvarOneLocHIST')
+
+ 
+ 
+%% Varibaility in one DEM cell (multiple measurement locations)
 
 clf
  %Boxplot
@@ -270,25 +277,51 @@ boxplot(T,G,'Labels',{'Glacier 4','Glacier 2','Glacier 13'})
     fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',16)
      saveFIG('DEMcellSTD')
      
-%% PDF in one DEM cell
-
+% PDF 
 clf
 for g = 1:3;
 glacier = char(options.glacier(g));
 
 data = SWE(g).standard(~isnan(SWE(g).standard));
+chi2gof(data)
 
-bins = round(sqrt(numel(data))/3);
+if g == 1; bins = round(sqrt(numel(data))/3); end
     [N, edges] = histcounts(data(:),bins);
 figure(1);    plot((edges(:,1:end-1)+edges(:,2:end))/2,N,'LineWidth',2); hold on
-              xlabel('Standardized SWE in one DEM cell'); ylabel('Frequency')
+              xlabel('SWE about local mean (m w.e.)'); ylabel('Frequency')
+              title({'SWE variability due to multiple measurement','locations in one grid cell'})
 end
 legend(options.glacier)
-xlim([-1.5 1.5])
-     
-%% Density Options for SWE PDF
+saveFIG('SWEvarMeasureLocHIST')
 
+% Plot -> map of cell std values
+    topoParam.G4  = NaN(size(topo_full_ns.G4.elevation));
+    topoParam.G2  = NaN(size(topo_full_ns.G2.elevation));
+    topoParam.G13 = NaN(size(topo_full_ns.G13.elevation));
+    stdtemp(1).swe = SWE(1).cellstd;    stdtemp(1).utm = SWE(1).utm(:,1:2);
+    stdtemp(2).swe = SWE(2).cellstd;    stdtemp(2).utm = SWE(2).utm(:,1:2);
+    stdtemp(3).swe = SWE(3).cellstd;    stdtemp(3).utm = SWE(3).utm(:,1:2);
+
+PlotTopoParameter(topoParam,'std in one grid cell', 'Standard Deviation (m w.e.)', stdtemp, 'colour', 'nomassB')
+    saveFIG('Map_cellstd_measureLoc')
+     
+    
+% Plot -> Hist of # of obs in one dem cell
 clf
+for g = 1:3
+   subplot(1,3,g)
+   edges = 0.5:7.5;
+   histogram(SWE(g).numObs,edges,'FaceColor',options.RGB(g,:));   
+    xlim([0.5 7.5]); xlabel('Number of observations in a DEM cell')
+    ylim([0 170]);                      ylabel('Frequency')
+    title(options.glacier(g))
+end
+    
+%% Variability due to density options 
+
+ %PDF
+figure(1); clf
+figure(2); clf
 for g = 1:3;
 glacier = char(options.glacier(g));
 clear data M S
@@ -297,23 +330,45 @@ clear data M S
     end
  M = mean(data,2);      M = repmat(M,1,8);
  S = std(data,[],2);    S = repmat(S,1,8);
- data = (data-M)./S;
+ data = (data-M);%./S;
  
  bins = round(sqrt(numel(data))/3);
     [N, edges] = histcounts(data(:),bins);
 figure(1);    plot((edges(:,1:end-1)+edges(:,2:end))/2,N,'LineWidth',2); hold on
-              xlabel('Standardized SWE'); ylabel('Frequency')
+              xlabel('SWE about local mean (m w.e.)'); ylabel('Frequency')
+              legend(options.glacier); title('SWE variation due to density interpolation')
 
 bins = round(sqrt(length(S))/3);
     [N, edges] = histcounts(S(:,1),bins);
 figure(2);    plot((edges(:,1:end-1)+edges(:,2:end))/2,N,'LineWidth',2); hold on
               xlabel('Standard Deviation due to Density Option'); ylabel('Frequency')
+              legend(options.glacier)
 mean(S(:,1))
 end
-legend(options.glacier)
+
+figure(1); saveFIG('SWEvarDensityHIST')
+
 % for j = 1:length(data)
 %     DD = data(:);%(data(j,:)-mean(data(j,:)))/std(data(j,:));
 %     [N, edges] = histcounts(DD,bins);
 %     plot((edges(:,1:end-1)+edges(:,2:end))/2,N,'LineWidth',2); hold on
 % end
 
+   
+ %Map of std due to Density Interp
+for g = 1:3
+    glacier = char(options.glacier(g));
+    swedata.(glacier) = [];        
+    for opt = 2:9
+        swedata.(glacier) = [swedata.(glacier), sweOPT(opt).(glacier)(:,1)];
+    end
+end
+    topoParam.G4  = NaN(size(topo_full_ns.G4.elevation));
+    topoParam.G2  = NaN(size(topo_full_ns.G2.elevation));
+    topoParam.G13 = NaN(size(topo_full_ns.G13.elevation));
+    stdtemp(1).swe = std(swedata.G4,[],2);    stdtemp(1).utm = SWE(1).utm(:,1:2);
+    stdtemp(2).swe = std(swedata.G2,[],2);    stdtemp(2).utm = SWE(2).utm(:,1:2);
+    stdtemp(3).swe = std(swedata.G13,[],2);   stdtemp(3).utm = SWE(3).utm(:,1:2);
+
+PlotTopoParameter(topoParam,'std in one grid cell', 'Standard Deviation (m w.e.)', stdtemp, 'colour', 'nomassB')
+    saveFIG('Map_cellstd_density')    

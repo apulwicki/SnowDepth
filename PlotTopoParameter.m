@@ -25,7 +25,7 @@ if fixed_color == 0
     maxSWE  = nanmax([SWE(1).swe(:);SWE(2).swe(:);SWE(3).swe(:)]);
 elseif fixed_color == 1
     x_min = 0;      minSWE  = x_min;
-    x_max = 1.4;    maxSWE  = x_max;
+    x_max = 0.1;    maxSWE  = x_max;
 end
 
 G13size = size(topoParam.G13);
@@ -89,7 +89,8 @@ for i = 1:3
                     plot(E,N,'k.', 'MarkerSize',5); hold on
                     caxis([x_min x_max]); caxis(caxis); 
                 elseif  strcmp(sweDOTS,'colour')
-                    scatter(E,N , 13, SWE(i).swe,'filled'); 
+                    INN = ~isnan(SWE(i).swe);
+                    scatter(E(INN),N(INN), 13, SWE(i).swe(INN),'filled'); 
                     caxis([minSWE maxSWE]); caxis(caxis); 
                 elseif  strcmp(sweDOTS,'sweONswe')
                     scatter(E,N , 13, SWE(i).swe,'filled'); 
