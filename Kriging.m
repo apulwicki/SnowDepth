@@ -102,12 +102,13 @@ end
 
 %% Plotting -> regression kriging
     param = 'RK';
-    topoParam.G4  = sweRK(2).G4;
-    topoParam.G2  = sweRK(2).G2;
-    topoParam.G13 = [sweRK(2).G13; nan(10,size(sweRK(2).G13,2))];
-    topoParam.G13 = [sweRK(2).G13, nan(size(sweRK(2).G13,1),10)];
+    opt = 8;
+    topoParam.G4  = sweRK(opt+1).G4;
+    topoParam.G2  = sweRK(opt+1).G2;
+    topoParam.G13 = [sweRK(opt+1).G13; nan(10,size(sweRK(opt+1).G13,2))];
+    topoParam.G13 = [sweRK(opt+1).G13, nan(size(sweRK(opt+1).G13,1),10)];
 
-    PlotTopoParameter(topoParam,param, 'SWE (m w.e.)', SWE, 'sweONswe', 'massB')
+    PlotTopoParameter(topoParam,param, 'SWE (m w.e.)', SWE, 'black', 'massB')
 
     saveFIG('RegressionKriging','3G')
 
@@ -153,7 +154,7 @@ end
 
     fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',13)
     fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 12 4];
-% saveFIG('krigRKfit')
+ saveFIG('krigRKfit')
 
     clear b coeffs dim f fig filename g glacier i line option p r X yModel yObserved
 

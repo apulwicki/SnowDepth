@@ -361,16 +361,17 @@ end
 end
 meanswe = mean(meanswe,3);
 
-B = bar(meanswe, 'EdgeColor','none');
-    ylabel('Mean SWE (m w.e.)')
-    set(gca,'xticklabel',{'Glacier 4','Glacier2','Glacier 13'})
-    legend('Measurement','Topographic regression','Kriging','Regression Kriging')
+B = bar(meanswe, 'EdgeColor','none','BarWidth', 1);
+    ylabel('Mean SWE (m w.e.)','Fontname','timesnewroman')
+    set(gca,'xticklabel',{'Glacier 4','Glacier 2','Glacier 13'})
+    legend('Obs.','LR','SK','RK')
 
     colormap = [rgb('Indigo'); rgb('DarkCyan'); rgb('GoldenRod'); rgb('FireBrick')];
     for i = 1:4
     B(i).FaceColor = colormap(i,:); end
 
-    fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18)
+    fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18,'FontName','Timesnewroman')
+             set(findall(fig,'type','axes'),'Fontname','Timesnewroman')
 saveFIG('InterpMethod_mean')
 
  % 3D - all density options
@@ -416,10 +417,10 @@ end
 end
 meanR2 = mean(meanR2,3);
 
-B = bar(meanR2, 'EdgeColor','none');
+B = bar(meanR2, 'EdgeColor','none','BarWidth',1);
     ylabel('Mean R^2')
     set(gca,'xticklabel',{'Glacier 4','Glacier 2','Glacier 13'})
-    legend('Topographic regression','Kriging','Regression Kriging')
+    legend('LR','SK','RK')
 
     colormap = [rgb('Indigo'); rgb('DarkCyan'); rgb('GoldenRod'); rgb('FireBrick')];
     for i = 2:4

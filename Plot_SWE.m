@@ -245,12 +245,13 @@ glacier_list = ['G04';'G02';'G13']; %for selecting data from chosen glacier
 for i = 1:3 %go through each glacier
     glacier = glacier_list(i,:);    
     G = char(options.glacier(i));
-        %z = pulldata(data, book, glacier, person, pattern, quality, format)
     z = pulldata(SD,'all',glacier,'all','all',1,'fat'); % pull transect data  
-   
+
    data = z(5).depth(:,1:4);
+           nanstd(data(:))/nanmean(data(:))
+           nanstd(data(:))
    data = (data - repmat(nanmean(data,2),1,4))/100*mean(cell2mat(Density.snowpit(:,2)))/1000;%./repmat(nanstd(data, [], 2),1,4);
-        chi2gof(data(:))
+        %chi2gof(data(:))
    VARoneloc.(G) = data;
    if i==1;     bins = round(sqrt(numel(data))/3);  end
    [N, edges] = histcounts(data(:),bins);

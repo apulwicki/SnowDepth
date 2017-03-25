@@ -126,14 +126,14 @@ end
 
 % Glacier labels
     annotation('textbox',[.02 .05 .1 .1],'String', 'Glacier 4','EdgeColor','none','FontWeight','bold')
-    annotation('textbox',[.32 .05 .1 .1],'String', 'Glacier 2','EdgeColor','none','FontWeight','bold')
+    annotation('textbox',[.30 .05 .1 .1],'String', 'Glacier 2','EdgeColor','none','FontWeight','bold')
     annotation('textbox',[.59 .05 .1 .1],'String', 'Glacier 13','EdgeColor','none','FontWeight','bold')
 
 % Winter balance
      if strcmp(massB, 'massB')
      annotation('textbox',[.02 0 .1 .1],'String',...
          [num2str(round(nanmean(topoParam.G4(:)),2), '%.2f'),' m w.e.'],'EdgeColor','none')    
-     annotation('textbox',[.32 0 .1 .1],'String',...
+     annotation('textbox',[.30 0 .1 .1],'String',...
          [num2str(round(nanmean(topoParam.G2(:)),2), '%.2f'),' m w.e.'],'EdgeColor','none')    
      annotation('textbox',[.59 0 .1 .1],'String',...
          [num2str(round(nanmean(topoParam.G13(:)),2), '%.2f'),' m w.e.'],'EdgeColor','none')    
