@@ -17,7 +17,7 @@ end
 
 %get colour min max
      %Manual colour range = 1
-   fixed_color = 0;
+   fixed_color = 1;
 if fixed_color == 0 
     x_min   = nanmin([topoParam.G4(:);topoParam.G2(:);topoParam.G13(:)]);
     x_max   = nanmax([topoParam.G4(:);topoParam.G2(:);topoParam.G13(:)]);
@@ -25,7 +25,7 @@ if fixed_color == 0
     maxSWE  = nanmax([SWE(1).swe(:);SWE(2).swe(:);SWE(3).swe(:)]);
 elseif fixed_color == 1
     x_min = 0;      minSWE  = x_min;
-    x_max = 0.1;    maxSWE  = x_max;
+    x_max = 60;    maxSWE  = x_max;
 end
 
 G13size = size(topoParam.G13);

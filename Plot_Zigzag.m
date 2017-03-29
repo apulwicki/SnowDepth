@@ -211,16 +211,17 @@ for i = 1:3
         
         subplot(3,1,i)
         for j = 1:length(zz)
-            if j ==1;
-                bins    = round(sqrt(length(SWEzz(i).swe)/3));
-                N       = zeros(3,bins); edges = zeros(3,bins+1);   end
             ZZdata = SWEzz(i).swe(SWEzz(i).ZZ==char(zz(j)));
-            ZZdata = (ZZdata-mean(ZZdata));%/std(ZZdata);
+            ZZdata = (ZZdata-mean(ZZdata))/mean(ZZdata)*100;%/std(ZZdata);
+            
             display([zz(j), num2str(chi2gof(ZZdata)), num2str(std(SWEzz(i).swe(SWEzz(i).ZZ==char(zz(j)))))])
-        [N(j,:), edges(j,:)] = histcounts(ZZdata,bins);
-            plot((edges(j,1:end-1)+edges(j,2:end))/2,N(j,:),'LineWidth',2); hold on 
-            xlabel('SWE about local mean (m w.e.)');     ylabel('Frequency')
+                if j ==1;   bins    = round(sqrt(length(SWEzz(i).swe)));
+                            edges   = linspace(-50,50,bins); end
+                            N = histcounts(ZZdata,edges);   
+            plot((edges(:,1:end-1)+edges(:,2:end))/2,N/sum(N),'LineWidth',2); hold on 
+            xlabel('SWE variability (%)');     ylabel('Frequency')
             title(name)
+            ax = gca; ax.XTick = [-40:20:40];
         end
             legend(zz)
  %            xlim([-6 6]);         ylim([0 60]);
@@ -324,41 +325,39 @@ for g = 1:3
         tempZZ = allZZ(z);
         if ~strcmp(tempZZ,'G02\_Z7A')
         data = SWEzz(g).swe(SWEzz(g).ZZ == tempZZ);
-        data = (data-mean(data));%/std(data);
+        data = (data-mean(data))/mean(data)*100;%/std(data);
+             
         gZZ = [gZZ; data];
         fullZZ = [fullZZ; data];
         end
     end
     
     glacier = char(options.glacier(g));
-    [~,chiP] = chi2gof(gZZ);
-    display([glacier, ' ', num2str(chiP)])
-     figure(1); 
-    if g ==1;
-     bins    = round(sqrt(length(gZZ))); end
-    N       = zeros(3,bins); edges = zeros(3,bins+1);
-    [N(g,:), edges(g,:)] = histcounts(gZZ,bins);
-            plot((edges(g,1:end-1)+edges(g,2:end))/2,N(g,:),'LineWidth',2,'Color',options.RGB(g,:)); hold on 
+%     [~,chiP] = chi2gof(gZZ);
+%     display([glacier, ' ', num2str(chiP)])
+        display([glacier,' 2 sigma ', num2str(2*nanstd(gZZ))]);
+if g ==1;     bins    = round(sqrt(length(gZZ))); end   
+   edges   = linspace(-50,50,bins);
+   N       =  histcounts(data,edges);
+figure(1);   plot((edges(:,1:end-1)+edges(:,2:end))/2,N/sum(N),'LineWidth',2,'Color',options.RGB(g,:)); hold on 
 
-     figure(2);
-    normALL = normpdf(gZZ,mean(gZZ),std(gZZ));
-    [gZZ, I] = sort(gZZ);
-    plot(gZZ,normALL(I),'LineWidth',2,'Color',options.RGB(g,:)); hold on
+%      figure(2);
+%     normALL = normpdf(gZZ,mean(gZZ),std(gZZ));
+%     [gZZ, I] = sort(gZZ);
+%     plot(gZZ,normALL(I),'LineWidth',2,'Color',options.RGB(g,:)); hold on
 
 end
     [~,chiP] = chi2gof(fullZZ);
-    display(['All zigzags ', num2str(chiP)])
+    %display(['All zigzags ', num2str(chiP)])
      figure(1)
-%     bins    = round(sqrt(length(fullZZ)));
-    N       = zeros(3,bins); edges = zeros(3,bins+1);
-    [N(g,:), edges(g,:)] = histcounts(fullZZ,bins);
-            plot((edges(g,1:end-1)+edges(g,2:end))/2,N(g,:),'LineWidth',2,'Color','k','LineStyle','--');
-            xlabel('SWE about local mean (m w.e.)');     ylabel('Frequency')
-%             xlim([-6 6]);         
+%      N       =  histcounts(fullZZ,edges);
+% figure(1);   plot((edges(:,1:end-1)+edges(:,2:end))/2,N/sum(N),'k--','LineWidth',2); hold on 
+          xlabel('SWE variability (%)');     ylabel('Frequency')
+%         xlim([-6 6]);         
             
-        legend([options.glacier,{'All zigzags'}]);     
-        fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',13) 
-        fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 11 8];
+        legend('Glacier 4','Glacier 2','Glacier 13')
+        fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18) 
+        fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 13 6];
 saveFIG('ZigzagPDF_G');
 
  
@@ -385,8 +384,8 @@ data = nan(S,1);
 for g = 1:3
     allZZ = categories(SWEzz(g).ZZ);
     for z = 1:length(allZZ)
-        tempZZ = allZZ(z);
-        D = SWEzz(g).swe(SWEzz(g).ZZ == tempZZ)-mean(SWEzz(g).swe(SWEzz(g).ZZ == tempZZ));
+        tempZZ = allZZ(z); I = SWEzz(g).ZZ == tempZZ;
+        D = (SWEzz(g).swe(I)-mean(SWEzz(g).swe(I)))/mean(SWEzz(g).swe(I));
         data = [data, [D; nan(S-length(D),1)]];
     end
 end

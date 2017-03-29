@@ -33,7 +33,6 @@ end
     topoParam.G4  = sweKRIG(2).G4.(param);
     topoParam.G2  = sweKRIG(2).G2.(param);
     topoParam.G13 = sweKRIG(2).G13.(param);
-    topoParam.rig = rig;
 figure(3)
     PlotTopoParameter(topoParam,param, 'SWE (m w.e.)', SWE, 'black','massB')
 
