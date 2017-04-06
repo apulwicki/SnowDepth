@@ -2,16 +2,17 @@
 
 load TopoSWE.mat
 
-input.SWE = SWE; input.topo_sampled = topo_sampled; 
+input.SWE = transectSWE; input.topo_sampled = transectTOPO; 
 input.topo_sampled_ns = topo_sampled_ns;
 
-balanceRK(5).pattern            = 9999;
-balance_residualsRK(5).pattern  = 9999;
-BMAsubset(5).pattern            = 9999;
+% balanceRK(5).pattern            = 9999;
+% balance_residualsRK(5).pattern  = 9999;
+% BMAsubset(5).pattern            = 9999;
 
-n = 1;
+type = 'centreline';
+n = 10;
 
-for S = 1:5
+for S = 1%1:5
 %     for T = 1:3
  %Pattern
 subset           = 'pattern';
@@ -31,6 +32,9 @@ option.clt       = S;
 [ SWEdata, TOPOdata ] = DataSubset( subset, option, input );
 
 [ SWEdata, TOPOdata ] = ObsInCell(SWEdata, TOPOdata);
+
+[ SWEdata, TOPOdata ] = SortNSelect( SWEdata, TOPOdata, n );
+
 %% Plot - locations
     param = 'empty';
     topoParam.G4  = NaN(options.mapsize(1,:));
@@ -40,6 +44,10 @@ option.clt       = S;
 PlotTopoParameter(topoParam,param, 'SWE (m w.e.)', SWEdata, 'colour', 'NOmassB')
     saveFIG(['SamplingLocation_', subset,num2str(S)])%,'_numpeople',num2str(T)])
 
+%% Linear regression
+
+subsetLR.(type) =  LinearRegression( SWEdata, TOPOdata, topo_full );
+    
 %% Regression Kriging
  
 [ balanceRK(n).(subset), balance_residualsRK(n).(subset), BMAsubset(n).(subset) ] = ...
@@ -58,3 +66,56 @@ PlotTopoParameter(topoParam,param, 'SWE (m w.e.)', SWEdata, 'black', 'massB')
     n = n+1;
 %     end
 end
+
+
+%% Random subsets
+
+input.SWE               = SWE;  
+input.topo_sampled      = topo_sampled; 
+input.topo_sampled_ns   = topo_sampled_ns;
+n                       = 10:5:60;
+
+for i = 1:length(n)
+    for x = 1:30
+        [ SWEdata, TOPOdata ] = DataSubset( 'random', n(i), input );
+
+        [ testRK ] = RegressionKriging( SWEdata, TOPOdata, topo_full, SWE );
+        for g = 1:3;
+        glacier = char(options.glacier(g));
+        Ttemp = KrigingR(SWEdata.(glacier)(:,1), SWEdata.(glacier)(:,2:3), glacier);
+        testKRIG.(glacier) = Ttemp.pred;
+        end
+        
+        locRK       = SampledCell(testRK);
+        outRK       = RMSE( locRK, SWE );
+        tempRK(x,:) = struct2table(outRK);
+        
+        locKRIG     = SampledCell(testKRIG);
+        outKRIG     = RMSE( locKRIG, SWE );
+        tempKRIG(x,:) = struct2table(outKRIG);
+    end
+rmseRK2(i,:)   = mean(tempRK{:,:});
+rmseKRIG2(i,:) = mean(tempKRIG{:,:});
+end
+
+
+ figure(1); clf
+for g = 1:3;
+glacier = char(options.glacier(g));
+
+subplot(1,3,g) 
+    plot(n, rmse(:,g),'Color',options.RGB(g,:),'LineWidth',3); hold on; 
+%     rl = refline; rl.Color = 'k'; rl.LineStyle = '--';
+end
+
+ figure(1); clf
+for g = 1:3;
+glacier = char(options.glacier(g));
+
+subplot(1,3,g) 
+    plot(n, rmseKRIG(:,g),'LineWidth',3); hold on; 
+    plot(n, rmseRK(:,g),'LineWidth',3); hold on; 
+    legend('SK','RK')
+    xlabel('Sample size'); ylabel('RMSE (m w.e.)')
+end
+ 

@@ -42,7 +42,7 @@ options.ZigzagSWE       = 2;
 
 % Converting to SWE
 
-options.DensitySWE     = 8;
+options.DensitySWE     = 2;
                 % 1 Depth (raw)
                 
                 % 2 Donjek mean density (uniform)       Snowpit
@@ -64,7 +64,7 @@ options.ObsPerCell     = 2;
                 % 2 average of all observation in a DEM cell
                 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% GLACIER MAPS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-load('TopoSWE.mat','topo_full_ns', 'rig', 'E', 'N')
+load('TopoSWE.mat','topo_full_ns', 'rig', 'E', 'N', 'ENGrid')
 
 % Size of glacier maps
 options.mapsize        = [size(topo_full_ns.G4.elevation);...
@@ -72,9 +72,14 @@ options.mapsize        = [size(topo_full_ns.G4.elevation);...
                           size(topo_full_ns.G13.elevation)];
                       
 % Where map is NaN
-options.mapNaN.G4      = isnan(topo_full_ns.G4.elevation);...
-options.mapNaN.G2      = isnan(topo_full_ns.G2.elevation);...
-options.mapNaN.G13     = isnan(topo_full_ns.G13.elevation);...
+options.mapNaN.G4      = isnan(topo_full_ns.G4.elevation);
+options.mapNaN.G2      = isnan(topo_full_ns.G2.elevation);
+options.mapNaN.G13     = isnan(topo_full_ns.G13.elevation);
+
+% Sampled grid coordinates
+options.ENgrid.G4      = ENGrid.G4;
+options.ENgrid.G2      = ENGrid.G2;
+options.ENgrid.G13     = ENGrid.G13;
 
 % RIG boundary
 options.rig            = rig; 
@@ -83,7 +88,7 @@ options.rig            = rig;
 options.E = E;
 options.N = N; 
 
-clear rig E N
+clear rig E N ENGrid
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% EASE OF USE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 
 options.glacier        = {'G4','G2','G13'};

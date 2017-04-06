@@ -17,7 +17,7 @@ end
 
 %get colour min max
      %Manual colour range = 1
-   fixed_color = 1;
+   fixed_color = 0;
 if fixed_color == 0 
     x_min   = nanmin([topoParam.G4(:);topoParam.G2(:);topoParam.G13(:)]);
     x_max   = nanmax([topoParam.G4(:);topoParam.G2(:);topoParam.G13(:)]);

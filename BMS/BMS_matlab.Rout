@@ -58,6 +58,9 @@ The following objects are masked from ‘package:base’:
 >     ##uniform prior model
 >       #mprior is uniform model prior, used UPI
 >       attG = bms(G, mprior = "uniform", user.int = F)
+Warning message:
+In bms(G, mprior = "uniform", user.int = F) :
+  data seems to be rank-deficient: its rank seems to be only  3
 >           #get coefficients
 >         GC_uni = coef(attG,order.by.pip = F,include.constant = T)
 >     
@@ -106,4 +109,4 @@ The following objects are masked from ‘package:base’:
 > 
 > proc.time()
    user  system elapsed 
-  0.532   0.024   0.553 
+  0.588   0.008   0.597 

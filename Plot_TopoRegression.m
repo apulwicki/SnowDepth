@@ -378,25 +378,25 @@ saveFIG('InterpMethod_mean')
 for opt = 2:9
 for g = 1:3
     glacier = char(options.glacier(g));
-meanswe3.(glacier)(opt-1,:) = [mean(sweOPT(opt).(glacier)(:,1)), ...
+meanswe3.(glacier)(opt-1,:) = [...%mean(sweOPT(opt).(glacier)(:,1)), ...
                 nanmean(sweBMS(opt).(glacier)(:)),...
                 nanmean(sweKRIG(opt).(glacier).pred(:)),...
                 nanmean(sweRK(opt).(glacier)(:))];
 end
 end
 
-    colormap = [rgb('Indigo'); rgb('DarkCyan'); rgb('GoldenRod'); rgb('FireBrick')];
+    colormap = [ rgb('DarkCyan'); rgb('GoldenRod'); rgb('FireBrick')];%rgb('Indigo');
 for g = 1:3
     glacier = char(options.glacier(g));
 subplot(1,3,g)
 B = bar(meanswe3.(glacier), 'EdgeColor','none');
     ylabel('Mean SWE (m w.e.)')
-    ylim([0 0.75])
+    ylim([0 0.8])
     set(gca,'xticklabel',{'S1','F1','S2','F2','S3','F3','S4','F4'})
-        if g == 3;
-        legend('Measurement','Topographic regression','Kriging','Regression Kriging'); end
+        %if g == 3;
+        legend('LR','SK','RK'); %end
     title(options.glacier(g))
-    for i = 1:4
+    for i = 1:3
     B(i).FaceColor = colormap(i,:); end
 end 
     fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',19.5)

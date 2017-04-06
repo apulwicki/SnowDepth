@@ -219,7 +219,7 @@ for i = 1:3
                             edges   = linspace(-50,50,bins); end
                             N = histcounts(ZZdata,edges);   
             plot((edges(:,1:end-1)+edges(:,2:end))/2,N/sum(N),'LineWidth',2); hold on 
-            xlabel('SWE variability (%)');     ylabel('Frequency')
+            xlabel('SWE variability (%)');     ylabel('Probability')
             title(name)
             ax = gca; ax.XTick = [-40:20:40];
         end
@@ -352,7 +352,7 @@ end
      figure(1)
 %      N       =  histcounts(fullZZ,edges);
 % figure(1);   plot((edges(:,1:end-1)+edges(:,2:end))/2,N/sum(N),'k--','LineWidth',2); hold on 
-          xlabel('SWE variability (%)');     ylabel('Frequency')
+          xlabel('SWE variability (%)');     ylabel('Probability')
 %         xlim([-6 6]);         
             
         legend('Glacier 4','Glacier 2','Glacier 13')
@@ -376,11 +376,10 @@ plot(fullZZ,normALL(I),'LineWidth',2,'Color','k','LineStyle','--')
 [mu,s,muci,sci] = normfit(fullZZ);
 muci
 
-%% Kruskal Wallis Test
+%% Kruskal Wallis Test - between zigzags
 
 clc; close all
-S = 200;
-data = nan(S,1);
+
 for g = 1:3
     allZZ = categories(SWEzz(g).ZZ);
     for z = 1:length(allZZ)
@@ -394,3 +393,34 @@ data = data(:,2:end);
 
 [kw, ~, stats] = kruskalwallis(data)
 multcompare(stats)
+
+%% How many zigzag points do you need? -> % error from mean
+clf
+S = 200;
+data = nan(S,1);
+for g = 1:3
+clear P Esub 
+    allZZ = categories(SWEzz(g).ZZ);
+    for z = 1:length(allZZ)
+        tempZZ = allZZ(z); I = SWEzz(g).ZZ == tempZZ;
+        Dfull = SWEzz(g).swe(I);
+        Dmean = mean(Dfull);
+    
+     %pull subset
+    N = 1:2:40;
+    for i = 1:length(N)
+        for rep = 1:1000;
+        r = randi([i length(Dfull)],1, N(i));
+        Esub(i,rep) = abs(mean(Dfull(r))-Dmean)/Dmean*100;
+        end
+    end
+subplot(1,3,g)
+    P(z) = plot(N,mean(Esub,2),'LineWidth', 3); hold on
+    plot(N,mean(Esub,2)+2*std(Esub,[],2), 'Color', P(z).Color); hold on
+    end
+    plot([0 max(N)],[5 5],'k--')
+    legend(P, allZZ)
+    ylabel('Error (%)');    xlabel('Sample size');
+end
+
+

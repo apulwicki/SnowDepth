@@ -333,3 +333,41 @@ ho(1,1).FaceColor = rgb('MediumTurquoise');  ho(1,1).EdgeColor = 'w';
 display(['original mean difference = ', num2str(nanmean(OG(:)))])
 display(['corrected mean difference = ', num2str(nanmean(corr(:)))])
 
+%% Basic linear regression
+
+ %Plot coefficient values
+cmap = cbrewer('qual','Dark2',3);
+figure(3);  clf
+for g = 1:3
+    glacier = char(options.glacier(g));
+    X = [struct2table(topo_sampled.(glacier)), table(SWE(g).swe,'VariableNames',{'swe'})];
+    basicLR.(glacier) = fitlm(X);
+     
+    coeffs = [basicLR.(glacier).Coefficients{2:8,1}, BMS(9).(glacier){1:7,1}, MLR(9).(glacier){1:7,1}];
+    subplot(1,3,g)
+    B = bar(coeffs, 'EdgeColor','none');
+    for i = 1:3; B(i).FaceColor = cmap(i,:); end
+    legend('Basic','BMS','MLR')
+    set(gca,'xticklabel',options.topoVars)
+end
+  
+ %Plot RMSE of all fits
+figure(2);  clf
+for g = 1:3
+    glacier = char(options.glacier(g));
+    rmseBasic.(glacier) =  sqrt(sum((SWE(g).swe-basicLR.(glacier).Fitted).^2)/numel(SWE(g).swe));
+    rmseBMA.(glacier)   =  sqrt(sum(residualsBMS(8).(glacier).^2)/numel(residualsBMS(8).(glacier)));
+    rmseMLR.(glacier)   =  sqrt(sum(residualsMLR(8).(glacier).^2)/numel(residualsMLR(8).(glacier)));
+    rmseRK.(glacier)    =  sqrt(sum(residualsRK(8).(glacier).^2)/numel(residualsRK(8).(glacier)));
+    rmseKRIG.(glacier)  =  sqrt(sum(residualsKRIG(8).(glacier).^2)/numel(residualsKRIG(8).(glacier)));
+rmseALL(g,:) = [rmseBasic.(glacier), rmseBMA.(glacier), rmseMLR.(glacier),...
+                                        rmseKRIG.(glacier),rmseRK.(glacier)];
+end
+
+B = bar(rmseALL, 'EdgeColor','none');
+    cmap = cbrewer('qual','Dark2',size(rmseALL,2)+1);
+    for i = 1:size(rmseALL,2); B(i).FaceColor = cmap(i+1,:); end
+    legend('BasicLR','BMA','MLR', 'SK','RK')
+    ylabel('RMSE (m w.e.)'); 
+    set(gca,'xticklabel',{'Glacier 4','Glacier 2','Glacier 13'})
+

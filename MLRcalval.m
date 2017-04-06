@@ -26,7 +26,7 @@ n = size(M,2);
 c = logical(dec2bin(0:(2^n)-1)=='1');      c = c(2:end,:);
 
  %Choose number of runs
-runs = 1000;        
+runs = 1;        
 
  %Cross validation random number matrix
 [~, cal_ind] = sort(rand(runs,length(y)),2); %create matrix of random numbers
@@ -59,9 +59,10 @@ for j = 1:length(c)                             %all linear combos of params
     rmse_best(j,1)  = min(rmse);                        %lowest rmse value
 
      %Do fitlm for best set of calibration data
-    min_rmse        = rmse==min(rmse);                  %find best set
-    swe_obs         = table(y(cal_ind(min_rmse,:)), 'VariableNames',{'swe'}); %create table of input data
-    topo_obs        = M(cal_ind(min_rmse,:),c(j,:));    %create table of topo params
+    min_rmse_IND    = cal_ind(rmse==min(rmse),:);       %find best set
+    min_rmse_IND    = min_rmse_IND(1,:);
+    swe_obs         = table(y(min_rmse_IND), 'VariableNames',{'swe'}); %create table of input data
+    topo_obs        = M(min_rmse_IND,c(j,:));           %create table of topo params
     mlr_best{j,1}   = fitlm([topo_obs, swe_obs]);       %do thorough MLR using fitlm
     BIC_best(j,1)   = mlr_best{j,1}.ModelCriterion.BIC; %BIC of best MLR run
 
@@ -70,8 +71,10 @@ end
 %% Weighting models - full
 
  %Calculate weight for each model based on BIC value
-BICweight = exp(-(BIC_best-min(BIC_best))/2);   %exponential weighting compared to best (min) BIC
-BICweight = BICweight/sum(BICweight);           %normlize weights
+BIC_best(isinf(BIC_best)) = NaN;
+BICweight = exp(-(BIC_best-nanmin(BIC_best))/2);    %exponential weighting compared to best (min) BIC
+BICweight(isnan(BICweight)) = 0;
+BICweight = BICweight/sum(BICweight);               %normlize weights
 
  %Get the coefficients for each param and weight them 
 coeffs_w{j,1} = cell(length(mlr_best),1);                       %initialize
@@ -163,7 +166,7 @@ rmse_final  = sqrt(sum((y-y_regress).^2)/numel(y_regress));  %get the RMSE betwe
 
 %R^2
 R2 = corr(y,y_regress)^2;
-    coeffs_final = [coeffs_final; table(0, R2, 0, ...
+    coeffs_final = [coeffs_final; table(R2, 0, 0, ...
                 'VariableName',coeffs_final.Properties.VariableNames,'RowNames',{'R2_full'})];
 %% Residuals
 

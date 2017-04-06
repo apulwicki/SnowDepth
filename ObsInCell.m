@@ -28,9 +28,11 @@ if length(SWE) == 3;
     fields = fieldnames(SWE(g));
         for f = 1:length(fields)
                 [A1, I]  = sort(sameG);
-        param = char(fields(f));
-        data     = SWE(g).(param)(I,:); %sort everyone
-            
+        param   = char(fields(f));
+        data    = SWE(g).(param)(I,:); %sort everyone
+        EE      = options.E.(glacier)(I,:); %sort everyone
+        NN      = options.N.(glacier)(I,:); %sort everyone
+        
         T = diff(A1)==0;    T1 = [0;T(1:end-1)]; T = any([T,T1],2);
         sameG_not = unique(A1(T));
         for i = length(sameG_not):-1:1
@@ -44,6 +46,10 @@ if length(SWE) == 3;
                      data(data(:,3)==0,3) = NaN;
                     data(ind,4) = length(ind);
                      data(data(:,4)==0,4) = NaN;
+                    data(ind(1,1),5) = floor(EE(ind(1,1)));
+                     data(data(:,5)==0,5) = floor(EE(data(:,5)==0)); 
+                    data(ind(1,1),6) = floor(NN(ind(1,1)));
+                     data(data(:,6)==0,6) = floor(NN(data(:,6)==0)); 
                 end
            end
            data(ind(2:end,1),:)    = [];
@@ -59,7 +65,8 @@ if length(SWE) == 3;
        SWE(g).standard  = SWE(g).swe(:,3);
        SWE(g).numObs    = SWE(g).swe(:,4); 
         SWE(g).numObs(isnan(SWE(g).numObs)) = 1;
-       SWE(g).swe(:,2:4) = [];       
+       SWE(g).EN        = SWE(g).swe(:,5:6);
+       SWE(g).swe(:,2:end) = [];       
     end
     
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

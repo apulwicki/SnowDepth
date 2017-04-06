@@ -263,7 +263,7 @@ for i = 1:3 %go through each glacier
 stdtemp(i).swe = nanstd(z(5).depth(:,1:4), [], 2)./nanmean(z(5).depth(:,1:4),2)*100;
 stdtemp(i).utm = z(5).depth(:,6:7);
 end
-            xlabel('SWE variability (%)'); ylabel('Frequency')
+            xlabel('SWE variability (%)'); ylabel('Probability')
             legend('Glacier 4','Glacier 2','Glacier 13')
             %title('SWE (S1) variation at single measurement location')
             fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18)
@@ -294,24 +294,39 @@ boxplot(T,G,'Labels',{'Glacier 4','Glacier 2','Glacier 13'})
      saveFIG('DEMcellSTD')
      
 % PDF 
-clf(1)
+
+run MAIN
+ff = 2;
+for g = 1:3
+    glacier = char(options.glacier(g));
+    I = ~isnan(SWE(g).standard);
+    pdfdata(ff).(glacier) = SWE(g).standard(I)./SWE(g).swe(I)*100;
+end
+
+
+%clf(1)
+for ff = 2%:9
+    figure(ff)
 for g = 1:3;
 glacier = char(options.glacier(g));
 
-data = SWE(g).standard(~isnan(SWE(g).standard))./SWE(g).swe(~isnan(SWE(g).standard))*100;
+I = ~isnan(SWE(g).standard);
+data = pdfdata(ff).(glacier);
+%data = SWE(g).standard(I)./SWE(g).swe(I)*100;
         %chi2gof(data)
-         display([glacier,' 2 sigma ', num2str(2*nanstd(data(:)))]);
+         display([num2str(ff),glacier,' 2 sigma ', num2str(2*nanstd(data(:)))]);
 
 if g == 1; bins = round(sqrt(numel(data))); end
-   edges   = linspace(-30,30,bins);
+   edges   = linspace(-50,50,bins);
    N       =  histcounts(data,edges);
- figure(1);   plot((edges(:,1:end-1)+edges(:,2:end))/2,N/sum(N),'LineWidth',2,'Color',options.RGB(g,:)); hold on 
+   plot((edges(:,1:end-1)+edges(:,2:end))/2,N/sum(N),'LineWidth',2,'Color',options.RGB(g,:)); hold on 
 
 stdtemp(g).swe = SWE(g).cellstd./SWE(g).swe*100;    stdtemp(g).utm = SWE(g).utm(:,1:2);
 
 end
-            xlabel('SWE variability (%)'); ylabel('Frequency')
+            xlabel('SWE variability (%)'); ylabel('Probability')
             legend('Glacier 4','Glacier 2','Glacier 13')
+end
             fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18)
             fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 13 6];    
             %title({'SWE variability due to multiple measurement','locations in one grid cell'})
@@ -342,7 +357,7 @@ end
 %% Variability due to density options 
 
  %PDF
-clf(1); 
+figure(1); clf; 
 for g = 1:3;
 glacier = char(options.glacier(g));
 clear data M S
@@ -362,13 +377,13 @@ figure(1);   plot((edges(:,1:end-1)+edges(:,2:end))/2,N/sum(N),'LineWidth',2, 'C
  % bins = round(sqrt(length(S)));
 %     [N, edges] = histcounts(S(:,1),bins);
 % figure(2);    plot((edges(:,1:end-1)+edges(:,2:end))/2,N,'LineWidth',2); hold on
-%               xlabel('Standard Deviation due to Density Option'); ylabel('Frequency')
+%               xlabel('Standard Deviation due to Density Option'); ylabel('Probability')
 %               legend(options.glacier)
 % mean(S(:,1))
 end
 
 figure(1); 
-    xlabel('SWE variability (%)'); ylabel('Frequency')
+    xlabel('SWE variability (%)'); ylabel('Probability')
     legend('Glacier 4','Glacier 2','Glacier 13') %title('SWE variation due to density interpolation')
             fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18)
             fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 13 6];    
@@ -399,3 +414,27 @@ end
 
 PlotTopoParameter(topoParam,'std in one grid cell', 'Coefficient of Variation (%)', stdtemp, 'colour', 'nomassB')
     saveFIG('Map_cellstd_density')    
+    
+    
+    
+%% How many grid cell points do you need? -> %error from observed glacier mean
+clf
+for g = 1:3
+clear Esub 
+        Dfull = SWE(g).swe;
+        Dmean = mean(Dfull);
+    
+     %pull subset
+    N = 1:2:70;
+    for i = 1:length(N)
+        for rep = 1:1000;
+        r = randi([i length(Dfull)],1, N(i));
+        Esub(i,rep) = abs(mean(Dfull(r))-Dmean)/Dmean*100;
+        end
+    end
+    P(g) = plot(N,mean(Esub,2),'LineWidth', 3, 'Color', options.RGB(g,:)); hold on
+    plot(N,mean(Esub,2)+2*std(Esub,[],2), 'Color', options.RGB(g,:)); 
+end
+    plot([0 max(N)],[10 10],'k--')
+    legend(P, options.glacier)
+    ylabel('Error (%)');    xlabel('Sample size');

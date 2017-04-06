@@ -1,5 +1,4 @@
 
-
 %% Add cell # of observation
 
     same_cell = csvread('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Sampling/same_cell.csv', 1, 2);

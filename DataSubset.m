@@ -60,6 +60,11 @@ elseif strcmp(subset, 'topoparam')
         I = topo_sampled_ns.(glacier).(option.topo) > option.value;
     end
     
+elseif strcmp(subset, 'random')
+    
+    n = option;
+    I = randi(length(SWE(g).swe),n,1);
+    
 end
 
 % Select SWE and topo data %
