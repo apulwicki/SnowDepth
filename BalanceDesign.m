@@ -1,21 +1,39 @@
 %% Selecting Data from Pattern
 
+type = 'centreline';
+n = 10:5:50;
+DenOpt = {'S1','F1','S2','F2','S3','F3','S4','F4'};
+
+for c = 1%:length(n)
+    
+    for d = 2%:9;
 load TopoSWE.mat
+clear SWE Density
+
+options.DensitySWE     = d;
+run MeasurementLocations.m  %This program determines the easting and northing of transect measurements
+run Import_Density.m        %Imports snow density values
+run Import_Transect.m       %Imports transect snow depth and measurement location data
+run Import_Zigzag.m         %Imports zigzag snow depth and measurement location data
+run Import_SWE.m            %Converts to SWE and condences data
+transectSWE = SWE;  transectTOPO = topo_sampled;
 
 input.SWE = transectSWE; input.topo_sampled = transectTOPO; 
 input.topo_sampled_ns = topo_sampled_ns;
+den = DenOpt{d-1};
 
 % balanceRK(5).pattern            = 9999;
 % balance_residualsRK(5).pattern  = 9999;
 % BMAsubset(5).pattern            = 9999;
 
-type = 'centreline';
-n = 10;
 
-for S = 1%1:5
+
+
+%for S = 1%1:5
 %     for T = 1:3
  %Pattern
 subset           = 'pattern';
+    S = 1;
 option.clt       = S;
 
 %  %Measurement density
@@ -33,25 +51,32 @@ option.clt       = S;
 
 [ SWEdata, TOPOdata ] = ObsInCell(SWEdata, TOPOdata);
 
-[ SWEdata, TOPOdata ] = SortNSelect( SWEdata, TOPOdata, n );
+[ SWEdata, TOPOdata ] = SortNSelect( SWEdata, TOPOdata, n(c) );
 
 %% Plot - locations
-    param = 'empty';
-    topoParam.G4  = NaN(options.mapsize(1,:));
-    topoParam.G2  = NaN(options.mapsize(2,:));
-    topoParam.G13 = NaN(options.mapsize(3,:));
-
-PlotTopoParameter(topoParam,param, 'SWE (m w.e.)', SWEdata, 'colour', 'NOmassB')
-    saveFIG(['SamplingLocation_', subset,num2str(S)])%,'_numpeople',num2str(T)])
+%     param = 'empty';
+%     topoParam.G4  = NaN(options.mapsize(1,:));
+%     topoParam.G2  = NaN(options.mapsize(2,:));
+%     topoParam.G13 = NaN(options.mapsize(3,:));
+% 
+% PlotTopoParameter(topoParam,param, 'SWE (m w.e.)', SWEdata, 'colour', 'NOmassB')
+%     saveFIG(['SamplingLocation_', subset,num2str(S)])%,'_numpeople',num2str(T)])
 
 %% Linear regression
 
-subsetLR.(type) =  LinearRegression( SWEdata, TOPOdata, topo_full );
+subsetLR(c).(type).(den) =  LinearRegression( SWEdata, TOPOdata, topo_full );
     
+%% Simple kriging
+
+subsetSK(c).(type).(den) =  KrigingR_G( SWEdata );
+
 %% Regression Kriging
  
-[ balanceRK(n).(subset), balance_residualsRK(n).(subset), BMAsubset(n).(subset) ] = ...
-    RegressionKriging( SWEdata, TOPOdata, topo_full, SWE );
+subsetRK(c).(type).(den) =  RegressionKriging( SWEdata, TOPOdata, topo_full, SWE );
+
+%     end
+    end
+end
 
 %% Plot estimate
 
@@ -63,11 +88,6 @@ subsetLR.(type) =  LinearRegression( SWEdata, TOPOdata, topo_full );
 PlotTopoParameter(topoParam,param, 'SWE (m w.e.)', SWEdata, 'black', 'massB')
     saveFIG(['Map_',param, subset,num2str(S)])%,'_numpeople',num2str(T)])
     
-    n = n+1;
-%     end
-end
-
-
 %% Random subsets
 
 input.SWE               = SWE;  

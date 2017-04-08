@@ -57,25 +57,25 @@ optimisation start
   - type :  matern5_2 
   - nugget : unknown homogenous nugget effect 
   - parameters lower bounds :  1e-10 1e-10 
-  - parameters upper bounds :  3467.858 4281.513 
+  - parameters upper bounds :  5132.895 5767.017 
   - upper bound for alpha   :  1 
-  - best initial criterion value(s) :  3.850599 
+  - best initial criterion value(s) :  11.39939 
 
 N = 3, M = 5 machine precision = 2.22045e-16
 At X0, 0 variables are exactly at the bounds
-At iterate     0  f=      -3.8506  |proj g|=     0.046016
-At iterate     1  f =      -3.9312  |proj g|=             0
+At iterate     0  f=      -11.399  |proj g|=   1.4125e-16
+At iterate     1  f =      -11.399  |proj g|=    1.4125e-16
 
 iterations 1
 function evaluations 2
-segments explored during Cauchy searches 2
+segments explored during Cauchy searches 1
 BFGS updates skipped 0
-active bounds at final generalized Cauchy point 1
-norm of the final projected gradient 0
-final function value -3.93125
+active bounds at final generalized Cauchy point 0
+norm of the final projected gradient 1.41245e-16
+final function value -11.3994
 
-F = -3.93125
-final  value -3.931247 
+F = -11.3994
+final  value -11.399389 
 converged
 > #plot(m)
 > #m
@@ -124,4 +124,4 @@ converged
 > 
 > proc.time()
    user  system elapsed 
-  0.792   0.016   0.807 
+  0.816   0.016   0.830 

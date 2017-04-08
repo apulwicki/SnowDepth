@@ -26,7 +26,7 @@ n = size(M,2);
 c = logical(dec2bin(0:(2^n)-1)=='1');      c = c(2:end,:);
 
  %Choose number of runs
-runs = 1;        
+runs = 100;        
 
  %Cross validation random number matrix
 [~, cal_ind] = sort(rand(runs,length(y)),2); %create matrix of random numbers

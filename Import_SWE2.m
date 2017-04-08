@@ -1,15 +1,4 @@
 
-%% Add cell # of observation
-
-    same_cell = csvread('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Sampling/same_cell.csv', 1, 2);
-
-    div = [1, length(SWE(1).swe); length(SWE(1).swe)+1, length(SWE(1).swe)+length(SWE(2).swe);...
-            length(SWE(1).swe)+length(SWE(2).swe)+1, length(SWE(1).swe)+length(SWE(2).swe)+length(SWE(3).swe)];
-
-    for g = 1:3
-       SWE(g).cellN = same_cell(div(g,1):div(g,2));
-    end
-        clear g same_cell
 %% Average observations in one cell
 
 run OPTIONS

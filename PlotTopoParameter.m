@@ -60,7 +60,7 @@ for i = 1:3
                 h = imagesc(data); hold on
                 set(h,'alphadata',~isnan(data)); end
                 
-                    minE = min(rig.(name)(:,1));
+                        minE = min(rig.(name)(:,1));
                         minN = min(rig.(name)(:,2));
                     Eg = (rig.(name)(:,1) - minE)/40;
                     Ng = (rig.(name)(:,2) - minN)/40;  Ng = (max(Ng)-Ng);

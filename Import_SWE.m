@@ -175,6 +175,23 @@ end
 clear density count i fitDen gof index j weight x X y Y E* N* D bit
 clear SD ZZ
 
+%% Zigzag removal
+
+run ZigzagRemoval.m         %Do you want zigzags?
+
+%% Add cell # of observation
+
+    same_cell = csvread('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Sampling/same_cell.csv', 1, 2);
+
+    div = [1, length(SWE(1).swe); length(SWE(1).swe)+1, length(SWE(1).swe)+length(SWE(2).swe);...
+            length(SWE(1).swe)+length(SWE(2).swe)+1, length(SWE(1).swe)+length(SWE(2).swe)+length(SWE(3).swe)];
+
+    for g = 1:3
+       SWE(g).cellN = same_cell(div(g,1):div(g,2));
+    end
+        clear g same_cell
+
+
 % plot(SWE(1).density,'.'); hold on
 % plot(SWE(2).density,'.'); hold on
 % plot(SWE(3).density,'.');

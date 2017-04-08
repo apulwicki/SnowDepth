@@ -59,18 +59,18 @@ for g = 1:3
 end   
 
  %Residuals of RK
-for g = 1:3
-    glacier = char(options.glacier(g));
-    [~, I] = ismember(SWEdata.(glacier)(:,4), SWE(g).cellN);
-T = sub2ind(size(sweRK.(glacier)),...
-    floor(options.N.(glacier)(I)),floor(options.E.(glacier)(I)));
-
-sampledRK.(glacier)      = sweRK.(glacier)(T); 
-sampledBMA.(glacier)     = sweBMA.(glacier)(T);
-
-residualsRK.(glacier)    = SWE(g).swe(I) - sampledRK.(glacier);
-sweRK.LOO.(glacier)      = krig.(glacier).LOO + sampledBMA.(glacier);
-end
+% for g = 1:3
+%     glacier = char(options.glacier(g));
+%     [~, I] = ismember(SWEdata.(glacier)(:,4), SWE(g).cellN);
+% T = sub2ind(size(sweRK.(glacier)),...
+%     floor(options.N.(glacier)(I)),floor(options.E.(glacier)(I)));
+% 
+% sampledRK.(glacier)      = sweRK.(glacier)(T); 
+% sampledBMA.(glacier)     = sweBMA.(glacier)(T);
+% 
+% residualsRK.(glacier)    = SWE(g).swe(I) - sampledRK.(glacier);
+% sweRK.LOO.(glacier)      = krig.(glacier).LOO + sampledBMA.(glacier);
+% end
     clear E g glacier N r T
     
 display('Done')    
