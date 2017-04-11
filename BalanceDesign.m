@@ -1,12 +1,16 @@
 %% Selecting Data from Pattern
-
-type = 'centreline';
-n = 10:5:50;
-DenOpt = {'S1','F1','S2','F2','S3','F3','S4','F4'};
-
-for c = 1%:length(n)
     
-    for d = 2%:9;
+type = 'hourglass';
+n = 10:10:100;
+DenOpt = {'S1','F1','S2','F2','S3','F3','S4','F4'};
+    subsetLR(length(n)+1).(type)      = 9999;
+    subsetSK(length(n)+1).(type)      = 9999;
+    subsetRK(length(n)+1).(type)      = 9999;
+
+
+for c = 1:length(n)
+    
+    for d = 2:9;
 load TopoSWE.mat
 clear SWE Density
 
@@ -22,18 +26,11 @@ input.SWE = transectSWE; input.topo_sampled = transectTOPO;
 input.topo_sampled_ns = topo_sampled_ns;
 den = DenOpt{d-1};
 
-% balanceRK(5).pattern            = 9999;
-% balance_residualsRK(5).pattern  = 9999;
-% BMAsubset(5).pattern            = 9999;
-
-
-
-
 %for S = 1%1:5
 %     for T = 1:3
  %Pattern
 subset           = 'pattern';
-    S = 1;
+    S = 6;
 option.clt       = S;
 
 %  %Measurement density
@@ -47,47 +44,144 @@ option.clt       = S;
 % option.lessgreat = 'less';
 % option.value     = 2200;
 
-[ SWEdata, TOPOdata ] = DataSubset( subset, option, input );
+[ SWEdata(c).(type).(den), TOPOdata ] = DataSubset( subset, option, input );
 
-[ SWEdata, TOPOdata ] = ObsInCell(SWEdata, TOPOdata);
+[ SWEdata(c).(type).(den), TOPOdata ] = ObsInCell(SWEdata(c).(type).(den), TOPOdata);
 
-[ SWEdata, TOPOdata ] = SortNSelect( SWEdata, TOPOdata, n(c) );
+[ SWEdata(c).(type).(den), TOPOdata ] = SortNSelect( SWEdata(c).(type).(den), TOPOdata, n(c) );
 
-%% Plot - locations
+    if strcmp(type,'centreline'); TOPOdata.G13.centreD = repmat(0.001, n(c), 1); end
+        
+% Plot - locations
 %     param = 'empty';
 %     topoParam.G4  = NaN(options.mapsize(1,:));
 %     topoParam.G2  = NaN(options.mapsize(2,:));
 %     topoParam.G13 = NaN(options.mapsize(3,:));
 % 
-% PlotTopoParameter(topoParam,param, 'SWE (m w.e.)', SWEdata, 'colour', 'NOmassB')
+% PlotTopoParameter(topoParam,param, 'SWE (m w.e.)', SWEdata(c).(type).(den), 'colour', 'NOmassB')
 %     saveFIG(['SamplingLocation_', subset,num2str(S)])%,'_numpeople',num2str(T)])
 
-%% Linear regression
+% Linear regression
 
-subsetLR(c).(type).(den) =  LinearRegression( SWEdata, TOPOdata, topo_full );
+subsetLR(c).(type).(den) =  LinearRegression( SWEdata(c).(type).(den), TOPOdata, topo_full );
     
-%% Simple kriging
+% Simple kriging
 
-subsetSK(c).(type).(den) =  KrigingR_G( SWEdata );
+subsetSK(c).(type).(den) =  KrigingR_G( SWEdata(c).(type).(den) );
 
-%% Regression Kriging
+% Regression Kriging
  
-subsetRK(c).(type).(den) =  RegressionKriging( SWEdata, TOPOdata, topo_full, SWE );
+subsetRK(c).(type).(den) =  RegressionKriging( SWEdata(c).(type).(den), TOPOdata, topo_full, SWE );
 
 %     end
     end
 end
 
-%% Plot estimate
+%% PLOT -> map estimate
 
-    param = 'RK';
-    topoParam.G4  = balanceRK(S).(subset).G4;
-    topoParam.G2  = balanceRK(S).(subset).G2;
-    topoParam.G13 = balanceRK(S).(subset).G13;
+        n = 10:5:50;
+        DenOpt = {'S1','F1','S2','F2','S3','F3','S4','F4'};
+        
+            c = 1;
+            type = 'centreline';
+            den = DenOpt{7};
 
-PlotTopoParameter(topoParam,param, 'SWE (m w.e.)', SWEdata, 'black', 'massB')
-    saveFIG(['Map_',param, subset,num2str(S)])%,'_numpeople',num2str(T)])
-    
+figure(1); PlotTopoParameter(subsetLR(c).(type).(den),type, 'SWE (m w.e.)', SWEdata(c).(type).(den), 'black', 'massB')
+     title('Linear Regression')
+     saveFIG(['MapSubset_LR',type,'_n',num2str(n(c)),den])
+
+figure(2); PlotTopoParameter(subsetSK(c).(type).(den),type, 'SWE (m w.e.)', SWEdata(c).(type).(den), 'black', 'massB')
+     title('Simple Kriging')
+     saveFIG(['MapSubset_SK',type,'_n',num2str(n(c)),den])
+
+figure(3); PlotTopoParameter(subsetRK(c).(type).(den),type, 'SWE (m w.e.)', SWEdata(c).(type).(den), 'black', 'massB')
+     title('Regression Kriging')
+     saveFIG(['MapSubset_RK',type,'_n',num2str(n(c)),den])
+
+%% PLOT -> sample size and density variation
+n = 10:5:50;
+
+load Topo_Regress_Krig.mat
+ %Linear Regression
+figure(4); clf
+for g = 1:3
+    glacier = options.glacier{g};
+    meanLR.(glacier) = nanmean(stackSWE.MLR.(glacier)(:));
+    for c = 1:length(n);
+for d = 1:8 
+   den = DenOpt{d};
+   stack.(glacier)(d,c) = nanmean(subsetLR(c).centreline.(den).(glacier)(:));
+end
+    end
+    subplot(1,3,g)
+    plot(n,stack.(glacier),'LineWidth',2); hold on
+    plot([min(n), max(n)],[meanLR.(glacier), meanLR.(glacier)],'k--')
+        xlabel('Sample size'); ylabel('Mean SWE')
+        title(['LR Centreline ',glacier])
+        legend([DenOpt, {'All'}])
+        %ylim([0 2.45])
+end
+
+ %Simple Kriging
+figure(5); clf
+for g = 1:3
+    glacier = options.glacier{g};
+    meanSK.(glacier) = nanmean(stackSWE.SK.(glacier)(:));
+    for c = 1:length(n);
+for d = 1:8 
+   den = DenOpt{d};
+   stack.(glacier)(d,c) = nanmean(subsetSK(c).centreline.(den).(glacier)(:));
+end
+    end
+    subplot(1,3,g)
+    plot(n,stack.(glacier),'LineWidth',2); hold on
+    plot([min(n), max(n)],[meanSK.(glacier), meanSK.(glacier)],'k--')
+        xlabel('Sample size'); ylabel('Mean SWE')
+        title(['SK Centreline ',glacier])
+        legend([DenOpt, {'All'}])
+        %ylim([0 2.45])
+end
+
+ %Regression Kriging
+figure(6); clf
+for g = 1:3
+    glacier = options.glacier{g};
+    meanRK.(glacier) = nanmean(stackSWE.RK.(glacier)(:));
+    for c = 1:length(n);
+for d = 1:8 
+   den = DenOpt{d};
+   stack.(glacier)(d,c) = nanmean(subsetRK(c).centreline.(den).(glacier)(:));
+end
+    end
+    subplot(1,3,g)
+    plot(n,stack.(glacier),'LineWidth',2); hold on
+    plot([min(n), max(n)],[meanRK.(glacier), meanRK.(glacier)],'k--')
+        xlabel('Sample size'); ylabel('Mean SWE')
+        title(['RK Centreline ',glacier])
+        legend([DenOpt, {'All'}])
+        %ylim([0 2.45])
+end
+
+%% PLOT -> elevation coefficient G2 and G13
+figure(7); clf
+n = 10:5:50;
+for g = 2:3
+    glacier = options.glacier{g};
+for c = 1:length(n);
+for d = 1:8 
+   den = DenOpt{d};
+   stackC.(glacier)(d,c) = (subsetLR(c).centreline.(den).coeff{1,g});
+end
+end
+
+    subplot(1,2,g-1)
+    plot(n,stackC.(glacier),'LineWidth',2); hold on
+    plot([min(n), max(n)],[mean(boxMLR.(glacier){1,:}), mean(boxMLR.(glacier){1,:})],'k--')
+        xlabel('Sample size'); ylabel('Elevation Regression Coefficient')
+        title(['LR Centreline ',glacier])
+        legend([DenOpt, {'All'}])
+end
+
 %% Random subsets
 
 input.SWE               = SWE;  

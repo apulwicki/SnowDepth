@@ -14,12 +14,12 @@ function [ BMSbest, residuals ] = BMS_R( swe, topoSampled )
 %       Alexandra Pulwicki  Created: December 2016
 %                           Updated: December 2016
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+global options
 
 for g = 1:3 %For all glaciers
 %% Make Cal Val data sets
  %Initialize
-    GG = {'G4','G2','G13'};
-    glacier = char(GG(g)); display(['glacier = ', glacier]);
+    glacier = options.glacier{g}; display(['glacier = ', glacier]);
     y = swe.(glacier)(:,1);
 
  %Choose number of runs
@@ -31,6 +31,7 @@ cal_ind      = cal_ind(:,1:floor(length(y)*2/3)); %Choose 2/3 for the calibratio
 
  % Run BMS code in R with cross validation
 for i = 1:runs                                  %for number of runs
+    display(num2str(i));    
         cal_ind_temp    = cal_ind(i,:);         %get random numbers for choosing obs
         val_ind         = setdiff(1:length(y),cal_ind_temp); %get random numbers for validating
 
@@ -66,8 +67,8 @@ for i = 1:runs                                  %for number of runs
                         y_regress).^2)/numel(y_regress)); %RMSE between modelled and observed
 
         %BMS coeffs with lowest RMSE
-        rmse_min.(glacier)    = rmse.(glacier)==min(rmse.(glacier));  %min RMSE value
-        BMSbest.(glacier)     = [BMSg{rmse_min.(glacier),g}(:,1); ... %coeffs for that run
+        rmse_min.(glacier)    = find(rmse.(glacier)==min(rmse.(glacier)));  %min RMSE value
+        BMSbest.(glacier)     = [BMSg{rmse_min.(glacier)(1,1),g}(:,1); ... %coeffs for that run
                 table(min(rmse.(glacier)),'VariableNames',{'Coefficient'},'RowNames',{'rmse'})];         
 end    
    

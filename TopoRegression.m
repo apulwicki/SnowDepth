@@ -193,6 +193,8 @@ for g = 1:3
     for i = 2:9
     stackSWE.MLR.(glacier)(:,:,i-1)   = sweMLR(i).(glacier);
     stackSWE.BMS.(glacier)(:,:,i-1)   = sweBMS(i).(glacier);
+    stackSWE.SK.(glacier)(:,:,i-1)    = sweKRIG(i).(glacier).pred;
+    stackSWE.RK.(glacier)(:,:,i-1)    = sweRK(i).(glacier);
     end
 
 end    

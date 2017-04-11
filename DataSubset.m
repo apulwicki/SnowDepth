@@ -16,6 +16,7 @@ if strcmp(subset, 'pattern')
     elseif option.clt == 3; pattern = [{'UT'};{'BT'}];               %transects
     elseif option.clt == 4; pattern = [{'UM'};{'UH'};{'UC'};{'UT'};{'BT'};]; %upper ablation
     elseif option.clt == 5; pattern = [{'LM'};{'LH'};{'LC'}];        %lower ablation
+    elseif option.clt == 6; pattern = [{'UH'};{'LH'}];               %hourglass 
     end
     
     for p = 1:length(pattern)
