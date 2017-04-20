@@ -373,3 +373,44 @@ B = bar(rmseALL, 'EdgeColor','none');
     ylabel('RMSE (m w.e.)'); 
     set(gca,'xticklabel',{'Glacier 4','Glacier 2','Glacier 13'})
 
+%% Run MLR for # of runs
+
+[ SWEtemp, TOPOdata ] = ObsInCell( SWE, topo_sampled);
+for g = 1:3; glacier = options.glacier{g};
+SWEdata.(glacier) = [SWEtemp(g).swe,SWEtemp(g).utm(:,1:2)]; end
+
+n = round(logspace(1,3,10));
+%MLRrun46 =  LinearRegression( SWEdata, TOPOdata, topo_full );
+load('MLRrun.mat')
+
+ %Elevation Coefficient
+    MLRrunCoeff = [MLRrun10.coeff{1,:}; MLRrun17.coeff{1,:}; MLRrun28.coeff{1,:}; ...
+                    MLRrun46.coeff{1,:}; MLRrun77.coeff{1,:}; MLRrun129.coeff{1,:}; ...
+                    MLRrun215.coeff{1,:}; MLRrun359.coeff{1,:}; MLRrun599.coeff{1,:}; ...
+                    MLRrun1000.coeff{1,:}; ];
+figure(1); clf
+for g = 1:3
+plot(n, MLRrunCoeff(:,g), 'Color',options.RGB(g,:),'Marker','*','LineWidth',2); hold on
+end
+ylabel('Elevation Regression Coefficient'); xlabel('Number of runs'); legend(options.glacier); 
+    fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18)
+    fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 7.3 7];
+    saveFIG('MLRrunCoeffs')
+
+ %Winter mass balance
+for g = 1:3
+    glacier = options.glacier{g};
+    MLRrunWMB(:,g) = [nanmean(MLRrun10.(glacier)(:)); nanmean(MLRrun17.(glacier)(:));...
+                      nanmean(MLRrun28.(glacier)(:)); nanmean(MLRrun46.(glacier)(:));...
+                      nanmean(MLRrun77.(glacier)(:)); nanmean(MLRrun129.(glacier)(:));...
+                      nanmean(MLRrun215.(glacier)(:)); nanmean(MLRrun359.(glacier)(:));...
+                      nanmean(MLRrun599.(glacier)(:)); nanmean(MLRrun1000.(glacier)(:))];
+end
+figure(2);clf
+for g = 1:3
+plot(n, MLRrunWMB(:,g), 'Color',options.RGB(g,:),'Marker','*','LineWidth',2); hold on
+end
+ylabel('Mean WSMB (m w.e.)'); xlabel('Number of runs'); legend(options.glacier); 
+    fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18)
+    fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 7.3 7];
+    saveFIG('MLRrunWSMB')
