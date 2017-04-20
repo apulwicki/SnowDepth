@@ -1,6 +1,6 @@
 %% Selecting Data from Pattern
     
-type = 'hourglass';
+type = 'HC';
 n = 10:10:100;
 DenOpt = {'S1','F1','S2','F2','S3','F3','S4','F4'};
     subsetLR(length(n)+1).(type)      = 9999;
@@ -30,7 +30,7 @@ den = DenOpt{d-1};
 %     for T = 1:3
  %Pattern
 subset           = 'pattern';
-    S = 6;
+    S = 2;
 option.clt       = S;
 
 %  %Measurement density
