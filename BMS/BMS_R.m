@@ -23,7 +23,7 @@ for g = 1:3 %For all glaciers
     y = swe.(glacier)(:,1);
 
  %Choose number of runs
-runs = 100;        
+runs = 200;        
 
  %Cross validation random number matrix
 [~, cal_ind] = sort(rand(runs,length(y)),2);      %create matrix of random numbers
@@ -31,7 +31,6 @@ cal_ind      = cal_ind(:,1:floor(length(y)*2/3)); %Choose 2/3 for the calibratio
 
  % Run BMS code in R with cross validation
 for i = 1:runs                                  %for number of runs
-    display(num2str(i));    
         cal_ind_temp    = cal_ind(i,:);         %get random numbers for choosing obs
         val_ind         = setdiff(1:length(y),cal_ind_temp); %get random numbers for validating
 

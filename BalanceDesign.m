@@ -1,11 +1,19 @@
 %% Selecting Data from Pattern
-    
-type = 'HC';
-n = 10:10:100;
+
 DenOpt = {'S1','F1','S2','F2','S3','F3','S4','F4'};
-    subsetLR(length(n)+1).(type)      = 9999;
-    subsetSK(length(n)+1).(type)      = 9999;
-    subsetRK(length(n)+1).(type)      = 9999;
+%     subsetLR(length(n)+1).(type)      = 9999;
+%     subsetSK(length(n)+1).(type)      = 9999;
+%     subsetRK(length(n)+1).(type)      = 9999;
+    subset = 'pattern';
+
+for t = 1:5
+    
+if t == 1;     type = 'centreline';          n = 10:5:50;    option.clt = 1;
+elseif t == 2; type = 'CentreTransect4';     n = 10:10:100;  option.clt = 2;
+elseif t == 3; type = 'CentreTransect3';     n = 10:10:100;  option.clt = 3;
+elseif t == 4; type = 'hourglass';           n = 10:10:100;  option.clt = 4;
+elseif t == 4; type = 'hourglassCircle';     n = 10:10:100;  option.clt = 5;
+end
 
 
 for c = 1:length(n)
@@ -25,13 +33,13 @@ transectSWE = SWE;  transectTOPO = topo_sampled;
 input.SWE = transectSWE; input.topo_sampled = transectTOPO; 
 input.topo_sampled_ns = topo_sampled_ns;
 den = DenOpt{d-1};
-
+    display([type, ' n=',num2str(n(c)),' ',den])
 %for S = 1%1:5
 %     for T = 1:3
  %Pattern
-subset           = 'pattern';
-    S = 2;
-option.clt       = S;
+% subset           = 'pattern';
+%     S = 2;
+% option.clt       = S;
 
 %  %Measurement density
 % subset           = 'density';
@@ -53,12 +61,12 @@ option.clt       = S;
     if strcmp(type,'centreline'); TOPOdata.G13.centreD = repmat(0.001, n(c), 1); end
         
 % Plot - locations
-%     param = 'empty';
-%     topoParam.G4  = NaN(options.mapsize(1,:));
-%     topoParam.G2  = NaN(options.mapsize(2,:));
-%     topoParam.G13 = NaN(options.mapsize(3,:));
-% 
-% PlotTopoParameter(topoParam,param, 'SWE (m w.e.)', SWEdata(c).(type).(den), 'colour', 'NOmassB')
+    param = 'empty';
+    topoParam.G4  = NaN(options.mapsize(1,:));
+    topoParam.G2  = NaN(options.mapsize(2,:));
+    topoParam.G13 = NaN(options.mapsize(3,:));
+
+PlotTopoParameter(topoParam,param, 'SWE (m w.e.)', SWEdata(c).(type).(den), 'colour', 'NOmassB')
 %     saveFIG(['SamplingLocation_', subset,num2str(S)])%,'_numpeople',num2str(T)])
 
 % Linear regression
@@ -76,14 +84,15 @@ subsetRK(c).(type).(den) =  RegressionKriging( SWEdata(c).(type).(den), TOPOdata
 %     end
     end
 end
+end
 
 %% PLOT -> map estimate
 
-        n = 10:5:50;
         DenOpt = {'S1','F1','S2','F2','S3','F3','S4','F4'};
         
-            c = 1;
-            type = 'centreline';
+            c = 10;
+            %type = 'centreline';    n = 10:5:50;
+            type = 'HC';            n = 10:10:100;
             den = DenOpt{7};
 
 figure(1); PlotTopoParameter(subsetLR(c).(type).(den),type, 'SWE (m w.e.)', SWEdata(c).(type).(den), 'black', 'massB')
@@ -99,9 +108,11 @@ figure(3); PlotTopoParameter(subsetRK(c).(type).(den),type, 'SWE (m w.e.)', SWEd
      saveFIG(['MapSubset_RK',type,'_n',num2str(n(c)),den])
 
 %% PLOT -> sample size and density variation
-n = 10:5:50;
+type = 'HC';            n = 10:10:100;
+%type = 'centreline';    n = 10:5:50;
 
 load Topo_Regress_Krig.mat
+load SubsetHourglass.mat
  %Linear Regression
 figure(4); clf
 for g = 1:3
@@ -110,16 +121,16 @@ for g = 1:3
     for c = 1:length(n);
 for d = 1:8 
    den = DenOpt{d};
-   stack.(glacier)(d,c) = nanmean(subsetLR(c).centreline.(den).(glacier)(:));
+   stack.(glacier)(d,c) = nanmean(subsetLR(c).(type).(den).(glacier)(:));
 end
     end
     subplot(1,3,g)
     plot(n,stack.(glacier),'LineWidth',2); hold on
     plot([min(n), max(n)],[meanLR.(glacier), meanLR.(glacier)],'k--')
         xlabel('Sample size'); ylabel('Mean SWE')
-        title(['LR Centreline ',glacier])
+        title(['LR ',type, ' ',glacier])
         legend([DenOpt, {'All'}])
-        %ylim([0 2.45])
+        ylim([0 0.75])
 end
 
  %Simple Kriging
@@ -130,16 +141,16 @@ for g = 1:3
     for c = 1:length(n);
 for d = 1:8 
    den = DenOpt{d};
-   stack.(glacier)(d,c) = nanmean(subsetSK(c).centreline.(den).(glacier)(:));
+   stack.(glacier)(d,c) = nanmean(subsetSK(c).(type).(den).(glacier)(:));
 end
     end
     subplot(1,3,g)
     plot(n,stack.(glacier),'LineWidth',2); hold on
     plot([min(n), max(n)],[meanSK.(glacier), meanSK.(glacier)],'k--')
         xlabel('Sample size'); ylabel('Mean SWE')
-        title(['SK Centreline ',glacier])
+        title(['SK ',type, ' ',glacier])
         legend([DenOpt, {'All'}])
-        %ylim([0 2.45])
+        ylim([0 0.75])
 end
 
  %Regression Kriging
@@ -150,27 +161,28 @@ for g = 1:3
     for c = 1:length(n);
 for d = 1:8 
    den = DenOpt{d};
-   stack.(glacier)(d,c) = nanmean(subsetRK(c).centreline.(den).(glacier)(:));
+   stack.(glacier)(d,c) = nanmean(subsetRK(c).(type).(den).(glacier)(:));
 end
     end
     subplot(1,3,g)
     plot(n,stack.(glacier),'LineWidth',2); hold on
     plot([min(n), max(n)],[meanRK.(glacier), meanRK.(glacier)],'k--')
         xlabel('Sample size'); ylabel('Mean SWE')
-        title(['RK Centreline ',glacier])
+        title(['RK ',type, ' ',glacier])
         legend([DenOpt, {'All'}])
-        %ylim([0 2.45])
+        ylim([0 0.75])
 end
 
 %% PLOT -> elevation coefficient G2 and G13
 figure(7); clf
-n = 10:5:50;
+type = 'HC';            n = 10:10:100;
+%type = 'centreline';    n = 10:5:50;
 for g = 2:3
     glacier = options.glacier{g};
 for c = 1:length(n);
 for d = 1:8 
    den = DenOpt{d};
-   stackC.(glacier)(d,c) = (subsetLR(c).centreline.(den).coeff{1,g});
+   stackC.(glacier)(d,c) = (subsetLR(c).(type).(den).coeff{1,g});
 end
 end
 
@@ -181,6 +193,28 @@ end
         title(['LR Centreline ',glacier])
         legend([DenOpt, {'All'}])
 end
+
+%% PLOT -> all coefficients for one sample size
+        
+            c = 10;
+            %type = 'centreline';    n = 10:5:50;
+            type = 'HC';            n = 10:10:100;
+
+for g = 1:3
+    glacier = options.glacier{g};
+for d = 1:8 
+   den = DenOpt{d};
+   stackC.(glacier)(d,:) = (subsetLR(c).(type).(den).coeff{1:7,g});
+end
+
+figure(8);    subplot(1,2,g)
+    boxplot(stackC.(glacier), 'Colors', options.RGB(g,:)); hold on
+        ylabel('Regression Coefficient')
+        title(['LR ',type,' ',glacier])
+        %set(gca,'XTick',options.
+end            
+     %saveFIG(['MapSubset_RK',type,'_n',num2str(n(c)),den])
+
 
 %% Random subsets
 

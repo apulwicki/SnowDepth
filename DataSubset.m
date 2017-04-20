@@ -12,17 +12,42 @@ glacier = char(options.glacier(g));
 % Pattern index %
 if strcmp(subset, 'pattern')
     if option.clt == 1;     pattern = [{'UM'};{'LM'}];               %centreline
-    elseif option.clt == 2; pattern = [{'UH'};{'LH'};{'UC'};{'LC'}]; %hourglass and circle
-    elseif option.clt == 3; pattern = [{'UT'};{'BT'}];               %transects
-    elseif option.clt == 4; pattern = [{'UM'};{'UH'};{'UC'};{'UT'};{'BT'};]; %upper ablation
-    elseif option.clt == 5; pattern = [{'LM'};{'LH'};{'LC'}];        %lower ablation
-    elseif option.clt == 6; pattern = [{'UH'};{'LH'}];               %hourglass 
+    elseif option.clt == 2; pattern = [{'UM'};{'LM'}];               %centreline + 4 transects
+    elseif option.clt == 3; pattern = [{'UM'};{'LM'};{'UT'}];        %centreline + 3 transects
+    elseif option.clt == 4; pattern = [{'UH'};{'LH'}];               %hourglass 
+    elseif option.clt == 5; pattern = [{'UH'};{'LH'};{'UC'};{'LC'}]; %hourglass and circle
+        %pattern = [{'LM'};{'LH'};{'LC'}];        %lower ablation
+        %pattern = [{'UM'};{'UH'};{'UC'};{'UT'};{'BT'};]; %upper ablation
     end
     
     for p = 1:length(pattern)
-        I(:,p) = SWE(g).pattern == pattern(p,1); end
-    I = any(I,2);
+        I1(:,p) = SWE(g).pattern == pattern(p,1); end
+    I1 = any(I1,2);
+    
+     %Hourglass transects
+    if option.clt == 2
+            HGT = [83:92,111:119,21:36,49:56,...
+                    240:248,267:275,371:378,450:458,407:413,483:488,...
+                    589:602,629:644,745:760,785:792];
+            HGT = categorical([HGT+0.1;HGT+0.2;HGT+0.3]);  HGT = HGT(:);
+        for p = 1:length(HGT)
+        I2(:,p) = SWE(g).label == HGT(p); end
+        I2 = any(I2,2);
+    I = any([I1, I2],2);
+    elseif option.clt == 3
+            HGT = [83:92,49:56,...
+                    240:248,407:413,483:488,...
+                    589:602,785:792];
+            HGT = categorical([HGT+0.1;HGT+0.2;HGT+0.3]);  HGT = HGT(:);
+        for p = 1:length(HGT)
+        I2(:,p) = SWE(g).label == HGT(p); end
+        I2 = any(I2,2);
+    I = any([I1, I2],2);
+    else I = I1;
+    end
 
+    
+    
 % Sampling density %
 elseif strcmp(subset, 'density')
     label = cellstr(SWE(g).label);
