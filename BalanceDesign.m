@@ -10,7 +10,7 @@ DenOpt = {'S1','F1','S2','F2','S3','F3','S4','F4'};
 
 for c = 1:length(n)
     
-    for d = 2:9;
+    for d = 2:9
 load TopoSWE.mat
 clear SWE Density
 
