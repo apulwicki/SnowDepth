@@ -1,3 +1,42 @@
+%% Full Data
+DenOpt = {'S1','F1','S2','F2','S3','F3','S4','F4'};
+ for d = 2:9
+load TopoSWE.mat
+clear SWE Density
+
+options.DensitySWE     = d;
+run MeasurementLocations.m  %This program determines the easting and northing of transect measurements
+run Import_Density.m        %Imports snow density values
+run Import_Transect.m       %Imports transect snow depth and measurement location data
+run Import_Zigzag.m         %Imports zigzag snow depth and measurement location data
+run Import_SWE.m            %Converts to SWE and condences data
+
+den = DenOpt{d-1};
+for g = 1:3; 
+    glacier = options.glacier{g};  fullSWE.(den).(glacier) = SWE(g); 
+    fullSWE.(den).input.(glacier) = [fullSWE.(den).(glacier).swe, fullSWE.(den).(glacier).utm(:,1:2), fullSWE.(den).(glacier).cellN];
+end
+ end
+ 
+for d = 2:9
+    den = DenOpt{d-1};
+    diplay(den)
+[ tempswe.(den), TOPOdata ] = ObsInCell( fullSWE.(den).input, topo_sampled); 
+
+% Linear regression
+
+fullLR.(den) =  LinearRegression( tempswe.(den), TOPOdata, topo_full );
+    
+% Simple kriging
+
+fullSK.(den) =  KrigingR_G( tempswe.(den) );
+
+% Regression Kriging
+ 
+fullRK.(den) =  RegressionKriging( tempswe.(den), TOPOdata, topo_full, SWE );
+end
+
+
 %% Selecting Data from Pattern
 
 DenOpt = {'S1','F1','S2','F2','S3','F3','S4','F4'};
@@ -5,21 +44,22 @@ DenOpt = {'S1','F1','S2','F2','S3','F3','S4','F4'};
 %     subsetSK(length(n)+1).(type)      = 9999;
 %     subsetRK(length(n)+1).(type)      = 9999;
     subset = 'pattern';
+    accumulation = 'true';
 
-for t = 1:5
+for t = 4:5
     
-if t == 1;     type = 'centreline';          n = 10:5:50;    option.clt = 1;
-elseif t == 2; type = 'CentreTransect4';     n = 10:10:100;  option.clt = 2;
-elseif t == 3; type = 'CentreTransect3';     n = 10:10:100;  option.clt = 3;
-elseif t == 4; type = 'hourglass';           n = 10:10:100;  option.clt = 4;
-elseif t == 4; type = 'hourglassCircle';     n = 10:10:100;  option.clt = 5;
+if     t == 1; type = 'centreline';          n = 10:5:50;    clt = 1;
+elseif t == 2; type = 'CentreTransect4';     n = 10:10:100;  clt = 2;
+elseif t == 3; type = 'CentreTransect3';     n = 10:10:100;  clt = 3;
+elseif t == 4; type = 'hourglass';           n = 10:10:100;  clt = 4;
+elseif t == 5; type = 'hourglassCircle';     n = 10:10:100;  clt = 5;
 end
 
 
 for c = 1:length(n)
     
     for d = 2:9
-load TopoSWE.mat
+%load TopoSWE.mat
 clear SWE Density
 
 options.DensitySWE     = d;
@@ -33,13 +73,13 @@ transectSWE = SWE;  transectTOPO = topo_sampled;
 input.SWE = transectSWE; input.topo_sampled = transectTOPO; 
 input.topo_sampled_ns = topo_sampled_ns;
 den = DenOpt{d-1};
-    display([type, ' n=',num2str(n(c)),' ',den])
+     display([type, ' n=',num2str(n(c)),' ',den])
 %for S = 1%1:5
 %     for T = 1:3
  %Pattern
 % subset           = 'pattern';
 %     S = 2;
-% option.clt       = S;
+% clt       = S;
 
 %  %Measurement density
 % subset           = 'density';
@@ -52,21 +92,34 @@ den = DenOpt{d-1};
 % option.lessgreat = 'less';
 % option.value     = 2200;
 
-[ SWEdata(c).(type).(den), TOPOdata ] = DataSubset( subset, option, input );
+[ SWEdata(c).(type).(den), TOPOdata ] = DataSubset( subset, clt, input );
 
-[ SWEdata(c).(type).(den), TOPOdata ] = ObsInCell(SWEdata(c).(type).(den), TOPOdata);
+[ SWEdata(c).(type).(den), TOPOdata ] = ObsInCell(SWEdata(c).(type).(den), TOPOdata); 
 
 [ SWEdata(c).(type).(den), TOPOdata ] = SortNSelect( SWEdata(c).(type).(den), TOPOdata, n(c) );
 
+    % Correct the centreline values for invertable matrix when only centreline
     if strcmp(type,'centreline'); TOPOdata.G13.centreD = repmat(0.001, n(c), 1); end
-        
+  
+    % Add Accumulation area points  
+    if strcmp(accumulation, 'true')
+        clt = 'accum';
+       [sweA, topoA] = DataSubset( subset, clt, input );
+       for g = 1:3; glacier = options.glacier{g};
+           SWEdata(c).(type).(den).(glacier) = [SWEdata(c).(type).(den).(glacier); sweA.(glacier)];
+           TOPOdata.(glacier).elevation = [TOPOdata.(glacier).elevation;topoA.(glacier).elevation];
+           TOPOdata.(glacier).centreD   = [TOPOdata.(glacier).centreD;  topoA.(glacier).centreD];
+           TOPOdata.(glacier).aspect    = [TOPOdata.(glacier).aspect;   topoA.(glacier).aspect];
+           TOPOdata.(glacier).slope     = [TOPOdata.(glacier).slope;    topoA.(glacier).slope];
+           TOPOdata.(glacier).northness = [TOPOdata.(glacier).northness;topoA.(glacier).northness];
+           TOPOdata.(glacier).curvature = [TOPOdata.(glacier).curvature;topoA.(glacier).curvature];
+           TOPOdata.(glacier).Sx        = [TOPOdata.(glacier).Sx;       topoA.(glacier).Sx];
+       end
+    end
+    
 % Plot - locations
-    param = 'empty';
-    topoParam.G4  = NaN(options.mapsize(1,:));
-    topoParam.G2  = NaN(options.mapsize(2,:));
-    topoParam.G13 = NaN(options.mapsize(3,:));
-
-PlotTopoParameter(topoParam,param, 'SWE (m w.e.)', SWEdata(c).(type).(den), 'colour', 'NOmassB')
+%     topoParam.G4  = NaN(options.mapsize(1,:));    topoParam.G2  = NaN(options.mapsize(2,:));    topoParam.G13 = NaN(options.mapsize(3,:));
+% PlotTopoParameter(topoParam,'none', 'SWE (m w.e.)', SWEdata(c).(type).(den), 'colour', 'NOmassB')
 %     saveFIG(['SamplingLocation_', subset,num2str(S)])%,'_numpeople',num2str(T)])
 
 % Linear regression
@@ -80,8 +133,7 @@ subsetSK(c).(type).(den) =  KrigingR_G( SWEdata(c).(type).(den) );
 % Regression Kriging
  
 subsetRK(c).(type).(den) =  RegressionKriging( SWEdata(c).(type).(den), TOPOdata, topo_full, SWE );
-
-%     end
+    
     end
 end
 end
@@ -90,9 +142,12 @@ end
 
         DenOpt = {'S1','F1','S2','F2','S3','F3','S4','F4'};
         
-            c = 10;
-            %type = 'centreline';    n = 10:5:50;
-            type = 'HC';            n = 10:10:100;
+            c = 1;
+            %type = 'centreline';          n = 10:5:50;    
+            type = 'CentreTransect4';     n = 10:10:100;  
+            %type = 'CentreTransect3';     n = 10:10:100; 
+            %type = 'hourglass';           n = 10:10:100; 
+            %type = 'hourglassCircle';     n = 10:10:100; 
             den = DenOpt{7};
 
 figure(1); PlotTopoParameter(subsetLR(c).(type).(den),type, 'SWE (m w.e.)', SWEdata(c).(type).(den), 'black', 'massB')

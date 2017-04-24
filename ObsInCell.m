@@ -19,6 +19,8 @@ if length(SWE) == 3;
         sameG_not = unique(A1(T));
         for i = length(sameG_not):-1:1
            ind = find(sameG_not(i)==A1);
+           topo_sampled.(glacier).(param)(ind(1,1),:) = ...
+               nanmean(topo_sampled.(glacier).(param)(ind(:,1),:));                      
            topo_sampled.(glacier).(param)(ind(2:end,1),:) = [];           
            A1(ind(2:end,1))     = [];
         end

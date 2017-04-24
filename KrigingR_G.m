@@ -7,7 +7,7 @@ for g = 1:3
 
 %   Detailed explanation goes here
 % Dice Kriging -> residuals
-
+    clear utm
     utm(:,1)    = data.(glacier)(:,2)-min(options.rig.(glacier)(:,1));
     utm(:,2)    = data.(glacier)(:,3)-min(options.rig.(glacier)(:,2));
     res         = data.(glacier)(:,1);

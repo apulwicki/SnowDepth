@@ -1,4 +1,4 @@
-function [ SWEdata, TOPOdata ] = DataSubset( subset, option, input )
+function [ SWEdata, TOPOdata ] = DataSubset( subset, clt, input )
 %UNTITLED2 Summary of this function goes here
 %   Detailed explanation goes here
 global options
@@ -11,11 +11,23 @@ glacier = char(options.glacier(g));
 
 % Pattern index %
 if strcmp(subset, 'pattern')
-    if option.clt == 1;     pattern = [{'UM'};{'LM'}];               %centreline
-    elseif option.clt == 2; pattern = [{'UM'};{'LM'}];               %centreline + 4 transects
-    elseif option.clt == 3; pattern = [{'UM'};{'LM'};{'UT'}];        %centreline + 3 transects
-    elseif option.clt == 4; pattern = [{'UH'};{'LH'}];               %hourglass 
-    elseif option.clt == 5; pattern = [{'UH'};{'LH'};{'UC'};{'LC'}]; %hourglass and circle
+    
+     % Accumulation area
+ if ischar(clt)     
+     if strcmp(clt,'accum')
+       AA.G4  = [150,364,579,644];
+       AA.G2  = 753:756;
+       AA.G13 = [922:929,931,932];
+       I = false(size(SWE(g).swe));
+       I(AA.(glacier)) = 1;
+     end
+    
+ else   
+    if clt == 1;     pattern = [{'UM'};{'LM'}];               %centreline
+    elseif clt == 2; pattern = [{'UM'};{'LM'}];               %centreline + 4 transects
+    elseif clt == 3; pattern = [{'UM'};{'LM'};{'UT'}];        %centreline + 3 transects
+    elseif clt == 4; pattern = [{'UH'};{'LH'}];               %hourglass 
+    elseif clt == 5; pattern = [{'UH'};{'LH'};{'UC'};{'LC'}]; %hourglass and circle
         %pattern = [{'LM'};{'LH'};{'LC'}];        %lower ablation
         %pattern = [{'UM'};{'UH'};{'UC'};{'UT'};{'BT'};]; %upper ablation
     end
@@ -25,7 +37,7 @@ if strcmp(subset, 'pattern')
     I1 = any(I1,2);
     
      %Hourglass transects
-    if option.clt == 2
+    if clt == 2
             HGT = [83:92,111:119,21:36,49:56,...
                     240:248,267:275,371:378,450:458,407:413,483:488,...
                     589:602,629:644,745:760,785:792];
@@ -34,7 +46,7 @@ if strcmp(subset, 'pattern')
         I2(:,p) = SWE(g).label == HGT(p); end
         I2 = any(I2,2);
     I = any([I1, I2],2);
-    elseif option.clt == 3
+    elseif clt == 3
             HGT = [83:92,49:56,...
                     240:248,407:413,483:488,...
                     589:602,785:792];
@@ -45,9 +57,8 @@ if strcmp(subset, 'pattern')
     I = any([I1, I2],2);
     else I = I1;
     end
-
-    
-    
+ end
+ 
 % Sampling density %
 elseif strcmp(subset, 'density')
     label = cellstr(SWE(g).label);
