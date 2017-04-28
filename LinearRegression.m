@@ -1,4 +1,4 @@
-function [ sweMLR ] = LinearRegression( SWEdata, TOPOdata, topo_full )
+function [ sweMLR, CI ] = LinearRegression( SWEdata, TOPOdata, topo_full )
 %UNTITLED2 Summary of this function goes here
 %   Detailed explanation goes here
 global options 
@@ -8,8 +8,8 @@ for i = 1:3
         X       = TOPOdata.(glacier);
 
         % Get coefficients
-        MLR.(glacier) = MLRcalval(swe, X);
-        MLR.(glacier).Properties.VariableNames(1) = options.glacier(i);
+        [MLR.(glacier), ~, CI.(glacier)]            = MLRcalval(swe, X);
+        MLR.(glacier).Properties.VariableNames(1)   = options.glacier(i);
         
         %Predict
         mlrCoeff = MLR.G4.Properties.RowNames(1:end-3);   topoCoeff = fieldnames(topo_full.G4);

@@ -1,4 +1,4 @@
-function [coeffs_final, residuals] = MLRcalval(y, X)
+function [coeffs_final, residuals, ci] = MLRcalval(y, X)
 % MLR with cross validation and linear combos of params
 %       This script calculates a MLR with cross validation for some number
 %       of runs (typically 1000) for all possible linear combination of
@@ -65,9 +65,19 @@ for j = 1:length(c)                             %all linear combos of params
     topo_obs        = M(min_rmse_IND,c(j,:));           %create table of topo params
     mlr_best{j,1}   = fitlm([topo_obs, swe_obs]);       %do thorough MLR using fitlm
     BIC_best(j,1)   = mlr_best{j,1}.ModelCriterion.BIC; %BIC of best MLR run
-
+     
+     %Confidence interval
+    ci              = coefCI(mlr_best{j,1});
+        tempI = find(c(j,:));
+        ciL(j,:) = [double(c(j,:)), 0];      ciU(j,:) = [double(c(j,:)), 0];  
+        for k = 1:length(tempI);
+            ciL(j,tempI(k)) = ci(k+1,1);    
+            ciU(j,tempI(k)) = ci(k+1,2);    
+        end
+        ciL(j,n+1)  = ci(1,1);          ciU(j,n+1)  = ci(1,2);
 end
-
+        ciL(ciL==0) = NaN;              ciU(ciU==0) = NaN; 
+        ci          = [nanmin(ciL)', nanmax(ciU)'];
 %% Weighting models - full
 
  %Calculate weight for each model based on BIC value
@@ -84,7 +94,7 @@ for j = 1:length(mlr_best)
     coeffs_w{j,1}{:,1} = coeffs_w{j,1}{:,1}*BICweight(j,1);     %weights the coefficients
 end
 
- %Fill in missing coefficients (the zeors ones)
+ %Fill in missing coefficients (the zero ones)
 all = coeffs_w{end,1}.Properties.RowNames;                      %get param names 
 coeffs_full = table();                                          %initialize
 for j = 1:length(mlr_best)
@@ -105,7 +115,9 @@ coeffs_final.Properties.RowNames = coeffs_full.Properties.RowNames;
 coeffs_final.Properties.RowNames(1,1) = {'Intercept'};
 coeffs_final.Properties.VariableNames = {'Coefficient'};
 
-
+ %Weight confidence intervals
+% ciLf = nansum(ciL.*repmat(BICweight,1,size(ciL,2)));
+% ciUf = nansum(ciU.*repmat(BICweight,1,size(ciU,2)));
 %% Calculate % variance explained by each variable
 
 beta = M.Properties.VariableNames; %names of params

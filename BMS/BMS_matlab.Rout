@@ -19,11 +19,3 @@ Type 'q()' to quit R.
 
 [Previously saved workspace restored]
 
-> 
-> ################# Import Data ###############################
-> #install.packages(...)
-> 
-> library(BMS)
-> library(R.matlab)
-
-Execution halted

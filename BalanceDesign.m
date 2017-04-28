@@ -1,5 +1,4 @@
 %% Full Data
-DenOpt = {'S1','F1','S2','F2','S3','F3','S4','F4'};
  for d = 2:9
 load TopoSWE.mat
 clear SWE Density
@@ -11,7 +10,7 @@ run Import_Transect.m       %Imports transect snow depth and measurement locatio
 run Import_Zigzag.m         %Imports zigzag snow depth and measurement location data
 run Import_SWE.m            %Converts to SWE and condences data
 
-den = DenOpt{d-1};
+den = options.DenOpt{d-1};
 for g = 1:3; 
     glacier = options.glacier{g};  fullSWE.(den).(glacier) = SWE(g); 
     fullSWE.(den).input.(glacier) = [fullSWE.(den).(glacier).swe, fullSWE.(den).(glacier).utm(:,1:2), fullSWE.(den).(glacier).cellN];
@@ -19,8 +18,8 @@ end
  end
  
 for d = 2:9
-    den = DenOpt{d-1};
-    diplay(den)
+    den = options.DenOpt{d-1};
+    display(den)
 [ tempswe.(den), TOPOdata ] = ObsInCell( fullSWE.(den).input, topo_sampled); 
 
 % Linear regression
@@ -39,40 +38,40 @@ end
 
 %% Selecting Data from Pattern
 
-DenOpt = {'S1','F1','S2','F2','S3','F3','S4','F4'};
 %     subsetLR(length(n)+1).(type)      = 9999;
 %     subsetSK(length(n)+1).(type)      = 9999;
 %     subsetRK(length(n)+1).(type)      = 9999;
     subset = 'pattern';
-    accumulation = 'true';
-
-for t = 4:5
     
-if     t == 1; type = 'centreline';          n = 10:5:50;    clt = 1;
-elseif t == 2; type = 'CentreTransect4';     n = 10:10:100;  clt = 2;
-elseif t == 3; type = 'CentreTransect3';     n = 10:10:100;  clt = 3;
-elseif t == 4; type = 'hourglass';           n = 10:10:100;  clt = 4;
-elseif t == 5; type = 'hourglassCircle';     n = 10:10:100;  clt = 5;
+
+for t = 1:5
+    
+if     t == 1; type = 'Acentreline';          n = 10:5:50;    clt = 1;
+elseif t == 2; type = 'ACentreTransect4';     n = 10:10:100;  clt = 2;
+elseif t == 3; type = 'ACentreTransect3';     n = 10:10:100;  clt = 3;
+elseif t == 4; type = 'Ahourglass';           n = 10:10:100;  clt = 4;
+elseif t == 5; type = 'AhourglassCircle';     n = 10:10:100;  clt = 5;
 end
 
 
 for c = 1:length(n)
     
     for d = 2:9
-%load TopoSWE.mat
-clear SWE Density
+load TopoSWE.mat
+%clear SWE Density
 
-options.DensitySWE     = d;
-run MeasurementLocations.m  %This program determines the easting and northing of transect measurements
-run Import_Density.m        %Imports snow density values
-run Import_Transect.m       %Imports transect snow depth and measurement location data
-run Import_Zigzag.m         %Imports zigzag snow depth and measurement location data
-run Import_SWE.m            %Converts to SWE and condences data
-transectSWE = SWE;  transectTOPO = topo_sampled;
+% options.DensitySWE     = d;
+% run MeasurementLocations.m  %This program determines the easting and northing of transect measurements
+% run Import_Density.m        %Imports snow density values
+% run Import_Transect.m       %Imports transect snow depth and measurement location data
+% run Import_Zigzag.m         %Imports zigzag snow depth and measurement location data
+% run Import_SWE.m            %Converts to SWE and condences data
+% transectSWE = SWE;  transectTOPO = topo_sampled;
+den = options.DenOpt{d-1};
 
-input.SWE = transectSWE; input.topo_sampled = transectTOPO; 
+input.SWE = fullSWE.(den); input.topo_sampled = topo_sampled; 
 input.topo_sampled_ns = topo_sampled_ns;
-den = DenOpt{d-1};
+
      display([type, ' n=',num2str(n(c)),' ',den])
 %for S = 1%1:5
 %     for T = 1:3
@@ -92,6 +91,7 @@ den = DenOpt{d-1};
 % option.lessgreat = 'less';
 % option.value     = 2200;
 
+
 [ SWEdata(c).(type).(den), TOPOdata ] = DataSubset( subset, clt, input );
 
 [ SWEdata(c).(type).(den), TOPOdata ] = ObsInCell(SWEdata(c).(type).(den), TOPOdata); 
@@ -102,9 +102,9 @@ den = DenOpt{d-1};
     if strcmp(type,'centreline'); TOPOdata.G13.centreD = repmat(0.001, n(c), 1); end
   
     % Add Accumulation area points  
+accumulation = 'true';
     if strcmp(accumulation, 'true')
-        clt = 'accum';
-       [sweA, topoA] = DataSubset( subset, clt, input );
+       [sweA, topoA] = DataSubset( subset, 'accum', input );
        for g = 1:3; glacier = options.glacier{g};
            SWEdata(c).(type).(den).(glacier) = [SWEdata(c).(type).(den).(glacier); sweA.(glacier)];
            TOPOdata.(glacier).elevation = [TOPOdata.(glacier).elevation;topoA.(glacier).elevation];

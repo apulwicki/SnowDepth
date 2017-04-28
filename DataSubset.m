@@ -2,7 +2,9 @@ function [ SWEdata, TOPOdata ] = DataSubset( subset, clt, input )
 %UNTITLED2 Summary of this function goes here
 %   Detailed explanation goes here
 global options
-SWE             = input.SWE; 
+SWE(1)          = input.SWE.G4; 
+SWE(2)          = input.SWE.G2;
+SWE(3)          = input.SWE.G13;
 topo_sampled    = input.topo_sampled; 
 topo_sampled_ns = input.topo_sampled_ns;
 

@@ -86,6 +86,7 @@ clear rig E N ENgrid mapNaN mapsize
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% EASE OF USE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 
 options.glacier        = {'G4','G2','G13'};
+options.DenOpt         = {'S1','F1','S2','F2','S3','F3','S4','F4'};
 options.topoVarsUnits  = { '{\itz} (m a.s.l)','{\itd_C} (m)','\alpha','{\itm} (^{\circ})',...
                             '{\itN}','{\kappa} (m^{-1})','Sx'};
 options.topoVars       = { '{\itz}','{\itd_C}','\alpha','{\itm}',...

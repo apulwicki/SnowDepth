@@ -127,48 +127,7 @@ subplot(1,3,3)
       set(findall(fig,'-property','FontSize'),'FontSize',16)
 saveFIG('Zigzag_Location_Map')         
 
-%% Variogram - zigzag
-
-GZZlabel = ['G04 Z3A'; 'G04 Z2A'; 'G04 Z5B'; 'G02 Z5C'; 'G02 Z7A';'G02 Z3B'; 'G13 Z7C';'G13 Z4C'; 'G13 Z3B'; 'G13 Z5A'];
-
-
-for i = 1:size(GZZlabel,1)
-    x = cell2mat(ZZ.depth(ZZ.index(i):ZZ.index(i+1)-1,3));
-    y = cell2mat(ZZ.depth(ZZ.index(i):ZZ.index(i+1)-1,4));
-    z = cell2mat(ZZ.depth(ZZ.index(i):ZZ.index(i+1)-1,5));
-    x2 = nanmax(x)-x;
-    y2 = nanmax(y)-y;
-    
-    lag = 1.5; maxlag = 40;
-    d = variogramAlex([z x2 y2], lag, maxlag);
-    fit = variofitAlex(d, [GZZlabel(i,:) ' (lag=' num2str(lag) ', maxlag=' num2str(maxlag) ')']);      
-   
-    %filename = strcat('/home/glaciology1/Documents/Data/Plots/variogram',GZZlabel(i,:));
-    filename = strcat('/Users/Alexandra/Documents/SFU/Data/Plots/Zigzag/variogram',GZZlabel(i,:));
-    fig = gcf;
-    fig.PaperUnits = 'inches';
-    fig.PaperPosition = [0 0 8 9];
-    print(filename,'-dpng','-r0')
-    clf
-
-end
-clear x y x2 y2 z i k c pointsize filename GZZlabel
-
-% figure(1)
-%     subplot(2,2,1)
-%     scatter(x2,y2,4,z,'filled'); box on;
-%     ylabel('y'); xlabel('x')
-%     %title(GZZ_lab(i,:))
-%     subplot(2,2,2)
-%     hist(z,20)
-%     ylabel('frequency'); xlabel('z')
-%     title('histogram of z-values')
-%     subplot(2,2,3)
-%     d = variogram([x2 y2],z,'plotit',true,'nrbins',100);
-%     title('Isotropic variogram')
-%     subplot(2,2,4)
-%     d2 = variogram([x2 y2],z,'plotit',true,'nrbins',100,'anisotropy',true);
-%     title('Anisotropic variogram')                   
+        
 %% Length of measured vs vertex spacing
 
 section_sum = [1];
