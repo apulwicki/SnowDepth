@@ -7,10 +7,10 @@ lags = 1:10:500;
 h1 = lags <= range;
 h2 = lags > range;
 
-% Vdata.val = nugget + ( sill*( 1.5*(lags/range) - 0.5*(lags/range).^3)); 
-% Vdata.val = [Vdata.val(h1==1), (sill+nugget)*h2(h2==1)]';
-Vdata.val = nugget + sill*(1-exp(-lags/range));
-Vdata.val = Vdata.val' + rand(size(Vdata.val))'*2;
+Vdata.val = nugget + ( sill*( 1.5*(lags/range) - 0.5*(lags/range).^3)); 
+Vdata.val = [Vdata.val(h1==1), (sill+nugget)*h2(h2==1)]';
+% Vdata.val = nugget + sill*(1-exp(-lags/range))';
+Vdata.val = Vdata.val ;%+ (rand(size(Vdata.val))-0.5)*2;
 
 Vdata.meanDist  = lags';
 Vdata.binCentre = lags';

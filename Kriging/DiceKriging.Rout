@@ -57,45 +57,44 @@ optimisation start
   - type :  matern5_2 
   - nugget : unknown homogenous nugget effect 
   - parameters lower bounds :  1e-10 1e-10 
-  - parameters upper bounds :  7422.816 9181.425 
+  - parameters upper bounds :  7246.54 8809.235 
   - upper bound for alpha   :  1 
-  - best initial criterion value(s) :  121.0655 
+  - best initial criterion value(s) :  136.6848 
 
 N = 3, M = 5 machine precision = 2.22045e-16
 At X0, 0 variables are exactly at the bounds
-At iterate     0  f=      -121.07  |proj g|=       0.5832
-At iterate     1  f =      -121.07  |proj g|=     0.0059656
-At iterate     2  f =      -121.07  |proj g|=    0.00084575
-At iterate     3  f =      -121.07  |proj g|=     0.0017025
-At iterate     4  f =      -121.07  |proj g|=     0.0093907
-At iterate     5  f =      -121.07  |proj g|=      0.020663
-At iterate     6  f =      -121.07  |proj g|=      0.039625
-At iterate     7  f =      -121.07  |proj g|=      0.069862
-At iterate     8  f =      -121.07  |proj g|=       0.11904
-At iterate     9  f =      -121.07  |proj g|=        0.1983
-At iterate    10  f =      -121.07  |proj g|=        0.3283
-At iterate    11  f =      -121.08  |proj g|=       0.45322
-At iterate    12  f =      -121.09  |proj g|=       0.46142
-At iterate    13  f =      -121.11  |proj g|=       0.46979
-At iterate    14  f =      -121.16  |proj g|=       0.46947
-At iterate    15  f =      -121.25  |proj g|=       0.43697
-At iterate    16  f =      -121.32  |proj g|=        0.0669
-At iterate    17  f =      -121.33  |proj g|=        0.1673
-At iterate    18  f =      -121.33  |proj g|=      0.059234
-At iterate    19  f =      -121.33  |proj g|=     0.0031857
-At iterate    20  f =      -121.33  |proj g|=    0.00090187
-At iterate    21  f =      -121.33  |proj g|=    0.00012769
+At iterate     0  f=      -136.68  |proj g|=      0.32581
+At iterate     1  f =      -136.76  |proj g|=       0.66364
+At iterate     2  f =      -136.76  |proj g|=       0.25083
+At iterate     3  f =      -136.77  |proj g|=      0.068397
+At iterate     4  f =      -136.77  |proj g|=     0.0090315
+At iterate     5  f =      -136.77  |proj g|=     0.0011769
+At iterate     6  f =      -136.77  |proj g|=     0.0049447
+At iterate     7  f =      -136.77  |proj g|=      0.036389
+At iterate     8  f =      -136.77  |proj g|=      0.077757
+At iterate     9  f =      -136.77  |proj g|=       0.14866
+At iterate    10  f =      -136.77  |proj g|=       0.24561
+At iterate    11  f =      -136.77  |proj g|=       0.25415
+At iterate    12  f =      -136.78  |proj g|=       0.27177
+At iterate    13  f =      -137.32  |proj g|=       0.70732
+At iterate    14  f =      -137.33  |proj g|=       0.68138
+At iterate    15  f =      -137.52  |proj g|=        0.6709
+At iterate    16  f =      -137.63  |proj g|=       0.61661
+At iterate    17  f =      -137.63  |proj g|=       0.02587
+At iterate    18  f =      -137.63  |proj g|=     0.0045979
+At iterate    19  f =      -137.63  |proj g|=    0.00094714
+At iterate    20  f =      -137.63  |proj g|=    0.00074521
 
-iterations 21
-function evaluations 26
-segments explored during Cauchy searches 22
+iterations 20
+function evaluations 31
+segments explored during Cauchy searches 21
 BFGS updates skipped 0
 active bounds at final generalized Cauchy point 0
-norm of the final projected gradient 0.000127687
-final function value -121.329
+norm of the final projected gradient 0.000745208
+final function value -137.632
 
-F = -121.329
-final  value -121.328877 
+F = -137.632
+final  value -137.632278 
 converged
 > #plot(m)
 > #m
@@ -144,4 +143,4 @@ converged
 > 
 > proc.time()
    user  system elapsed 
-  1.688   0.272   1.959 
+  1.660   0.228   1.887 
