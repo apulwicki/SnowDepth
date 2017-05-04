@@ -49,11 +49,23 @@ figure(4); clf
 for g = 1:3
     glacier = options.glacier{g};
 
-%subplot(1,3,g)
-    histogram(Qbetaswe.(den).(glacier), 'EdgeColor','none','FaceAlpha',0.7); hold on
-    ylabel('Frequency'); xlabel('Winter surface mass balance (m w.e.)'); title('All glaciers')
+    histogram(Qbeta.(den).(glacier), 'EdgeColor','none','FaceAlpha',0.7, 'FaceColor',options.RGB(g,:)); hold on
+    ylabel('Frequency'); xlabel('Winter surface mass balance (m w.e.)'); title(['WSMB Distribution - ',den])
 end
     legend(options.glacier)
+    
+ %With ZZ var vs Without
+ c = cbrewer('qual','Paired',2);
+ figure(5); clf
+for g = 1:3
+    glacier = options.glacier{g};
+subplot(1,3,g)
+    histogram(Qbeta.(den).(glacier), 'EdgeColor','none','FaceAlpha',0.7, 'FaceColor',c(1,:)); hold on
+    histogram(Qbetazz.(den).(glacier), 'EdgeColor','none','FaceAlpha',0.7, 'FaceColor',c(2,:)); hold on
+   
+    ylabel('Frequency'); xlabel('Winter surface mass balance (m w.e.)'); title(['WSMB Distribution - ',den])
+    legend('\beta','\beta and \sigma_{ZZ}') 
+end
     
  %all Density, one G
 for g = 1:3;
