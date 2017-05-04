@@ -1,8 +1,9 @@
 %% Variogram - fake data
-nugget = 1;
-range = 200;
-sill = 10;
-lags = 1:10:500;
+nugget = 5;
+range = 500;
+sill = 15;
+lags = 0:15:2000;
+slope = 0.8;
 
 h1 = lags <= range;
 h2 = lags > range;
@@ -10,26 +11,55 @@ h2 = lags > range;
 Vdata.val = nugget + ( sill*( 1.5*(lags/range) - 0.5*(lags/range).^3)); 
 Vdata.val = [Vdata.val(h1==1), (sill+nugget)*h2(h2==1)]';
 % Vdata.val = nugget + sill*(1-exp(-lags/range))';
-Vdata.val = Vdata.val ;%+ (rand(size(Vdata.val))-0.5)*2;
+% Vdata.val = nugget + slope*lags;
+% Vdata.val = [Vdata.val(h1==1), Vdata.val(lags==range)*h2(h2==1)]';
+
+Vdata.val = Vdata.val + (rand(size(Vdata.val))-0.5)*2;
 
 Vdata.meanDist  = lags';
 Vdata.binCentre = lags';
 Vdata.num       = ones(size(lags))';
 
-figure(1); clf
+figure(1);clf
     Vfit = variofitAlex(Vdata,'Fake Data',2);
 
 %% Variogram - transect
+ %%Fitting function cannot have small values for the variance!
+runs = 1000;
+% clear range weights sill nugget 
+ range = zeros(runs,3); weights = range; sill = range; nugget = range;
 
-figure(1); clf
-for g = 1%:3    
+figure(1); clf; figure(2); clf
+for g = 1:3    
     glacier = options.glacier{g};
-
-variogram.(glacier) = variogramAlex([SWE(g).swe SWE(g).utm(:,1:2)], 15, 'default');
-%subplot(1,3,g);
+for i = 1:runs
+I = randi([1 length(FLags)],round(length(FLags)*3/4),1);
+figure(1);  subplot(1,3,g);ap
+            
+    variogram.(glacier) = variogramAlex([SWE(g).swe(I) SWE(g).utm(I,1:2)], 15, 'default');
+        inc = variogram.(glacier).num~=0;
+        variogram.(glacier).val         = variogram.(glacier).val(inc)*1000;
+        variogram.(glacier).meanDist    = variogram.(glacier).meanDist(inc);
+        variogram.(glacier).num         = variogram.(glacier).num(inc);
+        variogram.(glacier).binCentre   = variogram.(glacier).binCentre(inc);
+    
     fit.(glacier) = variofitAlex(variogram.(glacier),glacier,2);
-    %saveFIG(['/home/glaciology1/Documents/Data/Plots/variofull',glacier])
+        range(i,:)      = [fit.(glacier).spherical.range, fit.(glacier).exponential.range, fit.(glacier).gaussian.range];
+        sill(i,:)       = [fit.(glacier).spherical.range, fit.(glacier).exponential.range, fit.(glacier).gaussian.range];
+        nugget(i,:)     = [fit.(glacier).spherical.range, fit.(glacier).exponential.range, fit.(glacier).gaussian.range];
+        weights(i,:)    = [fit.(glacier).spherical.gof.rsquare, fit.(glacier).exponential.gof.rsquare, fit.(glacier).gaussian.gof.rsquare];
+        weights         = weights/sum(weights(:)); 
+
+        ylabel('Semi-variance (x10^3)'); legend('Spherical','Exponential','Gaussian');
 end
+    range(range>5000) = NaN; range(range<80) = NaN;
+
+figure(2);  subplot(1,3,g);
+histogram(range(:))
+meanrange.(glacier) = nansum(range(:).*weights(:));
+end
+    %saveFIG(['/home/glaciology1/Documents/Data/Plots/variofull',glacier])
+
 %% Variogram for different sections (lower, upper)
 
 glacier_list = ['G04';'G02';'G13']; %select data from chosen glacier

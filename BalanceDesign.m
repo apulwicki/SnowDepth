@@ -44,13 +44,13 @@ end
     subset = 'pattern';
     
 
-for t = 1%:5
+for t = 1:5
     
-if     t == 1; type = 'centreline';          n = 10:5:50;    clt = 1;
-elseif t == 2; type = 'CentreTransect4';     n = 10:10:100;  clt = 2;
-elseif t == 3; type = 'CentreTransect3';     n = 10:10:100;  clt = 3;
-elseif t == 4; type = 'hourglass';           n = 10:10:100;  clt = 4;
-elseif t == 5; type = 'hourglassCircle';     n = 10:10:100;  clt = 5;
+if     t == 1; type = 'Acentreline';          n = 10:5:50;    clt = 1;
+elseif t == 2; type = 'ACentreTransect4';     n = 10:10:100;  clt = 2;
+elseif t == 3; type = 'ACentreTransect3';     n = 10:10:100;  clt = 3;
+elseif t == 4; type = 'Ahourglass';           n = 10:10:100;  clt = 4;
+elseif t == 5; type = 'AhourglassCircle';     n = 10:10:100;  clt = 5;
 end
 
 
@@ -92,21 +92,21 @@ input.topo_sampled_ns = topo_sampled_ns;
 % option.value     = 2200;
 
 
-[ SWEdata(c).(type).(den), TOPOdata ] = DataSubset( subset, clt, input );
+[ subsetSWE(c).(type).(den), TOPOdata ] = DataSubset( subset, clt, input );
 
-[ SWEdata(c).(type).(den), TOPOdata ] = ObsInCell(SWEdata(c).(type).(den), TOPOdata); 
+[ subsetSWE(c).(type).(den), TOPOdata ] = ObsInCell(subsetSWE(c).(type).(den), TOPOdata); 
 
-[ SWEdata(c).(type).(den), TOPOdata ] = SortNSelect( SWEdata(c).(type).(den), TOPOdata, n(c) );
+[ subsetSWE(c).(type).(den), TOPOdata ] = SortNSelect( subsetSWE(c).(type).(den), TOPOdata, n(c) );
 
     % Correct the centreline values for invertable matrix when only centreline
     if strcmp(type,'centreline'); TOPOdata.G13.centreD = repmat(0.001, n(c), 1); end
   
     % Add Accumulation area points  
-accumulation = 'false';
+accumulation = 'true';
     if strcmp(accumulation, 'true')
        [sweA, topoA] = DataSubset( subset, 'accum', input );
        for g = 1:3; glacier = options.glacier{g};
-           SWEdata(c).(type).(den).(glacier) = [SWEdata(c).(type).(den).(glacier); sweA.(glacier)];
+           subsetSWE(c).(type).(den).(glacier) = [subsetSWE(c).(type).(den).(glacier); sweA.(glacier)];
            TOPOdata.(glacier).elevation = [TOPOdata.(glacier).elevation;topoA.(glacier).elevation];
            TOPOdata.(glacier).centreD   = [TOPOdata.(glacier).centreD;  topoA.(glacier).centreD];
            TOPOdata.(glacier).aspect    = [TOPOdata.(glacier).aspect;   topoA.(glacier).aspect];
@@ -124,15 +124,15 @@ accumulation = 'false';
 
 % Linear regression
 
-subsetLR(c).(type).(den) =  LinearRegression( SWEdata(c).(type).(den), TOPOdata, topo_full );
-    
-% Simple kriging
-
-subsetSK(c).(type).(den) =  KrigingR_G( SWEdata(c).(type).(den) );
-
-% Regression Kriging
- 
-subsetRK(c).(type).(den) =  RegressionKriging( SWEdata(c).(type).(den), TOPOdata, topo_full, SWE );
+% subsetLR(c).(type).(den) =  LinearRegression( subsetSWE(c).(type).(den), TOPOdata, topo_full );
+%     
+% % Simple kriging
+% 
+% subsetSK(c).(type).(den) =  KrigingR_G( subsetSWE(c).(type).(den) );
+% 
+% % Regression Kriging
+%  
+% subsetRK(c).(type).(den) =  RegressionKriging( subsetSWE(c).(type).(den), TOPOdata, topo_full, SWE );
     
     end
 end
@@ -141,12 +141,12 @@ end
 subsetLR(10).centreline  = subsetLR(9).centreline;
 subsetSK(10).centreline  = subsetSK(9).centreline;
 subsetRK(10).centreline  = subsetRK(9).centreline;
-SWEdata(10).centreline   = SWEdata(9).centreline;
+subsetSWE(10).centreline   = subsetSWE(9).centreline;
 
 subsetLR(10).Acentreline = subsetLR(9).Acentreline;
 subsetSK(10).Acentreline = subsetSK(9).Acentreline;
 subsetRK(10).Acentreline = subsetRK(9).Acentreline;
-SWEdata(10).Acentreline  = SWEdata(9).Acentreline;
+subsetSWE(10).Acentreline  = subsetSWE(9).Acentreline;
 
 
 %% PLOT -> map estimate
@@ -162,15 +162,15 @@ for c = 1:10;
             type = subs{s};
             den = options.DenOpt{7};
 
-figure(1); PlotTopoParameter(subsetLR(c).(type).(den),type, 'SWE (m w.e.)', SWEdata(c).(type).(den), 'black', 'massB')
+figure(1); PlotTopoParameter(subsetLR(c).(type).(den),type, 'SWE (m w.e.)', subsetSWE(c).(type).(den), 'black', 'massB')
      title('Linear Regression')
      saveFIG(['MapSubset_LR',type,'_n',num2str(n(c)),den])
 
-figure(2); PlotTopoParameter(subsetSK(c).(type).(den),type, 'SWE (m w.e.)', SWEdata(c).(type).(den), 'black', 'massB')
+figure(2); PlotTopoParameter(subsetSK(c).(type).(den),type, 'SWE (m w.e.)', subsetSWE(c).(type).(den), 'black', 'massB')
      title('Simple Kriging')
      saveFIG(['MapSubset_SK',type,'_n',num2str(n(c)),den])
 
-figure(3); PlotTopoParameter(subsetRK(c).(type).(den),type, 'SWE (m w.e.)', SWEdata(c).(type).(den), 'black', 'massB')
+figure(3); PlotTopoParameter(subsetRK(c).(type).(den),type, 'SWE (m w.e.)', subsetSWE(c).(type).(den), 'black', 'massB')
      title('Regression Kriging')
      saveFIG(['MapSubset_RK',type,'_n',num2str(n(c)),den])
 end
@@ -455,12 +455,12 @@ n                       = 10:5:60;
 
 for i = 1:length(n)
     for x = 1:30
-        [ SWEdata, TOPOdata ] = DataSubset( 'random', n(i), input );
+        [ subsetSWE, TOPOdata ] = DataSubset( 'random', n(i), input );
 
-        [ testRK ] = RegressionKriging( SWEdata, TOPOdata, topo_full, SWE );
+        [ testRK ] = RegressionKriging( subsetSWE, TOPOdata, topo_full, SWE );
         for g = 1:3;
         glacier = char(options.glacier(g));
-        Ttemp = KrigingR(SWEdata.(glacier)(:,1), SWEdata.(glacier)(:,2:3), glacier);
+        Ttemp = KrigingR(subsetSWE.(glacier)(:,1), subsetSWE.(glacier)(:,2:3), glacier);
         testKRIG.(glacier) = Ttemp.pred;
         end
         

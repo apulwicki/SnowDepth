@@ -6,6 +6,7 @@
 library(R.matlab)
 library(DiceKriging)
 library(DiceOptim)
+library(foreach)
 
 
 ## Load my data ##
@@ -16,14 +17,16 @@ utm = data.frame(residuals$utm)
 sizexy = residuals$sizexy
 
 ## Model ##
-m = km(~1,design = utm, response = res, covtype = "matern5_2", nugget.estim = TRUE)
-#plot(m)
-#m
+m = km(~1,design = utm, response = res, covtype = "matern5_2", nugget.estim = TRUE, multistart = 5, iso = TRUE)
+ m@covariance@range.val
+ #plot(m)
+ #m
+ 
  #Return model paramaters
  maxLL = -m@logLik
  intercept = m@trend.coef
  nugget = m@covariance@nugget
- model = data.frame(intercept, nugget, maxLL)
+  model = data.frame(intercept, nugget, maxLL)
 
  #Cross validation (leave one out)
  LOO = leaveOneOut.km(m, "SK",trend.reestim = TRUE)
@@ -40,6 +43,7 @@ pred = matrix(pred.m$mean, sizexy[1,1], sizexy[1,2], byrow = TRUE)
 lower95 = matrix(pred.m$lower95, sizexy[1,1], sizexy[1,2], byrow = TRUE)
 upper95 = matrix(pred.m$upper95, sizexy[1,1], sizexy[1,2], byrow = TRUE)
 
+
 writeMat('/home/glaciology1/Documents/Data/SnowDepth/Kriging/kriging.mat',
          pred=pred, lower95=lower95, upper95=upper95, model = model, LOO = LOO,
          fixNames=TRUE, matVersion="5", onWrite=NULL, verbose=FALSE)
@@ -48,11 +52,11 @@ writeMat('/home/glaciology1/Documents/Data/SnowDepth/Kriging/kriging.mat',
 #           fixNames=TRUE, matVersion="5", onWrite=NULL, verbose=FALSE)
 
 ## Install and load rgl package
-#library(rgl)
+library(rgl)
 
 ## Plot surface and observations
-#plot3d(X[,1],X[,2],res, xlim=c(0,3000),ylim=c(0,3000),zlim=0:1)
-#surface3d(x.grid,x.grid, matrix(pred.m$mean,n.grid,n.grid),col="light blue", alpha=0.5)
+plot3d(utm[,1],utm[,2],res, xlim=c(0,3000),ylim=c(0,3000),zlim=0:1)
+surface3d(x,y, matrix(pred.m$mean,length(x),length(y)),col="light blue", alpha=0.5)
 
 ## Plot surface and observations with intervals
 #  rglwidget()

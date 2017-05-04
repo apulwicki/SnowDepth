@@ -31,7 +31,7 @@ function [ d ] = variogramAlex(zz, lag, maxlag_in)
     
     % Set maxlag if not specified    
     if strcmp(maxlag_in,'default') %when 'default' is chosen
-        maxlag = ceil(max(max(distMtx))/lag/2.5)*lag; %maxlag is half the maximum domain distance (rounded up to have integer number of lags)
+        maxlag = ceil(max(distMtx(:))/lag*1/2)*lag; %maxlag is half the maximum domain distance (rounded up to have integer number of lags)
     else
         maxlag = ceil(maxlag_in/lag)*lag;
     end

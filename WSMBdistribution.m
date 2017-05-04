@@ -50,7 +50,7 @@ for g = 1:3
     glacier = options.glacier{g};
 
 %subplot(1,3,g)
-    histogram(Q.(den).(glacier), 'EdgeColor','none','FaceAlpha',0.7); hold on
+    histogram(Qbetaswe.(den).(glacier), 'EdgeColor','none','FaceAlpha',0.7); hold on
     ylabel('Frequency'); xlabel('Winter surface mass balance (m w.e.)'); title('All glaciers')
 end
     legend(options.glacier)
