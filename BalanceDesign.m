@@ -176,8 +176,18 @@ figure(3); PlotTopoParameter(subsetRK(c).(type).(den),type, 'SWE (m w.e.)', subs
 end
 end
 %% PLOT -> sample size and density variation
-type = 'centreline';    n = 10:5:50;
 
+for g = 1:3
+    glacier = options.glacier{g};
+    for d = 1:8
+        den = options.DenOpt{d};
+        meanLR.(glacier)(d) = nanmean(fullLR.(den).(glacier)(:));
+        meanSK.(glacier)(d) = nanmean(fullSK.(den).(glacier)(:));
+        meanRK.(glacier)(d) = nanmean(fullRK.(den).(glacier)(:));
+    end
+end
+
+%type = 'centreline';    n = 10:5:50;
 load Topo_Regress_Krig.mat
 load Subset.mat
 
@@ -188,8 +198,8 @@ for s = 1:length(subs)
 figure(4); clf
 for g = 1:3
     glacier = options.glacier{g};
-    meanLR.(glacier) = nanmean(stackSWE.MLR.(glacier)(:));
-    for c = 1:length(n);
+    meanLR.(glacier) = nanmean(stackSWE.LR.(glacier)(:));
+    for c = 1:length(n)
 for d = 1:8 
    den = DenOpt{d};
    stack.(glacier)(d,c) = nanmean(subsetLR(c).(type).(den).(glacier)(:));
@@ -210,7 +220,7 @@ figure(5); clf
 for g = 1:3
     glacier = options.glacier{g};
     meanSK.(glacier) = nanmean(stackSWE.SK.(glacier)(:));
-    for c = 1:length(n);
+    for c = 1:length(n)
 for d = 1:8 
    den = DenOpt{d};
    stack.(glacier)(d,c) = nanmean(subsetSK(c).(type).(den).(glacier)(:));
@@ -231,7 +241,7 @@ figure(6); clf
 for g = 1:3
     glacier = options.glacier{g};
     meanRK.(glacier) = nanmean(stackSWE.RK.(glacier)(:));
-    for c = 1:length(n);
+    for c = 1:length(n)
 for d = 1:8 
    den = DenOpt{d};
    stack.(glacier)(d,c) = nanmean(subsetRK(c).(type).(den).(glacier)(:));
@@ -253,7 +263,7 @@ figure(7); clf
 type = 'centreline';    n = 10:5:50;
 for g = 2:3
     glacier = options.glacier{g};
-for c = 1:length(n);
+for c = 1:length(n)
 for d = 1:8 
    den = DenOpt{d};
    stackC.(glacier)(d,c) = (subsetLR(c).(type).(den).coeff{1,g});
@@ -332,8 +342,8 @@ run OPTIONS
     den = options.DenOpt{d};
 
     resLR(d) = SampledCell( fullLR.(den) );
-    resSK(d) = SampledCell( fullLR.(den) );
-    resRK(d) = SampledCell( fullLR.(den) );
+    resSK(d) = SampledCell( fullSK.(den) );
+    resRK(d) = SampledCell( fullRK.(den) );
   
     for g = 1:3
     glacier = options.glacier{g};
@@ -351,9 +361,9 @@ for s = 1:length(subs)
 figure(4); clf
 for g = 1:3
     glacier = options.glacier{g};
-    for c = 1:length(n);
+    for c = 1:length(n)
 for d = 1:8 
-   den = DenOpt{d};
+   den = options.DenOpt{d};
    stack.(glacier)(d,c) = subsetRmseLR(c).(type).(den).(glacier);
 end
     end
@@ -372,7 +382,7 @@ end
 figure(5); clf
 for g = 1:3
     glacier = options.glacier{g};
-    for c = 1:length(n);
+    for c = 1:length(n)
 for d = 1:8 
    den = DenOpt{d};
    stack.(glacier)(d,c) = subsetRmseSK(c).(type).(den).(glacier);
@@ -393,7 +403,7 @@ end
 figure(6); clf
 for g = 1:3
     glacier = options.glacier{g};
-    for c = 1:length(n);
+    for c = 1:length(n)
 for d = 1:8 
    den = DenOpt{d};
    stack.(glacier)(d,c) = subsetRmseRK(c).(type).(den).(glacier);
@@ -411,6 +421,74 @@ end
     saveFIG(['SubsetRMSE_samplesizeNdensity_RK',type])
 end
 
+%% PLOT -> compare sampling designs and interpolation methods over sample size
+for g = 1:3
+    glacier = options.glacier{g};
+    for d = 1:8
+        den = options.DenOpt{d};
+        meanLR(g,d) = nanmean(fullLR.(den).(glacier)(:));
+        meanSK(g,d) = nanmean(fullSK.(den).(glacier)(:));
+        meanRK(g,d) = nanmean(fullRK.(den).(glacier)(:));
+    end
+end
+
+figure(1); clf
+    subsets = fieldnames(D(1)); subsets = sort(subsets);
+    subsets = subsets([3,1,2,4,5,8,6,7,9,10]);
+    pp = 1;    
+for r = 1:3
+%     Xlab = 'RMSE (m w.e.)';
+%     if     r ==1; D = subsetRmseLR; interp = 'LR'; rmseKK = rmseLR;
+%     elseif r ==2; D = subsetRmseSK; interp = 'SK'; rmseKK = rmseSK;
+%     elseif r ==3; D = subsetRmseRK; interp = 'RK'; rmseKK = rmseRK;
+%     end
+    Xlab = 'SWE (m w.e.)';
+    if     r ==1; D = subsetLR; interp = 'LR'; rmseKK = meanLR;
+    elseif r ==2; D = subsetSK; interp = 'SK'; rmseKK = meanSK;
+    elseif r ==3; D = subsetRK; interp = 'RK'; rmseKK = meanRK;
+    end
+for g = 1:3
+     glacier = options.glacier{g};
+ for s = 1:length(subsets)
+     sub = subsets{s};
+    for n = 1:9
+        for d = 1:8
+        den = options.DenOpt{d};
+        T(d)= nanmean(D(n).(sub).(den).(glacier)(:));
+        end
+        rmseS.(glacier)(n,s)= mean(T);
+    end
+ end
+ 
+     cols = [44, 117, 234;   14, 140, 9;    140, 9, 140;    18, 200, 204;    140, 74, 9];
+        cols = cols/255;
+     n = 10:10:90;
+ subplot(3,3,pp)
+    plot(10:5:50,rmseS.(glacier)(:,1),'Color',cols(1,:)); hold on
+ for l = 2:5
+    plot(n,rmseS.(glacier)(:,l),'Color',cols(l,:)); hold on
+ end
+     plot(10:5:50,rmseS.(glacier)(:,6),'--','Color',cols(1,:)); hold on
+for l = size(rmseS.(glacier),2)/2+2:size(rmseS.(glacier),2)
+    plot(n,rmseS.(glacier)(:,l),'--','Color',cols(l-size(rmseS.(glacier),2)/2,:))
+end
+        ylabel([interp, ' ',Xlab]); xlabel('Sample Size')
+        if pp<=3; title(glacier); end
+    plot([0, max(n)],[mean(rmseKK(g,:)), mean(rmseKK(g,:))],'k--')    
+if strcmp(Xlab,'RMSE (m w.e.)')
+        if      g==1; ylim([0.13 0.23])
+        elseif  g==2; ylim([0.069 0.14]);
+        elseif  g==3; ylim([0.069 0.14]);
+        end
+        set(gca,'YTick',(0:0.01:1))
+elseif strcmp(Xlab,'SWE (m w.e.)')
+         ylim([0.2 0.7]);
+end
+xlim([0 max(n)])
+pp = pp+1;
+end
+end
+    legend(subsets);
 %% PLOT -> sampling designs
     subset = 'pattern';
 for t = 1:5
