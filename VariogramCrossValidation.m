@@ -82,12 +82,23 @@ plot(lags.(glacier), pred.(glacier).exponential);
 plot(lags.(glacier), pred.(glacier).gaussian);
 plot(variogramOUT.(glacier).meanDist, variogramOUT.(glacier).val,'o')
 
-%     pred.(glacier).final = pred.(glacier).spherical(:,1)*weightRMSE.(glacier)(1)+...
-%                            pred.(glacier).exponential(:,1)*weightRMSE.(glacier)(2)+...
-%                            pred.(glacier).gaussian(:,1)*weightRMSE.(glacier)(3);
+%Final weights for the three fits
+    for t = 1:3
+        if      t==1; type = 'spherical';
+        elseif  t==2; type = 'exponential';
+        elseif  t==3; type = 'gaussian';
+        end
+        weightRMSE.final(g,t) = sqrt(mean((pred.(glacier).(type)(:,1)-variogramALL.(glacier).val).^2));
+    end
+    weightRMSE.final = 1./weightRMSE.final;
+    weightRMSE.final = weightRMSE.final./repmat(sum(weightRMSE.final,2),1,3);
     
-% plot(lags, pred.(glacier).final);
-%     legend('Spherical','Exponential','Gaussian','Validation Data','Final','Location','best')
+    pred.(glacier).final = pred.(glacier).spherical*weightRMSE.final(g,1)+...
+                           pred.(glacier).exponential*weightRMSE.final(g,2)+...
+                           pred.(glacier).gaussian*weightRMSE.final(g,3);
+    
+plot(lags.(glacier), pred.(glacier).final);
+    legend('Spherical','Exponential','Gaussian','Validation Data','Final','Location','best')
   
 end
     %saveFIG(['/home/glaciology1/Documents/Data/Plots/variofull',glacier])
