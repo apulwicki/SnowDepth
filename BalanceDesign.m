@@ -431,9 +431,25 @@ for g = 1:3
         meanRK(g,d) = nanmean(fullRK.(den).(glacier)(:));
     end
 end
+%RMSE of full data
+    %SWE = ObsInCell(SWE, topo_sampled);
+for d = 1:8
+den = options.DenOpt{d};
+
+resLR(d) = SampledCell( fullLR.(den) );
+resSK(d) = SampledCell( fullSK.(den) );
+resRK(d) = SampledCell( fullRK.(den) );
+    for g = 1:3
+    glacier = options.glacier{g};
+
+    rmseLR(g,d) = sqrt(mean((SWE(g).swe-resLR(d).(glacier)).^2));
+    rmseSK(g,d) = sqrt(mean((SWE(g).swe-resSK(d).(glacier)).^2));
+    rmseRK(g,d) = sqrt(mean((SWE(g).swe-resRK(d).(glacier)).^2));
+    end
+end
 
 figure(1); clf
-    subsets = fieldnames(D(1)); subsets = sort(subsets);
+    subsets = fieldnames(subsetRK); subsets = sort(subsets);
     subsets = subsets([3,1,2,4,5,8,6,7,9,10]);
     pp = 1;    
 for r = 1:3
@@ -489,6 +505,8 @@ pp = pp+1;
 end
 end
     legend(subsets);
+    saveFIG(['SubsetInterpSizeCompile_',Xlab(1:3)])
+    
 %% PLOT -> sampling designs
     subset = 'pattern';
 for t = 1:5

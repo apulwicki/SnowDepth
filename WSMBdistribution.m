@@ -55,43 +55,74 @@ end
 den = options.DenOpt{7};
 
 figure(4); clf
-for g = 1:3
+bins    = round(sqrt(length(Qbetazz.(den).G4(:))));
+edges   = linspace(0,2,bins); 
+for g = 3:-1:1
     glacier = options.glacier{g};
-
-    histogram(Q.(den).(glacier), 'EdgeColor','none','FaceAlpha',0.7, 'FaceColor',options.RGB(g,:)); hold on
-    ylabel('Frequency'); xlabel('Winter surface mass balance (m w.e.)'); title(['WSMB Distribution - ',den])
+    
+    histogram(Qbetazz.(den).(glacier), edges, 'Normalization','probability',...
+        'EdgeColor','none','FaceAlpha',0.7, 'FaceColor',options.RGB(g,:)); hold on
+    ylabel('Probability'); xlabel('Winter surface mass balance (m w.e.)'); 
+    title({['WSMB Distribution - ',den],'\beta and \sigma_{ZZ} Variability'})
 end
-    legend(options.glacier)
+    legend(sort(options.glacier))
+    saveFIG('WSMB_betaNsigmaZZ')
     
  %With ZZ var vs Without
- c = cbrewer('qual','Paired',2);
+ c = cbrewer('qual','Paired',3);
  figure(5); clf
+ bins    = round(sqrt(length(Qbetazz.(den).G4(:))));
+ edges   = linspace(0,2,bins); 
 for g = 1:3
     glacier = options.glacier{g};
 subplot(1,3,g)
-    histogram(Qbeta.(den).(glacier), 'EdgeColor','none','FaceAlpha',0.7, 'FaceColor',c(1,:)); hold on
-    histogram(Qbetazz.(den).(glacier), 'EdgeColor','none','FaceAlpha',0.7, 'FaceColor',c(2,:)); hold on
+    histogram(Qbeta.(den).(glacier), edges, 'Normalization','probability', 'EdgeColor','none','FaceAlpha',1, 'FaceColor',c(2,:)); hold on
+    histogram(Qbetazz.(den).(glacier), edges, 'Normalization','probability', 'EdgeColor','none','FaceAlpha',0.7, 'FaceColor',c(1,:)); hold on
    
-    ylabel('Frequency'); xlabel('Winter surface mass balance (m w.e.)'); title(['WSMB Distribution - ',den])
+    ylabel('Probability'); xlabel('Winter surface mass balance (m w.e.)'); title([glacier,' WSMB Distribution - ',den])
     legend('\beta','\beta and \sigma_{ZZ}') 
 end
+    saveFIG('WSMB_compareBetaAndZZBeta')
     
  %all Density, one G
+figure(3); clf
+c = cbrewer('qual','Set1',8);
 for g = 1:3;
 glacier = options.glacier{g};
 
-figure(g); clf
 for d = 1:8
     den = options.DenOpt{d};
 
-%subplot(1,3,g)
-    histogram(Q.(den).(glacier), 'EdgeColor','none','FaceAlpha',0.7); hold on
-    ylabel('Frequency'); xlabel('Winter surface mass balance (m w.e.)'); title(glacier)
+subplot(1,3,g)
+    histogram(Qbetazz.(den).(glacier), 'Normalization','probability',...
+        'FaceColor',c(d,:),'EdgeColor','none','FaceAlpha',0.7); hold on
+    ylabel('Probability'); xlabel('Winter surface mass balance (m w.e.)'); title(glacier)
 end
     legend(options.DenOpt)
 end
+    saveFIG('WSMB_allDensityBetaNzz')
 
+ %all Density, one G
+figure(2); clf
+c = cbrewer('qual','Paired',16); n=1; p = 1;
 
+for d = 1:8
+    den = options.DenOpt{d};
+for g = 1:3;
+glacier = options.glacier{g};
+
+subplot(8,3,p)
+    histogram(Qbeta.(den).(glacier), 'Normalization','probability',...
+        'FaceColor',c(n,:),'EdgeColor','none'); hold on
+    histogram(Qbetazz.(den).(glacier), 'Normalization','probability',...
+        'FaceColor',c(n+1,:),'EdgeColor','none'); hold on
+    ylabel('Probability'); xlabel('Winter surface mass balance (m w.e.)'); title(glacier)
+    p = p+1;
+end
+    n = n+2;
+    legend(options.DenOpt(d))
+end
+    saveFIG('WSMB_allDensityBetaNzz')
 %% WSMB from generous MLR coeffs
 
 load Full.mat fullCI
