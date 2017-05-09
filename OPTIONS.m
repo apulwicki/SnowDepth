@@ -11,7 +11,7 @@ options.path3       = '/home/glaciology1/Documents/MastersDocuments/Methods/'; %
 % options.path1     = '/Users/Alexandra/Documents/SFU/Data/Plots/'; %Plots
 % options.path2     = '/Users/Alexandra/Documents/SFU/MastersDocuments/Thesis/'; %Latex
 % options.path3     = '/Users/Alexandra/Documents/SFU/MastersDocuments/Methods/'; %Latex
-% 
+ 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% TO ZZ OR NOT TO ZZ %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

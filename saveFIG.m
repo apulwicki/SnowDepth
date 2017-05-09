@@ -2,12 +2,12 @@ function [  ] = saveFIG( filename, size )
 
 global options
 
+    fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18)
 
 if nargin == 1
     size = [];
 elseif nargin == 2  
     if strcmp(size,'3G')
-    fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18)
     fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 13 6];
     end
 end    
