@@ -24,15 +24,15 @@ for d = 1:8
 
 % Linear regression
 
-%  fullLR.(den) =  LinearRegression( tempswe.(den), TOPOdata, topo_full );
+  fullLR.(den) =  LinearRegression( tempswe.(den), TOPOdata, topo_full );
     
 % Simple kriging
 
- fullSK.(den) =  KrigingR_G( tempswe.(den) );
+  fullSK.(den) =  KrigingR_G( tempswe.(den) );
 
 % Regression Kriging
  
-%  fullRK.(den) =  RegressionKriging( tempswe.(den), TOPOdata, topo_full, SWE );
+  fullRK.(den) =  RegressionKriging( tempswe.(den), TOPOdata, topo_full, SWE );
 end
 
 
@@ -44,9 +44,9 @@ end
     subset = 'pattern';
     
 load TopoSWE.mat
-for t = 1:5
+for t = 1%:5
     
-if     t == 1; type = 'centreline';          n = 10:5:50;    clt = 1;
+if     t == 1; type = 'centreline';          n = 5:5:50;     clt = 1;
 elseif t == 2; type = 'CentreTransect4';     n = 10:10:100;  clt = 2;
 elseif t == 3; type = 'CentreTransect3';     n = 10:10:100;  clt = 3;
 elseif t == 4; type = 'hourglass';           n = 10:10:100;  clt = 4;
@@ -114,29 +114,19 @@ accumulation = 'false';
 
 % Linear regression
 
-%  subsetLR(c).(type).(den) =  LinearRegression( subsetSWE(c).(type).(den), TOPOdata, topo_full );
+  subsetLR(c).(type).(den) =  LinearRegression( subsetSWE(c).(type).(den), TOPOdata, topo_full );
     
 % Simple kriging
  
-%  subsetSK(c).(type).(den) =  KrigingR_G( subsetSWE(c).(type).(den) );
+  subsetSK(c).(type).(den) =  KrigingR_G( subsetSWE(c).(type).(den) );
 
 % Regression Kriging
  
-%  subsetRK(c).(type).(den) =  RegressionKriging( subsetSWE(c).(type).(den), TOPOdata, topo_full, SWE );
+  subsetRK(c).(type).(den) =  RegressionKriging( subsetSWE(c).(type).(den), TOPOdata, topo_full, SWE );
     
     end
 end
 end
-
-subsetLR(10).centreline  = subsetLR(9).centreline;
-subsetSK(10).centreline  = subsetSK(9).centreline;
-subsetRK(10).centreline  = subsetRK(9).centreline;
-subsetSWE(10).centreline   = subsetSWE(9).centreline;
-
-subsetLR(10).Acentreline = subsetLR(9).Acentreline;
-subsetSK(10).Acentreline = subsetSK(9).Acentreline;
-subsetRK(10).Acentreline = subsetRK(9).Acentreline;
-subsetSWE(10).Acentreline  = subsetSWE(9).Acentreline;
 
 
 %% PLOT -> map estimate
@@ -194,26 +184,26 @@ end
 subs = fieldnames(subsetRK);
 for s = 1:length(subs)
     type = subs{s};
-% %Linear Regression
-% figure(4); clf
-% for g = 1:3
-%     glacier = options.glacier{g};
-%     meanLR.(glacier) = nanmean(stackSWE.LR.(glacier)(:));
-%     for c = 1:length(n)
-% for d = 1:8 
-%    den = DenOpt{d};
-%    stack.(glacier)(d,c) = nanmean(subsetLR(c).(type).(den).(glacier)(:));
-% end
-%     end
-%     subplot(1,3,g)
-%     plot(n,stack.(glacier),'LineWidth',2); hold on
-%     plot([min(n), max(n)],[meanLR.(glacier), meanLR.(glacier)],'k--')
-%         xlabel('Sample size'); ylabel('Mean SWE')
-%         title(['LR ',type, ' ',glacier])
-%         legend([DenOpt, {'All'}],'Location','best')
-%         ylim([0 0.8])
-% end
-%     saveFIG(['SubsetMeanSWE_samplesizeNdensity_LR',type])
+%Linear Regression
+figure(5); clf
+for g = 1:3
+    glacier = options.glacier{g};
+    meanLR.(glacier) = nanmean(stackSWE.MLR.(glacier)(:));
+    for c = 1:length(n)
+for d = 1:8 
+   den = DenOpt{d};
+   stack.(glacier)(d,c) = nanmean(subsetLR(c).(type).(den).(glacier)(:));
+end
+    end
+    subplot(1,3,g)
+    plot(n,stack.(glacier),'LineWidth',2); hold on
+    plot([min(n), max(n)],[meanLR.(glacier), meanLR.(glacier)],'k--')
+        xlabel('Sample size'); ylabel('Mean SWE')
+        title(['LR ',type, ' ',glacier])
+        columnlegend(3,[DenOpt, {'All'}],'Location','NorthEast');
+        ylim([0 0.8])
+end
+    saveFIG(['SubsetMeanSWE_samplesizeNdensity_LR',type],12)
 
  %Simple Kriging
 figure(5); clf
@@ -236,26 +226,26 @@ end
 end
     saveFIG(['SubsetMeanSWE_samplesizeNdensity_SK',type],12)
 
-%  %Regression Kriging
-% figure(6); clf
-% for g = 1:3
-%     glacier = options.glacier{g};
-%     meanRK.(glacier) = nanmean(stackSWE.RK.(glacier)(:));
-%     for c = 1:length(n)
-% for d = 1:8 
-%    den = DenOpt{d};
-%    stack.(glacier)(d,c) = nanmean(subsetRK(c).(type).(den).(glacier)(:));
-% end
-%     end
-%     subplot(1,3,g)
-%     plot(n,stack.(glacier),'LineWidth',2); hold on
-%     plot([min(n), max(n)],[meanRK.(glacier), meanRK.(glacier)],'k--')
-%         xlabel('Sample size'); ylabel('Mean SWE')
-%         title(['RK ',type, ' ',glacier])
-%         legend([DenOpt, {'All'}],'Location','best')
-%         ylim([0 0.8])
-% end
-%     saveFIG(['SubsetMeanSWE_samplesizeNdensity_RK',type])
+ %Regression Kriging
+figure(5); clf
+for g = 1:3
+    glacier = options.glacier{g};
+    meanRK.(glacier) = nanmean(stackSWE.RK.(glacier)(:));
+    for c = 1:length(n)
+for d = 1:8 
+   den = DenOpt{d};
+   stack.(glacier)(d,c) = nanmean(subsetRK(c).(type).(den).(glacier)(:));
+end
+    end
+    subplot(1,3,g)
+    plot(n,stack.(glacier),'LineWidth',2); hold on
+    plot([min(n), max(n)],[meanRK.(glacier), meanRK.(glacier)],'k--')
+        xlabel('Sample size'); ylabel('Mean SWE')
+        title(['RK ',type, ' ',glacier])
+        columnlegend(3,[DenOpt, {'All'}],'Location','NorthEast');
+        ylim([0 0.8])
+end
+    saveFIG(['SubsetMeanSWE_samplesizeNdensity_RK',type],12)
 end
 
 %% PLOT -> elevation coefficient G2 and G13
@@ -453,16 +443,16 @@ figure(1); clf
     subsets = subsets([3,1,2,4,5,8,6,7,9,10]);
     pp = 1;    
 for r = 1:3
-%     Xlab = 'RMSE (m w.e.)';
-%     if     r ==1; D = subsetRmseLR; interp = 'LR'; rmseKK = rmseLR;
-%     elseif r ==2; D = subsetRmseSK; interp = 'SK'; rmseKK = rmseSK;
-%     elseif r ==3; D = subsetRmseRK; interp = 'RK'; rmseKK = rmseRK;
-%     end
-    Xlab = 'SWE (m w.e.)';
-    if     r ==1; D = subsetLR; interp = 'LR'; rmseKK = meanLR;
-    elseif r ==2; D = subsetSK; interp = 'SK'; rmseKK = meanSK;
-    elseif r ==3; D = subsetRK; interp = 'RK'; rmseKK = meanRK;
+    Xlab = 'RMSE (m w.e.)';
+    if     r ==1; D = subsetRmseLR; interp = 'LR'; rmseKK = rmseLR;
+    elseif r ==2; D = subsetRmseSK; interp = 'SK'; rmseKK = rmseSK;
+    elseif r ==3; D = subsetRmseRK; interp = 'RK'; rmseKK = rmseRK;
     end
+%     Xlab = 'SWE (m w.e.)';
+%     if     r ==1; D = subsetLR; interp = 'LR'; rmseKK = meanLR;
+%     elseif r ==2; D = subsetSK; interp = 'SK'; rmseKK = meanSK;
+%     elseif r ==3; D = subsetRK; interp = 'RK'; rmseKK = meanRK;
+%     end
 for g = 1:3
      glacier = options.glacier{g};
  for s = 1:length(subsets)
@@ -492,9 +482,9 @@ end
         if pp<=3; title(glacier); end
     plot([0, max(n)],[mean(rmseKK(g,:)), mean(rmseKK(g,:))],'k--')    
 if strcmp(Xlab,'RMSE (m w.e.)')
-        if      g==1; ylim([0.13 0.23])
-        elseif  g==2; ylim([0.069 0.14]);
-        elseif  g==3; ylim([0.069 0.14]);
+        if      g==1; ylim([0.11 0.23])
+        elseif  g==2; ylim([0.065 0.14]);
+        elseif  g==3; ylim([0.065 0.14]);
         end
         set(gca,'YTick',(0:0.01:1))
 elseif strcmp(Xlab,'SWE (m w.e.)')
@@ -505,7 +495,7 @@ pp = pp+1;
 end
 end
     legend(subsets);
-    saveFIG(['SubsetInterpSizeCompile_',Xlab(1:3)])
+    saveFIG(['SubsetInterpSizeCompile_',Xlab(1:3)],14)
     
 %% PLOT -> sampling designs
     subset = 'pattern';

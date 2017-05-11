@@ -1,16 +1,41 @@
-type = 'Acentreline';
-for g = 1:3;
+for g = 1:3
+    glacier = char(options.glacier(g));  
+    for i = 2:9
+    stackSWE.MLR.(glacier)(:,:,i-1)   = sweMLR(i).(glacier);
+    stackSWE.BMS.(glacier)(:,:,i-1)   = sweBMS(i).(glacier);
+    stackSWE.SK.(glacier)(:,:,i-1)    = sweKRIG(i).(glacier).pred;
+    stackSWE.RK.(glacier)(:,:,i-1)    = sweRK(i).(glacier);
+    end
+end
+
+
+Dsubset     = subsetLR;
+Dfull       = fullLR;
+Dtext       = 'LR';
+DsubsetRmse = subsetRmseLR;
+Dmean       = meanLR;
+DstackSWE   = stackSWE.MLR;
+Drmse       = rmseLR;
+Dbox        = boxMLR;
+lab         = '1111111111';
+
+subs = fieldnames(subsetRK);
+for s = 1%:length(subs)
+    type = subs{s};
+
+%type = 'Acentreline';
+for g = 1%:3;
 glacier = options.glacier{g};
 Nfull = 10:10:100;
-for c = 9:-1:1
+for c = 10:-1:1
     figure(1); clf
     n = Nfull(1:c);
     dd = 7;
 den = options.DenOpt{dd};
 % Glacier
 subplot(3,3,[4,5,7,8])
-    h = imagesc(subsetLR(c).(type).(den).(glacier)); hold on
-    set(h,'alphadata',~isnan(subsetLR(c).(type).(den).(glacier)))
+    h = imagesc(Dsubset(c).(type).(den).(glacier)); hold on
+    set(h,'alphadata',~isnan(Dsubset(c).(type).(den).(glacier)))
     col = colorbar; ylabel(col, 'SWE (m w.e.)')
     caxis([0 1.2]); caxis(caxis);
     axis off; axis equal
@@ -26,19 +51,19 @@ subplot(3,3,[4,5,7,8])
 % Ref Glacier
 
 subplot(3,3,2)
-    h = imagesc(fullLR.(den).(glacier)); hold on
-    set(h,'alphadata',~isnan(fullLR.(den).(glacier)))
+    h = imagesc(Dfull.(den).(glacier)); hold on
+    set(h,'alphadata',~isnan(Dfull.(den).(glacier)))
     axis off; axis equal
     caxis([0 1.2]); caxis(caxis);
 
-title(['LR ',type, ' ',glacier])
+title([Dtext, ' ',type, ' ',glacier])
     
 % SWE vs n
-    meanLR.(glacier) = nanmean(stackSWE.MLR.(glacier)(:));
+    Dmean.(glacier) = nanmean(DstackSWE.(glacier)(:));
     for cc = 1:length(n);
     for d = 1:8 
        den = DenOpt{d};
-       stack_swen.(glacier)(d,cc) = nanmean(subsetLR(cc).(type).(den).(glacier)(:));
+       stack_swen.(glacier)(d,cc) = nanmean(Dsubset(cc).(type).(den).(glacier)(:));
     end
     end
 subplot(3,3,3)
@@ -47,7 +72,7 @@ subplot(3,3,3)
     else
     plot(n,stack_swen.(glacier)(:,1:c)','LineWidth',2); hold on
     end
-    plot([0, max(Nfull)],[meanLR.(glacier), meanLR.(glacier)],'k--')
+    plot([0, max(Nfull)],[Dmean.(glacier), Dmean.(glacier)],'k--')
         xlabel('Sample size'); ylabel('Mean SWE')
         %legend([DenOpt, {'All'}],'Location','best')
         xlim([0, max(Nfull)])
@@ -61,7 +86,7 @@ subplot(3,3,3)
     for cc = 1:length(n);
     for d = 1:8 
        den = DenOpt{d};
-       stack_rmsen.(glacier)(d,cc) = subsetRmseLR(cc).(type).(den).(glacier);
+       stack_rmsen.(glacier)(d,cc) = DsubsetRmse(cc).(type).(den).(glacier);
     end
     end
 subplot(3,3,6)
@@ -70,7 +95,7 @@ subplot(3,3,6)
     else
     plot(n,stack_rmsen.(glacier)(:,1:c)','LineWidth',2); hold on
     end
-    plot([0, max(Nfull)],[mean(rmseLR(g,:)), mean(rmseLR(g,:))],'k--')
+    plot([0, max(Nfull)],[mean(Drmse(g,:)), mean(Drmse(g,:))],'k--')
         xlabel('Sample size'); ylabel('RMSE (m w.e.)')
         xlim([0, max(Nfull)])
         if c == 9; 
@@ -84,7 +109,7 @@ subplot(3,3,6)
     for cc = 1:length(n);
     for d = 1:8 
        den = DenOpt{d};
-       stackC.(glacier)(d,cc) = (subsetLR(cc).(type).(den).coeff{1,g});
+       stackC.(glacier)(d,cc) = (Dsubset(cc).(type).(den).coeff{1,g});
     end
     end
 
@@ -94,7 +119,7 @@ subplot(3,3,9)
     else
     plot(n,stackC.(glacier)(:,1:c)','LineWidth',2); hold on
     end
-    plot([0, max(Nfull)],[mean(boxMLR.(glacier){1,:}), mean(boxMLR.(glacier){1,:})],'k--')
+    plot([0, max(Nfull)],[mean(Dbox.(glacier){1,:}), mean(Dbox.(glacier){1,:})],'k--')
         xlabel('Sample size'); ylabel('\beta_z')
         xlim([0, max(Nfull)])
         if c == 9; 
@@ -105,22 +130,23 @@ subplot(3,3,9)
 
 %
      fig.PaperUnits = 'pixels'; fig.PaperPosition = [0 0 570 450];
- print(['/home/glaciology1/Documents/Data/Plots/SubsetAnimation/', glacier,type,num2str(c)],'-dpng','-r0');
+ print(['/home/glaciology1/Documents/Data/Plots/SubsetAnimation/', glacier,Dtext,type,lab(1:c)],'-dpng','-r0');
 
 end
+
 
 %% Sitch together
 close all
 % load the images
  cd('/home/glaciology1/Documents/Data/Plots/SubsetAnimation/');
- fname = dir([glacier,type, '*.png']); images = cell(size(fname));
+ fname = dir([glacier,Dtext, type, '*.png']); images = cell(size(fname));
 % fname = [fname(1); fname(3:end); fname(2)];
  for i = 1:length(fname);
  images{i} = imread( fname(i).name );
  end
  
  % create the video writer with 1 fps
- writerObj = VideoWriter(['Subset_',type,glacier,'.avi']);
+ writerObj = VideoWriter(['Subset_',glacier,Dtext, type,'.avi']);
  writerObj.FrameRate = 1;
 
  % set the seconds per image
@@ -143,3 +169,8 @@ close all
  close(writerObj);
  
 end
+end
+
+cd ..
+cd ..
+cd SnowDepth/

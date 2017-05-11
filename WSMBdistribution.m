@@ -1,5 +1,5 @@
 %% WSMB distribution from fitlm coeffs
-
+clear Q
 varSIG = [0.027, 0.035, 0.04];
 
 for g = 1:3
@@ -8,24 +8,23 @@ for g = 1:3
 for d = 1:8
     den = options.DenOpt{d};
 
-    dataSWE = fullSWE.(den).(glacier).swe;
     varPD   = makedist('Normal','mu',0,'sigma',varSIG(g));
-    varSWE  = random(varPD, length(dataSWE),1000);
+    varSWE  = random(varPD, length(fullSWE.(den).(glacier).swe),1000);
 for vc = 1:1000
-    dataSWE = dataSWE + varSWE(:,vc);
+    dataSWE = fullSWE.(den).(glacier).swe + varSWE(:,vc);
     dataSWE(dataSWE<0) = 0;
     
- %Get CI
+ %Get Beta dist
     data    = [struct2table(topo_sampled.(glacier)), table(dataSWE,'VariableNames',{'swe'})];
     LRt     = fitlm(data);
-%     sigma   = LRt.CoefficientCovariance;
-%     mu      = LRt.Coefficients{:,1};
-%     beta    = mvnrnd(mu,sigma,1000);
+    sigma   = LRt.CoefficientCovariance;
+    mu      = LRt.Coefficients{:,1};
+    beta    = mvnrnd(mu,sigma,1000);
 
-for mc = 1%:1000
+for mc = 1:1000
      %Get random correlated beta value from normal distribution
-    %B = beta(mc,:);
-    B = LRt.Coefficients{:,1};
+    B = beta(mc,:);
+    %B = LRt.Coefficients{:,1};
     
      %Get distribution of swe
     tempSWE.(glacier) = repmat(B(1),options.mapsize(g,:));
@@ -49,33 +48,40 @@ end
  %all Gs, one density
 den = options.DenOpt{7};
 
+bins    = 200;%round(sqrt(length(Qbeta.(den).G4(:))));
+edges   = linspace(0.3,0.8,bins); 
+for d = 1:3
+    if      d == 1; data = Qzz;     t = '\sigma_{ZZ} Variability';      f = 'zz';
+    elseif  d == 2; data = Qbeta;   t = '\beta Variability';             f = 'beta';
+    elseif  d == 3; data = Qbetazz; t = '\beta and \sigma_{ZZ} Variability'; f = 'betaNzz';
+    end
 figure(4); clf
-bins    = round(sqrt(length(Qbetazz.(den).G4(:))));
-edges   = linspace(0,2,bins); 
-for g = 3:-1:1
+for g = 1:3
     glacier = options.glacier{g};
     
-    histogram(Qbetazz.(den).(glacier), edges, 'Normalization','probability',...
+    histogram(data.(den).(glacier), edges, 'Normalization','probability',...
         'EdgeColor','none','FaceAlpha',0.7, 'FaceColor',options.RGB(g,:)); hold on
     ylabel('Probability'); xlabel('Winter surface mass balance (m w.e.)'); 
-    title({['WSMB Distribution - ',den],'\beta and \sigma_{ZZ} Variability'})
+    title({['WSMB Distribution - ',den],t})
 end
-    legend(sort(options.glacier))
-    saveFIG('WSMB_betaNsigmaZZ')
+    legend(options.glacier)
+    saveFIG(['WSMB_',f])
+end
     
  %With ZZ var vs Without
- c = cbrewer('qual','Paired',3);
+ c = [0, 53, 140; 57, 103, 178; 145, 175, 224]/255;
  figure(5); clf
  bins    = round(sqrt(length(Qbetazz.(den).G4(:))));
- edges   = linspace(0,2,bins); 
+ edges   = linspace(0,1,bins); 
 for g = 1:3
     glacier = options.glacier{g};
 subplot(1,3,g)
-    histogram(Qbeta.(den).(glacier), edges, 'Normalization','probability', 'EdgeColor','none','FaceAlpha',1, 'FaceColor',c(2,:)); hold on
+    histogram(Qzz.(den).(glacier), edges, 'Normalization','probability', 'EdgeColor','none','FaceAlpha',0.7, 'FaceColor',c(1,:)); hold on
+    histogram(Qbeta.(den).(glacier), edges, 'Normalization','probability', 'EdgeColor','none','FaceAlpha',0.7, 'FaceColor',c(2,:)); hold on
     histogram(Qbetazz.(den).(glacier), edges, 'Normalization','probability', 'EdgeColor','none','FaceAlpha',0.7, 'FaceColor',c(1,:)); hold on
    
     ylabel('Probability'); xlabel('WSMB (m w.e.)'); title([glacier,' WSMB Distribution - ',den])
-    legend('\beta','\beta and \sigma_{ZZ}') 
+    legend('\sigma_{ZZ}','\beta','\beta and \sigma_{ZZ}') 
 end
     saveFIG('WSMB_compareBetaAndZZBeta')
     
