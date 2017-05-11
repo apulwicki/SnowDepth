@@ -18,7 +18,7 @@ sizexy = residuals$sizexy
 
 ## Model ##
 m = km(~1,design = utm, response = res, covtype = "matern5_2", nugget.estim = TRUE, multistart = 5, iso = TRUE)
- m@covariance@range.val
+ 
  #plot(m)
  #m
  
@@ -26,7 +26,8 @@ m = km(~1,design = utm, response = res, covtype = "matern5_2", nugget.estim = TR
  maxLL = -m@logLik
  intercept = m@trend.coef
  nugget = m@covariance@nugget
-  model = data.frame(intercept, nugget, maxLL)
+ theta = m@covariance@range.val
+    model = data.frame(intercept, nugget, maxLL, theta)
 
  #Cross validation (leave one out)
  LOO = leaveOneOut.km(m, "SK",trend.reestim = TRUE)
@@ -52,11 +53,11 @@ writeMat('/home/glaciology1/Documents/Data/SnowDepth/Kriging/kriging.mat',
 #           fixNames=TRUE, matVersion="5", onWrite=NULL, verbose=FALSE)
 
 ## Install and load rgl package
-library(rgl)
+#library(rgl)
 
 ## Plot surface and observations
-plot3d(utm[,1],utm[,2],res, xlim=c(0,3000),ylim=c(0,3000),zlim=0:1)
-surface3d(x,y, matrix(pred.m$mean,length(x),length(y)),col="light blue", alpha=0.5)
+#plot3d(utm[,1],utm[,2],res, xlim=c(0,3000),ylim=c(0,3000),zlim=0:1)
+#surface3d(x,y, matrix(pred.m$mean,length(x),length(y)),col="light blue", alpha=0.5)
 
 ## Plot surface and observations with intervals
 #  rglwidget()

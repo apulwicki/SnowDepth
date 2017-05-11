@@ -16,26 +16,19 @@ for vc = 1:1000
     dataSWE(dataSWE<0) = 0;
     
  %Get CI
-    data = [struct2table(topo_sampled.(glacier)), table(dataSWE,'VariableNames',{'swe'})];
-    LRt = fitlm(data);
-    %LRt.CoefficientCovariance
-    CIt.(den).(glacier) = coefCI(LRt);
-    SGt = diff(CIt.(den).(glacier),1,2)/(2*1.96);
-    MEt = LRt.Coefficients{:,1};
-    for i = 1:length(CIt.(den).(glacier))
-        pd(i) = makedist('Normal','mu',MEt(i),'sigma',SGt(i));
-    end
+    data    = [struct2table(topo_sampled.(glacier)), table(dataSWE,'VariableNames',{'swe'})];
+    LRt     = fitlm(data);
+%     sigma   = LRt.CoefficientCovariance;
+%     mu      = LRt.Coefficients{:,1};
+%     beta    = mvnrnd(mu,sigma,1000);
 
-for mc = 1:1000
- %Get random beta value from normal distribution
-    B = zeros(size(MEt));
-    for i = 1:length(CIt.(den).(glacier))
-        B(i) = random(pd(i));
-    end
-% figure(1); plot(pd); hold on; legend(LRt.CoefficientNames);
-
- %Get distribution of swe
-tempSWE.(glacier) = repmat(B(1),options.mapsize(g,:));
+for mc = 1%:1000
+     %Get random correlated beta value from normal distribution
+    %B = beta(mc,:);
+    B = LRt.Coefficients{:,1};
+    
+     %Get distribution of swe
+    tempSWE.(glacier) = repmat(B(1),options.mapsize(g,:));
 
         fields = fieldnames(topo_full.(glacier));
     for f = 1:length(fields)
@@ -108,8 +101,8 @@ end
 
  %all Density, one G
 figure(2); clf
-c = cbrewer('qual','Paired',16); 
-n=1; p = 1;
+c = [147, 148, 150; 37, 37, 38]/255;   
+p = 1;
 for d = 1:8
     den = options.DenOpt{d};
 for g = 1:3
@@ -117,17 +110,16 @@ glacier = options.glacier{g};
 
 subplot(8,3,p)
     histogram(Qbeta.(den).(glacier), 'Normalization','probability',...
-        'FaceColor',c(n,:),'EdgeColor','none'); hold on
+        'FaceColor',c(2,:),'EdgeColor','none'); hold on
     histogram(Qbetazz.(den).(glacier), 'Normalization','probability',...
-        'FaceColor',c(n+1,:),'EdgeColor','none'); hold on
+        'FaceColor',c(1,:),'EdgeColor','none'); hold on
     ylabel('Prob.'); xlabel('WSMB (m w.e.)'); 
-    if i <= 3; title(glacier); end
+    if p <= 3; title([glacier, ' - ', den]); end
     p = p+1;
 end
-    n = n+2;
-    legend(options.DenOpt(d))
+    legend('\beta','\beta and \sigma_{ZZ}')
 end
-    saveFIG('WSMB_allllll')
+    saveFIG('WSMB_allllll', 12)
 %% WSMB from generous MLR coeffs
 
 load Full.mat fullCI

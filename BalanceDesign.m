@@ -17,22 +17,22 @@ for g = 1:3;
 end
  end
  
-for d = 2:9
-    den = options.DenOpt{d-1};
+for d = 1:8
+    den = options.DenOpt{d};
     display(den)
 [ tempswe.(den), TOPOdata ] = ObsInCell( fullSWE.(den).input, topo_sampled); 
 
 % Linear regression
 
-fullLR.(den) =  LinearRegression( tempswe.(den), TOPOdata, topo_full );
+%  fullLR.(den) =  LinearRegression( tempswe.(den), TOPOdata, topo_full );
     
 % Simple kriging
 
-fullSK.(den) =  KrigingR_G( tempswe.(den) );
+ fullSK.(den) =  KrigingR_G( tempswe.(den) );
 
 % Regression Kriging
  
-fullRK.(den) =  RegressionKriging( tempswe.(den), TOPOdata, topo_full, SWE );
+%  fullRK.(den) =  RegressionKriging( tempswe.(den), TOPOdata, topo_full, SWE );
 end
 
 
@@ -46,17 +46,17 @@ end
 
 for t = 1:5
     
-if     t == 1; type = 'Acentreline';          n = 10:5:50;    clt = 1;
-elseif t == 2; type = 'ACentreTransect4';     n = 10:10:100;  clt = 2;
-elseif t == 3; type = 'ACentreTransect3';     n = 10:10:100;  clt = 3;
-elseif t == 4; type = 'Ahourglass';           n = 10:10:100;  clt = 4;
-elseif t == 5; type = 'AhourglassCircle';     n = 10:10:100;  clt = 5;
+if     t == 1; type = 'centreline';          n = 10:5:50;    clt = 1;
+elseif t == 2; type = 'CentreTransect4';     n = 10:10:100;  clt = 2;
+elseif t == 3; type = 'CentreTransect3';     n = 10:10:100;  clt = 3;
+elseif t == 4; type = 'hourglass';           n = 10:10:100;  clt = 4;
+elseif t == 5; type = 'hourglassCircle';     n = 10:10:100;  clt = 5;
 end
 
 
 for c = 1:length(n)
     
-    for d = 2:9
+    for d = 1:8
 load TopoSWE.mat
 %clear SWE Density
 
@@ -67,7 +67,7 @@ load TopoSWE.mat
 % run Import_Zigzag.m         %Imports zigzag snow depth and measurement location data
 % run Import_SWE.m            %Converts to SWE and condences data
 % transectSWE = SWE;  transectTOPO = topo_sampled;
-den = options.DenOpt{d-1};
+den = options.DenOpt{d};
 
 input.SWE = fullSWE.(den); input.topo_sampled = topo_sampled; 
 input.topo_sampled_ns = topo_sampled_ns;
@@ -102,7 +102,7 @@ input.topo_sampled_ns = topo_sampled_ns;
     if strcmp(type,'centreline'); TOPOdata.G13.centreD = repmat(0.001, n(c), 1); end
   
     % Add Accumulation area points  
-accumulation = 'true';
+accumulation = 'false';
     if strcmp(accumulation, 'true')
        [sweA, topoA] = DataSubset( subset, 'accum', input );
        for g = 1:3; glacier = options.glacier{g};
@@ -128,7 +128,7 @@ accumulation = 'true';
 %     
 % % Simple kriging
 % 
-% subsetSK(c).(type).(den) =  KrigingR_G( subsetSWE(c).(type).(den) );
+ subsetSK(c).(type).(den) =  KrigingR_G( subsetSWE(c).(type).(den) );
 % 
 % % Regression Kriging
 %  
@@ -162,17 +162,17 @@ for c = 1:10;
             type = subs{s};
             den = options.DenOpt{7};
 
-figure(1); PlotTopoParameter(subsetLR(c).(type).(den),type, 'SWE (m w.e.)', subsetSWE(c).(type).(den), 'black', 'massB')
-     title('Linear Regression')
-     saveFIG(['MapSubset_LR',type,'_n',num2str(n(c)),den])
+% figure(1); PlotTopoParameter(subsetLR(c).(type).(den),type, 'SWE (m w.e.)', subsetSWE(c).(type).(den), 'black', 'massB')
+%      title('Linear Regression')
+%      saveFIG(['MapSubset_LR',type,'_n',num2str(n(c)),den])
 
 figure(2); PlotTopoParameter(subsetSK(c).(type).(den),type, 'SWE (m w.e.)', subsetSWE(c).(type).(den), 'black', 'massB')
      title('Simple Kriging')
      saveFIG(['MapSubset_SK',type,'_n',num2str(n(c)),den])
 
-figure(3); PlotTopoParameter(subsetRK(c).(type).(den),type, 'SWE (m w.e.)', subsetSWE(c).(type).(den), 'black', 'massB')
-     title('Regression Kriging')
-     saveFIG(['MapSubset_RK',type,'_n',num2str(n(c)),den])
+% figure(3); PlotTopoParameter(subsetRK(c).(type).(den),type, 'SWE (m w.e.)', subsetSWE(c).(type).(den), 'black', 'massB')
+%      title('Regression Kriging')
+%      saveFIG(['MapSubset_RK',type,'_n',num2str(n(c)),den])
 end
 end
 %% PLOT -> sample size and density variation
@@ -376,7 +376,7 @@ end
         %ylim([0.05 0.2])
         set(gca,'YTick',(0:0.01:1))
 end
-    saveFIG(['SubsetRMSE_samplesizeNdensity_LR',type])
+    saveFIG(['SubsetRMSE_samplesizeNdensity_LR',type],18,'3G')
 
  %Simple Kriging
 figure(5); clf
@@ -397,7 +397,7 @@ end
         %ylim([0.05 0.2])
         set(gca,'YTick',(0:0.01:1))
 end
-    saveFIG(['SubsetRMSE_samplesizeNdensity_SK',type])
+    saveFIG(['SubsetRMSE_samplesizeNdensity_SK',type],18,'3G')
 
  %Regression Kriging
 figure(6); clf
@@ -418,7 +418,7 @@ end
         %ylim([0.05 0.2])
         set(gca,'YTick',(0:0.01:1))
 end
-    saveFIG(['SubsetRMSE_samplesizeNdensity_RK',type])
+    saveFIG(['SubsetRMSE_samplesizeNdensity_RK',type],18,'3G')
 end
 
 %% PLOT -> compare sampling designs and interpolation methods over sample size
