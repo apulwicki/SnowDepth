@@ -46,7 +46,7 @@ end
 load TopoSWE.mat
 for t = 1%:5
     
-if     t == 1; type = 'centreline';          n = 5:5:50;     clt = 1;
+if     t == 1; type = 'centreline';          n = 10:5:55;     clt = 1;
 elseif t == 2; type = 'CentreTransect4';     n = 10:10:100;  clt = 2;
 elseif t == 3; type = 'CentreTransect3';     n = 10:10:100;  clt = 3;
 elseif t == 4; type = 'hourglass';           n = 10:10:100;  clt = 4;
