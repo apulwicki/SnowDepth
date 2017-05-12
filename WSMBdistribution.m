@@ -64,10 +64,10 @@ subplot(4,2,p)
     ylabel('Probability'); xlabel('Winter surface mass balance (m w.e.)');  
 end
     legend(h,options.glacier)
-if p==1; title({'WSMB Distribution',t}); end
+    title(den);
 p = p+1;
 end
-saveFIG(['WSMB_Distribution',f])
+saveFIG(['WSMB_Distribution',f],16)
 end
 
     
@@ -87,6 +87,7 @@ subplot(1,3,g)
     legend('\sigma_{ZZ}','\beta','\beta and \sigma_{ZZ}','location','best') 
 end
     saveFIG('WSMB_compareBetaAndZZBeta')
+    
     
  %all Density, one G
 figure(3); clf
@@ -128,9 +129,36 @@ end
     legend('\beta','\beta and \sigma_{ZZ}')
 end
     saveFIG('WSMB_allllll', 12)
+    
+    
+%% Combining
+
+for g = 1:3
+glacier = options.glacier{g};
+for d = 1:8
+den = options.DenOpt{d};
+Tbeta.(glacier)(:,:,d)  = Qbeta.(den).(glacier);
+Tzz.(glacier)(:,:,d)    = Qzz.(den).(glacier);
+Td.(glacier)(:,:,d)     = nanmean(fullLR.(den).(glacier));
+Tdbetazz.(glacier)(:,:,d) = Qbetazz.(den).(glacier);
+end
+end
+
+
+%dNbetaNzz
+figure(1); clf
+for g = 1:3
+glacier = options.glacier{g};
+histogram(Tdbetazz.(glacier)(:),'Normalization','probability',...
+        'EdgeColor','none','FaceAlpha',0.75, 'FaceColor',options.RGB(g,:)); hold on
+end
+ylabel('Probability'); xlabel('WSMB (m w.e.)'); 
+legend(options.glacier)
+        saveFIG('WSMB_dNbetaNzz')
+
 %% WSMB from generous MLR coeffs
 
-load Full.mat fullCI
+%load Full.mat fullCI
 % for d = 2:9
 %     den = options.DenOpt{d-1};
 %     display(den)
@@ -140,42 +168,46 @@ load Full.mat fullCI
 % [~, fullCI.(den) ] =  LinearRegression( tempswe.(den), TOPOdata, topo_full );
 %     
 % end
+clear Qfull
+varSIG = [0.027, 0.035, 0.04];
 
 for g = 1:3
     glacier = options.glacier{g};
-
+       
 for d = 1:8
     den = options.DenOpt{d};
+
+%     varPD   = makedist('Normal','mu',0,'sigma',varSIG(g));
+%     varSWE  = random(varPD, length(fullSWE.(den).(glacier).swe),1000);
+for vc = 1%:1000
+    dataSWE = fullSWE.(den).(glacier).swe;% + varSWE(:,vc);
+    dataSWE(dataSWE<0) = 0;
     
- %Get CI
-SGt = diff(fullCI.(den).(glacier),1,2)/5.56;
-MEt = mean(fullCI.(den).(glacier),2);
-for i = 1:length(fullCI.(den).(glacier));
-    pd(i) = makedist('Normal','mu',MEt(i),'sigma',SGt(i));
-end
+ %Get Beta dist
+    X       = [struct2table(topo_sampled.(glacier)), table(dataSWE,'VariableNames',{'swe'})]; X = X{:,:};
+    sigma   = cov(X);
+    mu      = fullLR.(den).coeff{[8,1:7],g};
+    beta    = mvnrnd(mu,sigma,1000);
 
-for mc = 1:10000;
- %Get random beta value from normal distribution
-    B = zeros(size(MEt));
-for i = 1:length(fullCI.(den).(glacier));
-    B(i) = random(pd(i));
-end
-% figure(1); plot(pd); hold on; legend(LRt.CoefficientNames);
-
- %Get distribution of swe
-tempSWE.(glacier) = repmat(B(end),options.mapsize(g,:));
-
-    fields = fieldnames(topo_full.(glacier));
-for f = 1:length(fields)
-    param = fields{f};
-    val = topo_full.(glacier).(param)*B(f);
-    tempSWE.(glacier) = tempSWE.(glacier) + val; 
-end
-    tempSWE.(glacier)(tempSWE.(glacier)<0) = 0;
+for mc = 1:1000
+     %Get random correlated beta value from normal distribution
+    B = beta(mc,:);
+    %B = LRt.Coefficients{:,1};
     
+     %Get distribution of swe
+    tempSWE.(glacier) = repmat(B(1),options.mapsize(g,:));
+
+        fields = fieldnames(topo_full.(glacier));
+    for f = 1:length(fields)
+        param = fields{f};
+        val = topo_full.(glacier).(param)*B(f+1);
+        tempSWE.(glacier) = tempSWE.(glacier) + val; 
+    end
+        tempSWE.(glacier)(tempSWE.(glacier)<0) = 0;
+
  %Winter balance
-fullQ.(den).(glacier)(mc,1) = nanmean(tempSWE.(glacier)(:));
-
+fullQ.(den).(glacier)(mc,vc) = nanmean(tempSWE.(glacier)(:));
+end
 end
 end
 end
@@ -208,4 +240,41 @@ for d = 1:8
     ylabel('Frequency'); xlabel('Winter surface mass balance'); title(glacier)
 end
     legend(options.DenOpt)
+end
+
+
+%% KRIGING
+
+clear Q
+load TopoSWE.mat
+varSIG = [0.027, 0.035, 0.04];
+    SWE = ObsInCell(SWE, topo_sampled);
+ for gg = 1:3
+        glacier = options.glacier{gg};
+            varPD.(glacier)   = makedist('Normal','mu',0,'sigma',varSIG(g));
+            varSWE.(glacier)  = random(varPD.(glacier), length(SWE(gg).swe),1000);
+ end
+
+
+for d = 1:8
+    den = options.DenOpt{d};
+    display(den)
+for vc = 1:1000
+        [ dataSWE.(den), TOPOdata ] = ObsInCell( fullSWE.(den).input, topo_sampled); 
+    for gg = 1:3
+        glacier = options.glacier{gg};           
+            dataSWE.(den).(glacier)(:,1) = dataSWE.(den).(glacier)(:,1) + varSWE.(glacier)(:,vc);
+                dataSWE.(den).(glacier)(dataSWE.(den).(glacier)(:,1)<0,1) = 0;
+    end
+    
+% Simple kriging
+
+  tempSK.(den) =  KrigingR_G( dataSWE.(den) );
+
+ %Winter balance
+for gg = 1:3
+        glacier = options.glacier{gg};      
+        Q.(den).(glacier)(vc) = nanmean(tempSK.(den).(glacier)(:));
+end
+end
 end
