@@ -25,7 +25,7 @@ cd Kriging
     load kriging.mat
     
      %Model params
-    dataout.Model   =  model;
+    dataout.Model(g,:)   =  model;
 %     dataout.LOO     =  LOO.mean;
 
      %Assign to structure

@@ -38,13 +38,15 @@ type     = 'MLR';
 % modelled = sweBMS;
 % type     = 'BMS';
 
+topoParam = fullRK.S2;
+
 % opt      = 8;
 for opt = 2:9
     topoParam.G4  = modelled(opt).G4;
     topoParam.G2  = modelled(opt).G2;
     topoParam.G13 = modelled(opt).G13;
 
-    PlotTopoParameter(topoParam, 'modelledSWE', 'SWE (m w.e.)', SWE, 'sweONswe', 'massB')
+    PlotTopoParameter(topoParam, 'modelledSWE', 'SWE (m w.e.)', SWE, 'black', 'massB')
          saveFIG([type,'map_Modelled_Observed',num2str(opt-1)])
 end
     clear filename modelled opt type fig glacier g 

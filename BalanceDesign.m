@@ -44,13 +44,13 @@ end
     subset = 'pattern';
     
 load TopoSWE.mat
-for t = 1%:5
+for t = 1:5
     
-if     t == 1; type = 'centreline';          n = 10:5:55;     clt = 1;
-elseif t == 2; type = 'CentreTransect4';     n = 10:10:100;  clt = 2;
-elseif t == 3; type = 'CentreTransect3';     n = 10:10:100;  clt = 3;
-elseif t == 4; type = 'hourglass';           n = 10:10:100;  clt = 4;
-elseif t == 5; type = 'hourglassCircle';     n = 10:10:100;  clt = 5;
+if     t == 1; type = 'Acentreline';          n = 10:5:55;    clt = 1;
+elseif t == 2; type = 'ACentreTransect4';     n = 10:10:100;  clt = 2;
+elseif t == 3; type = 'ACentreTransect3';     n = 10:10:100;  clt = 3;
+elseif t == 4; type = 'Ahourglass';           n = 10:10:100;  clt = 4;
+elseif t == 5; type = 'AhourglassCircle';     n = 10:10:100;  clt = 5;
 end
 
 
@@ -92,7 +92,7 @@ input.topo_sampled_ns = topo_sampled_ns;
     if strcmp(type,'centreline'); TOPOdata.G13.centreD = repmat(0.001, n(c), 1); end
   
     % Add Accumulation area points  
-accumulation = 'false';
+accumulation = 'true';
     if strcmp(accumulation, 'true')
        [sweA, topoA] = DataSubset( subset, 'accum', input );
        for g = 1:3; glacier = options.glacier{g};
@@ -114,11 +114,11 @@ accumulation = 'false';
 
 % Linear regression
 
-  subsetLR(c).(type).(den) =  LinearRegression( subsetSWE(c).(type).(den), TOPOdata, topo_full );
+%   subsetLR(c).(type).(den) =  LinearRegression( subsetSWE(c).(type).(den), TOPOdata, topo_full );
     
 % Simple kriging
  
-  subsetSK(c).(type).(den) =  KrigingR_G( subsetSWE(c).(type).(den) );
+%   subsetSK(c).(type).(den) =  KrigingR_G( subsetSWE(c).(type).(den) );
 
 % Regression Kriging
  
@@ -325,7 +325,7 @@ end
 end
 
 %% PLOT -> RMSE
-load TopoBMS_MLR.mat SWE
+%load TopoBMS_MLR.mat SWE
 run OPTIONS
  %RMSE of full data
     for d = 1:8
@@ -344,9 +344,15 @@ run OPTIONS
     end
     end
     
+    ylimG4 = [0.11 0.23];
+    ylimG213 = [0.06 0.16];
 subs = fieldnames(subsetRK);
 for s = 1:length(subs)
-    type = subs{s};
+  n = 10:10:100;  
+  if s == 1 || s == 6
+        n = 10:5:55;
+  end
+  type = subs{s};
 %Linear Regression
 figure(4); clf
 for g = 1:3
@@ -359,56 +365,63 @@ end
     end
     subplot(1,3,g)
     plot(n,stack.(glacier),'LineWidth',2); hold on
-    plot([min(n), max(n)],[mean(rmseLR(g,:)), mean(rmseLR(g,:))],'k--')
+    plot([0, max(n)],[mean(rmseLR(g,:)), mean(rmseLR(g,:))],'k--')
         xlabel('Sample size'); ylabel('RMSE (m w.e.)')
         title(['LR ',type, ' ',glacier])
-        legend([DenOpt, {'All'}],'Location','best')
-        %ylim([0.05 0.2])
+        columnlegend(3,[options.DenOpt, {'All'}],'Location','NorthEast');
+        if g ==1;   ylim(ylimG4)
+        else        ylim(ylimG213)
+        end           
         set(gca,'YTick',(0:0.01:1))
+        set(gca,'XTick',(0:20:100))
 end
-    saveFIG(['SubsetRMSE_samplesizeNdensity_LR',type],18,'3G')
+    saveFIG(['SubsetRMSE_samplesizeNdensity_LR',type],12)
 
  %Simple Kriging
-figure(5); clf
+figure(4); clf
 for g = 1:3
     glacier = options.glacier{g};
     for c = 1:length(n)
 for d = 1:8 
-   den = DenOpt{d};
+   den = options.DenOpt{d};
    stack.(glacier)(d,c) = subsetRmseSK(c).(type).(den).(glacier);
 end
     end
     subplot(1,3,g)
     plot(n,stack.(glacier),'LineWidth',2); hold on
-    plot([min(n), max(n)],[mean(rmseSK(g,:)), mean(rmseSK(g,:))],'k--')
+    plot([0, max(n)],[mean(rmseSK(g,:)), mean(rmseSK(g,:))],'k--')
         xlabel('Sample size'); ylabel('RMSE (m w.e.)')
         title(['SK ',type, ' ',glacier])
-        legend([DenOpt, {'All'}],'Location','best')
-        %ylim([0.05 0.2])
+        columnlegend(3,[options.DenOpt, {'All'}],'Location','NorthEast');
+        if g ==1;   ylim(ylimG4)
+        else        ylim(ylimG213)
+        end           
         set(gca,'YTick',(0:0.01:1))
 end
-    saveFIG(['SubsetRMSE_samplesizeNdensity_SK',type],18,'3G')
+    saveFIG(['SubsetRMSE_samplesizeNdensity_SK',type],12)
 
  %Regression Kriging
-figure(6); clf
+figure(4); clf
 for g = 1:3
     glacier = options.glacier{g};
     for c = 1:length(n)
 for d = 1:8 
-   den = DenOpt{d};
+   den = options.DenOpt{d};
    stack.(glacier)(d,c) = subsetRmseRK(c).(type).(den).(glacier);
 end
     end
     subplot(1,3,g)
     plot(n,stack.(glacier),'LineWidth',2); hold on
-    plot([min(n), max(n)],[mean(rmseRK(g,:)), mean(rmseRK(g,:))],'k--')
+    plot([0, max(n)],[mean(rmseRK(g,:)), mean(rmseRK(g,:))],'k--')
         xlabel('Sample size'); ylabel('RMSE (m w.e.)')
         title(['RK ',type, ' ',glacier])
-        legend([DenOpt, {'All'}],'Location','best')
-        %ylim([0.05 0.2])
+        columnlegend(3,[options.DenOpt, {'All'}],'Location','NorthEast');
+        if g ==1;   ylim(ylimG4)
+        else        ylim(ylimG213)
+        end           
         set(gca,'YTick',(0:0.01:1))
 end
-    saveFIG(['SubsetRMSE_samplesizeNdensity_RK',type],18,'3G')
+    saveFIG(['SubsetRMSE_samplesizeNdensity_RK',type],12)
 end
 
 %% PLOT -> compare sampling designs and interpolation methods over sample size
@@ -496,7 +509,57 @@ end
 end
     legend(subsets);
     saveFIG(['SubsetInterpSizeCompile_',Xlab(1:3)],14)
-    
+
+%% PLOT -> theta from SK models
+
+for g = 1:3
+glacier = options.glacier{g};
+fields = fieldnames(subsetSK);
+for c = 1:length(subsetSK)
+    for f = 1:size(subsetSK,2)
+    for d = 1:8
+        den = options.DenOpt{d};
+    theta.(glacier)(c,f,d) = subsetSK(c).(fields{f}).(den).Model(g).theta;
+    end
+    end
+end
+end
+
+for g = 1:3
+glacier = options.glacier{g};
+for d = 1:8
+den = options.DenOpt{d};
+T(d,g) = fullSK.(den).Model(g).theta;
+end
+end
+T = mean(T);
+
+
+n = [10:5:55;10:10:100;10:10:100;10:10:100;10:10:100]';
+c = [171 76 112; 118 197 107;0 172 236;37 19 81;255 111 89]/255;
+insetx = [.27, .55, .83];
+d = 3; den = options.DenOpt{d};
+figure(1); clf
+for g = 1:3
+glacier = options.glacier{g};
+
+    subplot(1,3,g)
+    for i = 1:5
+    plot(n(:,i),theta.(glacier)(:,i,d),'-o','Color',c(i,:)); hold on
+    end
+    for i = 1:5
+    plot(n(:,i),theta.(glacier)(:,i+5,d),'--o','Color',c(i,:)); hold on
+    end
+    plot([0 100],[T(g) T(g)],'k', 'LineWidth',2)
+        columnlegend(2,fieldnames(subsetSK));
+        ylabel('\theta (m)'); xlabel('Sample size')
+        title(glacier)
+    axes('Position',[insetx(g) .67 .06 .1]); box on
+    histogram(theta.(glacier)(:,:,d),20, 'FaceColor', options.RGB(g,:))
+        ylabel('Frequency'); xlabel('\theta (m)')
+end
+    saveFIG(['Subset_SKtheta',den],13)
+
 %% PLOT -> sampling designs
     subset = 'pattern';
 for t = 1:5

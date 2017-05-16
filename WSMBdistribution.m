@@ -249,10 +249,10 @@ clear Q
 load TopoSWE.mat
 varSIG = [0.027, 0.035, 0.04];
     SWE = ObsInCell(SWE, topo_sampled);
- for gg = 1:3
-        glacier = options.glacier{gg};
+ for g = 1:3
+        glacier = options.glacier{g};
             varPD.(glacier)   = makedist('Normal','mu',0,'sigma',varSIG(g));
-            varSWE.(glacier)  = random(varPD.(glacier), length(SWE(gg).swe),1000);
+            varSWE.(glacier)  = random(varPD.(glacier), length(SWE(g).swe),1000);
  end
 
 
