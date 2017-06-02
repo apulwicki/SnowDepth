@@ -58,108 +58,116 @@ optimisation start
   - type :  matern5_2 
   - nugget : unknown homogenous nugget effect 
   - parameters lower bounds :  1e-10 
-  - parameters upper bounds :  5767.017 
+  - parameters upper bounds :  4501.489 
   - upper bound for alpha   :  1 
-  - best initial criterion value(s) :  49.8432 49.71119 49.52224 49.37131 49.35627 
+  - best initial criterion value(s) :  88.54114 85.21202 84.58982 84.29234 82.32933 
 
 N = 2, M = 5 machine precision = 2.22045e-16
 At X0, 0 variables are exactly at the bounds
-At iterate     0  f=      -49.843  |proj g|=      0.62175
-At iterate     1  f =      -49.884  |proj g|=       0.24621
-At iterate     2  f =      -49.885  |proj g|=     0.0081016
-At iterate     3  f =      -49.885  |proj g|=    0.00013596
-At iterate     4  f =      -49.885  |proj g|=    0.00013597
+At iterate     0  f=      -88.541  |proj g|=     0.031902
+At iterate     1  f =      -88.889  |proj g|=      0.021135
+At iterate     2  f =      -88.912  |proj g|=      0.018563
+At iterate     3  f =      -88.912  |proj g|=       0.25971
+At iterate     4  f =      -88.912  |proj g|=         0.003
+At iterate     5  f =      -88.912  |proj g|=     0.0020111
 
-iterations 4
-function evaluations 7
-segments explored during Cauchy searches 5
-BFGS updates skipped 0
-active bounds at final generalized Cauchy point 0
-norm of the final projected gradient 0.000135969
-final function value -49.8854
-
-F = -49.8854
-final  value -49.885433 
-converged
-N = 2, M = 5 machine precision = 2.22045e-16
-At X0, 0 variables are exactly at the bounds
-At iterate     0  f=      -49.711  |proj g|=      0.44666
-At iterate     1  f =       -49.77  |proj g|=         0.111
-At iterate     2  f =       -49.77  |proj g|=     0.0069716
-At iterate     3  f =       -49.77  |proj g|=    0.00014309
-At iterate     4  f =       -49.77  |proj g|=    0.00017689
-
-iterations 4
+iterations 5
 function evaluations 8
-segments explored during Cauchy searches 5
+segments explored during Cauchy searches 6
 BFGS updates skipped 0
 active bounds at final generalized Cauchy point 0
-norm of the final projected gradient 0.000176889
-final function value -49.7699
+norm of the final projected gradient 0.0020111
+final function value -88.9118
 
-F = -49.7699
-final  value -49.769946 
+F = -88.9118
+final  value -88.911783 
 converged
 N = 2, M = 5 machine precision = 2.22045e-16
 At X0, 0 variables are exactly at the bounds
-At iterate     0  f=      -49.522  |proj g|=      0.68882
-At iterate     1  f =      -49.976  |proj g|=      0.022026
-At iterate     2  f =      -49.976  |proj g|=    0.00052432
-At iterate     3  f =      -49.976  |proj g|=    9.1363e-05
+At iterate     0  f=      -85.212  |proj g|=     0.084505
+At iterate     1  f =      -88.552  |proj g|=      0.018443
+At iterate     2  f =      -88.619  |proj g|=       0.98774
+At iterate     3  f =      -88.635  |proj g|=      0.014824
+At iterate     4  f =      -88.638  |proj g|=      0.014132
+At iterate     5  f =      -88.638  |proj g|=       0.15338
+At iterate     6  f =      -88.638  |proj g|=      0.002328
+At iterate     7  f =      -88.638  |proj g|=     0.0023279
 
-iterations 3
-function evaluations 5
-segments explored during Cauchy searches 4
+iterations 7
+function evaluations 11
+segments explored during Cauchy searches 9
 BFGS updates skipped 0
 active bounds at final generalized Cauchy point 0
-norm of the final projected gradient 9.13634e-05
-final function value -49.9757
+norm of the final projected gradient 0.00232793
+final function value -88.6384
 
-F = -49.9757
-final  value -49.975655 
+F = -88.6384
+final  value -88.638356 
 converged
 N = 2, M = 5 machine precision = 2.22045e-16
 At X0, 0 variables are exactly at the bounds
-At iterate     0  f=      -49.371  |proj g|=      0.60601
-At iterate     1  f =      -49.795  |proj g|=       0.29451
-At iterate     2  f =      -49.797  |proj g|=     0.0030784
-At iterate     3  f =      -49.797  |proj g|=    0.00014316
-At iterate     4  f =      -49.797  |proj g|=    0.00014318
+At iterate     0  f=       -84.59  |proj g|=       0.0509
+At iterate     1  f =      -87.794  |proj g|=     0.0075517
+At iterate     2  f =      -87.802  |proj g|=      0.006938
+At iterate     3  f =      -87.802  |proj g|=       0.38853
+At iterate     4  f =      -87.802  |proj g|=     0.0047616
+At iterate     5  f =      -87.802  |proj g|=     0.0025537
 
-iterations 4
-function evaluations 7
-segments explored during Cauchy searches 5
+iterations 5
+function evaluations 12
+segments explored during Cauchy searches 7
 BFGS updates skipped 0
 active bounds at final generalized Cauchy point 0
-norm of the final projected gradient 0.000143179
-final function value -49.7971
+norm of the final projected gradient 0.0025537
+final function value -87.8022
 
-F = -49.7971
-final  value -49.797143 
+F = -87.8022
+final  value -87.802217 
 converged
 N = 2, M = 5 machine precision = 2.22045e-16
 At X0, 0 variables are exactly at the bounds
-At iterate     0  f=      -49.356  |proj g|=      0.78918
-At iterate     1  f =      -49.872  |proj g|=       0.20802
-At iterate     2  f =      -49.873  |proj g|=      0.062685
-At iterate     3  f =      -49.874  |proj g|=      0.000215
-At iterate     4  f =      -49.874  |proj g|=    0.00013793
+At iterate     0  f=      -84.292  |proj g|=     0.030814
+At iterate     1  f =      -87.132  |proj g|=     0.0045548
+At iterate     2  f =      -87.141  |proj g|=     0.0041721
+At iterate     3  f =      -87.141  |proj g|=       0.67893
+At iterate     4  f =      -87.141  |proj g|=     0.0041354
+At iterate     5  f =      -87.141  |proj g|=     0.0024712
 
-iterations 4
-function evaluations 6
-segments explored during Cauchy searches 5
+iterations 5
+function evaluations 12
+segments explored during Cauchy searches 7
 BFGS updates skipped 0
 active bounds at final generalized Cauchy point 0
-norm of the final projected gradient 0.000137929
-final function value -49.8735
+norm of the final projected gradient 0.00247119
+final function value -87.1409
 
-F = -49.8735
-final  value -49.873539 
+F = -87.1409
+final  value -87.140903 
+converged
+N = 2, M = 5 machine precision = 2.22045e-16
+At X0, 0 variables are exactly at the bounds
+At iterate     0  f=      -82.329  |proj g|=      0.23172
+At iterate     1  f =      -90.894  |proj g|=      0.016699
+At iterate     2  f =      -90.936  |proj g|=      0.014685
+At iterate     3  f =      -90.936  |proj g|=       0.90941
+At iterate     4  f =      -90.936  |proj g|=      0.014559
+At iterate     5  f =      -90.936  |proj g|=      0.014558
+
+iterations 5
+function evaluations 11
+segments explored during Cauchy searches 7
+BFGS updates skipped 0
+active bounds at final generalized Cauchy point 0
+norm of the final projected gradient 0.0145577
+final function value -90.9364
+
+F = -90.9364
+final  value -90.936433 
 converged
 
 * The 5 best values (multistart) obtained are:
- -49.88543 -49.76995 -49.97566 -49.79714 -49.87354 
-* The model corresponding to the best one (-49.97566) is stored. 
+ -88.91178 -88.63836 -87.80222 -87.1409 -90.93643 
+* The model corresponding to the best one (-90.93643) is stored. 
 Warning message:
 executing %dopar% sequentially: no parallel backend registered 
 >  
@@ -182,35 +190,3 @@ executing %dopar% sequentially: no parallel backend registered
 > y = seq(from = 0, to = (sizexy[1,1]-1)*40, by = 40)
 > grid = expand.grid(X1=x, X2 = y)
 > pred.m = predict(m,grid,"SK")
-> 
-> 
-> pred = matrix(pred.m$mean, sizexy[1,1], sizexy[1,2], byrow = TRUE)
-> lower95 = matrix(pred.m$lower95, sizexy[1,1], sizexy[1,2], byrow = TRUE)
-> upper95 = matrix(pred.m$upper95, sizexy[1,1], sizexy[1,2], byrow = TRUE)
-> 
-> 
-> writeMat('/home/glaciology1/Documents/Data/SnowDepth/Kriging/kriging.mat',
-+          pred=pred, lower95=lower95, upper95=upper95, model = model, LOO = LOO,
-+          fixNames=TRUE, matVersion="5", onWrite=NULL, verbose=FALSE)
-> #  writeMat('/Users/Alexandra/Documents/SFU/Data/SnowDepth/Kriging/kriging.mat',
-> #           pred=pred, lower95=lower95, upper95=upper95, model = model, LOO = LOO,
-> #           fixNames=TRUE, matVersion="5", onWrite=NULL, verbose=FALSE)
-> 
-> ## Install and load rgl package
-> #library(rgl)
-> 
-> ## Plot surface and observations
-> #plot3d(utm[,1],utm[,2],res, xlim=c(0,3000),ylim=c(0,3000),zlim=0:1)
-> #surface3d(x,y, matrix(pred.m$mean,length(x),length(y)),col="light blue", alpha=0.5)
-> 
-> ## Plot surface and observations with intervals
-> #  rglwidget()
-> #plot3d(utm[,1],utm[,2],res, xlim=c(0,3000),ylim=c(0,3000),zlim=0:1)
-> #surface3d(x,y, matrix(pred.m$mean, sizexy[1,1], sizexy[1,2]),col="light blue", alpha=0.5)
-> #surface3d(x.grid,x.grid, matrix(pred.m$upper95,n.grid,n.grid),col="light blue", alpha=0.25)
-> #surface3d(x.grid,x.grid, matrix(pred.m$lower95,n.grid,n.grid),col="light blue", alpha=0.25)
-> #rgl.snapshot("filename.png")
-> 
-> proc.time()
-   user  system elapsed 
-  1.320   0.040   1.358 
