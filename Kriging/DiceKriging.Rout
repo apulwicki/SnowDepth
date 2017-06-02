@@ -60,110 +60,105 @@ optimisation start
   - parameters lower bounds :  1e-10 
   - parameters upper bounds :  5767.017 
   - upper bound for alpha   :  1 
-  - best initial criterion value(s) :  52.40893 52.31696 52.2904 52.10521 52.05166 
+  - best initial criterion value(s) :  49.68885 49.61676 49.55967 49.55056 49.46524 
 
 N = 2, M = 5 machine precision = 2.22045e-16
 At X0, 0 variables are exactly at the bounds
-At iterate     0  f=      -52.409  |proj g|=      0.67657
-At iterate     1  f =      -52.429  |proj g|=       0.44574
-At iterate     2  f =      -52.461  |proj g|=      0.049538
-At iterate     3  f =      -52.461  |proj g|=    0.00073546
-At iterate     4  f =      -52.461  |proj g|=    0.00011521
+At iterate     0  f=      -49.689  |proj g|=      0.65155
+At iterate     1  f =       -49.73  |proj g|=      0.039316
+At iterate     2  f =       -49.73  |proj g|=     0.0042756
+At iterate     3  f =       -49.73  |proj g|=    4.2127e-05
+At iterate     4  f =       -49.73  |proj g|=    5.1856e-05
 
 iterations 4
-function evaluations 6
-segments explored during Cauchy searches 5
-BFGS updates skipped 0
-active bounds at final generalized Cauchy point 0
-norm of the final projected gradient 0.00011521
-final function value -52.4606
-
-F = -52.4606
-final  value -52.460586 
-converged
-N = 2, M = 5 machine precision = 2.22045e-16
-At X0, 0 variables are exactly at the bounds
-At iterate     0  f=      -52.317  |proj g|=      0.69928
-At iterate     1  f =      -52.453  |proj g|=       0.48022
-At iterate     2  f =      -52.486  |proj g|=      0.074019
-At iterate     3  f =      -52.486  |proj g|=    0.00048569
-At iterate     4  f =      -52.486  |proj g|=    8.1648e-05
-
-iterations 4
-function evaluations 6
-segments explored during Cauchy searches 5
-BFGS updates skipped 0
-active bounds at final generalized Cauchy point 0
-norm of the final projected gradient 8.16479e-05
-final function value -52.4863
-
-F = -52.4863
-final  value -52.486278 
-converged
-N = 2, M = 5 machine precision = 2.22045e-16
-At X0, 0 variables are exactly at the bounds
-At iterate     0  f=       -52.29  |proj g|=      0.43129
-At iterate     1  f =      -52.365  |proj g|=       0.71369
-At iterate     2  f =      -52.394  |proj g|=        0.1198
-At iterate     3  f =      -52.395  |proj g|=     0.0088304
-At iterate     4  f =      -52.395  |proj g|=     0.0001462
-At iterate     5  f =      -52.395  |proj g|=     0.0001462
-
-iterations 5
-function evaluations 7
-segments explored during Cauchy searches 6
-BFGS updates skipped 0
-active bounds at final generalized Cauchy point 0
-norm of the final projected gradient 0.000146201
-final function value -52.3947
-
-F = -52.3947
-final  value -52.394718 
-converged
-N = 2, M = 5 machine precision = 2.22045e-16
-At X0, 0 variables are exactly at the bounds
-At iterate     0  f=      -52.105  |proj g|=      0.78421
-At iterate     1  f =      -52.425  |proj g|=         0.425
-At iterate     2  f =      -52.447  |proj g|=       0.22272
-At iterate     3  f =      -52.448  |proj g|=     0.0043812
-At iterate     4  f =      -52.448  |proj g|=    0.00012459
-At iterate     5  f =      -52.448  |proj g|=    0.00012457
-
-iterations 5
 function evaluations 8
-segments explored during Cauchy searches 6
+segments explored during Cauchy searches 5
 BFGS updates skipped 0
 active bounds at final generalized Cauchy point 0
-norm of the final projected gradient 0.00012457
-final function value -52.4482
+norm of the final projected gradient 5.18561e-05
+final function value -49.7297
 
-F = -52.4482
-final  value -52.448236 
+F = -49.7297
+final  value -49.729671 
 converged
 N = 2, M = 5 machine precision = 2.22045e-16
 At X0, 0 variables are exactly at the bounds
-At iterate     0  f=      -52.052  |proj g|=      0.25524
-At iterate     1  f =      -52.106  |proj g|=       0.83036
-At iterate     2  f =       -52.12  |proj g|=       0.20089
-At iterate     3  f =      -52.121  |proj g|=      0.031162
-At iterate     4  f =      -52.121  |proj g|=    0.00086946
-At iterate     5  f =      -52.121  |proj g|=    0.00014349
+At iterate     0  f=      -49.617  |proj g|=       0.5642
+At iterate     1  f =      -49.696  |proj g|=       0.46359
+At iterate     2  f =      -49.702  |proj g|=      0.027243
+At iterate     3  f =      -49.702  |proj g|=    0.00071106
+At iterate     4  f =      -49.702  |proj g|=    9.5761e-05
 
-iterations 5
-function evaluations 7
-segments explored during Cauchy searches 6
+iterations 4
+function evaluations 6
+segments explored during Cauchy searches 5
 BFGS updates skipped 0
 active bounds at final generalized Cauchy point 0
-norm of the final projected gradient 0.000143491
-final function value -52.1211
+norm of the final projected gradient 9.57607e-05
+final function value -49.7023
 
-F = -52.1211
-final  value -52.121138 
+F = -49.7023
+final  value -49.702314 
+converged
+N = 2, M = 5 machine precision = 2.22045e-16
+At X0, 0 variables are exactly at the bounds
+At iterate     0  f=       -49.56  |proj g|=        0.484
+At iterate     1  f =      -49.588  |proj g|=     0.0053818
+At iterate     2  f =      -49.588  |proj g|=       0.00014
+At iterate     3  f =      -49.588  |proj g|=    0.00014002
+
+iterations 3
+function evaluations 7
+segments explored during Cauchy searches 4
+BFGS updates skipped 0
+active bounds at final generalized Cauchy point 0
+norm of the final projected gradient 0.000140023
+final function value -49.5877
+
+F = -49.5877
+final  value -49.587660 
+converged
+N = 2, M = 5 machine precision = 2.22045e-16
+At X0, 0 variables are exactly at the bounds
+At iterate     0  f=      -49.551  |proj g|=      0.45839
+At iterate     1  f =      -49.569  |proj g|=      0.008063
+At iterate     2  f =      -49.569  |proj g|=    0.00014162
+At iterate     3  f =      -49.569  |proj g|=    0.00014164
+
+iterations 3
+function evaluations 6
+segments explored during Cauchy searches 4
+BFGS updates skipped 0
+active bounds at final generalized Cauchy point 0
+norm of the final projected gradient 0.000141636
+final function value -49.5688
+
+F = -49.5688
+final  value -49.568840 
+converged
+N = 2, M = 5 machine precision = 2.22045e-16
+At X0, 0 variables are exactly at the bounds
+At iterate     0  f=      -49.465  |proj g|=      0.47308
+At iterate     1  f =      -49.531  |proj g|=      0.089539
+At iterate     2  f =      -49.531  |proj g|=     0.0037476
+At iterate     3  f =      -49.531  |proj g|=    0.00014312
+At iterate     4  f =      -49.531  |proj g|=    0.00021072
+
+iterations 4
+function evaluations 9
+segments explored during Cauchy searches 5
+BFGS updates skipped 0
+active bounds at final generalized Cauchy point 0
+norm of the final projected gradient 0.000210719
+final function value -49.5313
+
+F = -49.5313
+final  value -49.531272 
 converged
 
 * The 5 best values (multistart) obtained are:
- -52.46059 -52.48628 -52.39472 -52.44824 -52.12114 
-* The model corresponding to the best one (-52.48628) is stored. 
+ -49.72967 -49.70231 -49.58766 -49.56884 -49.53127 
+* The model corresponding to the best one (-49.72967) is stored. 
 Warning message:
 executing %dopar% sequentially: no parallel backend registered 
 >  
@@ -217,4 +212,4 @@ executing %dopar% sequentially: no parallel backend registered
 > 
 > proc.time()
    user  system elapsed 
-  1.280   0.012   1.292 
+  1.224   0.028   1.251 
