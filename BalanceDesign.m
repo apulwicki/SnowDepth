@@ -44,13 +44,16 @@ end
     subset = 'pattern';
     
 load TopoSWE.mat
-for t = 1:5
+for t = 1:6
     
-if     t == 1; type = 'Acentreline';          n = 10:5:55;    clt = 1;
-elseif t == 2; type = 'ACentreTransect4';     n = 10:10:100;  clt = 2;
-elseif t == 3; type = 'ACentreTransect3';     n = 10:10:100;  clt = 3;
-elseif t == 4; type = 'Ahourglass';           n = 10:10:100;  clt = 4;
-elseif t == 5; type = 'AhourglassCircle';     n = 10:10:100;  clt = 5;
+if     t == 1; type = 'centreline';          n = 10:5:55;    
+elseif t == 2; type = 'CentreTransect4';     n = 10:10:100;  
+elseif t == 3; type = 'CentreTransect3';     n = 10:10:100;
+elseif t == 4; type = 'hourglass';           n = 10:10:100;  
+elseif t == 5; type = 'hourglassCircle';     n = 10:10:100;  
+elseif t == 6; type = 'circle';              n = 10:10:100;  
+    
+    
 end
 
 
@@ -82,7 +85,7 @@ input.topo_sampled_ns = topo_sampled_ns;
 % option.value     = 2200;
 
 
-[ subsetSWE(c).(type).(den), TOPOdata ] = DataSubset( subset, clt, input );
+[ subsetSWE(c).(type).(den), TOPOdata ] = DataSubset( subset, t, input );
 
 [ subsetSWE(c).(type).(den), TOPOdata ] = ObsInCell(subsetSWE(c).(type).(den), TOPOdata); 
 
@@ -92,7 +95,7 @@ input.topo_sampled_ns = topo_sampled_ns;
     if strcmp(type,'centreline'); TOPOdata.G13.centreD = repmat(0.001, n(c), 1); end
   
     % Add Accumulation area points  
-accumulation = 'true';
+accumulation = 'false';
     if strcmp(accumulation, 'true')
        [sweA, topoA] = DataSubset( subset, 'accum', input );
        for g = 1:3; glacier = options.glacier{g};
@@ -114,15 +117,15 @@ accumulation = 'true';
 
 % Linear regression
 
-%   subsetLR(c).(type).(den) =  LinearRegression( subsetSWE(c).(type).(den), TOPOdata, topo_full );
+  subsetLR(c).(type).(den) =  LinearRegression( subsetSWE(c).(type).(den), TOPOdata, topo_full );
     
 % Simple kriging
  
-%   subsetSK(c).(type).(den) =  KrigingR_G( subsetSWE(c).(type).(den) );
+  subsetSK(c).(type).(den) =  KrigingR_G( subsetSWE(c).(type).(den) );
 
 % Regression Kriging
  
-  subsetRK(c).(type).(den) =  RegressionKriging( subsetSWE(c).(type).(den), TOPOdata, topo_full, SWE );
+ % subsetRK(c).(type).(den) =  RegressionKriging( subsetSWE(c).(type).(den), TOPOdata, topo_full, SWE );
     
     end
 end
@@ -142,9 +145,9 @@ for c = 1:10;
             type = subs{s};
             den = options.DenOpt{7};
 
-% figure(1); PlotTopoParameter(subsetLR(c).(type).(den),type, 'SWE (m w.e.)', subsetSWE(c).(type).(den), 'black', 'massB')
-%      title('Linear Regression')
-%      saveFIG(['MapSubset_LR',type,'_n',num2str(n(c)),den])
+figure(1); PlotTopoParameter(subsetLR(c).(type).(den),type, 'SWE (m w.e.)', subsetSWE(c).(type).(den), 'black', 'massB')
+     title('Linear Regression')
+     saveFIG(['MapSubset_LR',type,'_n',num2str(n(c)),den])
 
 figure(2); PlotTopoParameter(subsetSK(c).(type).(den),type, 'SWE (m w.e.)', subsetSWE(c).(type).(den), 'black', 'massB')
      title('Simple Kriging')
@@ -538,24 +541,25 @@ T = mean(T);
 n = [10:5:55;10:10:100;10:10:100;10:10:100;10:10:100]';
 c = [171 76 112; 118 197 107;0 172 236;37 19 81;255 111 89]/255;
 insetx = [.27, .55, .83];
-d = 3; den = options.DenOpt{d};
+%d = 3; den = options.DenOpt{d};
 figure(1); clf
 for g = 1:3
 glacier = options.glacier{g};
+theta.(glacier) = mean(theta.(glacier),3);
 
     subplot(1,3,g)
     for i = 1:5
-    plot(n(:,i),theta.(glacier)(:,i,d),'-o','Color',c(i,:)); hold on
+    plot(n(:,i),theta.(glacier)(:,i),'-o','Color',c(i,:)); hold on
     end
     for i = 1:5
-    plot(n(:,i),theta.(glacier)(:,i+5,d),'--o','Color',c(i,:)); hold on
+    plot(n(:,i),theta.(glacier)(:,i+5),'--o','Color',c(i,:)); hold on
     end
     plot([0 100],[T(g) T(g)],'k', 'LineWidth',2)
         columnlegend(2,fieldnames(subsetSK));
         ylabel('\theta (m)'); xlabel('Sample size')
         title(glacier)
     axes('Position',[insetx(g) .67 .06 .1]); box on
-    histogram(theta.(glacier)(:,:,d),20, 'FaceColor', options.RGB(g,:))
+    histogram(theta.(glacier)(:,:),15, 'FaceColor', options.RGB(g,:))
         ylabel('Frequency'); xlabel('\theta (m)')
 end
     saveFIG(['Subset_SKtheta',den],13)

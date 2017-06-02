@@ -1,12 +1,12 @@
-T%% %%%%%%%%%%%%%%%%%%%%% BMS and MLR Plots %%%%%%%%%%%%%%%%%%%%%
+%% %%%%%%%%%%%%%%%%%%%%% BMS and MLR Plots %%%%%%%%%%%%%%%%%%%%%
 % % % 
-data            = BMS;
-residualsdata   = residualsBMS;
-type            = 'BMS';
+% data            = BMS;
+% residualsdata   = residualsBMS;
+% type            = 'BMS';
 % 
-% data            = MLR;
-% residualsdata   = residualsMLR;
-% type            = 'MLR';
+data            = MLR;
+residualsdata   = residualsMLR;
+type            = 'MLR';
 
 %% Plotting - fit to observed
 
@@ -353,7 +353,7 @@ load TopoSWE.mat
 for opt = 2:9
 for g = 1:3
     glacier = char(options.glacier(g));
-meanswe(g,:,opt) = [mean(sweOPT(opt).(glacier)(:,1)), ...
+meanswe(g,:,opt) = [...%mean(sweOPT(opt).(glacier)(:,1)), ...
                 nanmean(sweBMS(opt).(glacier)(:)),...
                 nanmean(sweKRIG(opt).(glacier).pred(:)),...
                 nanmean(sweRK(opt).(glacier)(:))];
@@ -364,15 +364,12 @@ meanswe = mean(meanswe,3);
 B = bar(meanswe, 'EdgeColor','none','BarWidth', 1);
     ylabel('Mean SWE (m w.e.)','Fontname','timesnewroman')
     set(gca,'xticklabel',{'Glacier 4','Glacier 2','Glacier 13'})
-    legend('Obs.','LR','SK','RK')
+    legend('LR','SK','RK')
 
-    colormap = [rgb('Indigo'); rgb('DarkCyan'); rgb('GoldenRod'); rgb('FireBrick')];
-    for i = 1:4
+    colormap = [248 62 61; 106 196 112; 212 188 0]/255;
+    for i = 1:3
     B(i).FaceColor = colormap(i,:); end
-
-    fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18,'FontName','Timesnewroman')
-             set(findall(fig,'type','axes'),'Fontname','Timesnewroman')
-saveFIG('InterpMethod_mean')
+saveFIG('InterpMethod_mean',30)
 
  % 3D - all density options
 for opt = 2:9
@@ -422,12 +419,10 @@ B = bar(meanR2, 'EdgeColor','none','BarWidth',1);
     set(gca,'xticklabel',{'Glacier 4','Glacier 2','Glacier 13'})
     legend('LR','SK','RK')
 
-    colormap = [rgb('Indigo'); rgb('DarkCyan'); rgb('GoldenRod'); rgb('FireBrick')];
-    for i = 2:4
-    B(i-1).FaceColor = colormap(i,:); end
-
-    fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18)
-saveFIG('InterpMethod_meanR2')
+    colormap = [248 62 61; 106 196 112; 212 188 0]/255;
+    for i = 1:3
+    B(i).FaceColor = colormap(i,:); end
+saveFIG('InterpMethod_meanR2',30)
 
 % 3D - all density options
 for opt = 2:9

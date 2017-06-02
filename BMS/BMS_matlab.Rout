@@ -17,3 +17,13 @@ Type 'demo()' for some demos, 'help()' for on-line help, or
 'help.start()' for an HTML browser interface to help.
 Type 'q()' to quit R.
 
+[Previously saved workspace restored]
+
+> 
+> ################# Import Data ###############################
+> #install.packages(...)
+> 
+> library(BMS)
+> library(R.matlab)
+
+Execution halted

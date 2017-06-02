@@ -30,6 +30,8 @@ if strcmp(subset, 'pattern')
     elseif clt == 3; pattern = [{'UM'};{'LM'};{'UT'}];        %centreline + 3 transects
     elseif clt == 4; pattern = [{'UH'};{'LH'}];               %hourglass 
     elseif clt == 5; pattern = [{'UH'};{'LH'};{'UC'};{'LC'}]; %hourglass and circle
+    elseif clt == 6; pattern = [{'UC'};{'LC'}];               %circle
+        
         %pattern = [{'LM'};{'LH'};{'LC'}];        %lower ablation
         %pattern = [{'UM'};{'UH'};{'UC'};{'UT'};{'BT'};]; %upper ablation
     end
