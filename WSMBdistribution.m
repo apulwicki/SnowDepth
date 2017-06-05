@@ -158,16 +158,8 @@ legend(options.glacier)
 
 %% WSMB from generous MLR coeffs
 
-%load Full.mat fullCI
-% for d = 2:9
-%     den = options.DenOpt{d-1};
-%     display(den)
-% [ tempswe.(den), TOPOdata ] = ObsInCell( fullSWE.(den).input, topo_sampled); 
-% 
-% % Linear regression
-% [~, fullCI.(den) ] =  LinearRegression( tempswe.(den), TOPOdata, topo_full );
-%     
-% end
+
+%load Full.mat; load TopoSWE.mat
 clear Qfull
 varSIG = [0.027, 0.035, 0.04];
 
@@ -177,23 +169,26 @@ for g = 1:3
 for d = 1:8
     den = options.DenOpt{d};
 
-%     varPD   = makedist('Normal','mu',0,'sigma',varSIG(g));
-%     varSWE  = random(varPD, length(fullSWE.(den).(glacier).swe),1000);
-for vc = 1%:1000
-    dataSWE = fullSWE.(den).(glacier).swe;% + varSWE(:,vc);
+    varPD   = makedist('Normal','mu',0,'sigma',varSIG(g));
+    varSWE  = random(varPD, length(fullSWE.(den).(glacier).swe),1000);
+for vc = 1:1000
+    dataSWE = fullSWE.(den).(glacier).swe + varSWE(:,vc);
     dataSWE(dataSWE<0) = 0;
     
  %Get Beta dist
-    X       = [struct2table(topo_sampled.(glacier)), table(dataSWE,'VariableNames',{'swe'})]; X = X{:,:};
-    sigma   = cov(X);
+    X       = struct2table(topo_sampled.(glacier)); X = X{:,:}; X = [ones(length(X),1) X];
+    Y       = dataSWE;
     mu      = fullLR.(den).coeff{[8,1:7],g};
-    beta    = mvnrnd(mu,sigma,1000);
+    
+    %VarCov matrix from betas
+%     sigmaSq = sum((Y-X*mu).^2)/(size(X,1)-size(X,2));
+%     VarCov  = sigmaSq*(chol(X'*X)\inv(chol(X'*X))');
+%     beta    = mvnrnd(mu,VarCov,1000);
 
 for mc = 1:1000
      %Get random correlated beta value from normal distribution
     B = beta(mc,:);
-    %B = LRt.Coefficients{:,1};
-    
+    %B = mu;
      %Get distribution of swe
     tempSWE.(glacier) = repmat(B(1),options.mapsize(g,:));
 
@@ -206,7 +201,7 @@ for mc = 1:1000
         tempSWE.(glacier)(tempSWE.(glacier)<0) = 0;
 
  %Winter balance
-fullQ.(den).(glacier)(mc,vc) = nanmean(tempSWE.(glacier)(:));
+fullQbetazz.(den).(glacier)(mc,vc) = nanmean(tempSWE.(glacier)(:));
 end
 end
 end

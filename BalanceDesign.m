@@ -46,12 +46,12 @@ end
 load TopoSWE.mat
 for t = 1:6
     
-if     t == 1; type = 'centreline';          n = 10:5:55;    
-elseif t == 2; type = 'CentreTransect4';     n = 10:10:100;  
-elseif t == 3; type = 'CentreTransect3';     n = 10:10:100;
-elseif t == 4; type = 'hourglass';           n = 10:10:100;  
-elseif t == 5; type = 'hourglassCircle';     n = 10:10:100;  
-elseif t == 6; type = 'circle';              n = 10:10:100;  
+if     t == 1; type = 'Acentreline';          n = 10:5:55;    
+elseif t == 2; type = 'ACentreTransect4';     n = 10:10:100;  
+elseif t == 3; type = 'ACentreTransect3';     n = 10:10:100;
+elseif t == 4; type = 'Ahourglass';           n = 10:10:100;  
+elseif t == 5; type = 'AhourglassCircle';     n = 10:10:100;  
+elseif t == 6; type = 'Acircle';              n = 10:10:100;  
     
     
 end
@@ -95,7 +95,7 @@ input.topo_sampled_ns = topo_sampled_ns;
     if strcmp(type,'centreline'); TOPOdata.G13.centreD = repmat(0.001, n(c), 1); end
   
     % Add Accumulation area points  
-accumulation = 'false';
+accumulation = 'true';
     if strcmp(accumulation, 'true')
        [sweA, topoA] = DataSubset( subset, 'accum', input );
        for g = 1:3; glacier = options.glacier{g};
@@ -482,17 +482,16 @@ for g = 1:3
     end
  end
  
-     cols = [44, 117, 234;   14, 140, 9;    140, 9, 140;    18, 200, 204;    140, 74, 9];
-        cols = cols/255;
-     n = 10:10:90;
+     cols = [84 13 110; 238 66 102; 255 210 63; 72 226 190; 18 96 181; 23 93 8]/255;
+     n = 10:10:100;
  subplot(3,3,pp)
     plot(10:5:50,rmseS.(glacier)(:,1),'Color',cols(1,:)); hold on
  for l = 2:5
     plot(n,rmseS.(glacier)(:,l),'Color',cols(l,:)); hold on
  end
-     plot(10:5:50,rmseS.(glacier)(:,6),'--','Color',cols(1,:)); hold on
+     plot(10:5:50,rmseS.(glacier)(:,6),'--','Color',cols(1,:),'LineWidth',3); hold on
 for l = size(rmseS.(glacier),2)/2+2:size(rmseS.(glacier),2)
-    plot(n,rmseS.(glacier)(:,l),'--','Color',cols(l-size(rmseS.(glacier),2)/2,:))
+    plot(n,rmseS.(glacier)(:,l),'--','Color',cols(l-size(rmseS.(glacier),2)/2,:),'LineWidth',3)
 end
         ylabel([interp, ' ',Xlab]); xlabel('Sample Size')
         if pp<=3; title(glacier); end
@@ -535,11 +534,10 @@ den = options.DenOpt{d};
 T(d,g) = fullSK.(den).Model(g).theta;
 end
 end
-T = mean(T);
 
 
 n = [10:5:55;10:10:100;10:10:100;10:10:100;10:10:100]';
-c = [171 76 112; 118 197 107;0 172 236;37 19 81;255 111 89]/255;
+cols = [84 13 110; 238 66 102; 255 210 63; 72 226 190; 18 96 181; 23 93 8]/255;
 insetx = [.27, .55, .83];
 %d = 3; den = options.DenOpt{d};
 figure(1); clf
@@ -549,12 +547,15 @@ theta.(glacier) = mean(theta.(glacier),3);
 
     subplot(1,3,g)
     for i = 1:5
-    plot(n(:,i),theta.(glacier)(:,i),'-o','Color',c(i,:)); hold on
+    plot(n(:,i),theta.(glacier)(:,i),'-o','Color',c(i,:),'LineWidth',3); hold on
     end
     for i = 1:5
-    plot(n(:,i),theta.(glacier)(:,i+5),'--o','Color',c(i,:)); hold on
+    plot(n(:,i),theta.(glacier)(:,i+5),'--o','Color',c(i,:),'LineWidth',3); hold on
     end
-    plot([0 100],[T(g) T(g)],'k', 'LineWidth',2)
+    
+    fill([min(T) min(T)],[max(T) max(T)],[207, 207, 209]);
+    
+    %plot([0 100],[T(g) T(g)],'k', 'LineWidth',3)
         columnlegend(2,fieldnames(subsetSK));
         ylabel('\theta (m)'); xlabel('Sample size')
         title(glacier)
