@@ -107,9 +107,8 @@ elseif length(SWE) == 1;
     end
     SWE.(glacier) = data;
     end
+   
     
-end
-    
-    
+end    
 end
 

@@ -44,14 +44,14 @@ end
     subset = 'pattern';
     
 load TopoSWE.mat
-for t = 1:6
+for t = 6
     
 if     t == 1; type = 'Acentreline';          n = 10:5:55;    
 elseif t == 2; type = 'ACentreTransect4';     n = 10:10:100;  
 elseif t == 3; type = 'ACentreTransect3';     n = 10:10:100;
 elseif t == 4; type = 'Ahourglass';           n = 10:10:100;  
 elseif t == 5; type = 'AhourglassCircle';     n = 10:10:100;  
-elseif t == 6; type = 'Acircle';              n = 10:10:100;  
+elseif t == 6; type = 'circle';              n = 10:10:100;  
     
     
 end
@@ -95,7 +95,7 @@ input.topo_sampled_ns = topo_sampled_ns;
     if strcmp(type,'centreline'); TOPOdata.G13.centreD = repmat(0.001, n(c), 1); end
   
     % Add Accumulation area points  
-accumulation = 'true';
+accumulation = 'false';
     if strcmp(accumulation, 'true')
        [sweA, topoA] = DataSubset( subset, 'accum', input );
        for g = 1:3; glacier = options.glacier{g};
@@ -117,15 +117,15 @@ accumulation = 'true';
 
 % Linear regression
 
-  subsetLR(c).(type).(den) =  LinearRegression( subsetSWE(c).(type).(den), TOPOdata, topo_full );
+%   subsetLR(c).(type).(den) =  LinearRegression( subsetSWE(c).(type).(den), TOPOdata, topo_full );
     
 % Simple kriging
  
-  subsetSK(c).(type).(den) =  KrigingR_G( subsetSWE(c).(type).(den) );
+%   subsetSK(c).(type).(den) =  KrigingR_G( subsetSWE(c).(type).(den) );
 
 % Regression Kriging
  
- % subsetRK(c).(type).(den) =  RegressionKriging( subsetSWE(c).(type).(den), TOPOdata, topo_full, SWE );
+ subsetRK(c).(type).(den) =  RegressionKriging( subsetSWE(c).(type).(den), TOPOdata, topo_full, SWE );
     
     end
 end
