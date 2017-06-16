@@ -49,11 +49,15 @@ saveFIG_IGS('SPvsFS',1,8.6);
 
 %% Grid Cell - Zigzag histrogram
     clear
-load TopoSWE.mat options SWEzz
+load TopoSWE.mat SWEzz
     
-    labels(:,1) = {'G4 LZ';'G4 MZ';'G4 UZ';'none'}; 
-    labels(:,2) = {'G2 LZ';'G2 MZ';'G2 UZ';'none'};
-    labels(:,3) = {'G13 LZ';'G13 M_1Z';'G13 M_2Z';'G13 UZ'};
+%     labels(:,1) = {'G4 LZ';'G4 MZ';'G4 UZ';'none'}; 
+%     labels(:,2) = {'G2 LZ';'G2 MZ';'G2 UZ';'none'};
+%     labels(:,3) = {'G13 LZ';'G13 M_1Z';'G13 M_2Z';'G13 UZ'};
+    labels(:,1) = {'L';'M';'U';'none'}; 
+    labels(:,2) = {'L';'M';'U';'none'};
+    labels(:,3) = {'L';'M_1';'M_2';'U'};
+
 figure(5); clf
     for g = 1:3
         zz = categories(SWEzz(g).ZZ);
@@ -67,11 +71,13 @@ figure(5); clf
                             edges   = linspace(-0.15,0.15,bins); end
                             N       = histcounts(ZZdata,edges);   
             plot((edges(:,1:end-1)+edges(:,2:end))/2,N/sum(N),'LineWidth',2); hold on 
-            xlabel('SWE variability (%)');     ylabel('Probability')
+            xlabel('Zigzag SWE distribution (m w.e.)');     ylabel('Probability')
+            grid on
+            xlim([-0.15 0.15])
             %title(options.glacier{g})
             %ax = gca; ax.XTick = [-40:20:40];
         end
-            legend(labels{1:length(zz),g})
+            legend(labels{1:length(zz),g},'Location','northeast')
     end
 saveFIG_IGS('ZigzagHistogram',1,17.8);
 
