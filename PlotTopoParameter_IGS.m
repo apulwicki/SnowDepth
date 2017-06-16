@@ -1,4 +1,4 @@
-function [ ] = PlotTopoParameter( topoParam, paramName, cLabel, SWE, sweDOTS, massB)
+function [ ] = PlotTopoParameter_IGS( topoParam, paramName, cLabel, SWE, sweDOTS, massB)
 %Inputs: data structure, parameter name, colorbar label, full SWE, color of
 %dots, 'massB'
 %Color of dots: black, colour, sweONswe, symmetric
@@ -25,17 +25,17 @@ if fixed_color == 0
     maxSWE  = nanmax([SWE(1).swe(:);SWE(2).swe(:);SWE(3).swe(:)]);
 elseif fixed_color == 1
     x_min = 0;      minSWE  = x_min;
-    x_max = 1;    maxSWE  = x_max;
+    x_max = 1.2;    maxSWE  = x_max;
 end
 
 G13size = size(topoParam.G13);
 
-width  = 0.41;
+width  = 0.3;
 height = 2.3;
 ystart = -0.64;
-pos_axis    = [0        ystart   width     height; 
+pos_axis    = [0.00     ystart   width     height; 
                0.15     ystart   width     height; 
-               0.48     ystart   width     height];
+               0.46     ystart   width     height];
 
 %phasemap needs
 if  strcmp(paramName, 'banana') %None need circular phase map, the option remains though
@@ -89,7 +89,7 @@ for i = 1:3
                  E = (SWE(i).utm(:,1)-minE)/40;
                  Na = (SWE(i).utm(:,2)-minN)/40; N = max(Ng)-Na;
                 if      strcmp(sweDOTS,'black')
-                    plot(E,N,'k.', 'MarkerSize',5); hold on
+                    plot(E,N,'k.', 'MarkerSize',2); hold on
                     %caxis([x_min x_max]); caxis(caxis); 
                 elseif  strcmp(sweDOTS,'colour')
                     INN = ~isnan(SWE(i).swe);
@@ -118,9 +118,9 @@ end
 
 %Flow direction
 if ~all(isnan(topoParam.(name)(:)))
-    annotation('arrow',[.15 .19],[.32 .22]) %G4
-    annotation('arrow',[.39 .31],[.55 .61]) %G2
-    annotation('arrow',[.81 .74],[.47 .59]) %G13
+    annotation('arrow',[.11 .15],[.35 .25]) %G4
+    annotation('arrow',[.34 .26],[.55 .61]) %G2
+    annotation('arrow',[.72 .65],[.47 .59]) %G13
 elseif all(isnan(topoParam.(name)(:)))
     annotation('arrow',[.13 .17],[.52 .42]) %G4
     annotation('arrow',[.39 .31],[.55 .61]) %G2
@@ -158,8 +158,8 @@ end
                 'String',{'0'}, 'LineStyle','none','FitBoxToText','off','EdgeColor',[1 1 1],'BackgroundColor',[1 1 1]); hold on
 
 % Font size and image size           
-    fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18)
-    fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 13 6];
+%     fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18)
+%     fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 13 6];
 
 end
 

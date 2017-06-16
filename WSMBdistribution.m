@@ -35,23 +35,10 @@ for vc = 1:1000
     LRtemp.(den)(vc)  =  LinearRegression( dataSWE.(den), TOPOdata, topo_full );
     
     for g = 1:3;        glacier = options.glacier{g};
-        mu      = LRtemp.(den)(vc).coeff{[8,1:7],g};
-    
-     %Get distribution of swe
-    tempSWE.(glacier) = repmat(mu(1),options.mapsize(g,:));
-
-        fields = fieldnames(topo_full.(glacier));
-    for f = 1:length(fields)
-        param = fields{f};
-        val = topo_full.(glacier).(param)*mu(f+1);
-        tempSWE.(glacier) = tempSWE.(glacier) + val; 
-    end
-        tempSWE.(glacier)(tempSWE.(glacier)<0) = 0;
-
  %Winter balance
-fullQzz.(den).(glacier)(vc) = nanmean(tempSWE.(glacier)(:));
-
+fullQzz.(den).(glacier)(vc) = nanmean(LRtemp.(den)(vc).(glacier)(:));
     end
+    
 end
 clock
 t = (cputime-t)/60/60
@@ -97,6 +84,8 @@ for mc = 1:1000
     end
         tempSWE.(glacier)(tempSWE.(glacier)<0) = 0;
 
+LRtemp.(den)(mc).(glacier) = tempSWE.(glacier);
+        
  %Winter balance
 fullQbeta.(den).(glacier)(mc) = nanmean(tempSWE.(glacier)(:));
 
@@ -105,6 +94,8 @@ end
 end
 clock
 e = (cputime-t)/60/60
+
+%save('WSMBDistribution.mat','var*','LR*','options','-v7.3')
 
 %% WSMB - Beta & SWE Var
 
@@ -364,16 +355,21 @@ p = p+1;
 %saveFIG(['WSMB_Distribution_Kriging',f],16)
 end
 
-%% Heatmap of spatial variability
+%% Heatmap, spatial variability -> SWE var (one density)
+%load WSMBDistribution.mat
+
+data = LRbeta;  t = 'beta';
+
+for d = 1:8; den = options.DenOpt{d};
 for g = 1:3; glacier = options.glacier{g};
-s = size(LRtemp.S1(1).(glacier));
+s = size(data.(den)(1).(glacier));
 
 clear F G A H U W X 
 n = 1; p = 1;
 runs = 100;
 for i = 1:runs
-    F(n:n+s(1)-1,:) = LRtemp.S1(i).(glacier);
-    G(:,p:p+s(2)-1) = LRtemp.S1(i).(glacier);
+    F(n:n+s(1)-1,:) = data.(den)(i).(glacier);
+    G(:,p:p+s(2)-1) = data.(den)(i).(glacier);
     n = n+s(1);
     p = p+s(2);
 end
@@ -400,14 +396,86 @@ for i = size(A,3):-1:1
 end
 A(:,:,X) = [];
     
-D.(glacier) = nansum(A,3);
+D.(den).(glacier) = nansum(A,3);
 
+end
+end
+
+% SWE Var Map
+den = 'S1';
+for g = 1:3; glacier = options.glacier{g};
+    DD.(glacier) = D.(den).(glacier)/(max(D.(den).(glacier)(:))*0.55);
+    DD.(glacier)(options.mapNaN.(glacier)) = NaN;
+end
+
+figure(1); 
+PlotTopoParameter(DD,'hot','Variability',SWE,'none','nomassB')
+    saveFIG(['SpatialVariabilityMap_SWEVAR_',t,den])
+
+%% Heatmap, spatial variability -> DENSITY var (mean swe)
+%load WSMBDistribution.mat
+
+data = LRbeta;  t = 'beta';
+
+clear P K C
+
+for d = 1:8; den = options.DenOpt{d};
+for g = 1:3; glacier = options.glacier{g};
+    clear P
+    for i=1:length(data.(den))
+    P(:,:,i) = data.(den).(glacier);
+    end
+    K.(den).(glacier) = nanmean(P,3);
+end
+end
+
+for g = 1:3; glacier = options.glacier{g};
+s = size(K.(den)(1).(glacier));
+clear F G A H U W X 
+
+n = 1; p = 1;
+for d = 1:8; den = options.DenOpt{d};
+    F(n:n+s(1)-1,:) = K.(den).(glacier);
+    G(:,p:p+s(2)-1) = K.(den).(glacier);
+    n = n+s(1);
+    p = p+s(2);
+end
+
+F = repmat(F,1,8);
+G = repmat(G,8,1);
+
+H = F-G;
+H = tril(H);
+H(H<=0) = NaN;
+U = isnan(H);
+
+n=1;
+for i = 1:s(1):size(H,1)
+for j = 1:s(2):size(H,2)
+    A(:,:,n) = H(i:i+s(1)-1,j:j+s(2)-1);
+    W(:,:,n) = U(i:i+s(1)-1,j:j+s(2)-1);
+    n=n+1;
+end
+end
+
+for i = size(A,3):-1:1
+   X(i) = all(all(W(:,:,i)));
+end
+A(:,:,X) = [];
+    
+C.(glacier) = nansum(A,3);
 
 end
 
-figure(1); clf
+
+% DENSITY Var Map
 for g = 1:3; glacier = options.glacier{g};
-subplot(1,3,g)
-    imagesc(D.(glacier)); colorbar
-    colormap hot
-end    
+    CC.(glacier) = C.(glacier)/(max(C.(glacier)(:))*0.55);
+    CC.(glacier)(options.mapNaN.(glacier)) = NaN;
+end
+
+figure(1); 
+PlotTopoParameter(CC,'hot','Variability',SWE,'none','nomassB')
+    saveFIG(['SpatialVariabilityMap_DENSITY_',t])
+
+
