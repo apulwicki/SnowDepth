@@ -177,7 +177,7 @@ for o = 1%1:3
     elseif  o == 3; data = varBbetazz; t = '\beta and \sigma_{ZZ} Variability'; f = 'betaNzz';
     end
 figure(o); clf; p = 1;
-for d = 1:8
+for d = 1%:8
     den = options.DenOpt{d};
 for g = 1:3
     glacier = options.glacier{g};
@@ -224,7 +224,7 @@ figure(o); clf;
 for g = 1:3
 glacier = options.glacier{g};
 
-for d = 1:8
+for d = 1%:8
     den = options.DenOpt{d};
 
 subplot(1,3,g)
@@ -236,7 +236,7 @@ subplot(1,3,g)
 end
     legend(options.DenOpt)
 end
-    saveFIG(['WSMB_allDensityBeta_',f])    
+    %saveFIG(['WSMB_allDensityBeta_',f])    
 end
 
  %all Density, one G
@@ -358,7 +358,7 @@ end
 %% Heatmap, spatial variability -> SWE var (one density)
 %load WSMBDistribution.mat
 
-data = LRbeta;  t = 'beta';
+data = varLRbetazz;  t = 'betazz';
 
 for d = 1:8; den = options.DenOpt{d};
 for g = 1:3; glacier = options.glacier{g};
@@ -415,7 +415,7 @@ PlotTopoParameter(DD,'hot','Variability',SWE,'none','nomassB')
 %% Heatmap, spatial variability -> DENSITY var (mean swe)
 %load WSMBDistribution.mat
 
-data = LRbeta;  t = 'beta';
+data = varLRbetazz;  t = 'betazz';
 
 clear P K C
 
@@ -479,3 +479,32 @@ PlotTopoParameter(CC,'hot','Variability',SWE,'none','nomassB')
     saveFIG(['SpatialVariabilityMap_DENSITY_',t])
 
 
+%% STD of distributions
+
+for o = 1:3
+    if      o == 1; data = varBzz;     Pmax = 53;   t = '\sigma_{ZZ} Variability';       f = 'zz';
+    elseif  o == 2; data = varBbeta;   Pmax = 21;   t = '\beta Variability';             f = 'beta';
+    elseif  o == 3; data = varBbetazz; Pmax = 53;   t = '\beta and \sigma_{ZZ} Variability'; f = 'betaNzz';
+    end
+
+for g = 1:3;    glacier = options.glacier{g};  
+for d = 1:8;    den = options.DenOpt{d};
+    
+    ProbDenLR.(f).(den).(glacier) = fitdist(data.(den).(glacier)(:),'Normal');
+sigmaLR.(f)(d,g) = ProbDenLR.(f).(den).(glacier).sigma;
+    
+end
+end
+end
+    mean(sigmaLR.zz)
+    mean(sigmaLR.beta)
+    mean(sigmaLR.betaNzz)
+
+for g = 1:3;    glacier = options.glacier{g};  
+for d = 1:8;    den = options.DenOpt{d};
+    
+    ProbDenSK.(f).(den).(glacier) = fitdist(varBsk.(den).(glacier)(:),'Normal');
+sigmaSK.(f)(d,g) = ProbDenSK.(f).(den).(glacier).sigma;
+    
+end
+end

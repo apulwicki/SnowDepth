@@ -89,3 +89,31 @@ for g = 1:3;        glacier = options.glacier{g};
         SigBetaDen.(glacier)(:,d) = sig;
 end
 end
+
+%% Residuals vs predicted values
+
+load TopoSWE.mat 
+load Full.mat
+
+    yObserved  = ObsInCell(SWE, topo_sampled);
+
+for d = 1%:8;    den = options.DenOpt{d};
+    yEstimated = SampledCell(fullLR.(den));
+
+for g = 1:3;    glacier = options.glacier{g};
+
+    residuals.(glacier)  = yEstimated.(glacier)-yObserved(g).swe;
+figure(1)    
+    subplot(1,3,g)
+    plot(yObserved(g).swe,residuals.(glacier),'.')
+    corr(yObserved(g).swe,residuals.(glacier))^2
+    title('Observed')
+figure(2)    
+    subplot(1,3,g)
+    plot(yEstimated.(glacier),residuals.(glacier),'.') 
+    title('Estimated')
+    corr(yEstimated.(glacier),residuals.(glacier))^2
+end
+end
+
+

@@ -164,5 +164,82 @@ aboxplot(BETAS,'labels',options.topoVars, ...
         
 saveFIG_IGS('BetaCoeffs',1,8.6)
 
+%% WSMB Distribution - LR sources of var
+
+%clear; load WSMBDistribution.mat
+figure(9); clf;
+x = 0.25:0.001:0.75;
+for o = 1:3
+    if      o == 1; data = varBzz;     Pmax = 53;   t = '\sigma_{ZZ} Variability';       f = 'zz';
+    elseif  o == 2; data = varBbeta;   Pmax = 20.3;   t = '\beta Variability';             f = 'beta';
+    elseif  o == 3; data = varBbetazz; Pmax = 18.8;   t = '\beta and \sigma_{ZZ} Variability'; f = 'betaNzz';
+    end
+for d = 1:8;    den = options.DenOpt{d};
+for g = 1:3;    glacier = options.glacier{g};
     
+ProbDen.(den).(glacier) = fitdist(data.(den).(glacier)(:),'Normal');
+    y = pdf(ProbDen.(den).(glacier),x);   y = y/Pmax;  
+
+subplot(1,3,o) 
+fill(x,y,options.RGB(g,:),'FaceAlpha',0.5, 'EdgeColor', 'none'); hold on
+    ylabel('Probability'); xlabel('WSMB (m w.e.)');  
+    
+end
+end
+    if o ==1; legend(options.glacier,'location','northwest')
+    end
+    xlim([min(x) max(x)])
+    title(t);
+end
+
+saveFIG_IGS('WSMBDist_LR',2,8.6)
+
+%% WSMB Distribution - LR vs SK
+
+%clear; load WSMBDistribution.mat
+figure(10); clf;
+x = 0.3:0.001:0.8;
+
+C = [115 191 184; 255 144 0]/255;
+G = {'Glacier 4','Glacier 2','Glacier 13'};
+
+for g = 1:3;    glacier = options.glacier{g};  
+for d = 1:8;    den = options.DenOpt{d};
+    
+ProbDenLR.(den).(glacier) = fitdist(varBbetazz.(den).(glacier)(:),'Normal');
+    yLR = pdf(ProbDenLR.(den).(glacier),x);   %y = y/Pmax;  
+ProbDenSK.(den).(glacier) = fitdist(varBsk.(den).(glacier)(:),'Normal');
+    ySK = pdf(ProbDenSK.(den).(glacier),x);   %y = y/Pmax;  
+    
+subplot(1,3,g) 
+fill(x,yLR,C(:,1),'FaceAlpha',0.5, 'EdgeColor', 'none'); hold on
+    ylabel('Probability'); xlabel('WSMB (m w.e.)'); 
+fill(x,ySK,C(:,2),'FaceAlpha',0.5, 'EdgeColor', 'none'); hold on
+    ylabel('Probability'); xlabel('WSMB (m w.e.)'); 
+    
+end
+
+    if o ==1; legend(['LR','SK'],'location','northwest')
+    end
+    title(G{g});
+end
+
+%saveFIG_IGS('WSMBDist_LRvsSK',2,8.6)
+
+%% WSMB Distribution - spatial variability (one density)
+
+%clear; load WSMBDistribution.mat D
+load TopoSWE.mat SWE
+
+% SWE Var Map
+den = 'S2';
+for g = 1:3; glacier = options.glacier{g};
+    DD.(glacier) = D.(den).(glacier)/(max(D.(den).(glacier)(:))*0.55);
+    DD.(glacier)(options.mapNaN.(glacier)) = NaN;
+end
+
+figure(11); 
+PlotTopoParameter_IGS(DD,'hot','Variability',SWE,'none','nomassB')
+    saveFIG_IGS('SpatialVar_LR',2,8.6)
+
 
