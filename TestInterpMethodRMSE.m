@@ -4,53 +4,53 @@ load('TopoSWE.mat')
 [dataSWE, dataTOPO] = ObsInCell(fullSWE.S2.input, topo_sampled);
 
 runs            = 100;
-num_excluded    = 30;
+num_excluded    = 200;
 
 F = fieldnames(dataTOPO.G4);
-for g = 1:3; glacier = options.glacier{g};
-I.(glacier) = randi([1 length(dataSWE.(glacier))],[num_excluded runs]);  
-end
+% for g = 1:3; glacier = options.glacier{g};
+% I200.(glacier) = randi([1 length(dataSWE.(glacier))],[num_excluded runs]);  
+% end
 
 %% Get distribution of RMSE
-LRrmse = zeros(runs,3);     SKrmse = LRrmse;    RKrmse = LRrmse;
+LRrmse200 = zeros(runs,3);     SKrmse200 = LRrmse;    RKrmse200 = LRrmse;
 
 for r = 1:runs
         display(num2str(r))
 for g = 1:3; glacier = options.glacier{g};
 inputSWE.(glacier) = dataSWE.(glacier);
-    inputSWE.(glacier)(I.(glacier)(:,r),:) = [];
+    inputSWE.(glacier)(I200.(glacier)(:,r),:) = [];
 
 inputTOPO.(glacier) = dataTOPO.(glacier);
     for i = 1:length(F)
-    inputTOPO.(glacier).(F{i})(I.(glacier)(:,r),:) = [];
+    inputTOPO.(glacier).(F{i})(I200.(glacier)(:,r),:) = [];
     end
 
 end
 
 % LR
-    LRtest = LinearRegression(inputSWE, inputTOPO, topo_full);
-    pred = SampledCell(LRtest);
-
-    for g = 1:3; glacier = options.glacier{g};
-    T.LR.(glacier) = [dataSWE.(glacier)(I.(glacier)(:,r),1), pred.(glacier)(I.(glacier)(:,r))];
-    end
-
-    for g = 1:3; glacier = options.glacier{g};
-LRrmse(r,g) = sqrt(mean((T.LR.(glacier)(:,1)-T.LR.(glacier)(:,2)).^2));
-    end
-
-% % SK
-%     SKtest = KrigingR_G(inputSWE);
-%     pred = SampledCell(SKtest);
+%     LRtest = LinearRegression(inputSWE, inputTOPO, topo_full);
+%     pred = SampledCell(LRtest);
 % 
 %     for g = 1:3; glacier = options.glacier{g};
-%     T.SK.(glacier) = [dataSWE.(glacier)(I,1), pred.(glacier)(I)];
+%     T.LR.(glacier) = [dataSWE.(glacier)(I.(glacier)(:,r),1), pred.(glacier)(I.(glacier)(:,r))];
 %     end
 % 
 %     for g = 1:3; glacier = options.glacier{g};
-% SKrmse(r,g) = sqrt(mean((T.SK.(glacier)(:,1)-T.SK.(glacier)(:,2)).^2));
+% LRrmse(r,g) = sqrt(mean((T.LR.(glacier)(:,1)-T.LR.(glacier)(:,2)).^2));
 %     end
-% 
+
+% SK
+    SKtest = KrigingR_G(inputSWE);
+    pred = SampledCell(SKtest);
+
+    for g = 1:3; glacier = options.glacier{g};
+    T200.SK.(glacier) = [dataSWE.(glacier)(I200.(glacier)(:,r),1), pred.(glacier)(I200.(glacier)(:,r))];
+    end
+
+    for g = 1:3; glacier = options.glacier{g};
+SKrmse200(r,g) = sqrt(mean((T200.SK.(glacier)(:,1)-T200.SK.(glacier)(:,2)).^2));
+    end
+
 % % RK
 %     RKtest = RegressionKriging(inputSWE, inputTOPO, topo_full);
 %     pred = SampledCell(RKtest);
