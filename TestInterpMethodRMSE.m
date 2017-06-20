@@ -1,6 +1,6 @@
 %% Select data
 
-load('TopoSWE.mat')
+load TopoSWE.mat fullSWE topo_sampled topo_full options
 [dataSWE, dataTOPO] = ObsInCell(fullSWE.S2.input, topo_sampled);
 
 runs            = 100;
@@ -12,7 +12,7 @@ F = fieldnames(dataTOPO.G4);
 % end
 
 %% Get distribution of RMSE
-LRrmse200 = zeros(runs,3);     SKrmse200 = LRrmse;    RKrmse200 = LRrmse;
+LRrmse200 = zeros(runs,3);     %SKrmse200 = LRrmse;    %RKrmse200 = LRrmse;
 
 for r = 1:runs
         display(num2str(r))
@@ -28,28 +28,28 @@ inputTOPO.(glacier) = dataTOPO.(glacier);
 end
 
 % LR
-%     LRtest = LinearRegression(inputSWE, inputTOPO, topo_full);
-%     pred = SampledCell(LRtest);
-% 
-%     for g = 1:3; glacier = options.glacier{g};
-%     T.LR.(glacier) = [dataSWE.(glacier)(I.(glacier)(:,r),1), pred.(glacier)(I.(glacier)(:,r))];
-%     end
-% 
-%     for g = 1:3; glacier = options.glacier{g};
-% LRrmse(r,g) = sqrt(mean((T.LR.(glacier)(:,1)-T.LR.(glacier)(:,2)).^2));
-%     end
+    LRtest = LinearRegression(inputSWE, inputTOPO, topo_full);
+    pred = SampledCell(LRtest);
+
+    for g = 1:3; glacier = options.glacier{g};
+    T.LR.(glacier) = [dataSWE.(glacier)(I.(glacier)(:,r),1), pred.(glacier)(I.(glacier)(:,r))];
+    end
+
+    for g = 1:3; glacier = options.glacier{g};
+LRrmse200(r,g) = sqrt(mean((T.LR.(glacier)(:,1)-T.LR.(glacier)(:,2)).^2));
+    end
 
 % SK
-    SKtest = KrigingR_G(inputSWE);
-    pred = SampledCell(SKtest);
-
-    for g = 1:3; glacier = options.glacier{g};
-    T200.SK.(glacier) = [dataSWE.(glacier)(I200.(glacier)(:,r),1), pred.(glacier)(I200.(glacier)(:,r))];
-    end
-
-    for g = 1:3; glacier = options.glacier{g};
-SKrmse200(r,g) = sqrt(mean((T200.SK.(glacier)(:,1)-T200.SK.(glacier)(:,2)).^2));
-    end
+%     SKtest = KrigingR_G(inputSWE);
+%     pred = SampledCell(SKtest);
+% 
+%     for g = 1:3; glacier = options.glacier{g};
+%     T200.SK.(glacier) = [dataSWE.(glacier)(I200.(glacier)(:,r),1), pred.(glacier)(I200.(glacier)(:,r))];
+%     end
+% 
+%     for g = 1:3; glacier = options.glacier{g};
+% SKrmse200(r,g) = sqrt(mean((T200.SK.(glacier)(:,1)-T200.SK.(glacier)(:,2)).^2));
+%     end
 
 % % RK
 %     RKtest = RegressionKriging(inputSWE, inputTOPO, topo_full);

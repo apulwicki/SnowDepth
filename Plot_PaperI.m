@@ -171,8 +171,8 @@ figure(9); clf;
 x = 0.25:0.001:0.75;
 for o = 1:3
     if      o == 1; data = varBzz;     Pmax = 53;   t = '\sigma_{ZZ} Variability';       f = 'zz';
-    elseif  o == 2; data = varBbeta;   Pmax = 20.3;   t = '\beta Variability';             f = 'beta';
-    elseif  o == 3; data = varBbetazz; Pmax = 18.8;   t = '\beta and \sigma_{ZZ} Variability'; f = 'betaNzz';
+    elseif  o == 2; data = varBbeta;   Pmax = 20.3;   t = '\sigma_{\beta} Variability';             f = 'beta';
+    elseif  o == 3; data = varBbetazz; Pmax = 18.8;   t = '\sigma_{\beta} and \sigma_{ZZ} Variability'; f = 'betaNzz';
     end
 for d = 1:8;    den = options.DenOpt{d};
 for g = 1:3;    glacier = options.glacier{g};
@@ -198,43 +198,81 @@ saveFIG_IGS('WSMBDist_LR',2,8.6)
 
 %clear; load WSMBDistribution.mat
 figure(10); clf;
-x = 0.3:0.001:0.8;
+x = 0.2:0.001:0.75;
 
 C = [115 191 184; 255 144 0]/255;
 G = {'Glacier 4','Glacier 2','Glacier 13'};
+
+Pmax = [76, 18, 37];
 
 for g = 1:3;    glacier = options.glacier{g};  
 for d = 1:8;    den = options.DenOpt{d};
     
 ProbDenLR.(den).(glacier) = fitdist(varBbetazz.(den).(glacier)(:),'Normal');
-    yLR = pdf(ProbDenLR.(den).(glacier),x);   %y = y/Pmax;  
-ProbDenSK.(den).(glacier) = fitdist(varBsk.(den).(glacier)(:),'Normal');
-    ySK = pdf(ProbDenSK.(den).(glacier),x);   %y = y/Pmax;  
+    yLR = pdf(ProbDenLR.(den).(glacier),x);   yLR = yLR/Pmax(g);  
+ProbDenSK.(den).(glacier) = fitdist(varBkriging.(den).(glacier)(:),'Normal');
+    ySK = pdf(ProbDenSK.(den).(glacier),x);   ySK = ySK/Pmax(g);  
     
 subplot(1,3,g) 
-fill(x,yLR,C(:,1),'FaceAlpha',0.5, 'EdgeColor', 'none'); hold on
+fill(x,yLR,C(1,:),'FaceAlpha',0.5, 'EdgeColor', 'none'); hold on
     ylabel('Probability'); xlabel('WSMB (m w.e.)'); 
-fill(x,ySK,C(:,2),'FaceAlpha',0.5, 'EdgeColor', 'none'); hold on
+fill(x,ySK,C(2,:),'FaceAlpha',0.5, 'EdgeColor', 'none'); hold on
     ylabel('Probability'); xlabel('WSMB (m w.e.)'); 
     
 end
 
-    if o ==1; legend(['LR','SK'],'location','northwest')
+    if g ==1; legend([{'LR'},{'SK'}],'location','northwest')
     end
     title(G{g});
 end
 
-%saveFIG_IGS('WSMBDist_LRvsSK',2,8.6)
+saveFIG_IGS('WSMBDist_LRvsSK',2,8.6)
+
+%% WSMB Distribution -> full PDF LR and SK
+
+%clear; load WSMBDistribution.mat varBbetazz varBkriging
+
+for g = 1:3
+glacier = options.glacier{g};
+for d = 1:8
+den = options.DenOpt{d};
+Tdbetazz.(glacier)(:,:,d)       = varBbetazz.(den).(glacier);
+Tdzzkriging.(glacier)(:,:,d)    = varBkriging.(den).(glacier);
+end
+end
+
+figure(12); clf
+x = 0.2:0.001:0.75;
+Pmax = [13.8, 24];
+for g = 1:3;     glacier = options.glacier{g};
+
+ProbDenLR.(glacier) = fitdist(Tdbetazz.(glacier)(:),'Normal');
+    yLR = pdf(ProbDenLR.(glacier),x);   yLR = yLR/Pmax(1);  
+ProbDenSK.(glacier) = fitdist(Tdzzkriging.(glacier)(:),'Normal');
+    ySK = pdf(ProbDenSK.(glacier),x);   ySK = ySK/Pmax(2);  
+    
+subplot(2,1,1) 
+fill(x,yLR,options.RGB(g,:),'FaceAlpha',0.7, 'EdgeColor', 'none'); hold on
+    ylabel('Probability'); xlabel('WSMB (m w.e.)'); 
+subplot(2,1,2)     
+fill(x,ySK,options.RGB(g,:),'FaceAlpha',0.7, 'EdgeColor', 'none'); hold on
+    ylabel('Probability'); xlabel('WSMB (m w.e.)'); 
+   
+end
+ylabel('Probability'); xlabel('WSMB (m w.e.)'); 
+legend(options.glacier,'Location','best')
+
+saveFIG_IGS('WSMBDist_full',1,13)
 
 %% WSMB Distribution - spatial variability (one density)
 
 %clear; load WSMBDistribution.mat D
 load TopoSWE.mat SWE
 
-% SWE Var Map
+% Linear regression
 den = 'S2';
 for g = 1:3; glacier = options.glacier{g};
-    DD.(glacier) = D.(den).(glacier)/(max(D.(den).(glacier)(:))*0.55);
+    DD.(glacier) = D_LR.(den).(glacier)/(max(D_LR.(den).(glacier)(:))*0.55);
     DD.(glacier)(options.mapNaN.(glacier)) = NaN;
 end
 
@@ -242,4 +280,14 @@ figure(11);
 PlotTopoParameter_IGS(DD,'hot','Variability',SWE,'none','nomassB')
     saveFIG_IGS('SpatialVar_LR',2,8.6)
 
+% Simple krigings
+den = 'S2';
+for g = 1:3; glacier = options.glacier{g};
+    DD.(glacier) = D_SK.(den).(glacier)/(max(D_SK.(den).(glacier)(:))*0.9);
+    DD.(glacier)(options.mapNaN.(glacier)) = NaN;
+end
+
+figure(12); 
+PlotTopoParameter_IGS(DD,'hot','Variability',SWE,'none','nomassB')
+    saveFIG_IGS('SpatialVar_SK',2,8.6)
 

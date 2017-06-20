@@ -25,7 +25,7 @@ if fixed_color == 0
     maxSWE  = nanmax([SWE(1).swe(:);SWE(2).swe(:);SWE(3).swe(:)]);
 elseif fixed_color == 1
     x_min = 0;      minSWE  = x_min;
-    x_max = 1.2;    maxSWE  = x_max;
+    x_max = 1;    maxSWE  = x_max;
 end
 
 G13size = size(topoParam.G13);
@@ -129,8 +129,8 @@ end
 
 % Glacier labels
     annotation('textbox',[.02 .05 .1 .1],'String', 'Glacier 4','EdgeColor','none','FontWeight','bold')
-    annotation('textbox',[.30 .05 .1 .1],'String', 'Glacier 2','EdgeColor','none','FontWeight','bold')
-    annotation('textbox',[.59 .05 .1 .1],'String', 'Glacier 13','EdgeColor','none','FontWeight','bold')
+    annotation('textbox',[.27 .05 .1 .1],'String', 'Glacier 2','EdgeColor','none','FontWeight','bold')
+    annotation('textbox',[.55 .05 .1 .1],'String', 'Glacier 13','EdgeColor','none','FontWeight','bold')
 
 % Winter balance
      if strcmp(massB, 'massB')

@@ -29,8 +29,7 @@ end
     %clear stackTransfer g*
 
 %% Use all data
-for d = 1:8
-    den = options.DenOpt{d};
+for d = 2:8;    den = options.DenOpt{d};
 
 % Input Data
 [ tempSWE, tempTOPO ] = ObsInCell(fullSWE.(den).input, topo_sampled); 
@@ -64,6 +63,7 @@ comboLR.(den) =  LinearRegression( comboSWE.(den), comboTOPO, topo_full );
        Transfer.combo.(den).(glacier2) = topo_full.(glacier2).(param)*coeffs(f)...
                                         + Transfer.combo.(den).(glacier2);
     end
+        Transfer.combo.(den).(glacier2)(Transfer.combo.(den).(glacier2)<0) = 0;
     end
 end
 
