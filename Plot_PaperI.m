@@ -167,20 +167,30 @@ saveFIG_IGS('BetaCoeffs',1,8.6)
 %% WSMB Distribution - LR sources of var
 
 %clear; load WSMBDistribution.mat var* options
+T(:,3:4) = [0.61491,0.1441;0.3986,0.15023;0.27533,0.10802];
+
 figure(9); clf;
-x = 0.25:0.001:0.75;
-for o = 1:3
-    if      o == 1; data = varBzz;     Pmax = 53;   t = '\sigma_{ZZ} Variability';       f = 'zz';
-    elseif  o == 2; data = varBbeta;   Pmax = 20.3;   t = '\sigma_{\beta} Variability';             f = 'beta';
-    elseif  o == 3; data = varBbetazz; Pmax = 18.8;   t = '\sigma_{\beta} and \sigma_{ZZ} Variability'; f = 'betaNzz';
+x = 0:0.001:1.1;
+for o = 1:4
+    if      o == 1; data = varBzz;     Pmax = 53;   t = '\sigma_{SWE} Variability';     f = 'zzLR';
+    elseif  o == 2; data = varBbeta;   Pmax = 20.3;   t = '\sigma_{\beta} Variability'; f = 'beta';
+    elseif  o == 3; data = varBkriging; Pmax = 76;   t = '\sigma_{SWE} Variability';  f = 'zzSK';
+    elseif  o == 4; data = varBkriging; Pmax = 3.8;   t = '\sigma_{KRIG} Variability'; f = 'KRIG';
     end
 for g = 1:3;    glacier = options.glacier{g};
 for d = 1:8;    den = options.DenOpt{d};
     
+if      o <= 3    
 ProbDen.(den).(glacier) = fitdist(data.(den).(glacier)(:),'Normal');
-    y = pdf(ProbDen.(den).(glacier),x);   y = y/Pmax;  
+    y = pdf(ProbDen.(den).(glacier),x);   y = y/Pmax;
+elseif  o == 4
+ProbDen.(den).(glacier) = makedist('Normal',T(g,3),T(g,4));
+    y = pdf(ProbDen.(den).(glacier),x);   y = y/Pmax;
+    y = [0 y]; x = [x 0];
+end
 
-subplot(1,3,o) 
+
+subplot(2,2,o) 
 p(g) = fill(x,y,options.RGB(g,:),'FaceAlpha',0.5, 'EdgeColor', 'none'); hold on
     ylabel('Probability'); xlabel('WSMB (m w.e.)');  
     
@@ -192,45 +202,12 @@ end
     title(t);
 end
 
-saveFIG_IGS('WSMBDist_LR',2,8.6)
+%saveFIG_IGS('WSMBDist_LR',2,8.6)
 
-%% WSMB Distribution - LR vs SK
-% 
-% %clear; load WSMBDistribution.mat
-% figure(10); clf;
-% x = 0.2:0.001:0.75;
-% 
-% C = [115 191 184; 255 144 0]/255;
-% G = {'Glacier 4','Glacier 2','Glacier 13'};
-% 
-% Pmax = [76, 18, 37];
-% 
-% for g = 1:3;    glacier = options.glacier{g};  
-% for d = 1:8;    den = options.DenOpt{d};
-%     
-% ProbDenLR.(den).(glacier) = fitdist(varBbetazz.(den).(glacier)(:),'Normal');
-%     yLR = pdf(ProbDenLR.(den).(glacier),x);   yLR = yLR/Pmax(g);  
-% ProbDenSK.(den).(glacier) = fitdist(varBkriging.(den).(glacier)(:),'Normal');
-%     ySK = pdf(ProbDenSK.(den).(glacier),x);   ySK = ySK/Pmax(g);  
-%     
-% subplot(1,3,g) 
-% fill(x,yLR,C(1,:),'FaceAlpha',0.5, 'EdgeColor', 'none'); hold on
-%     ylabel('Probability'); xlabel('WSMB (m w.e.)'); 
-% fill(x,ySK,C(2,:),'FaceAlpha',0.5, 'EdgeColor', 'none'); hold on
-%     ylabel('Probability'); xlabel('WSMB (m w.e.)'); 
-%     
-% end
-% 
-%     if g ==1; legend([{'LR'},{'SK'}],'location','northwest')
-%     end
-%     title(G{g});
-% end
-% 
-% saveFIG_IGS('WSMBDist_LRvsSK',2,8.6)
 
 %% WSMB Distribution -> full PDF LR and SK
 
-%clear; load WSMBDistribution.mat varBbetazz varBkriging Q* 
+%clear; load WSMBDistribution.mat varBbetazz varBkriging Q* options
 
 for g = 1:3
 glacier = options.glacier{g};
@@ -263,7 +240,7 @@ fill(x,yLR,options.RGB(g,:),'FaceAlpha',0.7, 'EdgeColor', 'none'); hold on
     ylabel('Probability'); xlabel('WSMB (m w.e.)'); 
     legend(options.glacier,'Location','best')
 subplot(2,1,2)     
-fill([x 0],[ySK 0],options.RGB(g,:),'FaceAlpha',0.7, 'EdgeColor', 'none'); hold on
+fill([0 x],[0 ySK],options.RGB(g,:),'FaceAlpha',0.7, 'EdgeColor', 'none'); hold on
     ylabel('Probability'); xlabel('WSMB (m w.e.)'); 
 
     xlim([min(x),max(x)])
@@ -273,28 +250,77 @@ saveFIG_IGS('WSMBDist_full',1,10)
 
 %% WSMB Distribution - spatial variability (one density)
 
-%clear; load WSMBDistribution.mat D
+%clear; load WSMBDistribution.mat D*
 load TopoSWE.mat SWE
 
+for o = 1:2
+    if o == 1
+    D = D_LR;   s = 'LR';   m = 0.6;
+    elseif o == 2
+    D = D_SK;   s = 'SK';   m = 0.9;
+    end
+        
+
 % Linear regression
-den = 'S2';
 for g = 1:3; glacier = options.glacier{g};
-    DD.(glacier) = D_LR.(den).(glacier)/(max(D_LR.(den).(glacier)(:))*0.55);
-    DD.(glacier)(options.mapNaN.(glacier)) = NaN;
+    DPlot.(glacier) = zeros(options.mapsize(g,:));
+    for d = 1:8; den = options.DenOpt{d};
+        DD.(glacier) = D.(den).(glacier)/(max(D.(den).(glacier)(:)));
+        DD.(glacier)(options.mapNaN.(glacier)) = NaN;
+    DPlot.(glacier) = DPlot.(glacier) + DD.(glacier);
+    end
+    DPlot.(glacier) = DPlot.(glacier)/nanmax(DPlot.(glacier)(:)*m);
 end
 
-figure(11); 
-PlotTopoParameter_IGS(DD,'hot','Variability',SWE,'none','nomassB')
-    saveFIG_IGS('SpatialVar_LR',2,8.6)
-
-% Simple krigings
-den = 'S2';
-for g = 1:3; glacier = options.glacier{g};
-    DD.(glacier) = D_SK.(den).(glacier)/(max(D_SK.(den).(glacier)(:))*0.9);
-    DD.(glacier)(options.mapNaN.(glacier)) = NaN;
+figure(o);
+PlotTopoParameter_IGS(DPlot,'hot','Variability',SWE,'none','nomassB')
+    saveFIG_IGS(['SpatialVar_',s],2,8.6)
 end
 
-figure(12); 
-PlotTopoParameter_IGS(DD,'hot','Variability',SWE,'none','nomassB')
-    saveFIG_IGS('SpatialVar_SK',2,8.6)
+%     
+%     
+% % Simple kriging
+% den = 'S2';
+% for g = 1:3; glacier = options.glacier{g};
+%     DD.(glacier) = D.(den).(glacier)/(max(D.(den).(glacier)(:))*0.9);
+%     DD.(glacier)(options.mapNaN.(glacier)) = NaN;
+% end
+% 
+% figure(12); 
+% PlotTopoParameter_IGS(DD,'hot','Variability',SWE,'none','nomassB')
+% %     saveFIG_IGS('SpatialVar_SK',2,8.6)
 
+%% Accumulation gradient
+
+taylor(:,1) = [571731.48;577258.98;580978.1;587346.4;591126.5;597353.2;601796.1;608101];
+taylor(:,2) = [6737517.35;6733918.68;6730286.9;6730436.4;6724959.2;6730694.1;6734532.2;6736574.4];
+taylor(:,3) = [2620;2640;2380;2225;2070;1915;1765;1615];
+taylor(:,4) = [3.2;3.7;2.6;2.7;2.4;1.78;1.65;0.91];
+taylor(:,5) = [0.407;0.409;0.394;0.364;0.388;0.385;0.390;0.342];
+taylor(:,6) = [1.302;1.513;1.024;0.983;0.932;0.685;0.643;0.311];
+
+alex(:,1) = [566453.4;570077.4;595349.9;601424.8;605031];
+alex(:,2) = [6727621.2;6732429.7;6741065.2;6753607.6;6762717.2];
+alex(:,3) = [2610;2730;2321;2472;2434];
+alex(:,6) = [1.30;1.59;0.5844;0.5785;0.3834];
+    alexerr = [0.029,0.049,0.032]*1.96;
+    
+    Dt = sqrt((taylor(:,1)-alex(1,1)).^2+(taylor(:,2)-alex(1,2)).^2)/1000;
+    Da = sqrt((alex(:,1)-alex(1,1)).^2+(alex(:,2)-alex(1,2)).^2)/1000;
+    [Dat, Iat] = sort([Da; Dt]); AT = [alex(:,6); taylor(:,6)]; AT = AT(Iat);    
+[Fat, Gat] = fit(Dat,AT,'poly1');
+    CIat = predint(Fat,Dat);    
+    
+figure(2); clf
+    pt = plot(Fat);    set(pt,'Color','k'); set(pt, 'LineWidth',1.5); hold on
+%     plot(Dat, CIat(:,1),'--', 'Color','k', 'LineWidth',.2)
+%     plot(Dat, CIat(:,2),'--','Color','k', 'LineWidth',.2)
+L(2) = plot(Da(1:2),alex(1:2,6),'.', 'MarkerSize',13, 'Color',rgb('OrangeRed'));
+    errorbar(Da(3:5),alex(3:5,6),alexerr,'.', 'MarkerSize',13, 'Color',rgb('OrangeRed'))
+L(1) = plot(Dt,taylor(:,6),'.', 'MarkerSize',13, 'Color',rgb('DarkCyan')); hold on
+    xlim([min(Dat), max(Dat)+1]); 
+    ylim([0 2])
+    grid on
+        xlabel('Distance from mountain divide (km)'); ylabel('SWE (m w.e.)')
+        legend(L,'Taylor-Barge (1969)','Pulwicki and Flowers (2017)', 'Location','northoutside')
+saveFIG_IGS('AccumGrad',1,8.6)

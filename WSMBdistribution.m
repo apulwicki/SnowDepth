@@ -306,10 +306,6 @@ legend(options.glacier)
 
 %% KRIGING
 
-format shortg
-clock
-t = cputime;
-
 %clear Q
 %load TopoSWE.mat
 for d = 1:8
@@ -346,18 +342,19 @@ for g = 1:3
 end
 end
 end
-clock
-e = (cputime-t)/60/60
 
+for d = 1:8
+    den = options.DenOpt{d};
 for g = 1:3; glacier = options.glacier{g};
 for i = 1:100
-Qupper.(glacier)(i) = nanmean(tempSK.S1(i).(glacier).upper95(:));
-Qpred.(glacier)(i) = nanmean(tempSK.S1(i).(glacier).pred(:));
-Qlower.(glacier)(i) = nanmean(tempSK.S1(i).(glacier).lower95(:));
+Qupper.(den).(glacier)(i) = nanmean(tempSKzz.(den)(i).(glacier).upper95(:));
+Qpred.(den).(glacier)(i) = nanmean(tempSKzz.(den)(i).(glacier).pred(:));
+Qlower.(den).(glacier)(i) = nanmean(tempSKzz.(den)(i).(glacier).lower95(:));
+end
 end
 end
 
-%save('Kriging1.mat','Qkriging','tempSK','-v7.3')
+save('Kriging1.mat','Qkrigingzz','tempSKzz','-v7.3')
 %% PLOT -> Kriging
  %all Gs, one density
 bins    = 200;%round(sqrt(length(Qbeta.(den).G4(:))));
@@ -388,14 +385,14 @@ data = varSKzz;  t = 'krigingzz';
 
 for d = 1; den = options.DenOpt{d};
 for g = 1:3; glacier = options.glacier{g};
-s = size(data.(den)(1).(glacier));
+s = size(data.(den)(1).(glacier).pred);
 
 clear F G A H U W X 
 n = 1; p = 1;
 runs = 100;
 for i = 1:runs
-    F(n:n+s(1)-1,:) = data.(den)(i).(glacier);
-    G(:,p:p+s(2)-1) = data.(den)(i).(glacier);
+    F(n:n+s(1)-1,:) = data.(den)(i).(glacier).upper95;
+    G(:,p:p+s(2)-1) = data.(den)(i).(glacier).upper95;
     n = n+s(1);
     p = p+s(2);
 end
@@ -423,7 +420,8 @@ end
 A(:,:,X) = [];
     
 D_SK.(den).(glacier) = nansum(A,3);
-
+    D_SK.(den).(glacier) = D_SK.(den).(glacier)/max(D_SK.(den).(glacier)(:));
+    D_SK.(den).(glacier)(options.mapNaN.(glacier)) = NaN;
 end
 end
 
@@ -431,7 +429,6 @@ end
 % den = 'S1';
 % for g = 1:3; glacier = options.glacier{g};
 %     DD.(glacier) = D_LR.(den).(glacier)/(max(D_LR.(den).(glacier)(:))*0.55);
-%     DD.(glacier)(options.mapNaN.(glacier)) = NaN;
 % end
 % 
 % figure(1); 

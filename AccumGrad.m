@@ -27,6 +27,11 @@ LMa = fitlm(Da,alex(:,6));
 [Fa, Ga] = fit(Da,alex(:,6),'poly1');
     CIa = predint(Fa,Da);
 
+    [Dat, Iat] = sort([Da; Dt]); AT = [alex(:,6); taylor(:,6)]; AT = AT(Iat);    
+[Fat, Gat] = fit(Dat,AT,'poly1');
+    CIat = predint(Fat,Dat);    
+    
+
 
 clf
 plot(Dt,taylor(:,6),'.', 'MarkerSize',13, 'Color',rgb('DarkCyan')); hold on
@@ -43,6 +48,19 @@ legend([pt,pa],'Taylor1969','Alex2016')
     xlabel('Distance from Sian Camp (km)'); ylabel('SWE (m w.e.)')
     yl = ylim;
     ylim([0, yl(2)]);
+    
+figure(2); clf
+    pt = plot(Fat);    set(pt,'Color','k'); set(pt, 'LineWidth',1.5); hold on
+%     plot(Dat, CIat(:,1),'--', 'Color','k', 'LineWidth',.2)
+%     plot(Dat, CIat(:,2),'--','Color','k', 'LineWidth',.2)
+L(2) = plot(Da,alex(:,6),'.', 'MarkerSize',13, 'Color',rgb('OrangeRed'));
+       plot(Da,alex(:,6),'.', 'MarkerSize',13, 'Color',rgb('OrangeRed'));
+L(1) = plot(Dt,taylor(:,6),'.', 'MarkerSize',13, 'Color',rgb('DarkCyan')); hold on
+    xlim([min(Dat), max(Dat)]); ylim([0 2])
+    grid on
+        xlabel('Distance from mountain divide (km)'); ylabel('SWE (m w.e.)')
+        legend(L,'Taylor (1969)','Pulwicki and Flowers (2017)', 'Location','northoutside')
+saveFIG_IGS('AccumGrad',1,8.6)
 
 %% Elevation Regression
 
