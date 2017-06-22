@@ -29,14 +29,14 @@ cd Kriging
 %     dataout.LOO     =  LOO.mean;
 
      %Assign to structure
-    dataout.(glacier)    = flipud(pred);
-%     dataout.lower95 = flipud(lower95);
-%     dataout.upper95 = flipud(upper95);
+    dataout.(glacier).pred    = flipud(pred);
+    dataout.(glacier).lower95 = flipud(lower95);
+    dataout.(glacier).upper95 = flipud(upper95);
         
      %Set glacier boundries
-    dataout.(glacier)(options.mapNaN.(glacier))    = NaN;
-%     dataout.lower95(options.mapNaN.(glacier)) = NaN;
-%     dataout.upper95(options.mapNaN.(glacier)) = NaN;
+    dataout.(glacier).pred(options.mapNaN.(glacier))    = NaN;
+    dataout.(glacier).lower95(options.mapNaN.(glacier)) = NaN;
+    dataout.(glacier).upper95(options.mapNaN.(glacier)) = NaN;
         
 cd ..
 

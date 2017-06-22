@@ -323,10 +323,10 @@ for g = 1:3;    glacier = options.glacier{g};
     varSWE.(glacier)  = random(varPD.(glacier), length(inputSWE.S1.(glacier)),1000);   
 end
 
-for d = 1
+for d = 1:8
     den = options.DenOpt{d};
     display(den)
-for vc = 1:1000
+for vc = 1:100%0
     display(num2str(vc))
     for g = 1:3;        glacier = options.glacier{g};
         dataSWE.(den).(glacier)      = inputSWE.(den).(glacier);
@@ -337,17 +337,25 @@ for vc = 1:1000
     
 % Simple kriging
 
-  tempSK.(den)(vc) =  KrigingR_G( dataSWE.(den) );
+  tempSKzz.(den)(vc) =  KrigingR_G( dataSWE.(den) );
 
  %Winter balance
 for g = 1:3
         glacier = options.glacier{g};      
-        Qkriging.(den).(glacier)(vc) = nanmean(tempSK.(den)(vc).(glacier)(:));
+        Qkrigingzz.(den).(glacier)(vc) = nanmean(tempSKzz.(den)(vc).(glacier).pred(:));
 end
 end
 end
 clock
 e = (cputime-t)/60/60
+
+for g = 1:3; glacier = options.glacier{g};
+for i = 1:100
+Qupper.(glacier)(i) = nanmean(tempSK.S1(i).(glacier).upper95(:));
+Qpred.(glacier)(i) = nanmean(tempSK.S1(i).(glacier).pred(:));
+Qlower.(glacier)(i) = nanmean(tempSK.S1(i).(glacier).lower95(:));
+end
+end
 
 %save('Kriging1.mat','Qkriging','tempSK','-v7.3')
 %% PLOT -> Kriging
@@ -378,7 +386,7 @@ saveFIG(['WSMB_Distribution_Kriging_separateD_',f],12)
 %data = varLRbetazz;  t = 'betazz';
 data = varSKzz;  t = 'krigingzz';
 
-for d = 2:8; den = options.DenOpt{d};
+for d = 1; den = options.DenOpt{d};
 for g = 1:3; glacier = options.glacier{g};
 s = size(data.(den)(1).(glacier));
 
@@ -419,16 +427,16 @@ D_SK.(den).(glacier) = nansum(A,3);
 end
 end
 
-% SWE Var Map
-den = 'S1';
-for g = 1:3; glacier = options.glacier{g};
-    DD.(glacier) = D_LR.(den).(glacier)/(max(D_LR.(den).(glacier)(:))*0.55);
-    DD.(glacier)(options.mapNaN.(glacier)) = NaN;
-end
-
-figure(1); 
-PlotTopoParameter(DD,'hot','Variability',SWE,'none','nomassB')
-    saveFIG(['SpatialVariabilityMap_SWEVAR_',t,den])
+% % SWE Var Map
+% den = 'S1';
+% for g = 1:3; glacier = options.glacier{g};
+%     DD.(glacier) = D_LR.(den).(glacier)/(max(D_LR.(den).(glacier)(:))*0.55);
+%     DD.(glacier)(options.mapNaN.(glacier)) = NaN;
+% end
+% 
+% figure(1); 
+% PlotTopoParameter(DD,'hot','Variability',SWE,'none','nomassB')
+%     saveFIG(['SpatialVariabilityMap_SWEVAR_',t,den])
 
 %% Heatmap, spatial variability -> DENSITY var (mean swe)
 %load WSMBDistribution.mat
