@@ -381,9 +381,9 @@ saveFIG(['WSMB_Distribution_Kriging_separateD_',f],12)
 %load WSMBDistribution.mat
 
 %data = varLRbetazz;  t = 'betazz';
-data = varSKzz;  t = 'krigingzz';
+data = tempSKzz;  t = 'krigingzz';
 
-for d = 1; den = options.DenOpt{d};
+for d = 1:8; den = options.DenOpt{d};
 for g = 1:3; glacier = options.glacier{g};
 s = size(data.(den)(1).(glacier).pred);
 
