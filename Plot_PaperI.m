@@ -249,6 +249,8 @@ Qmax(i) = nanmean(tempSKzz.(den)(i).(glacier).upper95(:));
 Qpre(i) = nanmean(tempSKzz.(den)(i).(glacier).pred(:));
     end
 Qstd.(den).(glacier) = (Qmax-Qmin)/2/1.96;
+Qstd.(den).(glacier) = mean(Qstd.(den).(glacier));
+Qmean.(den).(glacier) = mean(Qpre);
 
 Qstd.(den).(glacier) = mean(Qstd.(den).(glacier));
 Qmean.(den).(glacier) = mean(Qpre);
@@ -263,17 +265,19 @@ Pmax = [13.8, 24.5];
 for g = 1:3;     glacier = options.glacier{g};
 
 ProbDenLR.(glacier) = fitdist(Tdbetazz.(glacier)(:),'Normal');
-    yLR = pdf(ProbDenLR.(glacier),x);   %yLR = yLR/Pmax(1);  
-ProbDenSK.(glacier) = fitdist(Tsk.(glacier)(:),'Normal');
-    ySK = pdf(ProbDenSK.(glacier),x);   %ySK = ySK/Pmax(2);  
+    yLR     = pdf(ProbDenLR.(glacier),x);   %yLR = yLR/Pmax(1);  
+    YlrN    = yLR./trapz(x,yLR);
+ProbDenSK.(glacier) = makedist('Normal',T(g,3),T(g,4));
+    ySK     = pdf(ProbDenSK.(glacier),x);   %ySK = ySK/Pmax(2);
+    YskN    = ySK./trapz(x,ySK);
     
 subplot(2,1,1) 
-fill(x,yLR,options.RGB(g,:),'FaceAlpha',0.7, 'EdgeColor', 'none'); hold on
-    ylabel('Probability'); xlabel('WSMB (m w.e.)'); 
+fill(x,yLR,options.RGB(g,:),'FaceAlpha',0.85, 'EdgeColor', 'none'); hold on
+    ylabel('LR Probability'); xlabel('WSMB (m w.e.)'); 
     legend(options.glacier,'Location','best')
 subplot(2,1,2)     
-fill([0 x],[0 ySK],options.RGB(g,:),'FaceAlpha',0.7, 'EdgeColor', 'none'); hold on
-    ylabel('Probability'); xlabel('WSMB (m w.e.)'); 
+fill([0 x],[0 ySK],options.RGB(g,:),'FaceAlpha',0.85, 'EdgeColor', 'none'); hold on
+    ylabel('SK Probability'); xlabel('WSMB (m w.e.)'); 
 
     xlim([min(x),max(x)])
 end
@@ -334,12 +338,12 @@ figure(2); clf
     pt = plot(Fat);    set(pt,'Color','k'); set(pt, 'LineWidth',1.5); hold on
 %     plot(Dat, CIat(:,1),'--', 'Color','k', 'LineWidth',.2)
 %     plot(Dat, CIat(:,2),'--','Color','k', 'LineWidth',.2)
-L(2) = plot(Da(1:2),alex(1:2,6),'.', 'MarkerSize',13, 'Color',rgb('OrangeRed'));
-    errorbar(Da(3:5),alex(3:5,6),alexerr,'.', 'MarkerSize',13, 'Color',rgb('OrangeRed'))
-L(1) = plot(Dt,taylor(:,6),'.', 'MarkerSize',13, 'Color',rgb('DarkCyan')); hold on
+L(2) = plot(Da(1:2),alex(1:2,6),'.', 'MarkerSize',13, 'Color',[234, 140, 46]/255);
+    errorbar(Da(3:5),alex(3:5,6),alexerr,'.', 'MarkerSize',13, 'Color',[234, 140, 46]/255)
+L(1) = plot(Dt,taylor(:,6),'.', 'MarkerSize',13, 'Color',[68, 181, 226]/255); hold on
     xlim([min(Dat), max(Dat)+1]); 
     ylim([0 2])
     grid on
         xlabel('Distance from mountain divide (km)'); ylabel('SWE (m w.e.)')
-        legend(L,{'Taylor-Barge (1969)','Pulwicki and Flowers (2017)'},'Box','off', 'Location','northoutside')
+        legend(L,{'Taylor-Barge (1969)','Pulwicki et al. (2017)'},'Box','off', 'Location','northoutside')
 saveFIG_IGS('AccumGrad',1,8.6)
