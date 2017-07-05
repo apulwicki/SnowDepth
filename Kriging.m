@@ -8,9 +8,9 @@ load TopoBMS_MLR.mat
 %% Dice Kriging -> SWE
 
 sweKRIG(9).G4.pred = 9999; 
-for g = 1%:3
+for g = 2%1:3
         glacier = char(options.glacier(g));
-    for r = 2%:9
+    for r = 7%2:9
     sweKRIG(r).(glacier) = KrigingR(sweOPT(r).(glacier)(:,1), SWE(g).utm, glacier);
     end
 end    

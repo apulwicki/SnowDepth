@@ -17,7 +17,7 @@ saveFIG_IGS('DepthBoxplot',1,8.6)
 
 %% Density Interp - SP vs FS
     clear
-load TopoSWE.mat Density
+load TopoSWE.mat Density options
 
     den     = [nan(6,1), cell2mat(Density.pitANDtube(:,2:10))];
     SP      = den(:,7);
@@ -169,19 +169,19 @@ aboxplot(BETAS,'labels',options.topoVars, ...
         
 saveFIG_IGS('BetaCoeffs',1,8.6)
 
-%% WSMB Distribution - LR sources of var
+%% WSMB Distribution - LR & SK sources of var
 
-%clear; load WSMBDistribution.mat var* options
+clear; load WSMBDistribution.mat var* options 
+load LR_SK_RK.mat sweKRIG
 
 %get std of kriging surfaces
 for g = 1:3;    glacier = options.glacier{g};
 for d = 1:8;    den = options.DenOpt{d};
     
-    for i = 1:length(tempSKzz.(den))
-Qmin(i) = nanmean(tempSKzz.(den)(i).(glacier).lower95(:));
-Qmax(i) = nanmean(tempSKzz.(den)(i).(glacier).upper95(:));
-Qpre(i) = nanmean(tempSKzz.(den)(i).(glacier).pred(:));
-    end
+Qmin = nanmean(SK.(den).(glacier).lower95(:));
+Qmax = nanmean(SK.(den).(glacier).upper95(:));
+Qpre = nanmean(SK.(den).(glacier).pred(:));
+
 Qstd.(den).(glacier) = (Qmax-Qmin)/2/1.96;
 
 Qstd.(den).(glacier) = mean(Qstd.(den).(glacier));
@@ -190,46 +190,50 @@ Qmean.(den).(glacier) = mean(Qpre);
 end
 end
     
-
+%%
 figure(9); clf;
-x = 0:0.001:1.1;
-for o = 1:4
+x = 0:0.001:1.2;
+for o = 4%1:4
     if      o == 1; data = varBzz;     Pmax = 53;   t = '\sigma_{SWE} Variability';     f = 'zzLR';
     elseif  o == 2; data = varBbeta;   Pmax = 20.3;   t = '\sigma_{\beta} Variability'; f = 'beta';
     elseif  o == 3; data = varBkriging; Pmax = 76;   t = '\sigma_{SWE} Variability';  f = 'zzSK';
-    elseif  o == 4; data = varBkriging; Pmax = 4.1;   t = '\sigma_{KRIG} Variability'; f = 'KRIG';
+    elseif  o == 4; t = '\sigma_{KRIG} Variability'; f = 'KRIG';
     end
-for g = 1:3;    glacier = options.glacier{g};
-for d = 1:8;    den = options.DenOpt{d};
+for g = 1:3; 
+    glacier = options.glacier{g};
+for d = 1:8; 
+    den = options.DenOpt{d};
     
 if      o <= 3    
 ProbDen.(den).(glacier) = fitdist(data.(den).(glacier)(:),'Normal');
-    y = pdf(ProbDen.(den).(glacier),x);   y = y/Pmax;
+    y = pdf(ProbDen.(den).(glacier),x);   %y = y/Pmax;
 elseif  o == 4
 ProbDen.(den).(glacier) = makedist('Normal',Qmean.(den).(glacier),Qstd.(den).(glacier));
-    y = pdf(ProbDen.(den).(glacier),x);   y = y/Pmax;
+    y = pdf(ProbDen.(den).(glacier),x);   %y = y/Pmax;
     y = [0 y]; x = [x 0];
+    varB.SK.interp.(den).(glacier) = random(ProbDen.(den).(glacier),1000);
+    
 end
 
 
 subplot(2,2,o) 
-p(g) = fill(x,y,options.RGB(g,:),'FaceAlpha',0.5, 'EdgeColor', 'none'); hold on
-    ylabel('Probability'); xlabel('WSMB (m w.e.)');  
+p(g) = fill(x,y,options.RGB(g,:),'FaceAlpha',0.2, 'EdgeColor', 'none'); hold on
+    ylabel('Density'); xlabel('WSMB (m w.e.)');  
     
 end
 end
-    if o ==2; legend(p,options.glacier,'location','northeast')
-    end
+    %if o ==2; legend(p,options.glacier,'location','northeast');    end
     xlim([min(x) max(x)])
     title(t);
 end
-
+%%
 saveFIG_IGS('WSMBDist_LR',2,12)
 
 
 %% WSMB Distribution -> full PDF LR and SK
 
-%clear; load WSMBDistribution.mat varBbetazz varBkriging Q* options
+clear; load WSMBDistribution.mat varBbetazz varBkriging Q* options tempSKzz
+
 for g = 1:3
 glacier = options.glacier{g};
 for d = 1:8
@@ -266,18 +270,16 @@ for g = 1:3;     glacier = options.glacier{g};
 
 ProbDenLR.(glacier) = fitdist(Tdbetazz.(glacier)(:),'Normal');
     yLR     = pdf(ProbDenLR.(glacier),x);   %yLR = yLR/Pmax(1);  
-    YlrN    = yLR./trapz(x,yLR);
-ProbDenSK.(glacier) = makedist('Normal',T(g,3),T(g,4));
+ProbDenSK.(glacier) = fitdist(Tsk.(glacier)(:),'Normal');
     ySK     = pdf(ProbDenSK.(glacier),x);   %ySK = ySK/Pmax(2);
-    YskN    = ySK./trapz(x,ySK);
     
 subplot(2,1,1) 
 fill(x,yLR,options.RGB(g,:),'FaceAlpha',0.85, 'EdgeColor', 'none'); hold on
-    ylabel('LR Probability'); xlabel('WSMB (m w.e.)'); 
+    ylabel('LR Density'); xlabel('WSMB (m w.e.)'); 
     legend(options.glacier,'Location','best')
 subplot(2,1,2)     
 fill([0 x],[0 ySK],options.RGB(g,:),'FaceAlpha',0.85, 'EdgeColor', 'none'); hold on
-    ylabel('SK Probability'); xlabel('WSMB (m w.e.)'); 
+    ylabel('SK Density'); xlabel('WSMB (m w.e.)'); 
 
     xlim([min(x),max(x)])
 end
@@ -286,10 +288,10 @@ saveFIG_IGS('WSMBDist_full',1,10)
 
 %% WSMB Distribution - total spatial variability 
 
-%clear; load WSMBDistribution.mat D*
+clear; load WSMBDistribution.mat D* options
 load TopoSWE.mat SWE
 
-for o = 2%1:2
+for o = 1:2
     if o == 1
     D = D_LR;   s = 'LR';   m = 0.6;
     elseif o == 2
@@ -314,6 +316,7 @@ PlotTopoParameter_IGS(DPlot,'hot','Variability',SWE,'none','nomassB')
 end
 
 %% Accumulation gradient
+figure(1); clf 
 
 taylor(:,1) = [571731.48;577258.98;580978.1;587346.4;591126.5;597353.2;601796.1;608101];
 taylor(:,2) = [6737517.35;6733918.68;6730286.9;6730436.4;6724959.2;6730694.1;6734532.2;6736574.4];
