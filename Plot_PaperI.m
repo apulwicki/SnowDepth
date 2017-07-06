@@ -171,50 +171,25 @@ saveFIG_IGS('BetaCoeffs',1,8.6)
 
 %% WSMB Distribution - LR & SK sources of var
 
-clear; load WSMBDistribution.mat var* options 
-load LR_SK_RK.mat sweKRIG
+clear; load varWSMB.mat varB options 
 
-%get std of kriging surfaces
-for g = 1:3;    glacier = options.glacier{g};
-for d = 1:8;    den = options.DenOpt{d};
-    
-Qmin = nanmean(SK.(den).(glacier).lower95(:));
-Qmax = nanmean(SK.(den).(glacier).upper95(:));
-Qpre = nanmean(SK.(den).(glacier).pred(:));
-
-Qstd.(den).(glacier) = (Qmax-Qmin)/2/1.96;
-
-Qstd.(den).(glacier) = mean(Qstd.(den).(glacier));
-Qmean.(den).(glacier) = mean(Qpre);
-
-end
-end
-    
-%%
 figure(9); clf;
 x = 0:0.001:1.2;
-for o = 4%1:4
-    if      o == 1; data = varBzz;     Pmax = 53;   t = '\sigma_{SWE} Variability';     f = 'zzLR';
-    elseif  o == 2; data = varBbeta;   Pmax = 20.3;   t = '\sigma_{\beta} Variability'; f = 'beta';
-    elseif  o == 3; data = varBkriging; Pmax = 76;   t = '\sigma_{SWE} Variability';  f = 'zzSK';
-    elseif  o == 4; t = '\sigma_{KRIG} Variability'; f = 'KRIG';
+for o = 1:4
+    if      o == 1; data = varB.LR.zz;      t = '\sigma_{SWE} Variability';     
+    elseif  o == 2; data = varB.LR.interp;  t = '\sigma_{\beta} Variability';   
+    elseif  o == 3; data = varB.SK.zz;      t = '\sigma_{SWE} Variability';     
+    elseif  o == 4; data = varB.SK.interp;  t = '\sigma_{KRIG} Variability';    
     end
 for g = 1:3; 
     glacier = options.glacier{g};
 for d = 1:8; 
     den = options.DenOpt{d};
     
-if      o <= 3    
 ProbDen.(den).(glacier) = fitdist(data.(den).(glacier)(:),'Normal');
-    y = pdf(ProbDen.(den).(glacier),x);   %y = y/Pmax;
-elseif  o == 4
-ProbDen.(den).(glacier) = makedist('Normal',Qmean.(den).(glacier),Qstd.(den).(glacier));
-    y = pdf(ProbDen.(den).(glacier),x);   %y = y/Pmax;
-    y = [0 y]; x = [x 0];
-    varB.SK.interp.(den).(glacier) = random(ProbDen.(den).(glacier),1000);
+    y = pdf(ProbDen.(den).(glacier),x);  
     
-end
-
+if  o == 4;    y = [0 y]; x = [x 0];    end
 
 subplot(2,2,o) 
 p(g) = fill(x,y,options.RGB(g,:),'FaceAlpha',0.2, 'EdgeColor', 'none'); hold on
@@ -222,44 +197,23 @@ p(g) = fill(x,y,options.RGB(g,:),'FaceAlpha',0.2, 'EdgeColor', 'none'); hold on
     
 end
 end
-    %if o ==2; legend(p,options.glacier,'location','northeast');    end
+    if o ==2; legend(p,options.glacier,'location','northeast');    end
     xlim([min(x) max(x)])
     title(t);
 end
-%%
-saveFIG_IGS('WSMBDist_LR',2,12)
 
+saveFIG_IGS('WSMBDist_',2,12)
 
 %% WSMB Distribution -> full PDF LR and SK
 
-clear; load WSMBDistribution.mat varBbetazz varBkriging Q* options tempSKzz
+clear; load varWSMB.mat varB options 
 
 for g = 1:3
 glacier = options.glacier{g};
 for d = 1:8
 den = options.DenOpt{d};
-Tdbetazz.(glacier)(:,:,d)       = varBbetazz.(den).(glacier);
-Tdzzkriging.(glacier)(:,:,d)    = varBkriging.(den).(glacier);
-end
-end
-
-%get std of kriging surfaces
-for g = 1:3;    glacier = options.glacier{g};
-for d = 1:8;    den = options.DenOpt{d};
-    
-    for i = 1:length(tempSKzz.(den))
-Qmin(i) = nanmean(tempSKzz.(den)(i).(glacier).lower95(:));
-Qmax(i) = nanmean(tempSKzz.(den)(i).(glacier).upper95(:));
-Qpre(i) = nanmean(tempSKzz.(den)(i).(glacier).pred(:));
-    end
-Qstd.(den).(glacier) = (Qmax-Qmin)/2/1.96;
-Qstd.(den).(glacier) = mean(Qstd.(den).(glacier));
-Qmean.(den).(glacier) = mean(Qpre);
-
-Qstd.(den).(glacier) = mean(Qstd.(den).(glacier));
-Qmean.(den).(glacier) = mean(Qpre);
-
-Tsk.(glacier)(:,:,d) = normrnd(Qmean.(den).(glacier),Qstd.(den).(glacier),100);
+TLR.(glacier)(:,:,d)    = varB.LR.zzinterp.(den).(glacier);
+TSK.(glacier)(:,:,d)    = varB.SK.zzinterp.(den).(glacier);
 end
 end
 
@@ -268,42 +222,39 @@ x = 0:0.001:1.1;
 Pmax = [13.8, 24.5];
 for g = 1:3;     glacier = options.glacier{g};
 
-ProbDenLR.(glacier) = fitdist(Tdbetazz.(glacier)(:),'Normal');
+ProbDenLR.(glacier) = fitdist(TLR.(glacier)(:),'Normal');
     yLR     = pdf(ProbDenLR.(glacier),x);   %yLR = yLR/Pmax(1);  
-ProbDenSK.(glacier) = fitdist(Tsk.(glacier)(:),'Normal');
+ProbDenSK.(glacier) = fitdist(TSK.(glacier)(:),'Normal');
     ySK     = pdf(ProbDenSK.(glacier),x);   %ySK = ySK/Pmax(2);
     
 subplot(2,1,1) 
 fill(x,yLR,options.RGB(g,:),'FaceAlpha',0.85, 'EdgeColor', 'none'); hold on
     ylabel('LR Density'); xlabel('WSMB (m w.e.)'); 
-    legend(options.glacier,'Location','best')
 subplot(2,1,2)     
 fill([0 x],[0 ySK],options.RGB(g,:),'FaceAlpha',0.85, 'EdgeColor', 'none'); hold on
     ylabel('SK Density'); xlabel('WSMB (m w.e.)'); 
 
     xlim([min(x),max(x)])
+    if g == 3; legend(options.glacier,'Location','best'); end
 end
 
 saveFIG_IGS('WSMBDist_full',1,10)
 
 %% WSMB Distribution - total spatial variability 
 
-clear; load WSMBDistribution.mat D* options
+clear; load varWSMB.mat D* options
 load TopoSWE.mat SWE
 
 for o = 1:2
-    if o == 1
-    D = D_LR;   s = 'LR';   m = 0.6;
-    elseif o == 2
-    D = D_SK;   s = 'SK';   m = 0.95;
+    if o == 1;      s = 'LR';   m = 0.6;
+    elseif o == 2;  s = 'SK';   m = 0.95;
     end
         
-
 % Linear regression
 for g = 1:3; glacier = options.glacier{g};
     DPlot.(glacier) = zeros(options.mapsize(g,:));
     for d = 1:8; den = options.DenOpt{d};
-        DD.(glacier) = D.(den).(glacier)/(max(D.(den).(glacier)(:)));
+        DD.(glacier) = D.(s).(den).(glacier)/(max(D.(s).(den).(glacier)(:)));
         DD.(glacier)(options.mapNaN.(glacier)) = NaN;
     DPlot.(glacier) = DPlot.(glacier) + DD.(glacier);
     end

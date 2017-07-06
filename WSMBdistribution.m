@@ -171,9 +171,9 @@ end
  %all Gs, one density
     x = 0.2:0.001:0.8;
 for o = 1:3
-    if      o == 1; data = varBzz;     t = '\sigma_{SWE} Variability';      f = 'zz';
-    elseif  o == 2; data = varBbeta;   t = '\sigma_{\beta} Variability';    f = 'beta';
-    elseif  o == 3; data = varBbetazz; t = '\sigma_{SWE} and \sigma_{\beta} Variability'; f = 'betaNzz';
+    if      o == 1; data = varB.LR.zz;     t = '\sigma_{SWE} Variability';      f = 'zz';
+    elseif  o == 2; data = varB.LR.interp;   t = '\sigma_{\beta} Variability';    f = 'beta';
+    elseif  o == 3; data = varB.LR.zzinterp; t = '\sigma_{SWE} and \sigma_{\beta} Variability'; f = 'betaNzz';
     end
 figure(1); clf; p = 1;
 for d = 1:8;    den = options.DenOpt{d};
@@ -187,7 +187,7 @@ fill(x,y,options.RGB(g,:),'FaceAlpha',0.85, 'EdgeColor', 'none'); hold on
     xlim([min(x) max(x)])
 end
     if p ==8; legend(options.glacier, 'Location','northwest'); end
-    title([t,' (',den,')']);
+    title(den);
 p = p+1;
 end
 saveFIG(['WSMB_Distribution',f],12)
@@ -217,9 +217,9 @@ end
     c = cbrewer('qual','Set1',8);
     x = 0.2:0.001:0.8;
 for o = 1:3
-    if      o == 1; data = varBzz;     t = '\sigma_{SWE} Variability';      f = 'zz';
-    elseif  o == 2; data = varBbeta;   t = '\sigma_{\beta} Variability';    f = 'beta';
-    elseif  o == 3; data = varBbetazz; t = '\sigma_{SWE} and \sigma_{\beta} Variability'; f = 'betaNzz';
+    if      o == 1; data = varB.LR.zz;     t = '\sigma_{SWE} Variability';      f = 'zz';
+    elseif  o == 2; data = varB.LR.interp;   t = '\sigma_{\beta} Variability';    f = 'beta';
+    elseif  o == 3; data = varB.LR.zzinterp; t = '\sigma_{SWE} and \sigma_{\beta} Variability'; f = 'betaNzz';
     end
 figure(1); clf; 
 for g = 1:3;    glacier = options.glacier{g};
@@ -231,7 +231,7 @@ subplot(1,3,g)
 fill(x,y,c(d,:),'FaceAlpha',0.5, 'EdgeColor', 'none'); hold on
     ylabel('Density'); xlabel('WSMB (m w.e.)'); title(glacier)
     xlim([min(x) max(x)])
-    title(t)
+    title(options.glacier{g})
 end
     if g ==3; legend(options.DenOpt); end
 end
@@ -343,14 +343,19 @@ end
 end
 end
 
-for d = 1:8
-    den = options.DenOpt{d};
-for g = 1:3; glacier = options.glacier{g};
-for i = 1:100
-Qupper.(den).(glacier)(i) = nanmean(tempSKzz.(den)(i).(glacier).upper95(:));
-Qpred.(den).(glacier)(i) = nanmean(tempSKzz.(den)(i).(glacier).pred(:));
-Qlower.(den).(glacier)(i) = nanmean(tempSKzz.(den)(i).(glacier).lower95(:));
-end
+for g = 1:3;    glacier = options.glacier{g};
+for d = 1:8;    den = options.DenOpt{d};
+    
+    for i = 1:length(tempSKzz.(den))
+Qmin(i) = nanmean(tempSKzz.(den)(i).(glacier).lower95(:));
+Qmax(i) = nanmean(tempSKzz.(den)(i).(glacier).upper95(:));
+Qpre(i) = nanmean(tempSKzz.(den)(i).(glacier).pred(:));
+    end
+Qstd.(den).(glacier) = (Qmax-Qmin)/2/1.96;
+
+Qstd.(den).(glacier) = mean(Qstd.(den).(glacier));
+Qmean.(den).(glacier) = mean(Qpre);
+
 end
 end
 
@@ -377,58 +382,14 @@ p = p+1;
 end
 saveFIG(['WSMB_Distribution_Kriging_separateD_',f],12)
 
-
-%%
- %all Gs, one density
- %get std of kriging surfaces
-for g = 1:3;    glacier = options.glacier{g};
-for d = 1:8;    den = options.DenOpt{d};
-    
-    for i = 1:length(tempSKzz.(den))
-Qmin(i) = nanmean(tempSKzz.(den)(i).(glacier).lower95(:));
-Qmax(i) = nanmean(tempSKzz.(den)(i).(glacier).upper95(:));
-Qpre(i) = nanmean(tempSKzz.(den)(i).(glacier).pred(:));
-    end
-Qstd.(den).(glacier) = (Qmax-Qmin)/2/1.96;
-
-Qstd.(den).(glacier) = mean(Qstd.(den).(glacier));
-Qmean.(den).(glacier) = mean(Qpre);
-
-end
-end
-     
-    x = 0.2:0.001:0.8;
-for o = 1:3
-    if      o == 1; data = varBkriging;     t = '\sigma_{SWE} Variability';      f = 'zz';
-    elseif  o == 2; data = varBbeta;   t = '\sigma_{\beta} Variability';    f = 'beta';
-    elseif  o == 3; data = varBbetazz; t = '\sigma_{SWE} and \sigma_{\beta} Variability'; f = 'betaNzz';
-    end
-figure(1); clf; p = 1;
-for d = 1:8;    den = options.DenOpt{d};
-for g = 1:3;    glacier = options.glacier{g};
-    
-        ProbDen = fitdist(data.(den).(glacier)(:),'Normal');
-        y       = pdf(ProbDen,x);   
-subplot(4,2,p)    
-fill(x,y,options.RGB(g,:),'FaceAlpha',0.85, 'EdgeColor', 'none'); hold on
-    ylabel('Density'); xlabel('WSMB (m w.e.)');
-    xlim([min(x) max(x)])
-end
-    if p ==8; legend(options.glacier, 'Location','northwest'); end
-    title([t,' (',den,')']);
-p = p+1;
-end
-saveFIG(['WSMB_SK_Distribution',f],12)
-end
-
     
  %all Density, one G
     c = cbrewer('qual','Set1',8);
-    x = 0.2:0.001:0.8;
+    x = 0:0.001:1.2;
 for o = 1:3
-    if      o == 1; data = varBzz;     t = '\sigma_{SWE} Variability';      f = 'zz';
-    elseif  o == 2; data = varBbeta;   t = '\sigma_{\beta} Variability';    f = 'beta';
-    elseif  o == 3; data = varBbetazz; t = '\sigma_{SWE} and \sigma_{\beta} Variability'; f = 'betaNzz';
+    if      o == 1; data = varB.SK.zz;       t = '\sigma_{SWE} Variability';      f = 'zz';
+    elseif  o == 2; data = varB.SK.interp;   t = '\sigma_{\beta} Variability';    f = 'beta';
+    elseif  o == 3; data = varB.SK.zzinterp; t = '\sigma_{SWE} and \sigma_{\beta} Variability'; f = 'betaNzz';
     end
 figure(1); clf; 
 for g = 1:3;    glacier = options.glacier{g};
@@ -437,23 +398,45 @@ for d = 1:8;    den = options.DenOpt{d};
     ProbDen = fitdist(data.(den).(glacier)(:),'Normal');
     y       = pdf(ProbDen,x);   
 subplot(1,3,g)
-fill(x,y,c(d,:),'FaceAlpha',0.5, 'EdgeColor', 'none'); hold on
+fill([0 x],[0 y],c(d,:),'FaceAlpha',0.5, 'EdgeColor', 'none'); hold on
     ylabel('Density'); xlabel('WSMB (m w.e.)'); title(glacier)
     xlim([min(x) max(x)])
-    title(t)
+    title(options.glacier{g})
 end
     if g ==3; legend(options.DenOpt); end
 end
     saveFIG(['WSMB_SK_allDensity_',f],13)    
 end    
     
-
+    x = 0:0.001:1.2;
+for o = 1:3
+    if      o == 1; data = varB.SK.zz;       t = '\sigma_{SWE} Variability';      f = 'zz';
+    elseif  o == 2; data = varB.SK.interp;   t = '\sigma_{\beta} Variability';    f = 'beta';
+    elseif  o == 3; data = varB.SK.zzinterp; t = '\sigma_{SWE} and \sigma_{\beta} Variability'; f = 'betaNzz';
+    end
+figure(1); clf; p = 1;
+for d = 1:8;    den = options.DenOpt{d};
+for g = 1:3;    glacier = options.glacier{g};
+    
+        ProbDen = fitdist(data.(den).(glacier)(:),'Normal');
+        y       = pdf(ProbDen,x);   
+subplot(4,2,p)    
+fill([0 x],[0 y],options.RGB(g,:),'FaceAlpha',0.85, 'EdgeColor', 'none'); hold on
+    ylabel('Density'); xlabel('WSMB (m w.e.)');
+    xlim([min(x) max(x)])
+end
+    if p ==8; legend(options.glacier, 'Location','northwest'); end
+    title(den);
+p = p+1;
+end
+saveFIG(['WSMB_Distribution_SK_',f],12)
+end
 
 %% Heatmap, spatial variability -> SWE var 
 %load WSMBDistribution.mat
 
-data = varMAP.LR.zzinterp;  t = 'betazz';
-%data = varMAP.SK.zzinterp;  t = 'krigingzz';
+%data = varMAP.LR.zzinterp;  method = 'LR';  t = 'betazz';
+data = varMAP.SK.zzinterp; method = 'SK'; t = 'krigingzz';
 
 for d = 1:8; den = options.DenOpt{d};
 for g = 1:3; glacier = options.glacier{g};
@@ -463,8 +446,8 @@ clear F G A H U W X
 n = 1; p = 1;
 runs = 100;
 for i = 1:runs
-    F(n:n+s(1)-1,:) = data.(den)(i).(glacier);
-    G(:,p:p+s(2)-1) = data.(den)(i).(glacier);
+    F(n:n+s(1)-1,:) = data.(den)(i).(glacier).pred;
+    G(:,p:p+s(2)-1) = data.(den)(i).(glacier).pred;
     n = n+s(1);
     p = p+s(2);
 end
@@ -491,9 +474,9 @@ for i = size(A,3):-1:1
 end
 A(:,:,X) = [];
     
-D.LR.(den).(glacier) = nansum(A,3);
-    D.LR.(den).(glacier) = D.LR.(den).(glacier)/max(D.LR.(den).(glacier)(:));
-    D.LR.(den).(glacier)(options.mapNaN.(glacier)) = NaN;
+D.(method).(den).(glacier) = nansum(A,3);
+    D.(method).(den).(glacier) = D.(method).(den).(glacier)/max(D.(method).(den).(glacier)(:));
+    D.(method).(den).(glacier)(options.mapNaN.(glacier)) = NaN;
 end
 end
 
