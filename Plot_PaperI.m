@@ -1,34 +1,39 @@
-%% Measurement - Depth Boxplot
+%% Measurement - Depth Boxplot and SP vs FS
     clear
-load TopoSWE.mat allDepth options
+load TopoSWE.mat allDepth options Density
 
+ %Depth boxplot
     lG4     = length(allDepth.G4(:)); 
     lG2     = length(allDepth.G2(:)); 
     lG13    = length(allDepth.G13(:));
     toBox = [[allDepth.G4(:); nan(lG13-lG4,1)],...
              [allDepth.G2(:); nan(lG13-lG2,1)],...
               allDepth.G13(:)];
-figure(3); clf
+figure(1); clf
+subplot(1,2,1)
 boxplot(toBox,'labels',{'Glacier 4','Glacier 2','Glacier 13'},...
                'BoxStyle','outline','Colors',options.RGB,'Width',0.35,...
                'OutlierSize',4,'Symbol','o')
     ylabel('Snow depth (cm)');
-saveFIG_IGS('DepthBoxplot',1,8.6)
 
-%% Density Interp - SP vs FS
-    clear
-load TopoSWE.mat Density options
-
+ %SP vs FS
     den     = [nan(6,1), cell2mat(Density.pitANDtube(:,2:10))];
     SP      = den(:,7);
     FS      = den(:,2);
     errorSP = [den(:,7)-den(:,9),den(:,10)-den(:,7)];   %min and max SP
     errorFS = [den(:,2)-den(:,4),den(:,5)-den(:,2)];    %min and max FS
+    markerC = [options.RGB(1,:);options.RGB(1,:);...
+               options.RGB(2,:);options.RGB(2,:);...
+               options.RGB(3,:);options.RGB(3,:)]; 
+    markerS = {'s','o','s','o','^','s'};
 
-figure(4); clf
-errorbarxy(SP,FS,errorSP(:,2),errorFS(:,2),errorSP(:,1),errorFS(:,1),...
-                'Color','k','LineStyle','none','Marker','s',...
-                'MarkerFaceColor','k','LineWidth',1,'MarkerSize',7); hold on
+subplot(1,2,2)
+for i = 1:length(SP)
+errorbarxy(SP(i),FS(i),errorSP(i,2),errorFS(i,2),errorSP(i,1),errorFS(i,1),...
+                'Color','k','LineStyle','none','Marker',markerS{i},...
+                'MarkerFaceColor',markerC(i,:),'LineWidth',1,'MarkerSize',9,...
+                'MarkerEdgeColor','none'); hold on
+end
     axis([220 400 220 400])
     grid on
     line = refline(1,0);
@@ -50,11 +55,11 @@ errorbarxy(SP,FS,errorSP(:,2),errorFS(:,2),errorSP(:,1),errorFS(:,1),...
     end
     ax = gca; ax.XTick = 220:40:400; ax.YTick = 220:40:400;
 
-saveFIG_IGS('SPvsFS',1,8.6);
+saveFIG_IGS('DepthBoxplot_SPvsFS',2,8.6)
 
 %% Grid Cell - Zigzag histrogram
     clear
-load TopoSWE.mat SWEzz
+load TopoSWE.mat SWEzz options
     
 %     labels(:,1) = {'G4 LZ';'G4 MZ';'G4 UZ';'none'}; 
 %     labels(:,2) = {'G2 LZ';'G2 MZ';'G2 UZ';'none'};
@@ -62,8 +67,19 @@ load TopoSWE.mat SWEzz
     labels(:,1) = {'L';'M';'U';'none'}; 
     labels(:,2) = {'L';'M';'U';'none'};
     labels(:,3) = {'L';'M_1';'M_2';'U'};
+    Fcolor      = [ 7,95,73;
+                    13,191,149;
+                    141,247,222;
+                    162,135,2;
+                    242,202,2;
+                    254,234,134;
+                    89,51,91;
+                    132,76,135;
+                    171,111,174;
+                    202,164,204]/255;
 
 figure(5); clf
+c = 1;
     for g = 1:3
         zz = categories(SWEzz(g).ZZ);
 
@@ -75,12 +91,14 @@ figure(5); clf
                 if j ==1;   bins    = 20;   %round(sqrt(length(SWEzz(g).swe)));
                             edges   = linspace(-0.15,0.15,bins); end
                             N       = histcounts(ZZdata,edges);   
-            plot((edges(:,1:end-1)+edges(:,2:end))/2,N/sum(N),'LineWidth',2); hold on 
+            fill((edges(:,1:end-1)+edges(:,2:end))/2,N/sum(N),Fcolor(c,:),...
+                  'EdgeColor','none','FaceAlpha',0.75); hold on 
             xlabel('Zigzag SWE distribution (m w.e.)');     ylabel('Probability')
             grid on
             xlim([-0.15 0.15])
             %title(options.glacier{g})
             %ax = gca; ax.XTick = [-40:20:40];
+            c = c+1;
         end
             legend(labels{1:length(zz),g},'Location','northeast')
     end
