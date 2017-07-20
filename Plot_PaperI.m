@@ -173,31 +173,35 @@ BETAS = [reshape(betas(:,:,1), [1 size(betas(:,:,1))]);...
          reshape(betas(:,:,2), [1 size(betas(:,:,2))]);...
          reshape(betas(:,:,3), [1 size(betas(:,:,3))])];
 
+BETAS(:,:,[3,5]) = [];     
+     incB = [1 2 4 6 7];
+     
 figure(8); clf        
-aboxplot(BETAS,'labels',options.topoVars, ...
-         'Colormap', options.RGB, 'OutlierMarkerSize',6); % Advanced box plot
+aboxplot(BETAS,'labels',options.topoVars(incB), ...
+         'Colormap', options.RGB, 'OutlierMarkerSize',8,...
+         'WidthS',1.9,'WidthE',1.3); % Advanced box plot
         legend('Glacier 4','Glacier 2','Glacier 13'); % Add a legend
         ylabel('Regression coefficient'); hold on 
         
         ylim([-0.06 0.12])
         line(xlim,[0 0],'Color',[0 0 0],'LineStyle','--','LineWidth', 0.5)
-        for i = 1:6
+        for i = 1:4
         line([i+0.5 i+0.5],ylim,'Color',[0 0 0],'LineStyle','--','LineWidth', 0.5)
         end
-        
+ 
 saveFIG_IGS('BetaCoeffs',1,8.6)
 
 %% WSMB Distribution - LR & SK sources of var
 
-clear; load varWSMB.mat varB options 
+%clear; load varWSMB.mat varB options 
 
 figure(9); clf;
 x = 0:0.001:1.2;
-for o = 1:4
-    if      o == 1; data = varB.LR.zz;      t = '\sigma_{SWE} Variability';     
-    elseif  o == 2; data = varB.LR.interp;  t = '\sigma_{\beta} Variability';   
-    elseif  o == 3; data = varB.SK.zz;      t = '\sigma_{SWE} Variability';     
-    elseif  o == 4; data = varB.SK.interp;  t = '\sigma_{KRIG} Variability';    
+for o = [1,2,4,5]
+    if      o == 1; data = varB.LR.zz;      t = '\sigma_{SWE}';     
+    elseif  o == 2; data = varB.LR.interp;  t = '\sigma_{INT}';   
+    elseif  o == 4; data = varB.SK.zz;      t = '\sigma_{SWE}';     
+    elseif  o == 5; data = varB.SK.interp;  t = '\sigma_{INT}';    
     end
 for g = 1:3; 
     glacier = options.glacier{g};
@@ -207,24 +211,22 @@ for d = 1:8;
 ProbDen.(den).(glacier) = fitdist(data.(den).(glacier)(:),'Normal');
     y = pdf(ProbDen.(den).(glacier),x);  
     
-if  o == 4;    y = [0 y]; x = [x 0];    end
+if  o == 5;    y = [0 y]; x = [x 0];    end
 
-subplot(2,2,o) 
-p(g) = fill(x,y,options.RGB(g,:),'FaceAlpha',0.2, 'EdgeColor', 'none'); hold on
-    ylabel('Density'); xlabel('WSMB (m w.e.)');  
+subplot(2,3,o) 
+fill(x,y,options.RGB(g,:),'FaceAlpha',0.2, 'EdgeColor', 'none'); hold on
+    if      o == 1;         ylabel('LR Density');
+    elseif  o == 4;         ylabel('SK Density');  
+    end
+    if  o == 4||o == 5; xlabel('WSMB (m w.e.)');  end
     
 end
 end
-    if o ==2; legend(p,options.glacier,'location','northeast');    end
     xlim([min(x) max(x)])
     title(t);
 end
 
-saveFIG_IGS('WSMBDist_',2,12)
-
-%% WSMB Distribution -> full PDF LR and SK
-
-clear; load varWSMB.mat varB options 
+%full PDF LR and SK
 
 for g = 1:3
 glacier = options.glacier{g};
@@ -235,28 +237,26 @@ TSK.(glacier)(:,:,d)    = varB.SK.zzinterp.(den).(glacier);
 end
 end
 
-figure(12); clf
-x = 0:0.001:1.1;
-Pmax = [13.8, 24.5];
 for g = 1:3;     glacier = options.glacier{g};
 
 ProbDenLR.(glacier) = fitdist(TLR.(glacier)(:),'Normal');
     yLR     = pdf(ProbDenLR.(glacier),x);   %yLR = yLR/Pmax(1);  
 ProbDenSK.(glacier) = fitdist(TSK.(glacier)(:),'Normal');
     ySK     = pdf(ProbDenSK.(glacier),x);   %ySK = ySK/Pmax(2);
-    
-subplot(2,1,1) 
-fill(x,yLR,options.RGB(g,:),'FaceAlpha',0.85, 'EdgeColor', 'none'); hold on
-    ylabel('LR Density'); xlabel('WSMB (m w.e.)'); 
-subplot(2,1,2)     
-fill([0 x],[0 ySK],options.RGB(g,:),'FaceAlpha',0.85, 'EdgeColor', 'none'); hold on
-    ylabel('SK Density'); xlabel('WSMB (m w.e.)'); 
-
+    std(yLR)
+subplot(2,3,3) 
+p(g) = fill(x,yLR,options.RGB(g,:),'FaceAlpha',0.8, 'EdgeColor', 'none'); hold on
+    if g == 3; legend(p,options.glacier,'location','northeast'); end
     xlim([min(x),max(x)])
-    if g == 3; legend(options.glacier,'Location','best'); end
+    title('\sigma_{\rho} & \sigma_{SWE} & \sigma_{INT} ')
+subplot(2,3,6)     
+fill([x 0],[0 ySK],options.RGB(g,:),'FaceAlpha',0.8, 'EdgeColor', 'none'); hold on
+    xlabel('WSMB (m w.e.)'); 
+    title('\sigma_{\rho} & \sigma_{SWE} & \sigma_{INT} ')
+    xlim([min(x),max(x)])
 end
 
-saveFIG_IGS('WSMBDist_full',1,10)
+%saveFIG_IGS('WSMBDist',2,12)
 
 %% WSMB Distribution - total spatial variability 
 
@@ -280,13 +280,11 @@ for g = 1:3; glacier = options.glacier{g};
 end
 
 figure(o);
-PlotTopoParameter_IGS(DPlot,'hot','Variability',SWE,'none','nomassB')
+PlotTopoParameter_IGS(DPlot,'summer','Variability',SWE,'none','nomassB')
     saveFIG_IGS(['SpatialVar_',s],2,8.6)
 end
 
 %% Accumulation gradient
-figure(1); clf 
-
 taylor(:,1) = [571731.48;577258.98;580978.1;587346.4;591126.5;597353.2;601796.1;608101];
 taylor(:,2) = [6737517.35;6733918.68;6730286.9;6730436.4;6724959.2;6730694.1;6734532.2;6736574.4];
 taylor(:,3) = [2620;2640;2380;2225;2070;1915;1765;1615];
@@ -317,5 +315,18 @@ L(1) = plot(Dt,taylor(:,6),'.', 'MarkerSize',13, 'Color',[68, 181, 226]/255); ho
     ylim([0 2])
     grid on
         xlabel('Distance from mountain divide (km)'); ylabel('SWE (m w.e.)')
-        legend(L,{'Taylor-Barge (1969)','Pulwicki et al. (2017)'},'Box','off', 'Location','northoutside')
+        legend(L,{'Taylor-Barge (1969)','This study'},'Box','off', 'Location','northoutside')
+    ylim([0 1.7])
+    
+   %Labels 
+    Lx = Da(3:5); Ly = alex(3:5,6);
+    for g = 1:3
+        strG = options.glacier{g};
+        if g == 1; bit = 0;
+        else bit = 0.1;
+        end
+        text(Lx(g,1)-1, Ly(g,1)+bit, strG,...
+            'HorizontalAlignment','right','FontSize',9,'FontName','Arial');
+    end
+        
 saveFIG_IGS('AccumGrad',1,8.6)

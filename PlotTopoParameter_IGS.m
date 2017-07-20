@@ -42,6 +42,8 @@ if  strcmp(paramName, 'banana') %None need circular phase map, the option remain
     Cmap = phasemap;
 elseif  strcmp(paramName, 'hot') %None need circular phase map, the option remains though
     Cmap = hot;
+elseif  strcmp(paramName, 'summer') %None need circular phase map, the option remains though
+    Cmap = cbrewer('seq', 'BuPu', 100);
 else
     Cmap = parula;
 end
