@@ -1,3 +1,71 @@
+%% Topo Params - Full vs measured dist
+clear
+load TopoSWE.mat topo* options
+    
+figure(1); clf
+    header = fieldnames(topo_full.G4);
+    n = 1;  nLab = 1:3:21;
+for r = 1:4 %length(header)
+    param = char(header(r));
+    for i = 1:3
+        name = char(options.glacier(i)); 
+        %a(i) = subplot(length(header),3,n);
+        a(i) = subplot(4,3,n);
+            h(i).f = histogram(topo_full_ns.(name).(param)(:),25,'FaceColor','w'); hold on
+            h(i).s = histogram(topo_sampled_ns.(name).(param),25,'FaceColor','k'); 
+            
+            hist_stats_full.(name)(r,:) = [nanmean(topo_full_ns.(name).(param)(:)),...
+                                            nanstd(topo_full_ns.(name).(param)(:)),...
+                                            skewness(topo_full_ns.(name).(param)(:)),...
+                                            kurtosis(topo_full_ns.(name).(param)(:))];
+            hist_stats_sample.(name)(r,:) = [nanmean(topo_sampled_ns.(name).(param)(:)),...
+                                            nanstd(topo_sampled_ns.(name).(param)(:)),...
+                                            skewness(topo_sampled_ns.(name).(param)(:)),...
+                                            kurtosis(topo_sampled_ns.(name).(param)(:))];                            
+                                        
+            xlabel(char(options.topoVarsUnits(r)));     
+            if ismember(n,nLab); ylabel('Frequency'); end
+            axis tight
+       %     legend('Full range','Sampled');
+    n = n+1;        
+    end
+    set([h(1).f h(1).s h(2).f h(2).s h(3).s], 'BinEdges', h(3).f.BinEdges)
+    linkaxes(flip(a));
+end 
+saveFIG_IGS('TopoParamsSampled1',2,20)
+
+
+figure(1); clf
+n = 1;
+for r = 5:7 %length(header)
+    param = char(header(r));
+    for i = 1:3
+        name = char(options.glacier(i)); 
+        a(i) = subplot(3,3,n);
+            h(i).f = histogram(topo_full_ns.(name).(param)(:),25,'FaceColor','w'); hold on
+            h(i).s = histogram(topo_sampled_ns.(name).(param),25,'FaceColor','k'); 
+            
+            hist_stats_full.(name)(r,:) = [nanmean(topo_full_ns.(name).(param)(:)),...
+                                            nanstd(topo_full_ns.(name).(param)(:)),...
+                                            skewness(topo_full_ns.(name).(param)(:)),...
+                                            kurtosis(topo_full_ns.(name).(param)(:))];
+            hist_stats_sample.(name)(r,:) = [nanmean(topo_sampled_ns.(name).(param)(:)),...
+                                            nanstd(topo_sampled_ns.(name).(param)(:)),...
+                                            skewness(topo_sampled_ns.(name).(param)(:)),...
+                                            kurtosis(topo_sampled_ns.(name).(param)(:))];                            
+                                        
+            xlabel(char(options.topoVarsUnits(r)));     
+            if ismember(n,nLab); ylabel('Frequency'); end
+            axis tight
+       %     legend('Full range','Sampled');
+    n = n+1;        
+    end
+    set([h(1).f h(1).s h(2).f h(2).s h(3).s], 'BinEdges', h(3).f.BinEdges)
+    linkaxes(flip(a));
+end 
+saveFIG_IGS('TopoParamsSampled2',2,15)
+
+
 %% Measurement - Depth Boxplot and SP vs FS
     clear
 load TopoSWE.mat allDepth options Density

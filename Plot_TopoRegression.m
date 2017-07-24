@@ -184,7 +184,7 @@ print([options.path1, filename],'-dpng'); print([options.path2, filename],'-dpng
 %run Import_Topo.m
     
 header = fieldnames(topo_full.G4);
-for r = 1:length(header)
+for r = 1%:length(header)
 figure
     param = char(header(r));
     for i = 1:3
@@ -215,7 +215,7 @@ figure
 % saveFIG(['SampledRangeTopo_',header{r}])
 end 
 
-    close all
+   % close all
     clear v i r name header glacier N* a filename edges* param fig units dim h 
     
 %% Percent area of glacier reprented by sampled topo
