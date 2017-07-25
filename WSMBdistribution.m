@@ -586,3 +586,39 @@ sigmaSK.(f)(d,g) = ProbDenSK.(f).(den).(glacier).sigma;
     
 end
 end
+
+%% Ablation area only
+
+nanMask.G4 = mapNaN.G4;
+    nanMask.G4(1:20,:) = 1;
+    nanMask.G4(:,1:15) = 1;
+    Iy = 40:-2:18;   n = 1;
+    for i = 19:30
+       nanMask.G4(1:Iy(n),i) = 1; 
+       n = n+1;
+    end
+    Iy = 20:2:34;   n = 1;
+    for i = 40:47
+       nanMask.G4(1:Iy(n),i) = 1; 
+       n = n+1;
+    end
+
+nanMask.G2 = mapNaN.G2;
+    nanMask.G2(:,100:127) = 1;
+    nanMask.G2(95:139,:) = 1;
+    Ix = 85:100;   n = 1;
+    for i = 100:-1:85
+       nanMask.G2(i,Ix(n):end) = 1; 
+       n = n+1;
+    end
+    
+nanMask.G13 = mapNaN.G13;
+    nanMask.G13(:,95:end) = 1;
+    nanMask.G13(110:end,:) = 1;
+    nanMask.G13(93:end,1:60) = 1;
+    Iy = 50:110;   n = 1;
+    for i = 20:80
+       nanMask.G13(Iy(n):end,i) = 1; 
+       n = n+1;
+    end
+
