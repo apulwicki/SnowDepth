@@ -17,8 +17,8 @@ filename='VIWT_Oct-May_LowRes.nc';
 ncdisp(filename);
 
 % these are the factors read from the file
-scale_factor  = 0.0012045;
-add_offset    = 39.5782;
+scale_factor  = 0.0007272;
+add_offset    = 24.2323;
 missing_value = -32767;
 
 % opening the file
@@ -137,7 +137,7 @@ end
 vard_new=vard;
 % apply 3-day running mean
 window=3;
-for i=1:length(vard(1,:))-window+1;
+for i=1:length(vard(1,:))-window+1
     runmean(i,:)=nanmean(vard_new(:,i:i+window-1)');
 end
 vard_runmean=runmean';
@@ -219,7 +219,7 @@ data=vard_runmean';
 % contribution of each mode to total variance:
 variance=eigenvalues./sum(eigenvalues);
 
-figure(2); clf 
+figure(1); clf 
 subplot(2,1,1)
 plot(1:length(variance),variance,'*-');
 ylabel('ratio of total variance explained by mode');
@@ -231,7 +231,7 @@ ylabel('ratio of total variance explained by mode');
 xlabel('mode number');
 
 % plot first 4 modes (eigenvectors and PCs)
-figure(3); 
+figure(2); 
 for i=1:4
 subplot(4,2,2*i-1)
 var01=eigenvectors(:,i);
@@ -256,7 +256,7 @@ ax = gca;   ax.XTick = find(timeMonth==floor(timeMonth));     ax.XTickLabel = mo
 end
 
 % plot just the first mode
-figure(4); clf
+figure(3); clf
 for i=1
 subplot(2,1,2*i-1)
 var01=eigenvectors(:,i);

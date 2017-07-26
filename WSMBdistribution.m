@@ -589,8 +589,8 @@ end
 
 %% Ablation area only
 
- load Basic.mat
- 
+%%% MAKE NAN MASKS
+ load Basic.mat 
 nanMask.G4 = mapNaN.G4;
     nanMask.G4(1:20,:) = 1;
     nanMask.G4(:,1:15) = 1;
@@ -624,6 +624,7 @@ nanMask.G13 = mapNaN.G13;
        n = n+1;
     end
     
+%%% APPLY MASKS TO VAR MAPS
 load varWSMB.mat varMAP options
 clear ablB
 % LR
@@ -635,7 +636,7 @@ for u = 1:3
 for d = 1:8; density = options.DenOpt{d};
 for g = 1:3; glacier = options.glacier{g};
     
-for i = 1:1000;
+for i = 1:1000
     map = varMAP.(method).(uncert).(density)(i).(glacier);
     map(nanMask.(glacier)) = NaN;
 ablB.(method).(uncert).(density).(glacier)(i) = nanmean(map(:));
@@ -654,7 +655,7 @@ for u = [1,3]
 for d = 1:8; density = options.DenOpt{d};
 for g = 1:3; glacier = options.glacier{g};
     
-for i = 1:1000;
+for i = 1:1000
     map = varMAP.(method).(uncert).(density)(i).(glacier).pred;
     map(nanMask.(glacier)) = NaN;
 ablB.(method).(uncert).(density).(glacier)(i) = nanmean(map(:));
@@ -664,7 +665,25 @@ end
 end
 end
 
-%% PLOT
+%%% APPLY MASK TO FULL LR AND SK MAPS
+
+load Full.mat
+% LR & SK
+for d = 1:8;    den = options.DenOpt{d};
+for g = 1:3; glacier = options.glacier{g};    
+    map = fullLR.(den).(glacier);
+    map(nanMask.(glacier)) = NaN;
+ablB.LR(d,g) = nanmean(map(:));
+    map = fullSK.(den).(glacier).pred;
+    map(nanMask.(glacier)) = NaN;
+ablB.SK(d,g) = nanmean(map(:));
+end
+end
+
+D = [mean(ablB.LR); mean(ablB.SK)];
+bar(D'); title('Ablation only winter balance'); legend('LR','SK')
+%%
+%%% PLOT
 
 figure(9); clf;
 x = 0.15:0.001:0.8;
@@ -676,10 +695,8 @@ for o = 4:5
     elseif  o == 4; data = ablB.SK.zz;      t = '\sigma_{SWE}';     
     elseif  o == 5; data = ablB.SK.zzinterp;  t = '\sigma_{INT}';    
     end
-for g = 1:3; 
-    glacier = options.glacier{g};
-for d = 1:8; 
-    den = options.DenOpt{d};
+for g = 1:3;     glacier = options.glacier{g};
+for d = 1:8;     den = options.DenOpt{d};
     
 ProbDen.(den).(glacier) = fitdist(data.(den).(glacier)(:),'Normal');
     y = pdf(ProbDen.(den).(glacier),x);  
