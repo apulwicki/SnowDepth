@@ -134,7 +134,7 @@ load TopoSWE.mat SWEzz options
 %     labels(:,3) = {'G13 LZ';'G13 M_1Z';'G13 M_2Z';'G13 UZ'};
     labels(:,1) = {'L';'M';'U';'none'}; 
     labels(:,2) = {'L';'M';'U';'none'};
-    labels(:,3) = {'L';'M_1';'M_2';'U'};
+    labels(:,3) = {'L';'M1';'M2';'U'};
     Fcolor      = [ 7,95,73;
                     13,191,149;
                     141,247,222;
@@ -170,6 +170,18 @@ c = 1;
         end
             legend(labels{1:length(zz),g},'Location','northeast')
     end
+            % ZZ maps
+            X = 0.15;    S = 0.25;
+             ZZmap = imread('/home/glaciology1/Documents/MastersDocuments/Paper I/ZZMapG4.jpeg');
+            axes('position',[X,0.75,S,S]); 
+            imshow(ZZmap);            axis off; 
+             ZZmap = imread('/home/glaciology1/Documents/MastersDocuments/Paper I/ZZMapG2.jpeg');
+            axes('position',[X,0.44,S,S]); 
+            imshow(ZZmap);            axis off;
+             ZZmap = imread('/home/glaciology1/Documents/MastersDocuments/Paper I/ZZMapG13.jpeg');
+            axes('position',[X,0.13,S,S]); 
+            imshow(ZZmap);            axis off;
+
 saveFIG_IGS('ZigzagHistogram',1,17.8);
 
 %% Interp Method - LR & SK map
