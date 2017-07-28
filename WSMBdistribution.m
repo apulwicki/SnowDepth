@@ -358,6 +358,30 @@ Qmean.(den).(glacier) = mean(Qpre);
 
 end
 end
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%
+for d = 1:8;    den = options.DenOpt{d};
+for g = 1:3;    glacier = options.glacier{g};
+    L = fullSK.(den).(glacier).lower95;
+    U = fullSK.(den).(glacier).upper95;
+    D = (U-L);
+    %M = D/2+L;
+    M = fullSK.(den).(glacier).pred;
+    S = D/2/1.96;
+    Snan = S;
+    S(isnan(S)) = 1;
+    S1 = S;
+    ST = sqrt(prod(prod(S))/sum(sum(S)))
+    
+R = randn([options.mapsize(g,:),1000]);
+for i = 1:length(R) 
+    %T.interp.(den)(i).(glacier) = R(:,:,i).*D+L;
+    T.interp.(den)(i).(glacier) = R(:,:,i).*S+M;
+    Q(i) = nanmean(T.interp.(den)(i).(glacier)(:));
+    
+end
+std(Q)
+end
+end
 
 save('Kriging1.mat','Qkrigingzz','tempSKzz','-v7.3')
 %% PLOT -> Kriging
@@ -592,18 +616,8 @@ end
 %%% MAKE NAN MASKS
  load Basic.mat 
 nanMask.G4 = mapNaN.G4;
-    nanMask.G4(1:20,:) = 1;
-    nanMask.G4(:,1:15) = 1;
-    Iy = 40:-2:18;   n = 1;
-    for i = 19:30
-       nanMask.G4(1:Iy(n),i) = 1; 
-       n = n+1;
-    end
-    Iy = 20:2:34;   n = 1;
-    for i = 40:47
-       nanMask.G4(1:Iy(n),i) = 1; 
-       n = n+1;
-    end
+    nanMask.G4(1:38,:) = 1;
+    nanMask.G4(:,1:24) = 1;
 
 nanMask.G2 = mapNaN.G2;
     nanMask.G2(:,100:127) = 1;
@@ -624,8 +638,8 @@ nanMask.G13 = mapNaN.G13;
        n = n+1;
     end
     
-%%% APPLY MASKS TO VAR MAPS
-load varWSMB.mat varMAP options
+%%% APPLY MASKS TO *VAR* MAPS
+%load varWSMB.mat varMAP options
 clear ablB
 % LR
 for u = 1:3
@@ -637,9 +651,9 @@ for d = 1:8; density = options.DenOpt{d};
 for g = 1:3; glacier = options.glacier{g};
     
 for i = 1:1000
-    map = varMAP.(method).(uncert).(density)(i).(glacier);
+    map = varMAP.LR.(uncert).(density)(i).(glacier);
     map(nanMask.(glacier)) = NaN;
-ablB.(method).(uncert).(density).(glacier)(i) = nanmean(map(:));
+ablB.LR.(uncert).(density).(glacier)(i) = nanmean(map(:));
 end
 
 end
@@ -647,7 +661,7 @@ end
 end
 
 % SK
-for u = [1,3]
+for u = 1:3
     if      u == 1; uncert = 'zz';
     elseif  u == 2; uncert = 'interp';
     elseif  u == 3; uncert = 'zzinterp';
@@ -655,17 +669,34 @@ for u = [1,3]
 for d = 1:8; density = options.DenOpt{d};
 for g = 1:3; glacier = options.glacier{g};
     
-for i = 1:1000
-    map = varMAP.(method).(uncert).(density)(i).(glacier).pred;
+    if      u == 1
+        for i = 1:length(varMAP.SK.(uncert).(density))
+    map = varMAP.SK.(uncert).(density)(i).(glacier);
     map(nanMask.(glacier)) = NaN;
-ablB.(method).(uncert).(density).(glacier)(i) = nanmean(map(:));
+ablB.SK.(uncert).(density).(glacier)(i) = nanmean(map(:));  
+        end
+    elseif  u == 2
+    mapL = fullSK.(density).(glacier).lower95;
+    mapL(nanMask.(glacier)) = NaN;
+    mapU = fullSK.(density).(glacier).upper95;
+    mapU(nanMask.(glacier)) = NaN;
+    M    = nanmean(fullSK.(density).(glacier).pred(:));
+    S    = (mapU-mapL)/2/1.96;
+    sigma= sqrt(nansum(nansum(S.^2))/numel(S(~isnan(S))));
+ablB.SK.(uncert).(density).(glacier) = randn(1000,1)*sigma+M;
+
+    elseif  u == 3 
+        for i = 1:length(varMAP.SK.(uncert).(density))
+    map = varMAP.SK.(uncert).(density)(i).(glacier).pred;
+    map(nanMask.(glacier)) = NaN;
+ablB.SK.(uncert).(density).(glacier)(i) = nanmean(map(:));  
+        end
+    end
+end
+end
 end
 
-end
-end
-end
-
-%%% APPLY MASK TO FULL LR AND SK MAPS
+%%% APPLY MASK TO *FULL* LR AND SK MAPS
 
 load Full.mat
 % LR & SK
@@ -686,14 +717,15 @@ bar(D'); title('Ablation only winter balance'); legend('LR','SK')
 %%% PLOT
 
 figure(9); clf;
-x = 0.15:0.001:0.8;
-for o = 4:5
+x = 0:0.001:01.2;
+for o = 1:6
     if      o == 1; data = ablB.LR.zz;      t = '\sigma_{SWE}';     
     elseif  o == 2; data = ablB.LR.interp;  t = '\sigma_{INT}'; 
     elseif  o == 3; data = ablB.LR.zzinterp;  t = '\sigma_{ALL}'; 
         
-    elseif  o == 4; data = ablB.SK.zz;      t = '\sigma_{SWE}';     
-    elseif  o == 5; data = ablB.SK.zzinterp;  t = '\sigma_{INT}';    
+    elseif  o == 4; data = ablB.SK.zz;      t = '\sigma_{SWE}'; 
+    elseif  o == 5; data = ablB.SK.interp;      t = '\sigma_{INT}';         
+    elseif  o == 6; data = ablB.SK.zzinterp;  t = '\sigma_{ALL}';    
     end
 for g = 1:3;     glacier = options.glacier{g};
 for d = 1:8;     den = options.DenOpt{d};
@@ -703,7 +735,7 @@ ProbDen.(den).(glacier) = fitdist(data.(den).(glacier)(:),'Normal');
     
 if  o == 5;    y = [0 y]; x = [x 0];    end
 
-subplot(1,3,o-3) 
+subplot(2,3,o) 
 fill(x,y,options.RGB(g,:),'FaceAlpha',0.2, 'EdgeColor', 'none'); hold on
 %     if      o == 1;         ylabel('LR Density');
 %     elseif  o == 4;         ylabel('SK Density');  
