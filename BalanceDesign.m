@@ -136,7 +136,7 @@ end
 
 subs = fieldnames(subsetRK);
 for s = 1:length(subs)
-for c = 1:10;
+for c = 1:10
             %type = 'centreline';          n = 10:5:50;    
             %type = 'CentreTransect4';     n = 10:10:100;  
             %type = 'CentreTransect3';     n = 10:10:100; 
@@ -298,6 +298,7 @@ end
     subset = 'pattern';
 % load TopoSWE.mat
 % load Subset.mat    
+%SWE = ObsInCell(SWE, topo_sampled);
 
 subs = fieldnames(subsetRK);
 for s = 1:length(subs)
@@ -322,7 +323,6 @@ for c = 1:length(n)
     subsetRmseRK(c).(type).(den).(glacier) = sqrt(mean((SWE(g).swe-SWEpredRK(c).(type).(den).(glacier)).^2));
 
     end
-
     end
 end
 end
