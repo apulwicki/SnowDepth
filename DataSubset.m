@@ -8,8 +8,7 @@ SWE(3)          = input.SWE.G13;
 topo_sampled    = input.topo_sampled; 
 topo_sampled_ns = input.topo_sampled_ns;
 
-for g = 1:3;
-glacier = char(options.glacier(g));
+for g = 1:3;    glacier = char(options.glacier(g));
 
 % Pattern index %
 if strcmp(subset, 'pattern')
@@ -82,7 +81,7 @@ elseif strcmp(subset, 'density')
     T = strfind(label,'.');     T = cellfun(@isempty,T);
     label(T) = {'000.0'}; 
     label = char(label);
-    if g == 1;
+    if g == 1
         T = label(:,3) == '.';      label(T,:) = strcat('0',label(T,:));
         T = label(:,2) == '.';      label(T,:) = strcat('00',label(T,:));
     end
@@ -106,7 +105,7 @@ elseif strcmp(subset, 'topoparam')
     
 elseif strcmp(subset, 'random')
     
-    n = option;
+    n = clt;
     I = randi(length(SWE(g).swe),n,1);
     
 end

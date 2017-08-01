@@ -602,7 +602,9 @@ end
 
 %% Random subsets
 
-input.SWE               = SWE;  
+    load TopoSWE.mat
+    load Full.mat fullSWE option
+input.SWE               = fullSWE.S1;  
 input.topo_sampled      = topo_sampled; 
 input.topo_sampled_ns   = topo_sampled_ns;
 n                       = 10:5:60;
@@ -611,8 +613,8 @@ for i = 1:length(n)
     for x = 1:30
         [ subsetSWE, TOPOdata ] = DataSubset( 'random', n(i), input );
 
-        [ testRK ] = RegressionKriging( subsetSWE, TOPOdata, topo_full, SWE );
-        for g = 1:3;
+        [ testLR ] = LinearRegression( subsetSWE, TOPOdata, topo_full );
+        for g = 1:3
         glacier = char(options.glacier(g));
         Ttemp = KrigingR(subsetSWE.(glacier)(:,1), subsetSWE.(glacier)(:,2:3), glacier);
         testKRIG.(glacier) = Ttemp.pred;
@@ -632,8 +634,7 @@ end
 
 
  figure(1); clf
-for g = 1:3;
-glacier = char(options.glacier(g));
+for g = 1:3;    glacier = char(options.glacier(g));
 
 subplot(1,3,g) 
     plot(n, rmse(:,g),'Color',options.RGB(g,:),'LineWidth',3); hold on; 
@@ -641,8 +642,7 @@ subplot(1,3,g)
 end
 
  figure(1); clf
-for g = 1:3;
-glacier = char(options.glacier(g));
+for g = 1:3;    glacier = char(options.glacier(g));
 
 subplot(1,3,g) 
     plot(n, rmseKRIG(:,g),'LineWidth',3); hold on; 

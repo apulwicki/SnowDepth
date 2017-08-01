@@ -1,9 +1,9 @@
-function [ SWE, topo_sampled ] = ObsInCell( SWE, topo_sampled )
-%UNTITLED3 Summary of this function goes here
-%   Detailed explanation goes here
+function [ SWE, topo_sampled, STD ] = ObsInCell( SWE, topo_sampled )
+%Averages all observation within the same grid cell (identified by a unique
+%grid cell numbers
 global options
 
-if length(SWE) == 3;
+if length(SWE) == 3
     for g = 1:3
     glacier = char(options.glacier(g));
     sameG   = SWE(g).cellN;
@@ -72,7 +72,7 @@ if length(SWE) == 3;
     end
     
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-elseif length(SWE) == 1;
+elseif length(SWE) == 1
     
     for g = 1:3
     glacier = char(options.glacier(g));
@@ -101,11 +101,13 @@ elseif length(SWE) == 1;
     sameG_not = unique(A1(T));
     for i = length(sameG_not):-1:1
        ind = find(sameG_not(i)==A1);
-       data(ind(1,1),1:3)    = mean(data(ind,1:3));
+       %data(ind(1,1),1:3)    = mean(data(ind,1:3));       
+       data(ind(1,1),1:4)    = [mean(data(ind,1:3)) std(data(ind,1))];
        data(ind(2:end,1),:)  = [];
        A1(ind(2:end,1))      = [];
     end
-    SWE.(glacier) = data;
+    SWE.(glacier) = data(:,1:3);
+    STD.(glacier) = data(:,4);
     end
    
     
