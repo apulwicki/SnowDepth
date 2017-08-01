@@ -11,7 +11,7 @@ run Import_Zigzag.m         %Imports zigzag snow depth and measurement location 
 run Import_SWE.m            %Converts to SWE and condences data
 
 den = options.DenOpt{d-1};
-for g = 1:3; 
+for g = 1:3
     glacier = options.glacier{g};  fullSWE.(den).(glacier) = SWE(g); 
     fullSWE.(den).input.(glacier) = [fullSWE.(den).(glacier).swe, fullSWE.(den).(glacier).utm(:,1:2), fullSWE.(den).(glacier).cellN];
 end
