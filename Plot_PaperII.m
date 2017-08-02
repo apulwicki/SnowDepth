@@ -1,6 +1,6 @@
     %% Load data and calculate
 load TopoBMS_MLR.mat SWE options
-load Full.mat fullLR
+load Full.mat fullLR fullSK
 load Subset.mat
 
 subsets = fieldnames(subsetLR); subsets = sort(subsets); 
@@ -34,7 +34,28 @@ rmseLR = mean(rmseLR,2);
 sweLR = mean(sweLR,2);    
 WBerr = [0.029,0.049,0.032]*1.96;
 
-%% Plot -> RMSE and Winter balance
+    %Theta 
+for g = 1:3;    glacier = options.glacier{g};
+for c = 1:length(subsetSK)
+    for f = 1:length(subsets)
+    for d = 1:8
+        den = options.DenOpt{d};
+    theta.(glacier)(c,f,d) = subsetSK(c).(subsets{f}).(den).Model(g).theta;
+    end
+    end
+end
+end
+
+for g = 1:3;    glacier = options.glacier{g};
+for d = 1:8;    den = options.DenOpt{d};
+fullTheta(d,g) = fullSK.(den).Model(g).theta;
+end
+theta.(glacier) = mean(theta.(glacier),3);
+end
+
+
+%% Plot -> RMSE and Winter balance and theta (range length)
+    %Accumulation subsets are solid lines, no accumulation is dashed lines
 figure(1); clf
     cols = [84 13 110; 238 66 102; 
             255 210 63; 72 226 190; 
@@ -42,7 +63,7 @@ figure(1); clf
 
 for g = 1:3;     glacier = options.glacier{g};
     %RMSE
- subplot(2,3,g)
+ subplot(3,3,g)
  for l = 1:Nhalf
     p(l) = plot(n(:,l),Trmse.(glacier)(:,l),'Color',cols(l,:),'LineWidth',3); hold on
     plot(n(:,l+Nhalf),Trmse.(glacier)(:,l+Nhalf),'--','Color',cols(l,:),'LineWidth',3)
@@ -59,7 +80,7 @@ for g = 1:3;     glacier = options.glacier{g};
         set(gca,'YTick',(0:0.01:1))
         
     %Winter balance    
- subplot(2,3,g+3)
+ subplot(3,3,g+3)
  for l = 1:Nhalf
     plot(n(:,l),Tswe.(glacier)(:,l),'Color',cols(l,:),'LineWidth',3); hold on
     plot(n(:,l+Nhalf),Tswe.(glacier)(:,l+Nhalf),'--','Color',cols(l,:),'LineWidth',3)
@@ -70,8 +91,26 @@ for g = 1:3;     glacier = options.glacier{g};
          [161, 162, 163]/255);  set(h,'facealpha',.5); set(h,'EdgeColor','none')
      
 
-        ylabel('Winter balance (m w.e.)'); xlabel('Sample Size')
+        ylabel('Winter balance (m w.e.)'); %xlabel('Sample Size')
         ylim([0.2 0.8]);
+        
+    %Range length (theta)    
+
+subplot(3,3,g+6)
+for l = 1:Nhalf
+    plot(n(:,l),theta.(glacier)(:,l),'Color',cols(l,:),'LineWidth',3); hold on
+    plot(n(:,l),theta.(glacier)(:,l+Nhalf),'--','Color',cols(l,:),'LineWidth',3); hold on
+end
+    ylabel('\theta (m)'); xlabel('Sample size')
+%fill([min(T) min(T)],[max(T) max(T)],[207, 207, 209]);
+    
+    %plot([0 100],[T(g) T(g)],'k', 'LineWidth',3)
+        
+%     insetx = [.27, .55, .83];
+%     axes('Position',[insetx(g) .67 .06 .1]); box on
+%     histogram(theta.(glacier)(:,:),15, 'FaceColor', options.RGB(g,:))
+%         ylabel('Frequency'); xlabel('\theta (m)')
+
 end
 
     %saveFIG('SubsetInterpSizeCompile',14)
