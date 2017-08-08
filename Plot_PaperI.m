@@ -1,71 +1,3 @@
-%% Topo Params - Full vs measured dist
-clear
-load TopoSWE.mat topo* options
-    
-figure(1); clf
-    header = fieldnames(topo_full.G4);
-    n = 1;  nLab = 1:3:21;
-for r = 1:4 %length(header)
-    param = char(header(r));
-    for i = 1:3
-        name = char(options.glacier(i)); 
-        %a(i) = subplot(length(header),3,n);
-        a(i) = subplot(4,3,n);
-            h(i).f = histogram(topo_full_ns.(name).(param)(:),25,'FaceColor','w'); hold on
-            h(i).s = histogram(topo_sampled_ns.(name).(param),25,'FaceColor','k'); 
-            
-            hist_stats_full.(name)(r,:) = [nanmean(topo_full_ns.(name).(param)(:)),...
-                                            nanstd(topo_full_ns.(name).(param)(:)),...
-                                            skewness(topo_full_ns.(name).(param)(:)),...
-                                            kurtosis(topo_full_ns.(name).(param)(:))];
-            hist_stats_sample.(name)(r,:) = [nanmean(topo_sampled_ns.(name).(param)(:)),...
-                                            nanstd(topo_sampled_ns.(name).(param)(:)),...
-                                            skewness(topo_sampled_ns.(name).(param)(:)),...
-                                            kurtosis(topo_sampled_ns.(name).(param)(:))];                            
-                                        
-            xlabel(char(options.topoVarsUnits(r)));     
-            if ismember(n,nLab); ylabel('Frequency'); end
-            axis tight
-       %     legend('Full range','Sampled');
-    n = n+1;        
-    end
-    set([h(1).f h(1).s h(2).f h(2).s h(3).s], 'BinEdges', h(3).f.BinEdges)
-    linkaxes(flip(a));
-end 
-saveFIG_IGS('TopoParamsSampled1',2,20)
-
-
-figure(1); clf
-n = 1;
-for r = 5:7 %length(header)
-    param = char(header(r));
-    for i = 1:3
-        name = char(options.glacier(i)); 
-        a(i) = subplot(3,3,n);
-            h(i).f = histogram(topo_full_ns.(name).(param)(:),25,'FaceColor','w'); hold on
-            h(i).s = histogram(topo_sampled_ns.(name).(param),25,'FaceColor','k'); 
-            
-            hist_stats_full.(name)(r,:) = [nanmean(topo_full_ns.(name).(param)(:)),...
-                                            nanstd(topo_full_ns.(name).(param)(:)),...
-                                            skewness(topo_full_ns.(name).(param)(:)),...
-                                            kurtosis(topo_full_ns.(name).(param)(:))];
-            hist_stats_sample.(name)(r,:) = [nanmean(topo_sampled_ns.(name).(param)(:)),...
-                                            nanstd(topo_sampled_ns.(name).(param)(:)),...
-                                            skewness(topo_sampled_ns.(name).(param)(:)),...
-                                            kurtosis(topo_sampled_ns.(name).(param)(:))];                            
-                                        
-            xlabel(char(options.topoVarsUnits(r)));     
-            if ismember(n,nLab); ylabel('Frequency'); end
-            axis tight
-       %     legend('Full range','Sampled');
-    n = n+1;        
-    end
-    set([h(1).f h(1).s h(2).f h(2).s h(3).s], 'BinEdges', h(3).f.BinEdges)
-    linkaxes(flip(a));
-end 
-saveFIG_IGS('TopoParamsSampled2',2,15)
-
-
 %% Measurement - Depth Boxplot and SP vs FS
     clear
 load TopoSWE.mat allDepth options Density
@@ -78,7 +10,7 @@ load TopoSWE.mat allDepth options Density
              [allDepth.G2(:); nan(lG13-lG2,1)],...
               allDepth.G13(:)];
 figure(1); clf
-subplot(1,2,1)
+subplot(2,1,1)
 boxplot(toBox,'labels',{'Glacier 4','Glacier 2','Glacier 13'},...
                'BoxStyle','outline','Colors',options.RGB,'Width',0.35,...
                'OutlierSize',4,'Symbol','o')
@@ -95,11 +27,11 @@ boxplot(toBox,'labels',{'Glacier 4','Glacier 2','Glacier 13'},...
                options.RGB(3,:);options.RGB(3,:)]; 
     markerS = {'s','o','s','o','^','s'};
 
-subplot(1,2,2)
+subplot(2,1,2)
 for i = 1:length(SP)
 errorbarxy(SP(i),FS(i),errorSP(i,2),errorFS(i,2),errorSP(i,1),errorFS(i,1),...
                 'Color','k','LineStyle','none','Marker',markerS{i},...
-                'MarkerFaceColor',markerC(i,:),'LineWidth',1,'MarkerSize',9,...
+                'MarkerFaceColor',markerC(i,:),'LineWidth',1,'MarkerSize',8,...
                 'MarkerEdgeColor','none'); hold on
 end
     axis([220 400 220 400])
@@ -123,11 +55,11 @@ end
     end
     ax = gca; ax.XTick = 220:40:400; ax.YTick = 220:40:400;
 
-saveFIG_IGS('DepthBoxplot_SPvsFS',2,8.6)
+saveFIG_IGS('DepthBoxplot_SPvsFS',1,15)
 
 %% Grid Cell - Zigzag histrogram
-    clear
-load TopoSWE.mat SWEzz options
+    clear; close all
+load TopoSWE.mat SWEzz 
     
 %     labels(:,1) = {'G4 LZ';'G4 MZ';'G4 UZ';'none'}; 
 %     labels(:,2) = {'G2 LZ';'G2 MZ';'G2 UZ';'none'};
@@ -151,7 +83,7 @@ c = 1;
     for g = 1:3
         zz = categories(SWEzz(g).ZZ);
 
-    subplot(3,1,g)
+    subplot(1,3,g)
         for j = 1:length(zz)
             ZZdata = SWEzz(g).swe(SWEzz(g).ZZ==char(zz(j)));
             ZZdata = (ZZdata-mean(ZZdata));%/mean(ZZdata)*100;%/std(ZZdata);
@@ -159,41 +91,51 @@ c = 1;
                 if j ==1;   bins    = 20;   %round(sqrt(length(SWEzz(g).swe)));
                             edges   = linspace(-0.15,0.15,bins); end
                             N       = histcounts(ZZdata,edges);   
-            fill((edges(:,1:end-1)+edges(:,2:end))/2,N/sum(N),Fcolor(c,:),...
+            fill([0 (edges(:,1:end-1)+edges(:,2:end))/2 0],[0 N/sum(N) 0],Fcolor(c,:),...
                   'EdgeColor','none','FaceAlpha',0.75); hold on 
-            xlabel('Zigzag SWE distribution (m w.e.)');     ylabel('Probability')
+            xlabel([{'Zigzag SWE'}, {'distribution (m w.e.)'}]);     ylabel('Probability')
             grid on
             xlim([-0.15 0.15])
             %title(options.glacier{g})
             %ax = gca; ax.XTick = [-40:20:40];
             c = c+1;
         end
-            legend(labels{1:length(zz),g},'Location','northeast')
+            L = legend(labels{1:length(zz),g},'Location','northeast');
+                X = [0.27, 0.56, 0.86];
+                Y = [0.83, 0.83, 0.78];
+            Lpost = [X(g), Y(g), 0.05, 0.05];
+            set(L, 'Position', Lpost)
     end
             % ZZ maps
-            X = 0.15;    S = 0.25;
-             ZZmap = imread('/home/glaciology1/Documents/MastersDocuments/Paper I/ZZMapG4.jpeg');
-            axes('position',[X,0.75,S,S]); 
+            Y = 0.6;    S = 0.32;
+             %ZZmap = imread('/home/glaciology1/Documents/MastersDocuments/Paper I/ZZMapG4.jpeg');
+             ZZmap = imread('/Users/Alexandra/Documents/SFU/MastersDocuments/Paper I/ZZMapG4.jpeg');
+            axes('position',[0.051,Y+0.05,S*0.8,S*0.8]); 
             imshow(ZZmap);            axis off; 
-             ZZmap = imread('/home/glaciology1/Documents/MastersDocuments/Paper I/ZZMapG2.jpeg');
-            axes('position',[X,0.44,S,S]); 
+             %ZZmap = imread('/home/glaciology1/Documents/MastersDocuments/Paper I/ZZMapG2.jpeg');
+             ZZmap = imread('/Users/Alexandra/Documents/SFU/MastersDocuments/Paper I/ZZMapG2.jpeg');
+            axes('position',[0.31,Y,S,S]); 
             imshow(ZZmap);            axis off;
-             ZZmap = imread('/home/glaciology1/Documents/MastersDocuments/Paper I/ZZMapG13.jpeg');
-            axes('position',[X,0.13,S,S]); 
+             %ZZmap = imread('/home/glaciology1/Documents/MastersDocuments/Paper I/ZZMapG13.jpeg');
+             ZZmap = imread('/Users/Alexandra/Documents/SFU/MastersDocuments/Paper I/ZZMapG13.jpeg');
+            axes('position',[0.565,Y-0.025,S*1.1,S*1.1]); 
             imshow(ZZmap);            axis off;
 
-saveFIG_IGS('ZigzagHistogram',1,17.8);
+saveFIG_IGS('ZigzagHistogram',2,6);
 
 %% Interp Method - LR & SK map
     clear
-load Full.mat fullLR fullSK
+load Full.mat fullLR fullSK options
 load TopoSWE.mat SWE
+for g = 1:3;    glacier = options.glacier{g};
+    inputSK.(glacier) = fullSK.S2.(glacier).pred;
+end
 
 figure(6); clf
 PlotTopoParameter_IGS(fullLR.S2, 'modelledSWE', 'SWE (m w.e.)', SWE, 'black', 'massB')
 	saveFIG_IGS('LR_map',2,8.6)
 figure(6); clf
-PlotTopoParameter_IGS(fullSK.S2, 'modelledSWE', 'SWE (m w.e.)', SWE, 'black', 'massB')
+PlotTopoParameter_IGS(inputSK, 'modelledSWE', 'SWE (m w.e.)', SWE, 'black', 'massB')
 	saveFIG_IGS('SK_map',2,8.6)
 
 %% Interp Method - Observed vs Estimated SWE
@@ -260,7 +202,8 @@ figure(8); clf
 aboxplot(BETAS,'labels',options.topoVars(incB), ...
          'Colormap', options.RGB, 'OutlierMarkerSize',8,...
          'WidthS',1.9,'WidthE',1.3); % Advanced box plot
-        legend('Glacier 4','Glacier 2','Glacier 13'); % Add a legend
+        L = legend('G4','G2','G13'); % Add a legend
+            set(L, 'Position', [0.8, 0.85, 0.05, 0.05])
         ylabel('Regression coefficient'); hold on 
         
         ylim([-0.06 0.12])
@@ -269,11 +212,13 @@ aboxplot(BETAS,'labels',options.topoVars(incB), ...
         line([i+0.5 i+0.5],ylim,'Color',[0 0 0],'LineStyle','--','LineWidth', 0.5)
         end
  
-saveFIG_IGS('BetaCoeffs',1,8.6)
+saveFIG_IGS('BetaCoeffs',1,8)
 
 %% WSMB Distribution - LR & SK sources of var
 
 %clear; load varWSMB.mat varB options 
+
+ylimmax = [50, 20, NaN, 50, 5];
 
 figure(9); clf;
 x = 0:0.001:1.2;
@@ -283,10 +228,8 @@ for o = [1,2,4,5]
     elseif  o == 4; data = varB.SK.zz;      t = '\sigma_{SWE}';     
     elseif  o == 5; data = varB.SK.interp;  t = '\sigma_{INT}';    
     end
-for g = 1:3; 
-    glacier = options.glacier{g};
-for d = 1:8; 
-    den = options.DenOpt{d};
+for g = 1:3;     glacier = options.glacier{g};
+for d = 1:8;     den = options.DenOpt{d};
     
 ProbDen.(den).(glacier) = fitdist(data.(den).(glacier)(:),'Normal');
     y = pdf(ProbDen.(den).(glacier),x);  
@@ -299,10 +242,10 @@ fill(x,y,options.RGB(g,:),'FaceAlpha',0.2, 'EdgeColor', 'none'); hold on
     elseif  o == 4;         ylabel('SK Density');  
     end
     if  o == 4||o == 5; xlabel('WSMB (m w.e.)');  end
-    
 end
+    ylim([0 ylimmax(o)]); 
 end
-    xlim([min(x) max(x)])
+    xlim([min(x) 1])
     title(t);
 end
 
@@ -326,17 +269,21 @@ ProbDenSK.(glacier) = fitdist(TSK.(glacier)(:),'Normal');
     std(yLR)
 subplot(2,3,3) 
 p(g) = fill(x,yLR,options.RGB(g,:),'FaceAlpha',0.8, 'EdgeColor', 'none'); hold on
-    if g == 3; legend(p,options.glacier,'location','northeast'); end
-    xlim([min(x),max(x)])
+    if g == 3
+        L = legend(p,options.glacier,'location','northeast'); 
+        set(L, 'Position', [0.90, 0.74, 0.01, 0.01])
+    end
+    ylim([0 15])
+    xlim([min(x) 1])
     title('\sigma_{\rho} & \sigma_{SWE} & \sigma_{INT} ')
 subplot(2,3,6)     
 fill([x 0],[0 ySK],options.RGB(g,:),'FaceAlpha',0.8, 'EdgeColor', 'none'); hold on
     xlabel('WSMB (m w.e.)'); 
     title('\sigma_{\rho} & \sigma_{SWE} & \sigma_{INT} ')
-    xlim([min(x),max(x)])
+    xlim([min(x) 1])
 end
 
-%saveFIG_IGS('WSMBDist',2,12)
+saveFIG_IGS('WSMBDist',2,8)
 
 %% WSMB Distribution - total spatial variability 
 
@@ -365,6 +312,8 @@ PlotTopoParameter_IGS(DPlot,'summer','Variability',SWE,'none','nomassB')
 end
 
 %% Accumulation gradient
+run OPTIONS
+
 taylor(:,1) = [571731.48;577258.98;580978.1;587346.4;591126.5;597353.2;601796.1;608101];
 taylor(:,2) = [6737517.35;6733918.68;6730286.9;6730436.4;6724959.2;6730694.1;6734532.2;6736574.4];
 taylor(:,3) = [2620;2640;2380;2225;2070;1915;1765;1615];
@@ -409,4 +358,71 @@ L(1) = plot(Dt,taylor(:,6),'.', 'MarkerSize',13, 'Color',[68, 181, 226]/255); ho
             'HorizontalAlignment','right','FontSize',9,'FontName','Arial');
     end
         
-saveFIG_IGS('AccumGrad',1,8.6)
+saveFIG_IGS('AccumGrad',1,7.8)
+
+%% Topo Params - Full vs measured dist
+clear
+load TopoSWE.mat topo* options
+    
+figure(1); clf
+    header = fieldnames(topo_full.G4);
+    n = 1;  nLab = 1:3:21;
+for r = 1:4 %length(header)
+    param = char(header(r));
+    for i = 1:3
+        name = char(options.glacier(i)); 
+        %a(i) = subplot(length(header),3,n);
+        a(i) = subplot(4,3,n);
+            h(i).f = histogram(topo_full_ns.(name).(param)(:),25,'FaceColor','w'); hold on
+            h(i).s = histogram(topo_sampled_ns.(name).(param),25,'FaceColor','k'); 
+            
+            hist_stats_full.(name)(r,:) = [nanmean(topo_full_ns.(name).(param)(:)),...
+                                            nanstd(topo_full_ns.(name).(param)(:)),...
+                                            skewness(topo_full_ns.(name).(param)(:)),...
+                                            kurtosis(topo_full_ns.(name).(param)(:))];
+            hist_stats_sample.(name)(r,:) = [nanmean(topo_sampled_ns.(name).(param)(:)),...
+                                            nanstd(topo_sampled_ns.(name).(param)(:)),...
+                                            skewness(topo_sampled_ns.(name).(param)(:)),...
+                                            kurtosis(topo_sampled_ns.(name).(param)(:))];                            
+                                        
+            xlabel(char(options.topoVarsUnits(r)));     
+            if ismember(n,nLab); ylabel('Frequency'); end
+            axis tight
+       %     legend('Full range','Sampled');
+    n = n+1;        
+    end
+    set([h(1).f h(1).s h(2).f h(2).s h(3).s], 'BinEdges', h(3).f.BinEdges)
+    linkaxes(flip(a));
+end 
+saveFIG_IGS('TopoParamsSampled1',2,20)
+
+
+figure(1); clf
+n = 1;
+for r = 5:7 %length(header)
+    param = char(header(r));
+    for i = 1:3
+        name = char(options.glacier(i)); 
+        a(i) = subplot(3,3,n);
+            h(i).f = histogram(topo_full_ns.(name).(param)(:),25,'FaceColor','w'); hold on
+            h(i).s = histogram(topo_sampled_ns.(name).(param),25,'FaceColor','k'); 
+            
+            hist_stats_full.(name)(r,:) = [nanmean(topo_full_ns.(name).(param)(:)),...
+                                            nanstd(topo_full_ns.(name).(param)(:)),...
+                                            skewness(topo_full_ns.(name).(param)(:)),...
+                                            kurtosis(topo_full_ns.(name).(param)(:))];
+            hist_stats_sample.(name)(r,:) = [nanmean(topo_sampled_ns.(name).(param)(:)),...
+                                            nanstd(topo_sampled_ns.(name).(param)(:)),...
+                                            skewness(topo_sampled_ns.(name).(param)(:)),...
+                                            kurtosis(topo_sampled_ns.(name).(param)(:))];                            
+                                        
+            xlabel(char(options.topoVarsUnits(r)));     
+            if ismember(n,nLab); ylabel('Frequency'); end
+            axis tight
+       %     legend('Full range','Sampled');
+    n = n+1;        
+    end
+    set([h(1).f h(1).s h(2).f h(2).s h(3).s], 'BinEdges', h(3).f.BinEdges)
+    linkaxes(flip(a));
+end 
+saveFIG_IGS('TopoParamsSampled2',2,15)

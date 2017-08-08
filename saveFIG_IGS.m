@@ -17,10 +17,10 @@ set(findall(fig,'-property','FontSize'),'FontSize',9)
 set(findall(fig,'-property','FontName'),'FontName','Arial')
 
 %print(['/home/glaciology1/Documents/MastersDocuments/Paper I/', filename],'-dtiff'); 
-print(['/home/glaciology1/Documents/MastersDocuments/Paper I/', filename],'-dpdf','-fillpage'); 
-%print(['/Users/Alexandra/Documents/SFU/MastersDocuments/Paper I/', filename],'-dpdf','-fillpage'); 
-print([options.path1, filename],'-dpdf','-fillpage'); 
-print([options.path2, filename],'-dpdf','-fillpage');  
-print([options.path3, filename],'-dpdf','-fillpage');  
+%print(['/home/glaciology1/Documents/MastersDocuments/Paper I/', filename],'-dpdf','-fillpage'); 
+print(['/Users/Alexandra/Documents/SFU/MastersDocuments/Paper I/', filename],'-dpdf','-fillpage'); 
+% print([options.path1, filename],'-dpdf','-fillpage'); 
+% print([options.path2, filename],'-dpdf','-fillpage');  
+% print([options.path3, filename],'-dpdf','-fillpage');  
 
 end

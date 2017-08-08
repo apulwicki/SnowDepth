@@ -34,23 +34,18 @@ width  = 0.3;
 height = 2.3;
 ystart = -0.64;
 pos_axis    = [0.00     ystart   width     height; 
-               0.15     ystart   width     height; 
-               0.46     ystart   width     height];
+               0.08     ystart   width     height; 
+               0.33     ystart   width     height];
 
-%phasemap needs
-if  strcmp(paramName, 'banana') %None need circular phase map, the option remains though
+%Colormap choice
+if  strcmp(paramName, 'banana') 
     Cmap = phasemap;
-elseif  strcmp(paramName, 'hot') %None need circular phase map, the option remains though
+elseif  strcmp(paramName, 'hot') 
     Cmap = hot;
-elseif  strcmp(paramName, 'summer') %None need circular phase map, the option remains though
-    Cmap = cbrewer('seq', 'BuPu', 100);
+elseif  strcmp(paramName, 'summer') 
+    Cmap = cbrewer('seq', 'BuPu', 100,'PCHIP');
 else
     Cmap = parula;
-end
-
-%other color schemes
-if  strcmp(paramName, 'uncertainity')
-    Cmap = cbrewer('seq','OrRd',50,'PCHIP');
 end
  
 for i = 1:3
@@ -63,7 +58,7 @@ for i = 1:3
                 if ~all(isnan(topoParam.(name)(:)))
                 h = imagesc(data); hold on
                 set(h,'alphadata',~isnan(data)); end
-                
+                colormap(Cmap)
                         minE = min(rig.(name)(:,1));
                         minN = min(rig.(name)(:,2));
                     Eg = (rig.(name)(:,1) - minE)/40;
@@ -92,14 +87,11 @@ for i = 1:3
                  Na = (SWE(i).utm(:,2)-minN)/40; N = max(Ng)-Na;
                 if      strcmp(sweDOTS,'black')
                     plot(E,N,'k.', 'MarkerSize',2); hold on
-                    %caxis([x_min x_max]); caxis(caxis); 
                 elseif  strcmp(sweDOTS,'colour')
                     INN = ~isnan(SWE(i).swe);
                     scatter(E(INN),N(INN), 13, SWE(i).swe(INN),'filled'); 
-                    %caxis([minSWE maxSWE]); caxis(caxis); 
                 elseif  strcmp(sweDOTS,'sweONswe')
                     scatter(E,N , 13, SWE(i).swe,'filled'); 
-                   % caxis([x_min x_max]); caxis(caxis);
                 elseif   strcmp(sweDOTS,'symmetric')
                     plot(E,N,'k.', 'MarkerSize',5); hold on
                         mc = max(abs([x_min x_max]));
@@ -116,13 +108,13 @@ end
 
 %Colour bar
     c = colorbar('location','eastoutside');  ylabel(c,cLabel)
-    set(c,'Position',[0.88 0.2 0.03 0.55]);
+    set(c,'Position',[0.64 0.2 0.03 0.55]);
 
 %Flow direction
 if ~all(isnan(topoParam.(name)(:)))
     annotation('arrow',[.11 .15],[.35 .25]) %G4
-    annotation('arrow',[.34 .26],[.55 .61]) %G2
-    annotation('arrow',[.72 .65],[.47 .59]) %G13
+    annotation('arrow',[.29 .21],[.52 .58]) %G2
+    annotation('arrow',[.59 .52],[.45 .58]) %G13
 elseif all(isnan(topoParam.(name)(:)))
     annotation('arrow',[.13 .17],[.52 .42]) %G4
     annotation('arrow',[.39 .31],[.55 .61]) %G2
@@ -130,38 +122,33 @@ elseif all(isnan(topoParam.(name)(:)))
 end  
 
 % Glacier labels
-    annotation('textbox',[.02 .05 .1 .1],'String', 'Glacier 4','EdgeColor','none','FontWeight','bold')
-    annotation('textbox',[.27 .05 .1 .1],'String', 'Glacier 2','EdgeColor','none','FontWeight','bold')
-    annotation('textbox',[.55 .05 .1 .1],'String', 'Glacier 13','EdgeColor','none','FontWeight','bold')
+    annotation('textbox',[.06 .03 .1 .1],'String', 'Glacier 4','EdgeColor','none','FontWeight','bold')
+    annotation('textbox',[.24 .03 .1 .1],'String', 'Glacier 2','EdgeColor','none','FontWeight','bold')
+    annotation('textbox',[.43 .03 .1 .1],'String', 'Glacier 13','EdgeColor','none','FontWeight','bold')
 
 % Winter balance
      if strcmp(massB, 'massB')
-     annotation('textbox',[.02 0 .1 .1],'String',...
+     annotation('textbox',[.06 0 .1 .1],'String',...
          [num2str(round(nanmean(topoParam.G4(:)),2), '%.2f'),' m w.e.'],'EdgeColor','none')    
-     annotation('textbox',[.30 0 .1 .1],'String',...
+     annotation('textbox',[.24 0 .1 .1],'String',...
          [num2str(round(nanmean(topoParam.G2(:)),2), '%.2f'),' m w.e.'],'EdgeColor','none')    
-     annotation('textbox',[.59 0 .1 .1],'String',...
+     annotation('textbox',[.43 0 .1 .1],'String',...
          [num2str(round(nanmean(topoParam.G13(:)),2), '%.2f'),' m w.e.'],'EdgeColor','none')    
      end
 % North arrow
     Narrow = imread('Narrow.jpg');
-    a = axes('position',[0.855,0.82,0.12,0.12]); 
+    a = axes('position',[0.60,0.82,0.12,0.12]); 
     imshow(Narrow, Cmap);
     colormap(a,gray)    
     axis off; 
 
 % Scale bar
-    %a = axes(subfig); 
-    axes('position',[0.7,0.82,0.2,0.12]); axis off; 
+    axes('position',[0.45,0.82,0.2,0.12]); axis off; 
     scalebar('ScaleLength', 0.4, 'Location',[0.58,0.55])
-    annotation(gcf,'textbox',[0.8,0.83,.08,.05],...
+    annotation(gcf,'textbox',[0.53,0.83,.08,.05],...
                 'String',{'2 km'}, 'LineStyle','none','FitBoxToText','off','EdgeColor',[1 1 1],'BackgroundColor',[1 1 1]); hold on
-    annotation(gcf,'textbox',[0.727,0.83,.05,.05],...
+    annotation(gcf,'textbox',[0.478,0.83,.05,.05],...
                 'String',{'0'}, 'LineStyle','none','FitBoxToText','off','EdgeColor',[1 1 1],'BackgroundColor',[1 1 1]); hold on
-
-% Font size and image size           
-%     fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18)
-%     fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 13 6];
 
 end
 
