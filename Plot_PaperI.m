@@ -15,6 +15,8 @@ boxplot(toBox,'labels',{'Glacier 4','Glacier 2','Glacier 13'},...
                'BoxStyle','outline','Colors',options.RGB,'Width',0.35,...
                'OutlierSize',4,'Symbol','o')
     ylabel('Snow depth (cm)');
+    annotation('textbox',[.15 .87 .1 .1],'String', 'a','EdgeColor','none','FontWeight','bold')
+
 
  %SP vs FS
     den     = [nan(6,1), cell2mat(Density.pitANDtube(:,2:10))];
@@ -54,6 +56,8 @@ end
         end
     end
     ax = gca; ax.XTick = 220:40:400; ax.YTick = 220:40:400;
+        
+    annotation('textbox',[.15 .39 .1 .1],'String', 'b','EdgeColor','none','FontWeight','bold')
 
 saveFIG_IGS('DepthBoxplot_SPvsFS',1,15)
 
@@ -100,27 +104,39 @@ c = 1;
             %ax = gca; ax.XTick = [-40:20:40];
             c = c+1;
         end
-            L = legend(labels{1:length(zz),g},'Location','northeast');
-                X = [0.27, 0.56, 0.86];
-                Y = [0.83, 0.83, 0.78];
+            [L,icons] = legend(labels{1:length(zz),g},'Location','northeast');
+                X = [0.31, 0.59, 0.865];
+                Y = [0.75, 0.75, 0.70];
             Lpost = [X(g), Y(g), 0.05, 0.05];
             set(L, 'Position', Lpost)
+                L.Box='off';
+                for i = length(icons)/2+1:length(icons)
+                icons(i).Vertices(3:4,1) = icons(i).Vertices(3:4,1)/2;
+                end
+                for i = 1:length(icons)/2
+                icons(i).Position(1) = icons(i).Position(1)/2;
+                end
     end
             % ZZ maps
             Y = 0.6;    S = 0.32;
-             %ZZmap = imread('/home/glaciology1/Documents/MastersDocuments/Paper I/ZZMapG4.jpeg');
-             ZZmap = imread('/Users/Alexandra/Documents/SFU/MastersDocuments/Paper I/ZZMapG4.jpeg');
+             ZZmap = imread('/home/glaciology1/Documents/MastersDocuments/Paper I/ZZMapG4.jpeg');
+             %ZZmap = imread('/Users/Alexandra/Documents/SFU/MastersDocuments/Paper I/ZZMapG4.jpeg');
             axes('position',[0.051,Y+0.05,S*0.8,S*0.8]); 
             imshow(ZZmap);            axis off; 
-             %ZZmap = imread('/home/glaciology1/Documents/MastersDocuments/Paper I/ZZMapG2.jpeg');
-             ZZmap = imread('/Users/Alexandra/Documents/SFU/MastersDocuments/Paper I/ZZMapG2.jpeg');
+             ZZmap = imread('/home/glaciology1/Documents/MastersDocuments/Paper I/ZZMapG2.jpeg');
+             %ZZmap = imread('/Users/Alexandra/Documents/SFU/MastersDocuments/Paper I/ZZMapG2.jpeg');
             axes('position',[0.31,Y,S,S]); 
             imshow(ZZmap);            axis off;
-             %ZZmap = imread('/home/glaciology1/Documents/MastersDocuments/Paper I/ZZMapG13.jpeg');
-             ZZmap = imread('/Users/Alexandra/Documents/SFU/MastersDocuments/Paper I/ZZMapG13.jpeg');
+             ZZmap = imread('/home/glaciology1/Documents/MastersDocuments/Paper I/ZZMapG13.jpeg');
+             %ZZmap = imread('/Users/Alexandra/Documents/SFU/MastersDocuments/Paper I/ZZMapG13.jpeg');
             axes('position',[0.565,Y-0.025,S*1.1,S*1.1]); 
             imshow(ZZmap);            axis off;
 
+    annotation('textbox',[.13 .95 .1 .1],'String', 'a','EdgeColor','none','FontWeight','bold')
+    annotation('textbox',[.41 .95 .1 .1],'String', 'b','EdgeColor','none','FontWeight','bold')
+    annotation('textbox',[.69 .95 .1 .1],'String', 'c','EdgeColor','none','FontWeight','bold')
+            
+            
 saveFIG_IGS('ZigzagHistogram',2,6);
 
 %% Interp Method - LR & SK map
@@ -168,10 +184,12 @@ subplot(2,3,g+k)
         %title(['Glacier ',glacier(2:end)])
                 axis square;    box on;     grid on
         b = gca; legend(b,'off');
-        %dim = [b.Position(1)+0.01 b.Position(2)+.37 .3 .3];
-        %annotation('textbox',dim,'String', ['R^2=',num2str(round(G.(glacier).rsquare,2))],'FitBoxToText','on')
 end
 end
+%         locX = [];  
+%     annotation('textbox',[.06 .03 .1 .1],'String', 'Glacier 4','EdgeColor','none','FontWeight','bold')
+%     annotation('textbox',[.24 .03 .1 .1],'String', 'Glacier 2','EdgeColor','none','FontWeight','bold')
+%     annotation('textbox',[.43 .03 .1 .1],'String', 'Glacier 13','EdgeColor','none','FontWeight','bold')
 
 saveFIG_IGS(['observedVSestimated_',den],2,10)
 
@@ -203,8 +221,9 @@ aboxplot(BETAS,'labels',options.topoVars(incB), ...
          'Colormap', options.RGB, 'OutlierMarkerSize',8,...
          'WidthS',1.9,'WidthE',1.3); % Advanced box plot
         L = legend('G4','G2','G13'); % Add a legend
-            set(L, 'Position', [0.8, 0.85, 0.05, 0.05])
-        ylabel('Regression coefficient'); hold on 
+            set(L, 'Position', [0.75, 0.785, 0.05, 0.05])
+
+            ylabel('Regression coefficient'); hold on 
         
         ylim([-0.06 0.12])
         line(xlim,[0 0],'Color',[0 0 0],'LineStyle','--','LineWidth', 0.5)
@@ -218,14 +237,17 @@ saveFIG_IGS('BetaCoeffs',1,8)
 
 %clear; load varWSMB.mat varB options 
 
+    close all
 ylimmax = [50, 20, NaN, 50, 5];
+legendX = [0.32, 0.60, 0, 0.32, 0.60];
+legendY = [0.78, 0.78, 0, 0.31, 0.31];
 
 figure(9); clf;
 x = 0:0.001:1.2;
 for o = [1,2,4,5]
-    if      o == 1; data = varB.LR.zz;      t = '\sigma_{SWE}';     
+    if      o == 1; data = varB.LR.zz;      t = '\sigma_{GC}';     
     elseif  o == 2; data = varB.LR.interp;  t = '\sigma_{INT}';   
-    elseif  o == 4; data = varB.SK.zz;      t = '\sigma_{SWE}';     
+    elseif  o == 4; data = varB.SK.zz;      t = '\sigma_{GC}';     
     elseif  o == 5; data = varB.SK.interp;  t = '\sigma_{INT}';    
     end
 for g = 1:3;     glacier = options.glacier{g};
@@ -237,13 +259,26 @@ ProbDen.(den).(glacier) = fitdist(data.(den).(glacier)(:),'Normal');
 if  o == 5;    y = [0 y]; x = [x 0];    end
 
 subplot(2,3,o) 
-fill(x,y,options.RGB(g,:),'FaceAlpha',0.2, 'EdgeColor', 'none'); hold on
+p(g) = fill(x,y,options.RGB(g,:),'FaceAlpha',0.2, 'EdgeColor', 'none'); hold on
     if      o == 1;         ylabel('LR Density');
     elseif  o == 4;         ylabel('SK Density');  
     end
     if  o == 4||o == 5; xlabel('WSMB (m w.e.)');  end
 end
     ylim([0 ylimmax(o)]); 
+    %legend
+    if g == 3
+        [L, icons] = legend(p,options.glacier,'location','northeast'); 
+        set(L, 'Position', [legendX(o), legendY(o), 0.01, 0.01])
+            L.Box='off';
+            for i = length(icons)/2+1:length(icons)
+            icons(i).Vertices(3:4,1) = icons(i).Vertices(3:4,1)/2;
+            end
+            for i = 1:length(icons)/2
+            icons(i).Position(1) = icons(i).Position(1)/2;
+            end
+    end
+
 end
     xlim([min(x) 1])
     title(t);
@@ -270,17 +305,35 @@ ProbDenSK.(glacier) = fitdist(TSK.(glacier)(:),'Normal');
 subplot(2,3,3) 
 p(g) = fill(x,yLR,options.RGB(g,:),'FaceAlpha',0.8, 'EdgeColor', 'none'); hold on
     if g == 3
-        L = legend(p,options.glacier,'location','northeast'); 
-        set(L, 'Position', [0.90, 0.74, 0.01, 0.01])
+        [L1, icons1] = legend(p,options.glacier,'location','northeast'); 
+        set(L1, 'Position', [0.88, 0.78, 0.01, 0.01])
+            L1.Box='off';
+            for i = length(icons1)/2+1:length(icons1)
+            icons1(i).Vertices(3:4,1) = icons1(i).Vertices(3:4,1)/2;
+            end
+            for i = 1:length(icons1)/2
+            icons1(i).Position(1) = icons1(i).Position(1)/2;
+            end
     end
     ylim([0 15])
     xlim([min(x) 1])
-    title('\sigma_{\rho} & \sigma_{SWE} & \sigma_{INT} ')
+    title('\sigma_{GC} & \sigma_{\rho} & \sigma_{INT} ')
 subplot(2,3,6)     
-fill([x 0],[0 ySK],options.RGB(g,:),'FaceAlpha',0.8, 'EdgeColor', 'none'); hold on
+q(g) = fill([x 0],[0 ySK],options.RGB(g,:),'FaceAlpha',0.8, 'EdgeColor', 'none'); hold on
     xlabel('WSMB (m w.e.)'); 
     title('\sigma_{\rho} & \sigma_{SWE} & \sigma_{INT} ')
     xlim([min(x) 1])
+    if g == 3
+        [L, icons] = legend(q,options.glacier,'location','northeast'); 
+        set(L, 'Position', [0.88, 0.31, 0.01, 0.01])
+            L.Box='off';
+            for i = length(icons)/2+1:length(icons)
+            icons(i).Vertices(3:4,1) = icons(i).Vertices(3:4,1)/2;
+            end
+            for i = 1:length(icons)/2
+            icons(i).Position(1) = icons(i).Position(1)/2;
+            end
+    end
 end
 
 saveFIG_IGS('WSMBDist',2,8)
@@ -337,14 +390,15 @@ figure(2); clf
     pt = plot(Fat);    set(pt,'Color','k'); set(pt, 'LineWidth',1.5); hold on
 %     plot(Dat, CIat(:,1),'--', 'Color','k', 'LineWidth',.2)
 %     plot(Dat, CIat(:,2),'--','Color','k', 'LineWidth',.2)
-L(2) = plot(Da(1:2),alex(1:2,6),'.', 'MarkerSize',13, 'Color',[234, 140, 46]/255);
-    errorbar(Da(3:5),alex(3:5,6),alexerr,'.', 'MarkerSize',13, 'Color',[234, 140, 46]/255)
-L(1) = plot(Dt,taylor(:,6),'.', 'MarkerSize',13, 'Color',[68, 181, 226]/255); hold on
+L(2) = plot(Da(1:2),alex(1:2,6),'o', 'MarkerSize',6, 'Color',[234, 140, 46]/255, 'MarkerFaceColor',[234, 140, 46]/255);
+L(3) = errorbar(Da(3:5),alex(3:5,6),alexerr,'o', 'MarkerSize',6, 'Color',[234, 140, 46]/255);
+L(1) = plot(Dt,taylor(:,6),'s', 'MarkerSize',6, 'Color',[68, 181, 226]/255, 'MarkerFaceColor',[68, 181, 226]/255); hold on
     xlim([min(Dat), max(Dat)+1]); 
     ylim([0 2])
     grid on
         xlabel('Distance from mountain divide (km)'); ylabel('SWE (m w.e.)')
-        legend(L,{'Taylor-Barge (1969)','This study'},'Box','off', 'Location','northoutside')
+        LEG = legend(L,{'PS-WB 1969','PS-WB 2016','GW-WB 2016'});
+        LEG.Position(1:2) = [0.58 0.755];
     ylim([0 1.7])
     
    %Labels 
