@@ -40,8 +40,8 @@ end
     grid on
     line = refline(1,0);
         line.Color = 'k'; line.LineStyle = '--'; hold on
-    xlabel('Snow pit-derived integrated density (kg m^{-3})')
-    ylabel('Federal Sampler-derived density (kg m^{-3})')
+    xlabel('SP-derived density (kg m^{-3})')
+    ylabel('FS-derived density (kg m^{-3})')
      
     %Label points
     labels = {'G4\_USP';'G4\_LSP';'G2\_USP';'G2\_LSP';'G13\_ASP';'G13\_USP'};
@@ -97,18 +97,17 @@ c = 1;
                             N       = histcounts(ZZdata,edges);   
             fill([0 (edges(:,1:end-1)+edges(:,2:end))/2 0],[0 N/sum(N) 0],Fcolor(c,:),...
                   'EdgeColor','none','FaceAlpha',0.75); hold on 
-            xlabel([{'Zigzag SWE'}, {'distribution (m w.e.)'}]);     ylabel('Probability')
+            xlabel('WB (m w.e.)');     ylabel('Probability')
             grid on
             xlim([-0.15 0.15])
             %title(options.glacier{g})
             %ax = gca; ax.XTick = [-40:20:40];
             c = c+1;
         end
-            [L,icons] = legend(labels{1:length(zz),g},'Location','northeast');
+            [L,icons] = legend(labels(1:length(zz),g));
                 X = [0.31, 0.59, 0.865];
                 Y = [0.75, 0.75, 0.70];
-            Lpost = [X(g), Y(g), 0.05, 0.05];
-            set(L, 'Position', Lpost)
+            L.Position(1:2) = [X(g), Y(g)];
                 L.Box='off';
                 for i = length(icons)/2+1:length(icons)
                 icons(i).Vertices(3:4,1) = icons(i).Vertices(3:4,1)/2;
@@ -119,16 +118,16 @@ c = 1;
     end
             % ZZ maps
             Y = 0.6;    S = 0.32;
-             ZZmap = imread('/home/glaciology1/Documents/MastersDocuments/Paper I/ZZMapG4.jpeg');
-             %ZZmap = imread('/Users/Alexandra/Documents/SFU/MastersDocuments/Paper I/ZZMapG4.jpeg');
+             %ZZmap = imread('/home/glaciology1/Documents/MastersDocuments/Paper I/ZZMapG4.jpeg');
+             ZZmap = imread('/Users/Alexandra/Documents/SFU/MastersDocuments/Paper I/ZZMapG4.jpeg');
             axes('position',[0.051,Y+0.05,S*0.8,S*0.8]); 
             imshow(ZZmap);            axis off; 
-             ZZmap = imread('/home/glaciology1/Documents/MastersDocuments/Paper I/ZZMapG2.jpeg');
-             %ZZmap = imread('/Users/Alexandra/Documents/SFU/MastersDocuments/Paper I/ZZMapG2.jpeg');
+             %ZZmap = imread('/home/glaciology1/Documents/MastersDocuments/Paper I/ZZMapG2.jpeg');
+             ZZmap = imread('/Users/Alexandra/Documents/SFU/MastersDocuments/Paper I/ZZMapG2.jpeg');
             axes('position',[0.31,Y,S,S]); 
             imshow(ZZmap);            axis off;
-             ZZmap = imread('/home/glaciology1/Documents/MastersDocuments/Paper I/ZZMapG13.jpeg');
-             %ZZmap = imread('/Users/Alexandra/Documents/SFU/MastersDocuments/Paper I/ZZMapG13.jpeg');
+             %ZZmap = imread('/home/glaciology1/Documents/MastersDocuments/Paper I/ZZMapG13.jpeg');
+             ZZmap = imread('/Users/Alexandra/Documents/SFU/MastersDocuments/Paper I/ZZMapG13.jpeg');
             axes('position',[0.565,Y-0.025,S*1.1,S*1.1]); 
             imshow(ZZmap);            axis off;
 
@@ -148,10 +147,10 @@ for g = 1:3;    glacier = options.glacier{g};
 end
 
 figure(6); clf
-PlotTopoParameter_IGS(fullLR.S2, 'modelledSWE', 'SWE (m w.e.)', SWE, 'black', 'massB')
+PlotTopoParameter_IGS(fullLR.S2, 'modelledSWE', 'WB (m w.e.)', SWE, 'black', 'massB')
 	saveFIG_IGS('LR_map',2,8.6)
 figure(6); clf
-PlotTopoParameter_IGS(inputSK, 'modelledSWE', 'SWE (m w.e.)', SWE, 'black', 'massB')
+PlotTopoParameter_IGS(inputSK, 'modelledSWE', 'WB (m w.e.)', SWE, 'black', 'massB')
 	saveFIG_IGS('SK_map',2,8.6)
 
 %% Interp Method - Observed vs Estimated SWE
@@ -161,11 +160,17 @@ load TopoSWE.mat SWE topo_sampled options
 
 den = 'S2';
     yObserved   = ObsInCell(SWE, topo_sampled);
+    for g = 1:3;    glacier = options.glacier{g};
+    SKinput.(glacier) = fullSK.(den).(glacier).pred;
+    end
+    
+          locX = [.15 .43 .71]; locX = [locX locX];
+          locY = [.83; 0.35];     locY = repmat(locY,1,3); locY = [locY(1,:) locY(2,:)];
 
 figure(7); clf
 for y = 1:2
     if      y ==1;  yEstimated = SampledCell(fullLR.(den));   k = 0;
-    elseif  y ==2;  yEstimated = SampledCell(fullSK.(den));   k = 3;
+    elseif  y ==2;  yEstimated = SampledCell(SKinput);   k = 3;
     end
 
 for g = 1:3;    glacier = options.glacier{g};
@@ -176,20 +181,18 @@ subplot(2,3,g+k)
 
         [F.(glacier), G.(glacier)] = fit(yObserved(g).swe, yEstimated.(glacier),'poly1');
         p = plot(F.(glacier)); hold on
+            xlabel(''); ylabel('')
             set(p,'Color',options.RGB(g,:)); set(p, 'LineWidth',1.5);     
-        xlabel('Observed (m w.e.)'); 
-        if      y ==1;  ylabel('LR Estimate (m w.e.)');
-        elseif  y ==2;  ylabel('SK Estimate (m w.e.)');
+        if      y ==2; xlabel([{'Gridcell averaged'}, {'WB (m w.e.)'}]); end
+        if      y ==1 && g ==1;  ylabel([{'LR gridcell'}, {'estimated WB (m w.e.)'}]);
+        elseif  y ==2 && g ==1;  ylabel([{'SK gridcell'}, {'estimated WB (m w.e.)'}]);
         end
-        %title(['Glacier ',glacier(2:end)])
                 axis square;    box on;     grid on
         b = gca; legend(b,'off');
+        
+        annotation('textbox',[locX(g+k) locY(g+k) .1 .1],'String', options.glacier{g},'EdgeColor','none','FontWeight','bold')
 end
 end
-%         locX = [];  
-%     annotation('textbox',[.06 .03 .1 .1],'String', 'Glacier 4','EdgeColor','none','FontWeight','bold')
-%     annotation('textbox',[.24 .03 .1 .1],'String', 'Glacier 2','EdgeColor','none','FontWeight','bold')
-%     annotation('textbox',[.43 .03 .1 .1],'String', 'Glacier 13','EdgeColor','none','FontWeight','bold')
 
 saveFIG_IGS(['observedVSestimated_',den],2,10)
 
@@ -263,7 +266,7 @@ p(g) = fill(x,y,options.RGB(g,:),'FaceAlpha',0.2, 'EdgeColor', 'none'); hold on
     if      o == 1;         ylabel('LR Density');
     elseif  o == 4;         ylabel('SK Density');  
     end
-    if  o == 4||o == 5; xlabel('WSMB (m w.e.)');  end
+    if  o == 4||o == 5; xlabel('Glacier-wide WB (m w.e.)');  end
 end
     ylim([0 ylimmax(o)]); 
     %legend
@@ -360,12 +363,13 @@ for g = 1:3; glacier = options.glacier{g};
 end
 
 figure(o);
-PlotTopoParameter_IGS(DPlot,'summer','Variability',SWE,'none','nomassB')
+PlotTopoParameter_IGS(DPlot,'summer','Relative uncertainity',SWE,'none','nomassB')
     saveFIG_IGS(['SpatialVar_',s],2,8.6)
 end
 
 %% Accumulation gradient
 run OPTIONS
+load Full.mat fullLR
 
 taylor(:,1) = [571731.48;577258.98;580978.1;587346.4;591126.5;597353.2;601796.1;608101];
 taylor(:,2) = [6737517.35;6733918.68;6730286.9;6730436.4;6724959.2;6730694.1;6734532.2;6736574.4];
@@ -377,8 +381,11 @@ taylor(:,6) = [1.302;1.513;1.024;0.983;0.932;0.685;0.643;0.311];
 alex(:,1) = [566453.4;570077.4;595349.9;601424.8;605031];
 alex(:,2) = [6727621.2;6732429.7;6741065.2;6753607.6;6762717.2];
 alex(:,3) = [2610;2730;2321;2472;2434];
-alex(:,6) = [1.30;1.59;0.5844;0.5785;0.3834];
-    alexerr = [0.029,0.049,0.032]*1.96;
+alex(:,6) = [1.30;1.59;...
+            nanmean(fullLR.S2.G4(:));...
+            nanmean(fullLR.S2.G2(:));...
+            nanmean(fullLR.S2.G13(:))];
+    alexerr = [0.029,0.049,0.032];%*1.96;
     
     Dt = sqrt((taylor(:,1)-alex(1,1)).^2+(taylor(:,2)-alex(1,2)).^2)/1000;
     Da = sqrt((alex(:,1)-alex(1,1)).^2+(alex(:,2)-alex(1,2)).^2)/1000;
@@ -396,9 +403,11 @@ L(1) = plot(Dt,taylor(:,6),'s', 'MarkerSize',6, 'Color',[68, 181, 226]/255, 'Mar
     xlim([min(Dat), max(Dat)+1]); 
     ylim([0 2])
     grid on
-        xlabel('Distance from mountain divide (km)'); ylabel('SWE (m w.e.)')
-        LEG = legend(L,{'PS-WB 1969','PS-WB 2016','GW-WB 2016'});
-        LEG.Position(1:2) = [0.58 0.755];
+        xlabel('Distance from topographic divide (km)'); ylabel('WB (m w.e.)')
+        LEG = legend(L,{'P-WB (1969)','P-WB (2016)','G-WB (2016)'});
+            LEG.Position(1:2) = [0.58 0.755];
+%             set(LEG,'PlotBoxAspectRatioMode','manual');
+%             set(LEG,'PlotBoxAspectRatio',[1 0.8 1]);
     ylim([0 1.7])
     
    %Labels 

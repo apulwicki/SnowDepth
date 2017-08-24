@@ -122,9 +122,9 @@ elseif all(isnan(topoParam.(name)(:)))
 end  
 
 % Glacier labels
-    annotation('textbox',[.06 .03 .1 .1],'String', 'Glacier 4','EdgeColor','none','FontWeight','bold')
-    annotation('textbox',[.24 .03 .1 .1],'String', 'Glacier 2','EdgeColor','none','FontWeight','bold')
-    annotation('textbox',[.43 .03 .1 .1],'String', 'Glacier 13','EdgeColor','none','FontWeight','bold')
+    annotation('textbox',[.06 .04 .1 .1],'String', 'Glacier 4','EdgeColor','none','FontWeight','bold')
+    annotation('textbox',[.24 .04 .1 .1],'String', 'Glacier 2','EdgeColor','none','FontWeight','bold')
+    annotation('textbox',[.43 .04 .1 .1],'String', 'Glacier 13','EdgeColor','none','FontWeight','bold')
 
 % Winter balance
      if strcmp(massB, 'massB')

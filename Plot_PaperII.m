@@ -75,7 +75,7 @@ for g = 1:3;     glacier = options.glacier{g};
         if      g==1; ylim([0.14 0.24])
         elseif  g==2; ylim([0.10 0.17]);
         elseif  g==3; ylim([0.08 0.14]);     
-            legend(p,subsets(7:12));
+            legend(p,subsets(1:6));
         end
         set(gca,'YTick',(0:0.01:1))
         
@@ -91,7 +91,7 @@ for g = 1:3;     glacier = options.glacier{g};
          [161, 162, 163]/255);  set(h,'facealpha',.5); set(h,'EdgeColor','none')
      
 
-        ylabel('Winter balance (m w.e.)'); %xlabel('Sample Size')
+        ylabel('LR Winter balance (m w.e.)'); %xlabel('Sample Size')
         ylim([0.2 0.8]);
         
     %Range length (theta)    
@@ -113,7 +113,7 @@ end
 
 end
 
-    %saveFIG('SubsetInterpSizeCompile',14)
+    saveFIG('SubsetInterpSizeCompile',14)
 
 % Display subset with highest RMSE    
 for g = 1:3;     glacier = options.glacier{g};
