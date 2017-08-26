@@ -105,8 +105,8 @@ c = 1;
             c = c+1;
         end
             [L,icons] = legend(labels(1:length(zz),g));
-                X = [0.31, 0.59, 0.865];
-                Y = [0.75, 0.75, 0.70];
+                X = [0.29, 0.57, 0.84];
+                Y = [0.73, 0.73, 0.67];
             L.Position(1:2) = [X(g), Y(g)];
                 L.Box='off';
                 for i = length(icons)/2+1:length(icons)
@@ -118,16 +118,16 @@ c = 1;
     end
             % ZZ maps
             Y = 0.6;    S = 0.32;
-             %ZZmap = imread('/home/glaciology1/Documents/MastersDocuments/Paper I/ZZMapG4.jpeg');
-             ZZmap = imread('/Users/Alexandra/Documents/SFU/MastersDocuments/Paper I/ZZMapG4.jpeg');
+             ZZmap = imread('/home/glaciology1/Documents/MastersDocuments/Paper I/ZZMapG4.jpeg');
+             %ZZmap = imread('/Users/Alexandra/Documents/SFU/MastersDocuments/Paper I/ZZMapG4.jpeg');
             axes('position',[0.051,Y+0.05,S*0.8,S*0.8]); 
             imshow(ZZmap);            axis off; 
-             %ZZmap = imread('/home/glaciology1/Documents/MastersDocuments/Paper I/ZZMapG2.jpeg');
-             ZZmap = imread('/Users/Alexandra/Documents/SFU/MastersDocuments/Paper I/ZZMapG2.jpeg');
+             ZZmap = imread('/home/glaciology1/Documents/MastersDocuments/Paper I/ZZMapG2.jpeg');
+             %ZZmap = imread('/Users/Alexandra/Documents/SFU/MastersDocuments/Paper I/ZZMapG2.jpeg');
             axes('position',[0.31,Y,S,S]); 
             imshow(ZZmap);            axis off;
-             %ZZmap = imread('/home/glaciology1/Documents/MastersDocuments/Paper I/ZZMapG13.jpeg');
-             ZZmap = imread('/Users/Alexandra/Documents/SFU/MastersDocuments/Paper I/ZZMapG13.jpeg');
+             ZZmap = imread('/home/glaciology1/Documents/MastersDocuments/Paper I/ZZMapG13.jpeg');
+             %ZZmap = imread('/Users/Alexandra/Documents/SFU/MastersDocuments/Paper I/ZZMapG13.jpeg');
             axes('position',[0.565,Y-0.025,S*1.1,S*1.1]); 
             imshow(ZZmap);            axis off;
 
@@ -263,8 +263,8 @@ if  o == 5;    y = [0 y]; x = [x 0];    end
 
 subplot(2,3,o) 
 p(g) = fill(x,y,options.RGB(g,:),'FaceAlpha',0.2, 'EdgeColor', 'none'); hold on
-    if      o == 1;         ylabel('LR Density');
-    elseif  o == 4;         ylabel('SK Density');  
+    if      o == 1;         ylabel({'LR probablity','density'});
+    elseif  o == 4;         ylabel({'SK probablity','density'});  
     end
     if  o == 4||o == 5; xlabel('Glacier-wide WB (m w.e.)');  end
 end
@@ -320,11 +320,11 @@ p(g) = fill(x,yLR,options.RGB(g,:),'FaceAlpha',0.8, 'EdgeColor', 'none'); hold o
     end
     ylim([0 15])
     xlim([min(x) 1])
-    title('\sigma_{GC} & \sigma_{\rho} & \sigma_{INT} ')
+    title('\sigma_{GC} & \sigma_{\rho} & \sigma_{INT}')
 subplot(2,3,6)     
 q(g) = fill([x 0],[0 ySK],options.RGB(g,:),'FaceAlpha',0.8, 'EdgeColor', 'none'); hold on
-    xlabel('WSMB (m w.e.)'); 
-    title('\sigma_{\rho} & \sigma_{SWE} & \sigma_{INT} ')
+    xlabel('Glacier-wide WB (m w.e.)'); 
+    title('\sigma_{GC} & \sigma_{\rho} & \sigma_{INT}')
     xlim([min(x) 1])
     if g == 3
         [L, icons] = legend(q,options.glacier,'location','northeast'); 
@@ -426,7 +426,8 @@ saveFIG_IGS('AccumGrad',1,7.8)
 %% Topo Params - Full vs measured dist
 clear
 load TopoSWE.mat topo* options
-    
+    GT = {'Glacier 4','Glacier 2','Glacier 13'};
+
 figure(1); clf
     header = fieldnames(topo_full.G4);
     n = 1;  nLab = 1:3:21;
@@ -452,6 +453,7 @@ for r = 1:4 %length(header)
             if ismember(n,nLab); ylabel('Frequency'); end
             axis tight
        %     legend('Full range','Sampled');
+       if r ==1; title(GT(i)); end
     n = n+1;        
     end
     set([h(1).f h(1).s h(2).f h(2).s h(3).s], 'BinEdges', h(3).f.BinEdges)
