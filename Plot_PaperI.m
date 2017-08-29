@@ -81,7 +81,7 @@ load TopoSWE.mat SWEzz
                     132,76,135;
                     171,111,174;
                     202,164,204]/255;
-
+    STDzz = NaN(4,3);
 figure(5); clf
 c = 1;
     for g = 1:3
@@ -89,9 +89,11 @@ c = 1;
 
     subplot(1,3,g)
         for j = 1:length(zz)
+            clear ZZdata
             ZZdata = SWEzz(g).swe(SWEzz(g).ZZ==char(zz(j)));
             ZZdata = (ZZdata-mean(ZZdata));%/mean(ZZdata)*100;%/std(ZZdata);
-
+% ZZdepth = SWEzz(g).depth(SWEzz(g).ZZ==char(zz(j)));
+% STDzz(j,g) = std(ZZdepth);
                 if j ==1;   bins    = 20;   %round(sqrt(length(SWEzz(g).swe)));
                             edges   = linspace(-0.15,0.15,bins); end
                             N       = histcounts(ZZdata,edges);   
