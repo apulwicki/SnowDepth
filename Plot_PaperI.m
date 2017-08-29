@@ -431,12 +431,12 @@ load TopoSWE.mat topo* options
 figure(1); clf
     header = fieldnames(topo_full.G4);
     n = 1;  nLab = 1:3:21;
-for r = 1:4 %length(header)
+for r = 1:3 %length(header)
     param = char(header(r));
     for i = 1:3
         name = char(options.glacier(i)); 
         %a(i) = subplot(length(header),3,n);
-        a(i) = subplot(4,3,n);
+        a(i) = subplot(3,3,n);
             h(i).f = histogram(topo_full_ns.(name).(param)(:),25,'FaceColor','w'); hold on
             h(i).s = histogram(topo_sampled_ns.(name).(param),25,'FaceColor','k'); 
             
@@ -459,16 +459,16 @@ for r = 1:4 %length(header)
     set([h(1).f h(1).s h(2).f h(2).s h(3).s], 'BinEdges', h(3).f.BinEdges)
     linkaxes(flip(a));
 end 
-saveFIG_IGS('TopoParamsSampled1',2,20)
+saveFIG_IGS('TopoParamsSampled1',2,15)
 
 
 figure(1); clf
 n = 1;
-for r = 5:7 %length(header)
+for r = 4:7 %length(header)
     param = char(header(r));
     for i = 1:3
         name = char(options.glacier(i)); 
-        a(i) = subplot(3,3,n);
+        a(i) = subplot(4,3,n);
             h(i).f = histogram(topo_full_ns.(name).(param)(:),25,'FaceColor','w'); hold on
             h(i).s = histogram(topo_sampled_ns.(name).(param),25,'FaceColor','k'); 
             
@@ -490,4 +490,4 @@ for r = 5:7 %length(header)
     set([h(1).f h(1).s h(2).f h(2).s h(3).s], 'BinEdges', h(3).f.BinEdges)
     linkaxes(flip(a));
 end 
-saveFIG_IGS('TopoParamsSampled2',2,15)
+saveFIG_IGS('TopoParamsSampled2',2,20)
