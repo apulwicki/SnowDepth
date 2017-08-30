@@ -185,9 +185,9 @@ subplot(2,3,g+k)
         p = plot(F.(glacier)); hold on
             xlabel(''); ylabel('')
             set(p,'Color',options.RGB(g,:)); set(p, 'LineWidth',1.5);     
-        if      y ==2; xlabel([{'Gridcell averaged'}, {'WB (m w.e.)'}]); end
-        if      y ==1 && g ==1;  ylabel([{'LR gridcell'}, {'estimated WB (m w.e.)'}]);
-        elseif  y ==2 && g ==1;  ylabel([{'SK gridcell'}, {'estimated WB (m w.e.)'}]);
+        if      y ==2; xlabel([{'Gridcell-averaged'}, {'WB (m w.e.)'}]); end
+        if      y ==1 && g ==1;  ylabel([{'LR gridcell-'}, {'estimated WB (m w.e.)'}]);
+        elseif  y ==2 && g ==1;  ylabel([{'SK gridcell-'}, {'estimated WB (m w.e.)'}]);
         end
                 axis square;    box on;     grid on
         b = gca; legend(b,'off');
@@ -250,9 +250,9 @@ legendY = [0.78, 0.78, 0, 0.31, 0.31];
 figure(9); clf;
 x = 0:0.001:1.2;
 for o = [1,2,4,5]
-    if      o == 1; data = varB.LR.zz;      t = '\sigma_{GC}';     
+    if      o == 1; data = varB.LR.zz;      t = '\sigma_{GS}';     
     elseif  o == 2; data = varB.LR.interp;  t = '\sigma_{INT}';   
-    elseif  o == 4; data = varB.SK.zz;      t = '\sigma_{GC}';     
+    elseif  o == 4; data = varB.SK.zz;      t = '\sigma_{GS}';     
     elseif  o == 5; data = varB.SK.interp;  t = '\sigma_{INT}';    
     end
 for g = 1:3;     glacier = options.glacier{g};
@@ -322,11 +322,11 @@ p(g) = fill(x,yLR,options.RGB(g,:),'FaceAlpha',0.8, 'EdgeColor', 'none'); hold o
     end
     ylim([0 15])
     xlim([min(x) 1])
-    title('\sigma_{GC} & \sigma_{\rho} & \sigma_{INT}')
+    title('\sigma_{GS} & \sigma_{\rho} & \sigma_{INT}')
 subplot(2,3,6)     
 q(g) = fill([x 0],[0 ySK],options.RGB(g,:),'FaceAlpha',0.8, 'EdgeColor', 'none'); hold on
     xlabel('Glacier-wide WB (m w.e.)'); 
-    title('\sigma_{GC} & \sigma_{\rho} & \sigma_{INT}')
+    title('\sigma_{GS} & \sigma_{\rho} & \sigma_{INT}')
     xlim([min(x) 1])
     if g == 3
         [L, icons] = legend(q,options.glacier,'location','northeast'); 
