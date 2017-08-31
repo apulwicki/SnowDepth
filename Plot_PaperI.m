@@ -122,7 +122,7 @@ c = 1;
             Y = 0.6;    S = 0.32;
              ZZmap = imread('/home/glaciology1/Documents/MastersDocuments/Paper I/ZZMapG4.jpeg');
              %ZZmap = imread('/Users/Alexandra/Documents/SFU/MastersDocuments/Paper I/ZZMapG4.jpeg');
-            axes('position',[0.051,Y+0.05,S*0.8,S*0.8]); 
+            axes('position',[0.062,Y+0.09,S*0.7,S*0.7]); 
             imshow(ZZmap);            axis off; 
              ZZmap = imread('/home/glaciology1/Documents/MastersDocuments/Paper I/ZZMapG2.jpeg');
              %ZZmap = imread('/Users/Alexandra/Documents/SFU/MastersDocuments/Paper I/ZZMapG2.jpeg');
