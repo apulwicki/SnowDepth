@@ -1,3 +1,6 @@
+load Full.mat
+load TopoSWE.mat
+
 %% Transfer Coeffs between glaciers
 fields = fieldnames(topo_sampled.G4);
 
@@ -12,7 +15,7 @@ for d = 1:8
     Transfer.(glacier).(den).(glacier2) = repmat(fullLR.(den).coeff{8,g},options.mapsize(gg,:));
     Transfer.(glacier).(den).(glacier2)(options.mapNaN.(glacier2)) = NaN;
     
-    for f = 1:length(f);
+    for f = 1:length(fields);
        param = fields{f};
        Transfer.(glacier).(den).(glacier2) = topo_full.(glacier2).(param)*coeffs(f)...
                                         + Transfer.(glacier).(den).(glacier2);
@@ -29,7 +32,7 @@ end
     %clear stackTransfer g*
 
 %% Use all data
-for d = 2:8;    den = options.DenOpt{d};
+for d = 1:8;    den = options.DenOpt{d};
 
 % Input Data
 [ tempSWE, tempTOPO ] = ObsInCell(fullSWE.(den).input, topo_sampled); 
@@ -131,7 +134,7 @@ B = bar(data);
     legend({'G4 Coefficients', 'G2 Coefficients', 'G13 Coefficients', 'All data Coefficients'})
     ylabel('Mean RMSE (m w.e.)');
     set(gca, 'XTick', [1 2 3]);    set(gca, 'XTickLabel', {'Glacier 4' 'Glacier 2' 'Glacier 13'})   
-saveFIG('TransferabilityRMSE',13)    
+%saveFIG('TransferabilityRMSE',13)    
     
 %% Mean elev coeff and intercept 
 
