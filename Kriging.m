@@ -454,17 +454,65 @@ subplot(1,3,g)
 
 
 
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Kriging 1000 reps with 2/3 data
+
+clear; close all
+load TopoBMS_MLR.mat sweOPT options
+
+nRuns = 100;
+    KRIGsubset(nRuns+1).G4 = 9999; 
+    KRIGmodel(nRuns+1).G4 = 9999; 
+    outD(nRuns+1).G4 = 9999; 
+
+for d = 1:8; den = options.DenOpt{d};    
+for i = 1:nRuns
+ for g = 1:3;     glacier = options.glacier{g};
+
+    fullD = sweOPT(d+1).(glacier);
+        
+    %Random subsets (2/3)
+    I.(glacier) = randi(length(fullD),floor(length(fullD)*2/3),1);
+    Inot.(glacier) = ~ismember(1:length(fullD),I.(glacier)); %%%
+
+    inputD = fullD(I.(glacier),:);
+
+    %Kriging
+    outD(i).(den).(glacier) = KrigingR(inputD(:,1), inputD(:,2:3), glacier);
+    
+    KRIGsubset(i).(den).(glacier) = outD(i).(den).(glacier).pred;
+    KRIGmodel(i).(den).(glacier) = outD(i).(den).(glacier).Model.theta;  
+ end    
+     estD = SampledCell(KRIGsubset(i).(den));
+   
+    %RMSE  
+   for g = 1:3;     glacier = options.glacier{g};
+       obsD = sweOPT(d+1).(glacier)(Inot.(glacier),1);
+       predD = estD.(glacier)(Inot.(glacier));
+     RMSE(i).(den).(glacier) = sqrt(mean((predD-obsD).^2));
+   end
+end
+
+%Get min RMSE option for each glacier
+    for i = 1:length(RMSE)
+    temp = struct2cell(RMSE(i).(den)(:))';
+    rmseD(i,1:3) = temp{:,:};
+    end
+
+   for g = 1:3;     glacier = options.glacier{g};
+    rmseI = rmseD{:,g}== min(rmseD{:,g});
+    WBSK.(den).(glacier) = outD(rmseI).(den).(glacier);
+   end
 
 
+%STD from upper and lower 95%
+    for g = 1:3;     glacier = options.glacier{g};
+    WBmin = nanmean(WBSK.(den).(glacier).lower95(:));
+    WBmax = nanmean(WBSK.(den).(glacier).upper95(:));
+    Qstd.(den).(glacier) = (WBmax-WBmin)/2/1.96;
+    end
 
-
-
-
-
-
-
-
-
+end
   
   
   
