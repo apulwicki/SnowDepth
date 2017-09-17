@@ -60,7 +60,7 @@ title([Dtext, ' ',type, ' ',glacier])
     
 % SWE vs n
     Dmean.(glacier) = nanmean(DstackSWE.(glacier)(:));
-    for cc = 1:length(n);
+    for cc = 1:length(n)
     for d = 1:8 
        den = DenOpt{d};
        stack_swen.(glacier)(d,cc) = nanmean(Dsubset(cc).(type).(den).(glacier)(:));
@@ -76,14 +76,14 @@ subplot(3,3,3)
         xlabel('Sample size'); ylabel('Mean SWE')
         %legend([DenOpt, {'All'}],'Location','best')
         xlim([0, max(Nfull)])
-        if c == 9; 
+        if c == 9
         ymaxswe = ylim;
         else
         ylim(ymaxswe);
         end
 
 % RMSE vs n
-    for cc = 1:length(n);
+    for cc = 1:length(n)
     for d = 1:8 
        den = DenOpt{d};
        stack_rmsen.(glacier)(d,cc) = DsubsetRmse(cc).(type).(den).(glacier);
@@ -98,7 +98,7 @@ subplot(3,3,6)
     plot([0, max(Nfull)],[mean(Drmse(g,:)), mean(Drmse(g,:))],'k--')
         xlabel('Sample size'); ylabel('RMSE (m w.e.)')
         xlim([0, max(Nfull)])
-        if c == 9; 
+        if c == 9
         ymaxrmse = ylim;
         else
         ylim(ymaxrmse);
@@ -106,7 +106,7 @@ subplot(3,3,6)
 
 % Elevation Coeff vs n
  
-    for cc = 1:length(n);
+    for cc = 1:length(n)
     for d = 1:8 
        den = DenOpt{d};
        stackC.(glacier)(d,cc) = (Dsubset(cc).(type).(den).coeff{1,g});
@@ -122,7 +122,7 @@ subplot(3,3,9)
     plot([0, max(Nfull)],[mean(Dbox.(glacier){1,:}), mean(Dbox.(glacier){1,:})],'k--')
         xlabel('Sample size'); ylabel('\beta_z')
         xlim([0, max(Nfull)])
-        if c == 9; 
+        if c == 9
         ymaxcoeff = ylim;
         else
         ylim(ymaxcoeff);
@@ -141,7 +141,7 @@ close all
  cd('/home/glaciology1/Documents/Data/Plots/SubsetAnimation/');
  fname = dir([glacier,Dtext, type, '*.png']); images = cell(size(fname));
 % fname = [fname(1); fname(3:end); fname(2)];
- for i = 1:length(fname);
+ for i = 1:length(fname)
  images{i} = imread( fname(i).name );
  end
  

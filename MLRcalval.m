@@ -128,20 +128,20 @@ beta = M.Properties.VariableNames; %names of params
 semiR = table(zeros(length(beta),1),'RowNames',beta);    %initalize
 semiR.Properties.VariableNames = {'SemiR2'};
 
-cx = cov([y,M{:,:}]);   %Covariance matrix of data
-dx = inv(cx);           %Inverse covariance matrix
-pc = -corrcov(dx);      %Convert correlations to covariance
-    n = size(pc,1);     pc(1:(n+1):end) = 1; %Set diagonal elements to 1
-
-kk  = pc./repmat(sqrt(diag(cx)),1,n)./...   %Semi-partial correlation (Eq. 2.6) 
-    sqrt(abs(repmat(diag(dx),1,n)-((dx.^2).'./repmat(diag(dx),1,n)).'));
-kk(1:(n+1):end) = 1;    %Set diagonal elements to 1
-kk = kk.^2;             %Square correlations
-
-semiR{:,1} = kk(1,2:end)';  %Assign to table
-    %Alternative method = calculate residuals of var of interest with other
-    %vars and then correlate residuals with y {res = fitlm([deg',disp'],BC); 
-    %corr(hl',res.Residuals.Raw)}
+% % cx = cov([y,M{:,:}]);   %Covariance matrix of data
+% % dx = inv(cx);           %Inverse covariance matrix
+% % pc = -corrcov(dx);      %Convert correlations to covariance
+% %     n = size(pc,1);     pc(1:(n+1):end) = 1; %Set diagonal elements to 1
+% % 
+% % kk  = pc./repmat(sqrt(diag(cx)),1,n)./...   %Semi-partial correlation (Eq. 2.6) 
+% %     sqrt(abs(repmat(diag(dx),1,n)-((dx.^2).'./repmat(diag(dx),1,n)).'));
+% % kk(1:(n+1):end) = 1;    %Set diagonal elements to 1
+% % kk = kk.^2;             %Square correlations
+% % 
+% % semiR{:,1} = kk(1,2:end)';  %Assign to table
+% %     %Alternative method = calculate residuals of var of interest with other
+% %     %vars and then correlate residuals with y {res = fitlm([deg',disp'],BC); 
+% %     %corr(hl',res.Residuals.Raw)}
 
 %--------Univariate R-squared
 uniR = table(zeros(length(beta),1),'RowNames',beta);    %initalize
@@ -150,7 +150,7 @@ uniR.Properties.VariableNames = {'UnivarR2'};
 uniR{:,1}   = corr(M{:,:},y).^2;      %Squared raw correlation between
                                            %regressors and y data
  %Metrics
-metric      = [semiR, uniR];   
+metric      = [semiR, uniR]; 
 row         = metric.Properties.RowNames;
 order       = coeffs_final.Properties.RowNames(2:end);
 [~, index]  = ismember(order, row);
