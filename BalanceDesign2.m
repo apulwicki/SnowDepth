@@ -1,5 +1,7 @@
 
-%% Get WB field that is the "true" field
+%% SAMPLING THEORETICAL FIELD FROM PATTERNS
+
+% Get WB field that is the "true" field
     clear; close all
 load Full.mat fullLR options
 load TopoSWE.mat topo_full
@@ -16,28 +18,81 @@ minN = min(options.rig.(glacier)(:,2));
     utmGridN.(glacier) = repmat([nN:-1:1]'*40+minN,1,nE); 
 end
  clear g* min* n*
-%% Random choice
+ 
+ 
+% Obtaining pattern data for utm, topo, and wb
 
- % NUMBER OF RANDOM POINTS
+ %Get csv files
+pattern.circle = csvread('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Sampling/CellNum_Circle.csv',1,0);
+pattern.centreline = csvread('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Sampling/CellNum_Centreline.csv',1,0);
+pattern.trans = csvread('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Sampling/CellNum_Transverse.csv',1,0);
+pattern.hourglass = csvread('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Sampling/CellNum_Hourglass.csv',1,0);
+
+namesP = fieldnames(pattern);
+for p = 1:length(namesP)
+        [~,ia,~] = unique(pattern.(namesP{p})(:,3));
+        ia = sort(ia);
+    pattern.(namesP{p}) = pattern.(namesP{p})(ia,:);
+    
+ clear I*
+for g = 1:3;    glacier = options.glacier{g};
+        I_E(:,1) = pattern.(namesP{p})(:,1) > min(utmGridE.(glacier)(:));
+        I_E(:,2) = pattern.(namesP{p})(:,1) < max(utmGridE.(glacier)(:));
+    I_E = all(I_E,2);
+        I_N(:,1) = pattern.(namesP{p})(:,2) > min(utmGridN.(glacier)(:));
+        I_N(:,2) = pattern.(namesP{p})(:,2) < max(utmGridN.(glacier)(:));
+    I_N = all(I_N,2);
+    I = all([I_E I_N],2);
+    
+    utmPattern.(namesP{p}).(glacier)(:,1:3) = pattern.(namesP{p})(I,:); 
+end
+
+ %Get UTM and WB for cells at the pattern locations
+ clear e n wb
+ for g = 1:3;    glacier = options.glacier{g};
+    e = zeros(length(utmPattern.(namesP{p}).(glacier)),1); n = e; wb = e;
+
+    for i = 1:length(utmPattern.(namesP{p}).(glacier))
+        [~, t1] =  min(abs(utmGridE.(glacier)(1,:) - utmPattern.(namesP{p}).(glacier)(i,1)));
+       pUTM.(namesP{p}).(glacier)(i,1) = utmGridE.(glacier)(1,t1);
+            [~, t2] =  min(abs(utmGridN.(glacier)(:,1) - utmPattern.(namesP{p}).(glacier)(i,2))); 
+       pUTM.(namesP{p}).(glacier)(i,2) = utmGridN.(glacier)(t2,1); 
+       
+       pWB.(namesP{p}).(glacier)(i,1) = fullLR.S2.(glacier)(t2,t1);
+       
+            topoparams = fieldnames(topo_full.G4);
+       for f = 1:length(topoparams)
+       pTOPO.(namesP{p}).(glacier).(topoparams{f})(i,1) = topo_full.(glacier).(topoparams{f})(t2,t1); 
+       end
+    end
+% figure(p)
+% subplot(1,3,g)
+% plot(pUTM.(namesP{p}).(glacier)(:,1),pUTM.(namesP{p}).(glacier)(:,2),'.')
+end
+end
+
+% RANDOM PATTERN
+
+ %Number of random points
  sizeR = 50;
 
 for g = 1:3;    glacier = options.glacier{g};
 data = fullLR.S2.(glacier);
 
  %Get random locations and the row,col for that cell
-n = 1:length(data(:)); 
-    n = reshape(n,size(data,1),size(data,2));
-    n(isnan(data)) = NaN;
-    n_NN = n(:);    n_NN(isnan(n_NN)) = [];
+p = 1:length(data(:)); 
+    p = reshape(p,size(data,1),size(data,2));
+    p(isnan(data)) = NaN;
+    n_NN = p(:);    n_NN(isnan(n_NN)) = [];
     
     I = randi(length(n_NN), sizeR, 1); 
 Iloc = n_NN(I);
 
     row = nan(length(Iloc),1);  col=row;  WBsubval.(glacier)=row;
 for i = 1:length(Iloc)
-    [row(i), col(i)]=find(n==Iloc(i));
-sampledWB.(glacier)(i,1) = data(row(i),col(i)); %Value of WB data at each random location
-sampledUTM.(glacier)(i,2:3) = [utmGridE.(glacier)(row(i),col(i)), utmGridN.(glacier)(row(i),col(i))];
+    [row(i), col(i)]=find(p==Iloc(i));
+pWB.random.(glacier)(i,1) = data(row(i),col(i)); %Value of WB data at each random location
+pUTM.random.(glacier)(i,2:3) = [utmGridE.(glacier)(row(i),col(i)), utmGridN.(glacier)(row(i),col(i))];
 end
     clear n* I*
 
@@ -46,101 +101,71 @@ end
 for f = 1:length(param)
    field = param{f};
    for i = 1:length(row)
-   sampledTOPO.(glacier).(field)(i,1) = topo_full.(glacier).(field)(row(i),col(i));
+   pTOPO.random.(glacier).(field)(i,1) = topo_full.(glacier).(field)(row(i),col(i));
    end
 end
 end
- clear c* data f* g* i param row
+    clear c* data f* g* i param row
+    clear e f g* i* I* n* p pattern t1 t2 topoparams utm* wb WB*
 
 %% Linear Regression
 
-c = 1;  type = 'random';
-subsetWB(c).(type) =  LinearRegression( sampledWB, sampledTOPO, topo_full );
-
-PlotTopoParameter(subsetWB(c).(type),'WB','WB (m w.e.)',sampledUTM, 'black', 'massB')
-
-
-
-%% Trying to get diff patterns
-load Full.mat fullSWE fullLR
-    clear sampled*
-y = 5:1:70;
-x = y+4;
-
-for g = 1:3;    glacier = options.glacier{g};
-
-    %Get UTM of grid cells sampled
-    E = utmGridE.(glacier)(1,y);
-    N = utmGridN.(glacier)(x,1);
-sampledUTM.(glacier) = [ones(length(E),1),E',N];
-    %Get WB values at each location
-sampledWB.(glacier) = fullLR.S2.(glacier)(x,y);
-    sampledWB.(glacier) = diag(sampledWB.(glacier));
+    namesP = fieldnames(pWB);
+    nRuns = 100;
+for p = 1:length(namesP)
     
-     %Get topoparam values at each location
- param = fields(topo_full.G4);
-for f = 1:length(param);   field = param{f};
-   sampledTOPO.(glacier).(field) = topo_full.(glacier).(field)(x,y);
-   sampledTOPO.(glacier).(field) = diag(sampledTOPO.(glacier).(field));
-end
-
-end
-
-PlotTopoParameter(subsetWB(c).(type),'WB','WB (m w.e.)',sampledUTM, 'black', 'massB')
-
-fitlm([struct2table(sampledTOPO.G13), table(sampledWB.G13)])
-
-% c = 1;  type = 'centreline';
-% subsetWB(c).(type) =  LinearRegression( sampledWB, sampledTOPO, topo_full );
-
-
-%%
-
-% - Use QGIS to get a set of utms for each pattern with a cell number 
-% - Create structure with each pattern as a substructure with utm and cell
-%number as entries
-% - Create structure with WB at each pattern locations
-pattern = 'LC';
-clear e n wb
-for g = 3;    glacier = options.glacier{g};
-%Get UTM of measurements location within a pattern
-    I = fullSWE.S2.(glacier).pattern == pattern;
-    utm_pattern = fullSWE.S2.(glacier).utm(I,:);
-        [~,ia,~] = unique(utm_pattern(:,3));
-        ia = sort(ia);
-    utm_pattern = utm_pattern(ia,:);
-%Get UTM and WB for cells at the pattern locations
-    e = zeros(length(utm_pattern),1); n = e; wb = e;
-for i = 1:length(utm_pattern)
-        [~, t1] =  min(abs(utmGridE.(glacier)(1,:) - utm_pattern(i,1)));
-   e(i) = utmGridE.(glacier)(1,t1);
-        [~, t2] =  min(abs(utmGridN.(glacier)(:,1) - utm_pattern(i,2))); 
-   n(i) = utmGridN.(glacier)(t2,1); 
-   wb(i) = fullLR.S2.(glacier)(t2,t1);
-end
-
-end
-
-plot(n,e,'.')
-%%
-
-
-
-load TopoSWE.mat topo*
-
-input.SWE = fullSWE.S2; input.topo_sampled = topo_sampled; input.topo_sampled_ns = topo_sampled_ns;
-t = 1;
-%     if     t == 1; type = 'centreline';          n = 10:5:55;    
-%     elseif t == 2; type = 'CentreTransect4';     n = 10:10:100;  
-%     elseif t == 3; type = 'CentreTransect3';     n = 10:10:100;
-%     elseif t == 4; type = 'hourglass';           n = 10:10:100;  
-%     elseif t == 5; type = 'hourglassCircle';     n = 10:10:100;  
-%     elseif t == 6; type = 'circle';              n = 10:10:100;  
+    for mc = 1:nRuns;
+    %Add some noise
+    WBinput = WBnoise(pWB.(namesP{p}));
     
+    %Linear regresion
+    subsetWB.(namesP{p})(mc) = LinearRegression( WBinput, pTOPO.(namesP{p}), topo_full );
+    end
+    
+    %Average WB distribution
+        T = struct2table(subsetWB.(namesP{p}));
+    for g = 1:3;    glacier = options.glacier{g};
+        TT = T.(glacier);
+        TT = reshape(TT,1,1,nRuns);
+        TT = cell2mat(TT);
+    subsetWBavg.(namesP{p}).(glacier) = mean(TT,3);
+    end
 
-[ subsetSWE, TOPOdata ] = DataSubset( 'pattern', t, input );
-[ subsetSWE, TOPOdata ] = ObsInCell(subsetSWE, TOPOdata); %=> utms of pattern points
+    %Plot resulting WB distribution from LR
+    figure(p)
+    PlotTopoParameter(subsetWBavg.(namesP{p}),'WB','WB (m w.e.)',pUTM.(namesP{p}), 'black', 'massB')
+end
 
-%How do I find the grid cells in utmGrid that are closest to the subsetSWE
-%utm coordinates?
-T = find(utmGridE.G4 == subsetSWE.G4(1,2))
+%% Difference Maps & RMSE
+
+load Full.mat fullLR
+
+    namesP = fieldnames(pWB);   pRMSE = ones(3,5);
+for p = 1:length(namesP)
+    for g = 1:3;    glacier = options.glacier{g};
+    %Difference map
+    pDIFFmap.(namesP{p}).(glacier) = fullLR.S2.(glacier) - subsetWBavg.(namesP{p}).(glacier);
+    
+    %RMSE
+    diff = subsetWBavg.(namesP{p}).(glacier)-fullLR.S2.(glacier);
+    pRMSE(g,p) = sqrt(nanmean((diff(:).^2)));
+    end
+end
+    pRMSE = array2table(pRMSE,'RowNames',options.glacier,'VariableNames',namesP);
+
+%% Get cell num raster
+
+% [raster, info] = geotiffread('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Glacier Topo Maps/Donjek_7x7aspect.tif');
+% 
+% cellN = 1:size(raster,1)*size(raster,2);
+% raster = reshape(cellN,[size(raster,1),size(raster,2)]);
+% 
+% geotiffwrite('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/CellNumber.tif',raster,info,'CoordRefSysCode','EPSG:32607')
+%     clear
+% % In QGIS: 1) convert sampling design to line, 2) convert to points, 3)
+% % point sample the cell num raster, 4) Export to csv
+
+
+
+
+
