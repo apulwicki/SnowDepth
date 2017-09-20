@@ -19,6 +19,12 @@ minN = min(options.rig.(glacier)(:,2));
 end
  clear g* min* n*
  
+%Additing noise to distributed WB
+fullWB = fullLR.S2;
+%     for g = 1:3;    glacier = options.glacier{g};
+%     noise = normrnd( 0, options.zzstd(g), size(fullWB.(glacier),1),size(fullWB.(glacier),2));
+%     fullWB.(glacier) = fullWB.(glacier) + noise;
+%     end
  
 % Obtaining pattern data for utm, topo, and wb
 
@@ -27,6 +33,7 @@ pattern.circle = csvread('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Sampl
 pattern.centreline = csvread('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Sampling/CellNum_Centreline.csv',1,0);
 pattern.trans = csvread('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Sampling/CellNum_Transverse.csv',1,0);
 pattern.hourglass = csvread('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Sampling/CellNum_Hourglass.csv',1,0);
+pattern.hourCircle = csvread('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Sampling/CellNum_HourglassCircle.csv',1,0);
 
 namesP = fieldnames(pattern);
 for p = 1:length(namesP)
@@ -58,7 +65,7 @@ end
             [~, t2] =  min(abs(utmGridN.(glacier)(:,1) - utmPattern.(namesP{p}).(glacier)(i,2))); 
        pUTM.(namesP{p}).(glacier)(i,2) = utmGridN.(glacier)(t2,1); 
        
-       pWB.(namesP{p}).(glacier)(i,1) = fullLR.S2.(glacier)(t2,t1);
+       pWB.(namesP{p}).(glacier)(i,1) = fullWB.(glacier)(t2,t1);
        
             topoparams = fieldnames(topo_full.G4);
        for f = 1:length(topoparams)
@@ -77,7 +84,7 @@ end
  sizeR = 50;
 
 for g = 1:3;    glacier = options.glacier{g};
-data = fullLR.S2.(glacier);
+data = fullWB.(glacier);
 
  %Get random locations and the row,col for that cell
 p = 1:length(data(:)); 
@@ -112,9 +119,9 @@ end
 
     namesP = fieldnames(pWB);
     nRuns = 100;
-for p = 1:length(namesP)
+for p = 5%1:length(namesP)
     
-    for mc = 1:nRuns;
+    for mc = 19:nRuns;
     %Add some noise
     WBinput = WBnoise(pWB.(namesP{p}));
     
@@ -130,7 +137,9 @@ for p = 1:length(namesP)
         TT = cell2mat(TT);
     subsetWBavg.(namesP{p}).(glacier) = mean(TT,3);
     end
+end
 
+for p = 1:length(namesP)
     %Plot resulting WB distribution from LR
     figure(p)
     PlotTopoParameter(subsetWBavg.(namesP{p}),'WB','WB (m w.e.)',pUTM.(namesP{p}), 'black', 'massB')
@@ -140,18 +149,31 @@ end
 
 load Full.mat fullLR
 
-    namesP = fieldnames(pWB);   pRMSE = ones(3,5);
+    namesP = fieldnames(pWB); 
 for p = 1:length(namesP)
     for g = 1:3;    glacier = options.glacier{g};
     %Difference map
     pDIFFmap.(namesP{p}).(glacier) = fullLR.S2.(glacier) - subsetWBavg.(namesP{p}).(glacier);
     
-    %RMSE
-    diff = subsetWBavg.(namesP{p}).(glacier)-fullLR.S2.(glacier);
-    pRMSE(g,p) = sqrt(nanmean((diff(:).^2)));
+    %RMSE for each run
+    for mc = 1:nRuns;
+    diff = subsetWB.(namesP{p})(mc).(glacier)-fullLR.S2.(glacier);
+    pRMSE.(glacier)(mc,p) = sqrt(nanmean((diff(:).^2)));
+    end
+        pRMSE.(glacier) = array2table(pRMSE.(glacier),'VariableNames',namesP);
     end
 end
-    pRMSE = array2table(pRMSE,'RowNames',options.glacier,'VariableNames',namesP);
+
+%Histogram of RMSE distributions
+clf
+for g = 1:3;    glacier = options.glacier{g};
+    subplot(1,3,g)
+for i = 5:-1:1
+histogram(pRMSE.(glacier){:,i},0:0.004:0.22,'FaceAlpha',0.5, 'EdgeColor','none'); hold on
+end
+    legend(namesP(5:-1:1))
+    xlabel('RMSE (m w.e.)'); ylabel('Frequency')
+end
 
 %% Get cell num raster
 
