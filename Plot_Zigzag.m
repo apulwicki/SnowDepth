@@ -284,7 +284,7 @@ for g = 1:3
         tempZZ = allZZ(z);
         if ~strcmp(tempZZ,'G02\_Z7A')
         data = SWEzz(g).swe(SWEzz(g).ZZ == tempZZ);
-        data = (data-mean(data))/mean(data)*100;%/std(data);
+        data = (data-mean(data));%/mean(data)*100;%/std(data);
              
         gZZ = [gZZ; data];
         fullZZ = [fullZZ; data];
@@ -296,27 +296,27 @@ for g = 1:3
 %     display([glacier, ' ', num2str(chiP)])
         display([glacier,' 2 sigma ', num2str(2*nanstd(gZZ))]);
 if g ==1;     bins    = round(sqrt(length(gZZ))); end   
-   edges   = linspace(-50,50,bins);
+   edges   = linspace(-0.2,0.2,bins);
    N       =  histcounts(data,edges);
-figure(1);   plot((edges(:,1:end-1)+edges(:,2:end))/2,N/sum(N),'LineWidth',2,'Color',options.RGB(g,:)); hold on 
-
+figure(1);   
+fill([min(edges) (edges(:,1:end-1)+edges(:,2:end))/2 max(edges)],[0 N/sum(N) 0],options.RGB(g,:),...
+       'FaceAlpha',0.5,'EdgeColor','none'); hold on 
 %      figure(2);
 %     normALL = normpdf(gZZ,mean(gZZ),std(gZZ));
 %     [gZZ, I] = sort(gZZ);
 %     plot(gZZ,normALL(I),'LineWidth',2,'Color',options.RGB(g,:)); hold on
-
 end
     [~,chiP] = chi2gof(fullZZ);
     %display(['All zigzags ', num2str(chiP)])
      figure(1)
 %      N       =  histcounts(fullZZ,edges);
 % figure(1);   plot((edges(:,1:end-1)+edges(:,2:end))/2,N/sum(N),'k--','LineWidth',2); hold on 
-          xlabel('SWE variability (%)');     ylabel('Probability')
+          xlabel('Winter balance (m w.e.)');     ylabel('Probability')
 %         xlim([-6 6]);         
             
         legend('Glacier 4','Glacier 2','Glacier 13')
         fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18) 
-        fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 13 6];
+        fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 10 6];
 saveFIG('ZigzagPDF_G');
 
  

@@ -423,3 +423,49 @@ l3 = plot(SPfit3,'k'); l3.Color = options.RGB(3,:); hold on
  saveFIG('ElevationVsSWEtube_all_DETRENDED');
    
     clear P LM x y index* i j count yfit str dim filename error
+    
+    
+    %% FS-derived vs SP-derived density (fancy like in paper I)
+    
+        clear
+load TopoSWE.mat allDepth options Density
+%SP vs FS
+    den     = [nan(6,1), cell2mat(Density.pitANDtube(:,2:10))];
+    SP      = den(:,7);
+    FS      = den(:,2);
+    errorSP = [den(:,7)-den(:,9),den(:,10)-den(:,7)];   %min and max SP
+    errorFS = [den(:,2)-den(:,4),den(:,5)-den(:,2)];    %min and max FS
+    markerC = [options.RGB(1,:);options.RGB(1,:);...
+               options.RGB(2,:);options.RGB(2,:);...
+               options.RGB(3,:);options.RGB(3,:)]; 
+    markerS = {'s','o','s','o','^','s'};
+
+for i = 1:length(SP)
+errorbarxy(SP(i),FS(i),errorSP(i,2),errorFS(i,2),errorSP(i,1),errorFS(i,1),...
+                'Color','k','LineStyle','none','Marker',markerS{i},...
+                'MarkerFaceColor',markerC(i,:),'LineWidth',1,'MarkerSize',8,...
+                'MarkerEdgeColor','none'); hold on
+end
+    axis([220 400 220 400])
+    grid on
+    line = refline(1,0);
+        line.Color = 'k'; line.LineStyle = '--'; hold on
+    xlabel('SP-derived density (kg m^{-3})')
+    ylabel('FS-derived density (kg m^{-3})')
+     
+    %Label points
+    labels = {'G4\_USP';'G4\_LSP';'G2\_USP';'G2\_LSP';'G13\_ASP';'G13\_USP'};
+    for g = 1:length(SP)
+        strG = labels{g,1};
+        if g ==1
+        text(SP(g,1)+45, FS(g,1)-6, strG,...
+            'HorizontalAlignment','right','FontSize',10,'FontName','Arial');            
+        else
+        text(SP(g,1)-3, FS(g,1)+7, strG,...
+            'HorizontalAlignment','right','FontSize',10,'FontName','Arial');
+        end
+    end
+    ax = gca; ax.XTick = 220:40:400; ax.YTick = 220:40:400;
+        
+
+saveFIG_IGS('SPvsFS',1,8)

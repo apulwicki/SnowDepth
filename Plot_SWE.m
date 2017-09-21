@@ -235,13 +235,13 @@ saveFIG('AllSWEopts_boxplot')
 clear text* fig filename cats swedata group g opt stats p t glacier
 
 
-%% Variability for one measurement location
+%% Variability for each measurement location
 
-clf(1);
 run MeasurementLocations.m  %This program determines the easting and northing of transect measurements
 run Import_Density.m        %Imports snow density values
 run Import_Transect.m       %Imports transect snow depth and measurement location data
 glacier_list = ['G04';'G02';'G13']; %for selecting data from chosen glacier
+ figure(1); clf(1);
 for i = 1:3 %go through each glacier
     glacier = glacier_list(i,:);    
     G = char(options.glacier(i));
@@ -249,25 +249,26 @@ for i = 1:3 %go through each glacier
 
    data = z(5).depth(:,1:4);
    data = data*mean(cell2mat(Density.snowpit(:,2)))/1000; %SWE conversion
-   data = (data - repmat(nanmean(data,2),1,4))./repmat(nanmean(data,2),1,4)*100;%./repmat(nanstd(data, [], 2),1,4);
+   data = (data - repmat(nanmean(data,2),1,4));%./repmat(nanmean(data,2),1,4)*100;%./repmat(nanstd(data, [], 2),1,4);
          display([glacier,' 2 sigma ', num2str(2*nanstd(data(:)))]);
         %chi2gof(data(:))
    VARoneloc.(G) = data;
    
    
    if i==1;     bins = round(sqrt(length(SWEzz(i).swe)));   end
-   edges   = linspace(-50,50,bins);
+   edges   = linspace(-5,5,bins);
    N       =  histcounts(data,edges);
- figure(1);   plot((edges(:,1:end-1)+edges(:,2:end))/2,N/sum(N),'LineWidth',2, 'Color',options.RGB(i,:)); hold on 
+   fill([-5 (edges(:,1:end-1)+edges(:,2:end))/2 5],[0 N/sum(N) 0],options.RGB(i,:),...
+       'FaceAlpha',0.5,'EdgeColor','none'); hold on 
 
 stdtemp(i).swe = nanstd(z(5).depth(:,1:4), [], 2)./nanmean(z(5).depth(:,1:4),2)*100;
 stdtemp(i).utm = z(5).depth(:,6:7);
 end
-            xlabel('SWE variability (%)'); ylabel('Probability')
+            xlabel('Point-scale WB (m w.e.)'); ylabel('Probability')
             legend('Glacier 4','Glacier 2','Glacier 13')
             %title('SWE (S1) variation at single measurement location')
             fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18)
-            fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 13 6];
+            fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 10 6];
   saveFIG('SWEvarOneLocHIST')
 
  % Plot -> map of measurement std values
@@ -300,7 +301,7 @@ ff = 2;
 for g = 1:3
     glacier = char(options.glacier(g));
     I = ~isnan(SWE(g).standard);
-    pdfdata(ff).(glacier) = SWE(g).standard(I)./SWE(g).swe(I)*100;
+    pdfdata(ff).(glacier) = SWE(g).standard(I);%./SWE(g).swe(I)*100;
 end
 
 
@@ -317,18 +318,19 @@ data = pdfdata(ff).(glacier);
          display([num2str(ff),glacier,' 2 sigma ', num2str(2*nanstd(data(:)))]);
 
 if g == 1; bins = round(sqrt(numel(data))); end
-   edges   = linspace(-50,50,bins);
+   edges   = linspace(-0.08,0.08,bins);
    N       =  histcounts(data,edges);
-   plot((edges(:,1:end-1)+edges(:,2:end))/2,N/sum(N),'LineWidth',2,'Color',options.RGB(g,:)); hold on 
+   fill([min(edges) (edges(:,1:end-1)+edges(:,2:end))/2 max(edges)],[0 N/sum(N) 0],options.RGB(g,:),...
+       'FaceAlpha',0.4,'EdgeColor','none'); hold on 
 
 stdtemp(g).swe = SWE(g).cellstd./SWE(g).swe*100;    stdtemp(g).utm = SWE(g).utm(:,1:2);
 
 end
-            xlabel('SWE variability (%)'); ylabel('Probability')
+            xlabel('Winter balance (m w.e.)'); ylabel('Probability')
             legend('Glacier 4','Glacier 2','Glacier 13')
 end
             fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18)
-            fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 13 6];    
+            fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 10 6];    
             %title({'SWE variability due to multiple measurement','locations in one grid cell'})
 saveFIG('SWEvarMeasureLocHIST')
 
@@ -366,14 +368,14 @@ clear data M S
     end
  M = mean(data,2);      M = repmat(M,1,8);
  S = std(data,[],2);    S = repmat(S,1,8);
- data = (data-M)./M*100;%./S;
+ data = (data-M);%./M*100;%./S;
          display([glacier,' 2 sigma ', num2str(2*nanstd(data(:)))]);
  
-if g ==1;  bins = round(sqrt(numel(data))/2); end
-   edges   = linspace(-50,50,bins);
+if g == 1;  bins = round(sqrt(numel(data))/2); end
+   edges   = linspace(-0.08,0.08,bins);
    N       =  histcounts(data,edges);
-figure(1);   plot((edges(:,1:end-1)+edges(:,2:end))/2,N/sum(N),'LineWidth',2, 'Color',options.RGB(g,:)); hold on 
- 
+   fill([min(edges) (edges(:,1:end-1)+edges(:,2:end))/2 max(edges)],[0 N/sum(N) 0],options.RGB(g,:),...
+       'FaceAlpha',0.5,'EdgeColor','none'); hold on 
  % bins = round(sqrt(length(S)));
 %     [N, edges] = histcounts(S(:,1),bins);
 % figure(2);    plot((edges(:,1:end-1)+edges(:,2:end))/2,N,'LineWidth',2); hold on
@@ -383,10 +385,10 @@ figure(1);   plot((edges(:,1:end-1)+edges(:,2:end))/2,N/sum(N),'LineWidth',2, 'C
 end
 
 figure(1); 
-    xlabel('SWE variability (%)'); ylabel('Probability')
+    xlabel('Winter balance (m w.e.)'); ylabel('Probability')
     legend('Glacier 4','Glacier 2','Glacier 13') %title('SWE variation due to density interpolation')
             fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18)
-            fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 13 6];    
+            fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 10 6];    
 saveFIG('SWEvarDensityHIST')
 
 % for j = 1:length(data)
