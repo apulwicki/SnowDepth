@@ -100,16 +100,19 @@ end
     saveFIG('residualsKriged','3G')
 
 %% Plotting -> regression kriging
-    param = 'RK';
-    opt = 8;
-    topoParam.G4  = sweRK(opt+1).G4;
-    topoParam.G2  = sweRK(opt+1).G2;
-    topoParam.G13 = [sweRK(opt+1).G13; nan(10,size(sweRK(opt+1).G13,2))];
-    topoParam.G13 = [sweRK(opt+1).G13, nan(size(sweRK(opt+1).G13,1),10)];
+%     param = 'RK';
+%     opt = 8;
+%     topoParam.G4  = sweRK(opt+1).G4;
+%     topoParam.G2  = sweRK(opt+1).G2;
+%     topoParam.G13 = [sweRK(opt+1).G13; nan(10,size(sweRK(opt+1).G13,2))];
+%     topoParam.G13 = [sweRK(opt+1).G13, nan(size(sweRK(opt+1).G13,1),10)];
+% 
+%     PlotTopoParameter(topoParam,param, 'SWE (m w.e.)', SWE, 'black', 'massB')
 
-    PlotTopoParameter(topoParam,param, 'SWE (m w.e.)', SWE, 'black', 'massB')
-
-    saveFIG('RegressionKriging','3G')
+    load Full.mat fullRK
+    load TopoSWE.mat SWE
+PlotTopoParameter(fullRK.S2,'RK', 'SWE (m w.e.)', SWE, 'black', 'massB')   
+    saveFIG('RegressionKriging',18,'3G')
 
     
 %% Model param table
@@ -129,12 +132,18 @@ end
 writetable(nugget, '/Users/Alexandra/Downloads/modelparam.csv','FileType','text')
 
 %% Plot - Actual vs fitted data  
-figure(1); clf
-for i = 1:3
-    glacier     = char(options.glacier(i));
-    yObserved   = SWE(i).swe;
-    %yModel      = sampledRK(8).(glacier);      
-    yModel      = sweRK(2).LOO.(glacier);
+    load TopoSWE.mat topo_sampled 
+    load Full.mat fullSWE fullRK options
+RKinput = SampledCell(fullRK.S2);
+WBinput = ObsInCell(fullSWE.S2.input, topo_sampled);
+
+close all
+    dim = [0.16 0.5 0.3 0.3;...
+           0.44 0.5 0.3 0.3;...
+           0.72 0.5 0.3 0.3];
+for i = 1:3;    glacier = options.glacier{i};
+    yObserved   = WBinput.(glacier)(:,1);
+    yModel      = RKinput.(glacier);
     
     subplot(1,3,i)
     axis([0 1.2 0 1.2]);    line = refline(1,0);    line.Color = 'k'; line.LineStyle = '--'; hold on
@@ -143,15 +152,14 @@ for i = 1:3
         [f.(glacier), g.(glacier)] = fit(yObserved, yModel,'poly1');
         p = plot(f.(glacier)); hold on
         set(p,'Color',options.RGB(i,:)); set(p, 'LineWidth',1.5);     
-        xlabel('Measured Winter Balance (m w.e.)'); ylabel('Modelled Winter Balance (m w.e.)');
+        xlabel('Measured WB (m w.e.)'); ylabel('Modelled WB (m w.e.)');
         title(['Glacier ',glacier(2:end)])
                 axis square;    box on
         b = gca; legend(b,'off');
-        dim = [b.Position(1)+0.01 b.Position(2)+.37 .3 .3];
-        annotation('textbox',dim,'String', ['R^2=',num2str(round(g.(glacier).rsquare,2), '%.2f')],'FitBoxToText','on')
+        annotation('textbox',dim(i,:),'String', ['R^2=',num2str(round(g.(glacier).rsquare,2), '%.2f')],'FitBoxToText','on')
 end
 
-    fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',13)
+    fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',12)
     fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 12 4];
  saveFIG('krigRKfit')
 
@@ -223,20 +231,21 @@ end
 
 
 %% Plot -> CI for kriging
+load Full.mat fullSK options
+load TopoSWE.mat sweOPT
 
-opt = 8;
-for g = 1:3
-   glacier = char(options.glacier(g));
-   CI.(glacier) = (sweKRIG(opt).(glacier).upper95 - sweKRIG(opt).(glacier).lower95)...
-       ./sweKRIG(opt).(glacier).pred*100;
+opt = 'S2';
+for g = 1:3;   glacier = options.glacier{g};
+   CI.(glacier) = (fullSK.(opt).(glacier).upper95 - fullSK.(opt).(glacier).lower95)...
+       ./fullSK.(opt).(glacier).pred*100;
    
    CI.(glacier)(isinf(CI.(glacier))) = NaN;
-   CI.(glacier)(CI.(glacier)>400) = 400;
+   %CI.(glacier)(CI.(glacier)>400) = 400;
 end
 
-PlotTopoParameter(CI,'uncertainity', {'Confidence Interval as','Percent of Kriged SWE (%)'}, ...
-                    sweOPT(opt), 'black', 'NmassB')
-    saveFIG('KrigingCI_percent','3G')
+PlotTopoParameter(CI,'uncertainity', {'Confidence Interval as','Percent of Kriged WB (%)'}, ...
+                    sweOPT(2), 'black', 'NmassB')
+    saveFIG('KrigingCI_percent',18,'3G')
     
     
     

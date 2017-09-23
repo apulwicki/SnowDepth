@@ -348,28 +348,27 @@ boxplot(T,G,'Labels',{'Glacier 4','Glacier 2','Glacier 13'})
  
 %% ALL INTERPOLATION TYPES - MEAN SWE - bar graph
 
-load TopoSWE.mat
+load Full.mat
  %2D - option S4
-for opt = 2:9
-for g = 1:3
-    glacier = char(options.glacier(g));
-meanswe(g,:,opt) = [...%mean(sweOPT(opt).(glacier)(:,1)), ...
-                nanmean(sweBMS(opt).(glacier)(:)),...
-                nanmean(sweKRIG(opt).(glacier).pred(:)),...
-                nanmean(sweRK(opt).(glacier)(:))];
+for d = 1:8;    den = options.DenOpt{d};
+for g = 1:3;    glacier = options.glacier{g};
+meanswe(g,:,d) = [...%mean(sweOPT(opt).(glacier)(:,1)), ...
+                nanmean(fullLR.(den).(glacier)(:)),...
+                nanmean(fullSK.(den).(glacier).pred(:)),...
+                nanmean(fullRK.(den).(glacier)(:))];
 end
 end
 meanswe = mean(meanswe,3);
 
 B = bar(meanswe, 'EdgeColor','none','BarWidth', 1);
-    ylabel('Mean SWE (m w.e.)','Fontname','timesnewroman')
+    ylabel([{'Glacier-wide WB'},{'(m w.e.)'}],'Fontname','timesnewroman')
     set(gca,'xticklabel',{'Glacier 4','Glacier 2','Glacier 13'})
     legend('LR','SK','RK')
 
     colormap = [248 62 61; 106 196 112; 212 188 0]/255;
     for i = 1:3
     B(i).FaceColor = colormap(i,:); end
-saveFIG('InterpMethod_mean',30)
+saveFIG('InterpMethod_mean',18)
 
  % 3D - all density options
 for opt = 2:9
@@ -401,15 +400,20 @@ end
 saveFIG('InterpMethod_allopts')
 
 %% ALL INTERPOLATION TYPES - R2 - bar graph
-load Topo_Regress_Krig.mat
+    load Full.mat
+    load TopoSWE.mat topo_sampled
 
-for opt = 2:9
-for g = 1:3
-    glacier = char(options.glacier(g));
-meanR2(g,:,opt-1) = [corr(sweOPT(opt).(glacier)(:,1), sampledBMA(opt).(glacier))^2, ...
-                      corr(sweOPT(opt).(glacier)(:,1), sampledKRIG(opt).(glacier))^2, ...
-                      corr(sweOPT(opt).(glacier)(:,1), sampledRK(opt).(glacier))^2];
-                      
+WBinput = ObsInCell(fullSWE.S2.input, topo_sampled);
+
+for d = 1:8;    den = options.DenOpt{d};
+RKinput = SampledCell(fullRK.(den));
+    SKtemp.G4 = fullSK.(den).G4.pred; SKtemp.G2 = fullSK.(den).G2.pred; SKtemp.G13 = fullSK.(den).G13.pred;
+SKinput = SampledCell(SKtemp);
+LRinput = SampledCell(fullLR.(den));
+for g = 1:3;    glacier = char(options.glacier(g));
+meanR2(g,:,d) = [corr(WBinput.(glacier)(:,1), LRinput.(glacier))^2, ...
+                     corr(WBinput.(glacier)(:,1), SKinput.(glacier))^2, ...
+                     corr(WBinput.(glacier)(:,1), RKinput.(glacier))^2];                     
 end
 end
 meanR2 = mean(meanR2,3);
@@ -422,7 +426,7 @@ B = bar(meanR2, 'EdgeColor','none','BarWidth',1);
     colormap = [248 62 61; 106 196 112; 212 188 0]/255;
     for i = 1:3
     B(i).FaceColor = colormap(i,:); end
-saveFIG('InterpMethod_meanR2',30)
+saveFIG('InterpMethod_meanR2',18)
 
 % 3D - all density options
 for opt = 2:9

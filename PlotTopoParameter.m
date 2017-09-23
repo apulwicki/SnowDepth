@@ -52,7 +52,7 @@ end
 
 %other color schemes
 if  strcmp(paramName, 'uncertainity')
-    Cmap = cbrewer('seq','OrRd',50,'PCHIP');
+    Cmap = cbrewer('seq', 'BuPu', 100,'PCHIP');
 end
  
 for i = 1:3
