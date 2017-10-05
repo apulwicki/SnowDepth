@@ -20,23 +20,23 @@ end
 %% SWE at sampling locations
 
 param = 'empty';
-for opt = 2%:9
+for opt = 2:9
 topoParam.G4  = NaN(size(topo_full_ns.G4.elevation));
 topoParam.G2  = NaN(size(topo_full_ns.G2.elevation));
 topoParam.G13 = NaN(size(topo_full_ns.G13.elevation));
 topoParam.rig = options.rig;
 
-PlotTopoParameter(topoParam,param, 'SWE (m w.e.)', sweOPT(opt), 'colour')
+PlotTopoParameter(topoParam,param, 'Winter Balance (m w.e.)', sweOPT(opt), 'colour','nomassB')
 
     saveFIG(['SWEmap_opt',num2str(opt)])
 end
 %% Modelled and observed SWE
 
-modelled = sweMLR;
-type     = 'MLR';
+% modelled = sweMLR;
+% type     = 'MLR';
 
-% modelled = sweBMS;
-% type     = 'BMS';
+modelled = sweBMS;
+type     = 'BMS';
 
 topoParam = fullRK.S2;
 
@@ -46,7 +46,7 @@ for opt = 2:9
     topoParam.G2  = modelled(opt).G2;
     topoParam.G13 = modelled(opt).G13;
 
-    PlotTopoParameter(topoParam, 'modelledSWE', 'SWE (m w.e.)', SWE, 'black', 'massB')
+    PlotTopoParameter(topoParam, 'modelledSWE', 'Winter Balance (m w.e.)', SWE, 'sweONswe', 'massB')
          saveFIG([type,'map_Modelled_Observed',num2str(opt-1)])
 end
     clear filename modelled opt type fig glacier g 
@@ -79,11 +79,11 @@ diffSWE_p.(glacier) = (maxSWE.(glacier)-minSWE.(glacier))./minSWE.(glacier)*100;
     diffSWE_p.(glacier) = [nan(size(diffSWE_p.(glacier),1),2),diffSWE_p.(glacier),nan(size(diffSWE_p.(glacier),1),2)];
 
 end
-diffSWE.rig = rig;   diffSWE_p.rig = rig; 
+diffSWE.rig = options.rig;   diffSWE_p.rig = options.rig; 
 
-PlotTopoParameter(diffSWE, 'modelledSWE', 'SWE (m w.e.)', SWE, 'black')
+PlotTopoParameter(diffSWE, 'modelledSWE', 'Winter Balance (m w.e.)', SWE, 'black','nomassB')
    saveFIG([type,'_SWEdifferenceMap'])
-PlotTopoParameter(diffSWE_p, 'modelledSWE', {'Predicted SWE range as ','percent of maximum SWE (%)'}, SWE, 'black')
+PlotTopoParameter(diffSWE_p, 'modelledSWE', {'WB Difference (%)'}, SWE, 'black','nomassB')
     saveFIG([type,'_SWEdifferenceMap_percent'])
 
 display(char(type))
@@ -148,21 +148,26 @@ PlotTopoParameter(sweRANGE, 'modelledSWE', 'SWE (m w.e.)', SWE, 'black')
 clear g* i maxSWE minSWE filename modelled  type diffSWE
 
 %% Residuals at sampling locations
-
+    load TopoBMS_MLR.mat
 param = 'empty';
+% type = 'BMA';
+% RES = residualsBMS(8);
+type = 'MLR';
+RES = residualsMLR(8);
+
 for g = 1:3
     glacier = char(options.glacier(g));
 topoParam.(glacier)  = NaN(size(topo_full_ns.(glacier).elevation));
-topoParam.rig = rig;
+topoParam.rig = options.rig;
 
-resZ(g).swe = res.(glacier); 
+resZ(g).swe = RES.(glacier); 
 resZ(g).utm = SWE(g).utm;
 end
 
 figure(3)
-PlotTopoParameter(topoParam,param, 'BMS Residuals (m w.e.)', resZ, 'colour')
+PlotTopoParameter(topoParam,param, [type,' Residuals (m w.e.)'], resZ, 'colour','nomassB')
     C = cbrewer('div', 'RdYlBu', 20, 'PCHIP');
     colormap(flipud(C))
-        saveFIG(['residualsMap_',method])
+        saveFIG(['residualsMap_',type])
 
 

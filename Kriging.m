@@ -44,9 +44,9 @@ test = KrigingR(residualsBMS(4).G4, SWE(1).utm, 'G4');
 
 % Dice Kriging -> residuals
 res_bmaKRIG(9).G4.pred = 9999;
-for g = 1%:3
+for g = 1:3
         glacier = char(options.glacier(g));
-    for r = 2%:9
+    for r = 4%2:9
     res_bmaKRIG(r).(glacier) = KrigingR(residualsBMS(r).(glacier), SWE(g).utm, glacier);
     end
 end    
@@ -86,18 +86,13 @@ end
 
 %% Plotting -> residuals
     param = 'pred';
-    topoParam.G4  = residualsKRIG(2).G4.(param);
-    topoParam.G2  = residualsKRIG(2).G2.(param);
-    topoParam.G13 = residualsKRIG(2).G13.(param);
-    topoParam.rig = rig;
+    topoParam.G4  = res_bmaKRIG(4).G4.(param);
+    topoParam.G2  = res_bmaKRIG(4).G2.(param);
+    topoParam.G13 = res_bmaKRIG(4).G13.(param);
+    topoParam.rig = options.rig;
 
-    PlotTopoParameter(topoParam,param, 'SWE (m w.e.)', SWE, 'symmetric')
-
-    annotation('textbox',[.17 .22 .1 .1],'String',[num2str(round(nanmean(residualsKRIG(2).G4.(param)(:)),2), '%.2f'),' m w.e.'],'EdgeColor','none')    
-    annotation('textbox',[.34 .55 .1 .1],'String',[num2str(round(nanmean(residualsKRIG(2).G2.(param)(:)),2), '%.2f'),' m w.e.'],'EdgeColor','none')    
-    annotation('textbox',[.75 .53 .1 .1],'String',[num2str(round(nanmean(residualsKRIG(2).G13.(param)(:)),2), '%.2f'),' m w.e.'],'EdgeColor','none')    
-
-    saveFIG('residualsKriged','3G')
+    PlotTopoParameter(topoParam,'symmetric', 'Residual (m w.e.)', SWE, 'symmetric','massB')
+        saveFIG('residualsKriged',18,'3G')
 
 %% Plotting -> regression kriging
 %     param = 'RK';
@@ -243,7 +238,7 @@ for g = 1:3;   glacier = options.glacier{g};
    %CI.(glacier)(CI.(glacier)>400) = 400;
 end
 
-PlotTopoParameter(CI,'uncertainity', {'Confidence Interval as','Percent of Kriged WB (%)'}, ...
+PlotTopoParameter(CI,'uncertainity', 'Confidence interval (%)', ...
                     sweOPT(2), 'black', 'NmassB')
     saveFIG('KrigingCI_percent',18,'3G')
     

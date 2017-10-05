@@ -72,8 +72,11 @@ end
 
 % Stack and get mean of all density options
 for d = 1:8
+    for gg = 1:3; 
+        glacier2 = options.glacier{gg}; 
  den = options.DenOpt{d};
- stackTransfer.combo.(glacier2)(:,:,d) =  Transfer.combo.(den).(glacier2); 
+ stackTransfer.combo.(glacier2)(:,:,d) =  Transfer.combo.(den).(glacier2);
+    end
 end
  for gg = 1:3; glacier2 = options.glacier{gg};
      Transfer.combo.mean.(glacier2) = nanmean(stackTransfer.combo.(glacier2),3);
@@ -82,19 +85,19 @@ end
 %% PLOT -> maps of mean
 
 
-figure(1); PlotTopoParameter( Transfer.G4.mean,'empty', 'SWE (m w.e.)', SWE, 'none', 'massB')
+figure(1); PlotTopoParameter( Transfer.G4.mean,'empty', 'Winter balance (m w.e.)', SWE, 'none', 'massB')
      title('Glacier 4 LR Coefficients')
      saveFIG('MapTransferabilityG4Coeffs')
 
-figure(2); PlotTopoParameter( Transfer.G2.mean,'empty', 'SWE (m w.e.)', SWE, 'none', 'massB')
+figure(2); PlotTopoParameter( Transfer.G2.mean,'empty', 'Winter balance (m w.e.)', SWE, 'none', 'massB')
      title('Glacier 2 LR Coefficients')
      saveFIG('MapTransferabilityG2Coeffs')
 
-figure(3); PlotTopoParameter( Transfer.G13.mean,'empty', 'SWE (m w.e.)', SWE, 'none', 'massB')
+figure(3); PlotTopoParameter( Transfer.G13.mean,'empty', 'Winter balance (m w.e.)', SWE, 'none', 'massB')
      title('Glacier 13 LR Coefficients')
      saveFIG('MapTransferabilityG13Coeffs')
 
-figure(4); PlotTopoParameter( Transfer.combo.mean,'empty', 'SWE (m w.e.)', SWE, 'none', 'massB')
+figure(4); PlotTopoParameter( Transfer.combo.mean,'empty', 'Winter balance (m w.e.)', SWE, 'none', 'massB')
      title('All Data LR Coefficients')
      saveFIG('MapTransferabilityComboCoeffs')   
      

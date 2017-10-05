@@ -194,7 +194,7 @@ for g = 1:3
 subplot(3,1,g)
     boxplot(swedata, group);
     ylim([0 1.2])
-    ylabel('SWE (m w.e.)')
+    ylabel([{'Winter Balance'}, {'(m w.e.)'}])
     
 end
 
@@ -205,17 +205,17 @@ end
         annotation('textbox',[0.16 0.885 0.1 0.1], 'String', textA,'EdgeColor','none')
         annotation('textbox',[0.16 0.870 0.1 0.1], 'String', textB,'EdgeColor','none')
         annotation('textbox',[0.16 0.855 0.1 0.1], 'String', textC,'EdgeColor','none')
-        annotation('textbox',[0.01 0.855 0.1 0.1], 'String', '(a)','EdgeColor','none')
+        annotation('textbox',[0.01 0.87 0.1 0.1], 'String', '(a)','EdgeColor','none')
 %Glacier 2
     textA = 'A          A          A                     A                      A         ';
     textB = 'B          B          B                     B          B          B         B';
     textC = '                                    C                     C                     C';
-    textD = '            D                     D                      D                     D';
+    textD = '            D                      D                     D                    D';
         annotation('textbox',[0.16 0.525 0.1 0.1], 'String', textA,'EdgeColor','none')
-        annotation('textbox',[0.16 0.51 0.1 0.1], 'String', textB,'EdgeColor','none')
-        annotation('textbox',[0.16 0.495 0.1 0.1], 'String', textC,'EdgeColor','none')
-        annotation('textbox',[0.16 0.48 0.1 0.1], 'String', textD,'EdgeColor','none')
-        annotation('textbox',[0.01 0.53 0.1 0.1], 'String', '(b)','EdgeColor','none')
+        annotation('textbox',[0.16 0.505 0.1 0.1], 'String', textB,'EdgeColor','none')
+        annotation('textbox',[0.16 0.48 0.1 0.1], 'String', textC,'EdgeColor','none')
+        annotation('textbox',[0.16 0.46 0.1 0.1], 'String', textD,'EdgeColor','none')
+        annotation('textbox',[0.01 0.55 0.1 0.1], 'String', '(b)','EdgeColor','none')
 %Glacier 13
     textA = 'A                     A                                            A         ';
     textB = '            B                      B                     B                    B';
@@ -224,12 +224,12 @@ end
         annotation('textbox',[0.16 0.225 0.1 0.1], 'String', textA,'EdgeColor','none')
         annotation('textbox',[0.16 0.21 0.1 0.1], 'String', textB,'EdgeColor','none')
         annotation('textbox',[0.16 0.195 0.1 0.1], 'String', textC,'EdgeColor','none')
-        annotation('textbox',[0.16 0.18 0.1 0.1], 'String', textD,'EdgeColor','none')
-        annotation('textbox',[0.01 0.23 0.1 0.1], 'String', '(c)','EdgeColor','none')
+        annotation('textbox',[0.16 0.17 0.1 0.1], 'String', textD,'EdgeColor','none')
+        annotation('textbox',[0.01 0.25 0.1 0.1], 'String', '(c)','EdgeColor','none')
           
 
     fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',13)
-    fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 7 11];
+    fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 9.75 11];
 saveFIG('AllSWEopts_boxplot')
 
 clear text* fig filename cats swedata group g opt stats p t glacier
@@ -237,10 +237,13 @@ clear text* fig filename cats swedata group g opt stats p t glacier
 
 %% Variability for each measurement location
 
+load TopoSWE.mat
+run OPTIONS.m
 run MeasurementLocations.m  %This program determines the easting and northing of transect measurements
 run Import_Density.m        %Imports snow density values
 run Import_Transect.m       %Imports transect snow depth and measurement location data
 glacier_list = ['G04';'G02';'G13']; %for selecting data from chosen glacier
+
  figure(1); clf(1);
 for i = 1:3 %go through each glacier
     glacier = glacier_list(i,:);    
@@ -258,8 +261,8 @@ for i = 1:3 %go through each glacier
    if i==1;     bins = round(sqrt(length(SWEzz(i).swe)));   end
    edges   = linspace(-5,5,bins);
    N       =  histcounts(data,edges);
-   fill([-5 (edges(:,1:end-1)+edges(:,2:end))/2 5],[0 N/sum(N) 0],options.RGB(i,:),...
-       'FaceAlpha',0.5,'EdgeColor','none'); hold on 
+   plot([-5 (edges(:,1:end-1)+edges(:,2:end))/2 5],[0 N/sum(N) 0],...
+       'Color',options.RGB(i,:),'LineWidth',3); hold on 
 
 stdtemp(i).swe = nanstd(z(5).depth(:,1:4), [], 2)./nanmean(z(5).depth(:,1:4),2)*100;
 stdtemp(i).utm = z(5).depth(:,6:7);
@@ -277,7 +280,7 @@ figure(2)
     topoParam.G2  = NaN(size(topo_full_ns.G2.elevation));
     topoParam.G13 = NaN(size(topo_full_ns.G13.elevation));
 
-PlotTopoParameter(topoParam,'std in one grid cell', 'Coefficient of Variation (%)', stdtemp, 'colour', 'nomassB')
+PlotTopoParameter(topoParam,'std in one grid cell', 'Coefficient of variation (%)', stdtemp, 'colour', 'nomassB')
     saveFIG('Map_pointstd')
 
  
@@ -320,8 +323,8 @@ data = pdfdata(ff).(glacier);
 if g == 1; bins = round(sqrt(numel(data))); end
    edges   = linspace(-0.08,0.08,bins);
    N       =  histcounts(data,edges);
-   fill([min(edges) (edges(:,1:end-1)+edges(:,2:end))/2 max(edges)],[0 N/sum(N) 0],options.RGB(g,:),...
-       'FaceAlpha',0.4,'EdgeColor','none'); hold on 
+   plot([min(edges) (edges(:,1:end-1)+edges(:,2:end))/2 max(edges)],[0 N/sum(N) 0],...
+       'Color',options.RGB(g,:),'LineWidth',3); hold on 
 
 stdtemp(g).swe = SWE(g).cellstd./SWE(g).swe*100;    stdtemp(g).utm = SWE(g).utm(:,1:2);
 

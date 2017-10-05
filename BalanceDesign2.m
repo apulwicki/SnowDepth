@@ -81,7 +81,7 @@ end
 % RANDOM PATTERN
 
  %Number of random points
- sizeR = 50;
+ sizeR = 100;
 
 for g = 1:3;    glacier = options.glacier{g};
 data = fullWB.(glacier);
@@ -115,18 +115,18 @@ end
     clear c* data f* g* i param row
     clear e f g* i* I* n* p pattern t1 t2 topoparams utm* wb WB*
 
-%% Linear Regression
+%% Linear Regression - full data
 
     namesP = fieldnames(pWB);
     nRuns = 100;
-for p = 5%1:length(namesP)
+for p = 1:length(namesP)
     
-    for mc = 19:nRuns;
+    for mc = 1:nRuns;
     %Add some noise
     WBinput = WBnoise(pWB.(namesP{p}));
     
     %Linear regresion
-    subsetWB.(namesP{p})(mc) = LinearRegression( WBinput, pTOPO.(namesP{p}), topo_full );
+    subsetWBfull.(namesP{p})(mc) = LinearRegression( WBinput, pTOPO.(namesP{p}), topo_full );
     end
     
     %Average WB distribution
@@ -174,6 +174,43 @@ end
     legend(namesP(5:-1:1))
     xlabel('RMSE (m w.e.)'); ylabel('Frequency')
 end
+
+
+%% Linear Regression - sample size test
+%load Full.mat fullLR
+    namesP = fieldnames(pWB); 
+sampleSize = 45:5:50;
+nRuns = 100;
+
+for s = 1:length(sampleSize)
+ss = sampleSize(s);
+    [WBinput(ss), TOPOinput(ss), UTMinput(ss)] = SubsetSampleSize( pWB, pTOPO, pUTM, ss );
+
+for p = 1:length(namesP)
+    
+    display(['Sample size: ',num2str(ss),' Pattern: ',namesP{p}])
+    
+    for mc = 1:nRuns;
+    %Add some noise
+    WBinputN = WBnoise(WBinput(ss).(namesP{p}));
+    
+    %Linear regresion
+    subsetWB(ss).(namesP{p})(mc) = LinearRegression( WBinputN, pTOPO.(namesP{p}), topo_full );
+    end
+    
+    %Average WB distribution
+        T = struct2table(subsetWB(ss).(namesP{p}));
+    for g = 1:3;    glacier = options.glacier{g};
+        TT = T.(glacier);
+        TT = reshape(TT,1,1,nRuns);
+        TT = cell2mat(TT);
+    subsetWBavg(ss).(namesP{p}).(glacier) = mean(TT,3);
+    end
+    
+save('PatternsTemp1.mat','*input','subset*','-append')    
+end
+end
+
 
 %% Get cell num raster
 

@@ -147,7 +147,7 @@ semiR.Properties.VariableNames = {'SemiR2'};
 uniR = table(zeros(length(beta),1),'RowNames',beta);    %initalize
 uniR.Properties.VariableNames = {'UnivarR2'};
 
-uniR{:,1}   = corr(M{:,:},y).^2;      %Squared raw correlation between
+% uniR{:,1}   = corr(M{:,:},y).^2;      %Squared raw correlation between
                                            %regressors and y data
  %Metrics
 metric      = [semiR, uniR]; 
@@ -169,21 +169,21 @@ coeffs_final = coeffs_final(index,:);
 %% Find goodness of fit values
 
  %Predict all data at sampling locations
-y_regress   = sum(X1{:,:}.*repmat(coeffs_final{1:end-1,1}',height(X1),1),2) + coeffs_final{end,1};      %predict validation data
+%y_regress   = sum(X1{:,:}.*repmat(coeffs_final{1:end-1,1}',height(X1),1),2) + coeffs_final{end,1};      %predict validation data
 
 %RMSE
-rmse_final  = sqrt(sum((y-y_regress).^2)/numel(y_regress));  %get the RMSE between observed and predicted values
+rmse_final  = 1; %sqrt(sum((y-y_regress).^2)/numel(y_regress));  %get the RMSE between observed and predicted values
     coeffs_final = [coeffs_final; table(rmse_final, 0, 0, ...
                 'VariableName',coeffs_final.Properties.VariableNames,'RowNames',{'rmse'})];
 
 %R^2
-R2 = corr(y,y_regress)^2;
+R2 = 1;% corr(y,y_regress)^2;
     coeffs_final = [coeffs_final; table(R2, 0, 0, ...
                 'VariableName',coeffs_final.Properties.VariableNames,'RowNames',{'R2_full'})];
 %% Residuals
 
  %Get residual
-residuals = y-y_regress;
+residuals = y;%-y_regress;
 
 end
 

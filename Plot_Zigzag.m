@@ -299,8 +299,8 @@ if g ==1;     bins    = round(sqrt(length(gZZ))); end
    edges   = linspace(-0.2,0.2,bins);
    N       =  histcounts(data,edges);
 figure(1);   
-fill([min(edges) (edges(:,1:end-1)+edges(:,2:end))/2 max(edges)],[0 N/sum(N) 0],options.RGB(g,:),...
-       'FaceAlpha',0.5,'EdgeColor','none'); hold on 
+ plot([min(edges) (edges(:,1:end-1)+edges(:,2:end))/2 max(edges)],[0 N/sum(N) 0],...
+       'Color',options.RGB(g,:),'LineWidth',3); hold on
 %      figure(2);
 %     normALL = normpdf(gZZ,mean(gZZ),std(gZZ));
 %     [gZZ, I] = sort(gZZ);

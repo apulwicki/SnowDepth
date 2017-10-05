@@ -1,8 +1,8 @@
 %% %%%%%%%%%%%%%%%%%%%%% BMS and MLR Plots %%%%%%%%%%%%%%%%%%%%%
 % % % 
-% data            = BMS;
-% residualsdata   = residualsBMS;
-% type            = 'BMS';
+data            = BMS;
+residualsdata   = residualsBMS;
+type            = 'BMS';
 % 
 data            = MLR;
 residualsdata   = residualsMLR;
@@ -48,9 +48,10 @@ saveFIG([type,'fit_opt',num2str(r)])
 %% Plots - Box and whisker for coeffs/semi partial from density options
 clf
 
-val = 1; Lval = 'coeff';  %coeff value
-%  val = 2; Lval = 'semiR2'; %semi-partial correlation
-
+for val = 1:2
+if val == 1; Lval = 'coeff';  %coeff value
+elseif val == 2; Lval = 'semiR2'; %semi-partial correlation
+end
 %Rearrange to compare density options
 params = data(2).G4.Properties.RowNames(1:end-3);
 box.G4 = []; box.G2 = []; box.G13 = [];
@@ -64,7 +65,7 @@ end
 
 h = cat(1, reshape(box.G4,[1 size(box.G4)]), reshape(box.G2,[1 size(box.G2)]),...
             reshape(box.G13,[1 size(box.G13)]));
-
+subplot(1,2,val)
 aboxplot(h,'labels',options.topoVars, ...
     'Colormap',                 options.RGB,...
     'OutlierMarkerSize',        10,...
@@ -77,19 +78,20 @@ aboxplot(h,'labels',options.topoVars, ...
         elseif val==2
             ylabel('Semi-partial R^2'); hold on; end 
 
-        for i = 1:7
+        for i = 1:6
         line([i+0.5 i+0.5],ylim,'Color',[0 0 0],'LineStyle','--','LineWidth', 0.5)
         end
 
-
+end
         fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',22) 
-        fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 13 10];
+        fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 14 6];
 
 saveFIG([type,Lval,'_DensityOpts'])
      clear box fig filename h i params
 %% Plots - fit for all SWE options
 clf
 R2value = [];
+T = [{'Glacier 4'},{'Glacier 2'},{'Glacier 13'}];
 
 figure(1)
 for i = 1:3
@@ -112,8 +114,10 @@ for i = 1:3
         [f.(name), g.(name)] = fit(y, X,'poly1');
         p = plot(f.(name)); hold on
         set(p,'Color',options.RGB(i,:)); set(p, 'LineWidth',1.5);     
-        xlabel('Measured Winter Balance (m w.e.)'); ylabel('Modelled Winter Balance (m w.e.)');
-        title(name)
+        xlabel('Measured WB (m w.e.)'); 
+        if i ==1; ylabel('Modelled WB (m w.e.)'); 
+        else ylabel(''); end
+        title(T(i))
                 axis square;    box on        
         R2value = mean([R2value g.(name).rsquare]);
         if r == 8; p.Color = [0 0 0]; end
@@ -121,16 +125,16 @@ for i = 1:3
         b = gca; legend(b,'off');
         dim = [b.Position(1)+0.01 b.Position(2)+.37 .3 .3];
         annotation('textbox',dim,'String', ['R^2=',num2str(round(R2value,2))],'FitBoxToText','on')
-    
+end
     fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',13)
     fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 12 4];
 saveFIG([type,'fit_allLines'])
-
-end
-        clear b p R2value dim f g j r fig filename h i params X y
+    clear b p R2value dim f g j r fig filename h i params X y
 
 %% Plots - Residuals
 clf
+T = [{'Glacier 4'},{'Glacier 2'},{'Glacier 13'}];
+
 for i = 1:3
 
     for r = 2:9
@@ -147,10 +151,9 @@ for i = 1:3
         %[~, chi] = chi2gof(residuals(r).(name));
         %annotation('textbox',dim,'String', ['p_{\chi} = ', num2str(chi)], 'EdgeColor','none')
     end
-        legend('Option 1', 'Option 2','Option 3','Option 4','Option 5',...
-            'Option 6','Option 7','Option 8')
-        xlim([-0.6 0.6]); ylim([0 180]);
-        xlabel('Residual (m w.e.)');         title(name) 
+        legend(options.DenOpt)
+        xlim([-0.6 0.6]); ylim([0 120]);
+        xlabel('Residual (m w.e.)');         title(T(i)) 
         if i == 1; ylabel('Frequency');
         else     ylabel('');        end
 end
@@ -282,7 +285,7 @@ figure(1)
 fig=gcf; fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 14 4];
 for g = 1:3
     glacier = char(options.glacier(g));
-s(1) = subplot(1,3,g)
+s(1) = subplot(1,3,g);
 aboxplot(h.(glacier),'labels',options.topoVars, ...
     'Colormap',                 [144 195 212; 245 177 29]/255,...
     'OutlierMarkerSize',        10,...
@@ -290,7 +293,7 @@ aboxplot(h.(glacier),'labels',options.topoVars, ...
         ylabel('Coefficient Value'); hold on 
         legend('MLR','BMA', 'Location','north'); % Add a legend
         
-        YY = ylim
+        YY = ylim;
         for i = 1:6
                 ylim_temp = YY;
         line([i+0.5 i+0.5],[ylim_temp(1,1)-0.01 ylim_temp(1,2)+0.01],'Color',[0 0 0],'LineStyle','--','LineWidth', 0.5)
@@ -310,9 +313,10 @@ saveFIG('CoeffBoxplot_BMSMLRcompare')
 
 %% Stats for predicted SWE
 
-%  method = 'BMS';
+    load TopoBMS_MLR.mat
+%  method = 'BMS'; name = 'BMA';
 % res = residualsBMS(8);
-method = 'MLR';
+method = 'MLR'; name = 'MLR';
 res = residualsMLR(8);
 
 
@@ -332,7 +336,7 @@ clf
          repmat('G02',length(reshape(stackSWE.(method).G2(:,:,7),[],1)),1);...
          repmat('G13',length(reshape(stackSWE.(method).G13(:,:,7),[],1)),1)];
 boxplot(T,G,'Labels',{'Glacier 4','Glacier 2','Glacier 13'})
-    ylabel([{'SWE estimated with'},{[method,' coefficients (m w.e)']}])
+    ylabel([{'WB estimated with'},{[name,' coefficients (m w.e)']}])
     fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18)
     saveFIG(['ModelledSWE_box_',method])
    
@@ -342,13 +346,14 @@ boxplot(T,G,'Labels',{'Glacier 4','Glacier 2','Glacier 13'})
          repmat('G02',length(res.G2(:)),1);...
          repmat('G13',length(res.G13(:)),1)];
 boxplot(T,G,'Labels',{'Glacier 4','Glacier 2','Glacier 13'})
-    ylabel([method,' Residuals (m w.e.)'])
+    ylabel([name,' residuals (m w.e.)'])
     fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18)
      saveFIG(['residuals_box_',method])
  
 %% ALL INTERPOLATION TYPES - MEAN SWE - bar graph
 
 load Full.mat
+load LR_SK_RK.mat
  %2D - option S4
 for d = 1:8;    den = options.DenOpt{d};
 for g = 1:3;    glacier = options.glacier{g};
@@ -381,17 +386,18 @@ meanswe3.(glacier)(opt-1,:) = [...%mean(sweOPT(opt).(glacier)(:,1)), ...
 end
 end
 
+    T = {'Glacier 4','Glacier 2','Glacier 13'};
     colormap = [ rgb('DarkCyan'); rgb('GoldenRod'); rgb('FireBrick')];%rgb('Indigo');
 for g = 1:3
     glacier = char(options.glacier(g));
 subplot(1,3,g)
 B = bar(meanswe3.(glacier), 'EdgeColor','none');
-    ylabel('Mean SWE (m w.e.)')
+    ylabel('Mean WB (m w.e.)')
     ylim([0 0.8])
     set(gca,'xticklabel',{'S1','F1','S2','F2','S3','F3','S4','F4'})
         %if g == 3;
-        legend('LR','SK','RK'); %end
-    title(options.glacier(g))
+        legend('LR','SK','RK','Location','southeast'); %end
+    title(T(g))
     for i = 1:3
     B(i).FaceColor = colormap(i,:); end
 end 
@@ -438,6 +444,7 @@ meanR2_3.(glacier)(opt-1,:) = [corr(sweOPT(opt).(glacier)(:,1), sampledBMA(opt).
 end
 end
 
+    T = {'Glacier 4','Glacier 2','Glacier 13'};
     colormap = [rgb('DarkCyan'); rgb('GoldenRod'); rgb('FireBrick')];
 for g = 1:3
     glacier = char(options.glacier(g));
@@ -446,9 +453,8 @@ B = bar(meanR2_3.(glacier), 'EdgeColor','none');
     ylabel('R^2')
     ylim([0 1])
     set(gca,'xticklabel',{'S1','F1','S2','F2','S3','F3','S4','F4'})
-        if g == 3;
-        legend('Topographic regression','Kriging','Regression Kriging'); end
-    title(options.glacier(g))
+        legend('LR','SK','RK','Location','northeast'); 
+    title(T(g))
     for i = 1:3
     B(i).FaceColor = colormap(i,:); end
 end 
