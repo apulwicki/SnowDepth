@@ -2,15 +2,15 @@ global options
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% PLOT SAVING PATH %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     %SFU 
-options.path1       = '/home/glaciology1/Documents/Data/Plots/'; %Plots folder
-options.path2       = '/home/glaciology1/Documents/MastersDocuments/Thesis/'; %Latex
-options.path3       = '/home/glaciology1/Documents/MastersDocuments/Methods/'; %Latex
+% options.path1       = '/home/glaciology1/Documents/Data/Plots/'; %Plots folder
+% options.path2       = '/home/glaciology1/Documents/MastersDocuments/Thesis/'; %Latex
+% options.path3       = '/home/glaciology1/Documents/MastersDocuments/Methods/'; %Latex
 
 
     %Laptop
-% options.path1     = '/Users/Alexandra/Documents/SFU/Data/Plots/'; %Plots
-% options.path2     = '/Users/Alexandra/Documents/SFU/MastersDocuments/Thesis/'; %Latex
-% options.path3     = '/Users/Alexandra/Documents/SFU/MastersDocuments/Methods/'; %Latex
+options.path1     = '/Users/Alexandra/Documents/SFU/Data/Plots/'; %Plots
+options.path2     = '/Users/Alexandra/Documents/SFU/MastersDocuments/Thesis/'; %Latex
+options.path3     = '/Users/Alexandra/Documents/SFU/MastersDocuments/Methods/'; %Latex
  
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% TO ZZ OR NOT TO ZZ %%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -86,6 +86,7 @@ clear rig E N ENgrid mapNaN mapsize
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% EASE OF USE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 
 options.glacier        = {'G4','G2','G13'};
+options.GName          = {'Glacier 4','Glacier 2','Glacier 13'};
 options.DenOpt         = {'S1','F1','S2','F2','S3','F3','S4','F4'};
 options.topoVarsUnits  = { '{\itz} (m a.s.l)','{\itd_C} (m)','\alpha','{\itm} (^{\circ})',...
                             '{\itN}','{\kappa} (m^{-1})','Sx'};
