@@ -14,10 +14,11 @@ run OPTIONS
                options.RGB(3,:);options.RGB(3,:)]; 
     markerS = {'s','o','s','o','^','s'};
 
+fig = figure(1);
 for i = 1:length(SP)
 errorbarxy(SP(i),FS(i),errorSP(i,2),errorFS(i,2),errorSP(i,1),errorFS(i,1),...
                 'Color','k','LineStyle','none','Marker',markerS{i},...
-                'MarkerFaceColor',markerC(i,:),'LineWidth',1,'MarkerSize',8,...
+                'MarkerFaceColor',markerC(i,:),'LineWidth',1,'MarkerSize',15,...
                 'MarkerEdgeColor','none'); hold on
 end
     axis([220 400 220 400])
@@ -25,7 +26,7 @@ end
     line = refline(1,0);
         line.Color = 'k'; line.LineStyle = '--'; hold on
     xlabel('Snow-pit-derived density (kg m^{-3})')
-    ylabel('Federal-Sampler-derived density (kg m^{-3})')
+    ylabel({'Federal-Sampler-','derived density (kg m^{-3})'})
      
     %Label points
     labels = {'G4\_Mid';'G4\_Low';'G2\_Mid';'G2\_Low';'G13\_High';'G13\_Mid'};
@@ -40,8 +41,11 @@ end
         end
     end
     ax = gca; ax.XTick = 220:40:400; ax.YTick = 220:40:400;
+%     fig.PaperUnits = 'centimeters';
+%     fig.PaperSize  = [1000 1000];
+
         
-saveFIG_IGS('SPvsFS',1,7.5)
+saveFIG('SPvsFS',24)
 
 
 %% Interp Method - LR map
@@ -49,9 +53,8 @@ saveFIG_IGS('SPvsFS',1,7.5)
 load Full.mat fullLR 
 load TopoSWE.mat SWE
 
-figure(6); clf
-PlotTopoParameter_IGS(fullLR.S2, 'modelledSWE', 'WB (m w.e.)', SWE, 'black', 'massB')
-	saveFIG_IGS('LR_map',2,8.6)
+PlotTopoParameter(fullLR.S2, 'modelledSWE', 'WB (m w.e.)', SWE, 'black', 'massB')
+	saveFIG('LR_map',20)
 
 
 %% Interp Method - LR Observed vs Estimated SWE
@@ -66,8 +69,8 @@ den = 'S2';
     SKinput.(glacier) = fullSK.(den).(glacier).pred;
     end
     
-          locX = [.15 .43 .71]; locX = [locX locX];
-          locY = [.83; 0.35];     locY = repmat(locY,1,3); locY = [locY(1,:) locY(2,:)];
+          locX = [.14 .43 .71];     
+          locY = 0.73;       
 
 figure(7); clf
 yEstimated = SampledCell(fullLR.(den)); 
@@ -76,23 +79,23 @@ for g = 1:3;    glacier = options.glacier{g};
     
 subplot(1,3,g)
     axis([0 1.2 0 1.2]);    line = refline(1,0);    line.Color = 'k'; line.LineStyle = '--'; hold on
-    plot(yObserved(g).swe, yEstimated.(glacier), 'o', 'Color', options.RGB(g,:),'MarkerSize',2); hold on
+    plot(yObserved(g).swe, yEstimated.(glacier), 'o', 'Color', options.RGB(g,:),'MarkerSize',5); hold on
 
         [F.(glacier), G.(glacier)] = fit(yObserved(g).swe, yEstimated.(glacier),'poly1');
         p = plot(F.(glacier)); hold on
             xlabel(''); ylabel('')
-            set(p,'Color',options.RGB(g,:)); set(p, 'LineWidth',1.5);     
+            set(p,'Color',options.RGB(g,:)); set(p, 'LineWidth',2.5);     
         xlabel('Observed WB (m w.e.)');
         if  g ==1;  ylabel('Estimated WB (m w.e.)');   end
                 axis square;    box on;     grid on
         b = gca; legend(b,'off');
         title(options.GName{g})
-        annotation('textbox',[locX(g) locY(g) .1 .1],...
+        annotation('textbox',[locX(g) locY .1 .1],...
                    'String', ['R^2=',num2str(round(G.(glacier).rsquare,2))],...
                    'EdgeColor','none','FontWeight','bold')
 end
 
-%saveFIG_IGS(['LRobservedVSestimated_',den],2,10)
+saveFIG(['LRobservedVSestimated_',den],20)
 
 %% Interp Method - Beta coeffs boxplot
     
@@ -119,22 +122,21 @@ B = bar(betas(incB,:));
         end
     legend(options.GName); % Add a legend
     ylabel('Regression coefficient'); hold on 
-    F = gca; F.XTickLabel = {'Elevation','Distance from centreline','Slope',...
-                             'Curvature','Wind redistribution'};
-             F.XTickLabelRotation = 0;
+    F = gca; F.XTickLabel = {'Elevation','Centre dist.','Slope',...
+                             'Curvature','Wind redist.'};
+             F.XTickLabelRotation = 50;
         ylim([-0.05 0.11])
         for i = 1:4
         line([i+0.5 i+0.5],ylim,'Color',[0 0 0],'LineStyle','--','LineWidth', 0.5)
         end
  
-saveFIG_IGS('BetaCoeffsBar',1,8)
+saveFIG('BetaCoeffsBar',20)
 
 %% WSMB Distribution - LR sources of var
 
 %clear; load varWSMB.mat varB 
 run OPTIONS.m
 
-    close all
 ylimmax = [50, 20, NaN, 50, 5];
 legendX = [0.32, 0.60, 0, 0.32, 0.60];
 legendY = [0.78, 0.78, 0, 0.31, 0.31];
@@ -205,13 +207,13 @@ p(g) = fill(x,yLR,options.RGB(g,:),'FaceAlpha',0.8, 'EdgeColor', 'none'); hold o
     end
         ylim([0 15])
         xlim([min(x) 1])
-    title([{'Grid scale &'},{'Density assignment &'},{'Interpolation'}])
+    title([{'Gridscale & Density & Interpolation'}])
     xlabel('Glacier-wide WB (m w.e.)'); 
 
 end
 
 
-%saveFIG_IGS('WSMBDist',2,6)
+saveFIG('WSMBDistLR',16)
 
 %% WSMB Distribution - total spatial variability 
 
@@ -262,11 +264,13 @@ alex(:,6) = [1.30;1.59;...
 [Fat, Gat] = fit(Dat,AT,'poly1');
     CIat = predint(Fat,Dat);    
     
+    Msize = 16;
+    
 figure(2); clf
-    pt = plot(Fat);    set(pt,'Color','k'); set(pt, 'LineWidth',1.5); hold on
-L(2) = plot(Da(1:2),alex(1:2,6),'o', 'MarkerSize',6, 'Color',[234, 140, 46]/255, 'MarkerFaceColor',[234, 140, 46]/255);
-L(3) = errorbar(Da(3:5),alex(3:5,6),alexerr,'o', 'MarkerSize',6, 'Color',[234, 140, 46]/255);
-L(1) = plot(Dt,taylor(:,6),'s', 'MarkerSize',6, 'Color',[68, 181, 226]/255, 'MarkerFaceColor',[68, 181, 226]/255); hold on
+    pt = plot(Fat);    set(pt,'Color','k'); set(pt, 'LineWidth',2); hold on
+L(2) = plot(Da(1:2),alex(1:2,6),'o', 'MarkerSize',Msize, 'Color',[234, 140, 46]/255, 'MarkerFaceColor',[234, 140, 46]/255);
+L(3) = errorbar(Da(3:5),alex(3:5,6),alexerr,'o', 'MarkerSize',Msize, 'Color',[234, 140, 46]/255);
+L(1) = plot(Dt,taylor(:,6),'s', 'MarkerSize',Msize, 'Color',[68, 181, 226]/255, 'MarkerFaceColor',[68, 181, 226]/255); hold on
     xlim([min(Dat), max(Dat)+1]); 
     grid on
         xlabel('Distance from topographic divide (km)'); ylabel('WB (m w.e.)')
@@ -278,12 +282,12 @@ L(1) = plot(Dt,taylor(:,6),'s', 'MarkerSize',6, 'Color',[68, 181, 226]/255, 'Mar
     Lx = Da(3:5); Ly = alex(3:5,6);
     for g = 1:3
         strG = options.GName{g};
-        if g == 1; bit = 0;
-        else; bit = 0.1;
+        if g == 1; bit = 0; bx = 1;
+        else bit = 0.1; bx = -1;
         end
-        text(Lx(g,1)-1, Ly(g,1)+bit, strG,...
-            'HorizontalAlignment','right','FontSize',9,'FontName','Arial');
+        text(Lx(g,1)-bx, Ly(g,1)+bit, strG,...
+            'HorizontalAlignment','right','FontName','Arial');
     end
         
-saveFIG_IGS('AccumGradPres',1,7.8)
+saveFIG('AccumGradPres',22)
 

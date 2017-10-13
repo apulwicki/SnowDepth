@@ -1,4 +1,3 @@
-
 %% SAMPLING THEORETICAL FIELD FROM PATTERNS
 
 % Get WB field that is the "true" field
@@ -114,77 +113,24 @@ end
 end
     clear c* data f* g* i param row
     clear e f g* i* I* n* p pattern t1 t2 topoparams utm* wb WB*
-
-%% Linear Regression - full data
-
-    namesP = fieldnames(pWB);
-    nRuns = 100;
-for p = 1:length(namesP)
     
-    for mc = 1:nRuns;
-    %Add some noise
-    WBinput = WBnoise(pWB.(namesP{p}));
     
-    %Linear regresion
-    subsetWBfull.(namesP{p})(mc) = LinearRegression( WBinput, pTOPO.(namesP{p}), topo_full );
-    end
-    
-    %Average WB distribution
-        T = struct2table(subsetWB.(namesP{p}));
-    for g = 1:3;    glacier = options.glacier{g};
-        TT = T.(glacier);
-        TT = reshape(TT,1,1,nRuns);
-        TT = cell2mat(TT);
-    subsetWBavg.(namesP{p}).(glacier) = mean(TT,3);
-    end
-end
+%% Linear Regression & Points selection
 
-for p = 1:length(namesP)
-    %Plot resulting WB distribution from LR
-    figure(p)
-    PlotTopoParameter(subsetWBavg.(namesP{p}),'WB','WB (m w.e.)',pUTM.(namesP{p}), 'black', 'massB')
-end
-
-%% Difference Maps & RMSE
-
-load Full.mat fullLR
-
-    namesP = fieldnames(pWB); 
-for p = 1:length(namesP)
-    for g = 1:3;    glacier = options.glacier{g};
-    %Difference map
-    pDIFFmap.(namesP{p}).(glacier) = fullLR.S2.(glacier) - subsetWBavg.(namesP{p}).(glacier);
-    
-    %RMSE for each run
-    for mc = 1:nRuns;
-    diff = subsetWB.(namesP{p})(mc).(glacier)-fullLR.S2.(glacier);
-    pRMSE.(glacier)(mc,p) = sqrt(nanmean((diff(:).^2)));
-    end
-        pRMSE.(glacier) = array2table(pRMSE.(glacier),'VariableNames',namesP);
-    end
-end
-
-%Histogram of RMSE distributions
-clf
-for g = 1:3;    glacier = options.glacier{g};
-    subplot(1,3,g)
-for i = 5:-1:1
-histogram(pRMSE.(glacier){:,i},0:0.004:0.22,'FaceAlpha',0.5, 'EdgeColor','none'); hold on
-end
-    legend(namesP(5:-1:1))
-    xlabel('RMSE (m w.e.)'); ylabel('Frequency')
-end
-
-
-%% Linear Regression - sample size test
 %load Full.mat fullLR
     namesP = fieldnames(pWB); 
-sampleSize = 35:5:100;
 nRuns = 100;
 
-for s = 1%:length(sampleSize)
-ss = sampleSize(s);
-    [WBinput(ss), TOPOinput(ss), UTMinput(ss)] = SubsetSampleSize( pWB, pTOPO, pUTM, ss );
+numPoints = zeros(1,1); numPoints(1) = 8;
+for n = 2:5;
+    numPoints(n,1) = numPoints(n-1)*2-1;
+end
+
+
+for n = 1:5;
+ss = numPoints(n);
+
+   [WBinput(ss), TOPOinput(ss), UTMinput(ss)] = SubsetSampleSize( pWB, pTOPO, pUTM, ss );
 
 for p = 1:length(namesP)
     
@@ -195,22 +141,14 @@ for p = 1:length(namesP)
     WBinputN = WBnoise(WBinput(ss).(namesP{p}),'high');
     
     %Linear regresion
-    subsetWB(ss).(namesP{p})(mc) = LinearRegression( WBinputN, pTOPO.(namesP{p}), topo_full );
+    subsetWB(ss).(namesP{p})(mc) = LinearRegression_Basic(WBinputN,...
+                                            TOPOinput(ss).(namesP{p}),...
+                                            topo_full);
     end
     
-    %Average WB distribution
-        T = struct2table(subsetWB(ss).(namesP{p}));
-    for g = 1:3;    glacier = options.glacier{g};
-        TT = T.(glacier);
-        TT = reshape(TT,1,1,nRuns);
-        TT = cell2mat(TT);
-    subsetWBavg(ss).(namesP{p}).(glacier) = mean(TT,3);
-    end
-    
-save('PatternsTemp_HighNoise.mat','*input','subset*','-v7.3')    
+save('PatternsTempBasicLR_HighNoise.mat','*input','subset*','-v7.3')    
 end
 end
-
 
 %% WB vs n
 load Full.mat fullLR
@@ -224,8 +162,8 @@ nRuns = 100;
 
 for g = 1:3; glacier = options.glacier{g};
 
-for s = 1:length(sampleSize)
-ss = sampleSize(s);
+for s = 1:length(numPoints)
+ss = numPoints(s);
 for p = 1:length(namesP)
     for mc = 1:nRuns;
 WBt.(glacier).(namesP{p})(s,mc) = nanmean(subsetWB(ss).(namesP{p})(mc).(glacier)(:));
@@ -254,13 +192,13 @@ stdWB  = std(WBt.(glacier).(namesP{p}),[],2);
 %plot(sampleSize,WBt.(glacier).(namesP{p}),'Color',P(p).Color); hold on
 %errorbar(sampleSize,meanWB,stdWB); hold on
 
-plot(sampleSize,meanWB,'LineWidth',3,'Color',C(p,:)); hold on
+plot(numPoints,meanWB,'-d','LineWidth',3,'Color',C(p,:)); hold on
     upper = meanWB + stdWB;
     lower = meanWB - stdWB;
-fill([sampleSize flip(sampleSize)],[upper',flip(lower')],...
+fill([numPoints' flip(numPoints')],[upper',flip(lower')],...
      C(p,:),'FaceAlpha',0.3,'EdgeColor','none')
 
-plot([min(sampleSize) max(sampleSize)],[nanmean(fullLR.S2.(glacier)(:)),nanmean(fullLR.S2.(glacier)(:))],'--k')
+plot([min(numPoints) max(numPoints)],[nanmean(fullLR.S2.(glacier)(:)),nanmean(fullLR.S2.(glacier)(:))],'--k')
 
     title([glacier,' ',namesPfull{p}])
     if g ==1; ylabel('WB (m w.e.)'); end
@@ -270,66 +208,14 @@ n = n+1;
 end
 end
 %legend(P, namesP)
-
-%% RMSE vs n
-
-load Full.mat fullLR
-
-    namesP = fieldnames(subsetWB); 
-for p = 1:length(namesP)
-    for g = 1:3;    glacier = options.glacier{g};
-for s = 1:length(sampleSize)
-ss = sampleSize(s);
-
-    for mc = 1:nRuns;
-    %Difference map
-    diff.(glacier).(namesP{p})(:,:,mc) = fullLR.S2.(glacier) - subsetWB(ss).(namesP{p})(mc).(glacier);
-    Tdiff = fullLR.S2.(glacier) - subsetWB(ss).(namesP{p})(mc).(glacier);
     
-    %RMSE for each run
-    RMSEt.(glacier).(namesP{p})(s,mc) = sqrt(nanmean((Tdiff(:).^2)));
-    end
-end
-    end
-end
-
-% Plot - RMSE vs n
-clf; n = 1;
-for p = 1:length(namesP)
-for g = 1:3; glacier = options.glacier{g};
-
-    subplot(length(namesP),3,n)
-%plot(sampleSize,RMSEt.(glacier).(namesP{p}),'Color',P(p).Color); hold on
-errorbar(sampleSize,mean(RMSEt.(glacier).(namesP{p}),2),std(RMSEt.(glacier).(namesP{p}),[],2))
-
-%P(p) = plot(sampleSize,mean(RMSEt.(glacier).(namesP{p}),2),'LineWidth',3); hold on%,'Color','k')
-%     upper = mean(RMSEt.(glacier).(namesP{p}),2) + std(RMSEt.(glacier).(namesP{p}),[],2);
-%     lower = mean(RMSEt.(glacier).(namesP{p}),2) - std(RMSEt.(glacier).(namesP{p}),[],2);
-% fill([sampleSize flip(sampleSize)],[upper',lower'],...
-%     P(p).Color,'FaceAlpha',0.3,'EdgeColor','none')
-
-    title(namesP{p})
-    if g ==1; ylabel('RMSE (m w.e.)'); end
-    if n>15; xlabel('Sample size'); end
-ylim([0 1])
-n = n+1;
-end
-end
-
-
-%% Get cell num raster
-
-% [raster, info] = geotiffread('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Glacier Topo Maps/Donjek_7x7aspect.tif');
-% 
-% cellN = 1:size(raster,1)*size(raster,2);
-% raster = reshape(cellN,[size(raster,1),size(raster,2)]);
-% 
-% geotiffwrite('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/CellNumber.tif',raster,info,'CoordRefSysCode','EPSG:32607')
-%     clear
-% % In QGIS: 1) convert sampling design to line, 2) convert to points, 3)
-% % point sample the cell num raster, 4) Export to csv
-
-
-
-
-
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    

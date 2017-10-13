@@ -8,8 +8,9 @@ global options
 for g = 1:3;    glacier = options.glacier{g};
     for p = 1:length(namesP)
 
+    
     %Index - evenly spaced along full data set
-    I = floor(linspace(1,length(WB.(namesP{p}).(glacier)), sampleSize));
+    I = unique(round(linspace(1,length(WB.(namesP{p}).(glacier)), sampleSize)));
     
     %WB select data
     WBout.(namesP{p}).(glacier) = WB.(namesP{p}).(glacier)(I);
