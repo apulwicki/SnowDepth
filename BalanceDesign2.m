@@ -214,12 +214,13 @@ end
 
 %% WB vs n
 load Full.mat fullLR
+load Patterns.mat patternWB
 run OPTIONS.m
 
 clear WBt
     namesP = fieldnames(subsetWB); 
     namesPfull = {'Circle','Centreline','Centre&Transverse','Hourglass','Hourglass&Circle','Random'};
-sampleSize = 40:5:100;
+sampleSize = 35:5:100;
 nRuns = 100;
 
 for g = 1:3; glacier = options.glacier{g};
@@ -235,6 +236,20 @@ end
 end
     
 end
+
+%calculate WB found using all points in a pattern
+for p = 1:length(namesP)
+for g = 1:3; glacier = options.glacier{g};
+    clear stack
+        for mc = 1:nRuns;
+        stack(:,:,mc) = patternWB.(namesP{p})(mc).(glacier);
+        end
+    allWB(p,g) = nanmean(stack(:));  
+end
+end
+
+
+
 
     C =[     0    0.4470    0.7410;...
         0.8500    0.3250    0.0980;...
@@ -261,6 +276,7 @@ fill([sampleSize flip(sampleSize)],[upper',flip(lower')],...
      C(p,:),'FaceAlpha',0.3,'EdgeColor','none')
 
 plot([min(sampleSize) max(sampleSize)],[nanmean(fullLR.S2.(glacier)(:)),nanmean(fullLR.S2.(glacier)(:))],'--k')
+plot([min(sampleSize) max(sampleSize)],[allWB(p,g),allWB(p,g)],':k')
 
     title([glacier,' ',namesPfull{p}])
     if g ==1; ylabel('WB (m w.e.)'); end
