@@ -179,20 +179,21 @@ end
 %% Linear Regression - sample size test
 %load Full.mat fullLR
     namesP = fieldnames(pWB); 
-sampleSize = 35:5:100;
+sampleSize = 40;%35:5:100;
 nRuns = 100;
 
 for s = 1%:length(sampleSize)
 ss = sampleSize(s);
     [WBinput(ss), TOPOinput(ss), UTMinput(ss)] = SubsetSampleSize( pWB, pTOPO, pUTM, ss );
 
-for p = 1:length(namesP)
+for p = 4%1:length(namesP)
     
     display(['Sample size: ',num2str(ss),' Pattern: ',namesP{p}])
     
     for mc = 1:nRuns;
     %Add some noise
     WBinputN = WBnoise(WBinput(ss).(namesP{p}),'high');
+    %WBinputN = WBinput(ss).(namesP{p});
     
     %Linear regresion
     subsetWB(ss).(namesP{p})(mc) = LinearRegression( WBinputN, pTOPO.(namesP{p}), topo_full );
@@ -207,7 +208,7 @@ for p = 1:length(namesP)
     subsetWBavg(ss).(namesP{p}).(glacier) = mean(TT,3);
     end
     
-save('PatternsTemp_HighNoise.mat','*input','subset*','-v7.3')    
+%save('PatternsTemp_HighNoise.mat','*input','subset*','-v7.3')    
 end
 end
 

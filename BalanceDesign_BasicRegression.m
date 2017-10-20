@@ -1,7 +1,7 @@
 %% SAMPLING THEORETICAL FIELD FROM PATTERNS
 
 % Get WB field that is the "true" field
-    clear; close all
+   % clear; close all
 load Full.mat fullLR options
 load TopoSWE.mat topo_full
 
@@ -155,12 +155,14 @@ load Full.mat fullLR
     %namesP = {'hourglass'};
     namesPfull = {'Circle','Centreline','Centre&Transverse','Hourglass',...
                   'Hourglass&Circle','Random', 'Safe Random'};
-nRuns = 100;
+nRuns = 1000;
+for i = 1:100;
 
-for p = 1:length(namesP)
-for g = 1:3; glacier = options.glacier{g};
+for p = 4%1:length(namesP)
+for g = 2%1:3; 
+    glacier = options.glacier{g};
 
-for ss = 8:length(pWB.(namesP{p}).(glacier))
+for ss = 40%8:length(pWB.(namesP{p}).(glacier))
 
    [WBinput(ss), TOPOinput(ss), UTMinput(ss)] = SubsetSampleSize( pWB, pTOPO, pUTM, ss );
 
@@ -169,7 +171,7 @@ for ss = 8:length(pWB.(namesP{p}).(glacier))
     
     for mc = 1:nRuns;
     %Add some noise
-    WBinputN = WBnoise(WBinput(ss).(namesP{p}),'low');
+    WBinputN = WBnoise(WBinput(ss).(namesP{p}),'high');
     
     %Linear regresion
         swe	    = WBinputN.(glacier)(:,1);
@@ -196,6 +198,12 @@ for ss = 8:length(pWB.(namesP{p}).(glacier))
 end
 end
 end
+
+basicM(i,6) = mean(T.(namesP{p}).(glacier)(40,:));
+basicS(i,6) = std(T.(namesP{p}).(glacier)(40,:));
+end
+
+%%
         C =[     0    0.4470    0.7410;...
         0.8500    0.3250    0.0980;...
         0.9290    0.6940    0.1250;...
@@ -210,7 +218,7 @@ T = T_high;
      clf; n = 1;
 for p = 1:length(namesP)
 for g = 1:3; glacier = options.glacier{g};
-   numPoints = 8:length(pWB.(namesP{p}).(glacier));
+   numPoints = 8:length(T.(namesP{p}).(glacier));
 
 meanWB = mean(T.(namesP{p}).(glacier)(8:end,:),2);
 stdWB  = std(T.(namesP{p}).(glacier)(8:end,:),[],2);
@@ -234,11 +242,136 @@ end
     title([glacier,' ',namesPfull{p}])
     if g ==1; ylabel('WB (m w.e.)'); end
     if n>15; xlabel('Sample size'); end
-ylim([0 1.2])
-xlim([0 150])
+ylim([0.2 1.1])
+xlim([8 50])
 n = n+1;
 end
 end 
     
+%% DATA - WB for all n
+
+% Selecting Data from Pattern
+
+    den = 'S2';
+    nRuns = 100;
+
+
+load TopoSWE.mat
+run OPTIONS
+
+for g = 3%1:3;    glacier = options.glacier{g};
+ 
+for t = 1%[6,1,3,4,5,100]
+if     t == 6; type = 'DCircle';           subset = 'pattern';       
+elseif t == 1; type = 'DCentreline';       subset = 'pattern';     
+elseif t == 3; type = 'DCentreTransect';   subset = 'pattern';   
+elseif t == 4; type = 'DHourglass';        subset = 'pattern';  
+elseif t == 5; type = 'DHourCircle';       subset = 'pattern';
+elseif t == 100; type = 'DRandomSafe';     subset = 'random';
+else continue
+end
+
+input.SWE = fullSWE.(den); input.topo_sampled = topo_sampled; 
+input.topo_sampled_ns = topo_sampled_ns;
+
+[ subsetSWE_temp, TOPOdata_temp ] = DataSubset( subset, t, input );
+
+[ subsetSWE_temp, TOPOdata_temp ] = ObsInCell( subsetSWE_temp, TOPOdata_temp ); 
+
+maxN = length(subsetSWE_temp.G4);
+
+for n = 8:maxN
     
+     display([glacier, ',' type, ' n=',num2str(n)])
+
+[ WBinput(n).(type), TOPOinput(n).(type) ] = SortNSelect( subsetSWE_temp, TOPOdata_temp, n );
+
+    % Correct the centreline values for invertable matrix when only centreline
+    if strcmp(type,'DCentreline'); TOPOinput(n).(type).G13 =  rmfield(TOPOinput(n).(type).G13, 'centreD'); end
+      
+% Linear regression
+
+    for mc = 1:nRuns;
+    %Add some noise
+    WBinputN = WBnoise(WBinput(n).(type),'high');
     
+    %Linear regresion
+        swe	    = WBinputN.(glacier)(:,1);
+        Xt      = struct2array(TOPOinput(n).(type).(glacier));
+        X       = [ones(length(Xt),1), Xt];
+
+        % Get coefficients
+        MLR.(glacier)            = regress(swe, X);
+        
+        %Predict
+        sweMLR.(glacier) = repmat(MLR.(glacier)(1), options.mapsize(g,:));
+        mlrCoeff = MLR.(glacier)(2:end);    topoCoeff = fieldnames(topo_full.G4);
+            %multiply coeffs and add them
+        for m = 1:length(mlrCoeff)
+            param               = topoCoeff{m};
+            sweT                = topo_full.(glacier).(param)*mlrCoeff(m);
+            sweMLR.(glacier)    = sweMLR.(glacier) + sweT;
+        end
+            %Set min to 0
+        sweMLR.(glacier)(sweMLR.(glacier)<0) = 0;
+        
+        T.(type).(glacier)(n,mc) = nanmean(sweMLR.(glacier)(:));
+    end
+        
+end
+% figure; plot(WBinput(n).(type).G4(:,2),WBinput(n).(type).G4(:,3),'.')
+% title(type)
+end
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  % Figure  
+    
+    C =[     0    0.4470    0.7410;...
+        0.8500    0.3250    0.0980;...
+        0.9290    0.6940    0.1250;...
+        0.4940    0.1840    0.5560;...
+        0.4660    0.6740    0.1880;...
+        0.3010    0.7450    0.9330;...
+        0.0588    0.3490    0.1216];
+  
+% load Patterns.mat T_*
+% T = T_high; 
+     load Full.mat fullLR
+     clf; n = 1;
+
+    namesP = fieldnames(T);
+    namesPfull = {'Circle','Centreline','Centre&Transverse','Hourglass',...
+                  'Hourglass&Circle', 'Safe Random'};
+
+for p = 1:length(namesP)
+for g = 1:3; glacier = options.glacier{g};
+   numPoints = 8:size(T.(namesP{p}).(glacier),1);
+
+meanWB = mean(T.(namesP{p}).(glacier)(8:end,:),2);
+stdWB  = std(T.(namesP{p}).(glacier)(8:end,:),[],2);
+N10    = find((stdWB(12:end)./meanWB(12:end))<0.1,1); N10 = N10+11;
+    subplot(length(namesP),3,n)
+%plot(sampleSize,WBt.(glacier).(namesP{p}),'Color',P(p).Color); hold on
+%errorbar(sampleSize,meanWB,stdWB); hold on
+
+plot(numPoints,meanWB,'LineWidth',3,'Color',C(p,:)); hold on
+    upper = meanWB + stdWB;
+    lower = meanWB - stdWB;
+fill([numPoints flip(numPoints)],[upper',flip(lower')],...
+     C(p,:),'FaceAlpha',0.3,'EdgeColor','none')
+
+plot([min(numPoints) max(numPoints)],[nanmean(fullLR.S2.(glacier)(:)),nanmean(fullLR.S2.(glacier)(:))],'--k')
+
+% if ~isempty(N10)
+% plot([N10 N10],[0 1.2],':k','LineWidth',2')
+% end
+      
+    title([glacier,' ',namesPfull{p}])
+    if g ==1; ylabel('WB (m w.e.)'); end
+    if n>15; xlabel('Sample size'); end
+ylim([0.1 1.5])
+xlim([8 100])
+n = n+1;
+end
+end 

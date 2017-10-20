@@ -24,7 +24,7 @@ if strcmp(subset, 'pattern')
      end
     
  else   
-    if clt == 1;     pattern = [{'UM'};{'LM'}];               %centreline
+    if     clt == 1; pattern = [{'UM'};{'LM'}];               %centreline
     elseif clt == 2; pattern = [{'UM'};{'LM'}];               %centreline + 4 transects
     elseif clt == 3; pattern = [{'UM'};{'LM'};{'UT'}];        %centreline + 3 transects
     elseif clt == 4; pattern = [{'UH'};{'LH'}];               %hourglass 

@@ -101,12 +101,12 @@ elseif length(SWE) == 1
     sameG_not = unique(A1(T));
     for i = length(sameG_not):-1:1
        ind = find(sameG_not(i)==A1);
-       %data(ind(1,1),1:3)    = mean(data(ind,1:3));       
-       data(ind(1,1),1:4)    = [mean(data(ind,1:3)) std(data(ind,1))];
+       data(ind(1,1),1:4)    = mean(data(ind,1:4));       
+       %data(ind(1,1),1:4)    = [mean(data(ind,1:3)) std(data(ind,1))];
        data(ind(2:end,1),:)  = [];
        A1(ind(2:end,1))      = [];
     end
-    SWE.(glacier) = data(:,1:3);
+    SWE.(glacier) = data(:,1:4);
     STD.(glacier) = data(:,4);
     end
    
