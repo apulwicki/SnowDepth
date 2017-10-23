@@ -1,4 +1,27 @@
-    %% Load data and calculate
+%% Figure 2 - Synthetic sampling designs 
+
+    %load Patterns.mat pUTM 
+    %load Full.mat fullLR
+    run OPTIONS
+NumSubPoints = 20;
+    P = fieldnames(pUTM);
+for t = 1:length(P)
+    clear pattern*
+for g = 1:3;    glacier = options.glacier{g};
+        if t == 6; pUTM.(P{t}).(glacier)(:,1) = []; end
+patternFULL.(glacier)(:,2:3) = pUTM.(P{t}).(glacier);
+
+I = floor(linspace(1,size(pUTM.(P{t}).(glacier),1),NumSubPoints));
+patternSUB.(glacier)(:,2:3) = pUTM.(P{t}).(glacier)(I,:);
+end
+
+figure(1)
+PlotTopoParameter_DD(fullLR.S2, 'modelledSWE', 'WB (m w.e.)', ...
+                     patternFULL, patternSUB, 'black', 'nomassB')
+	saveFIG_IGS(['SampleDesign_',P{t}],1,8.6)
+end
+
+%% Load data and calculate
 load TopoBMS_MLR.mat SWE options
 load Full.mat fullLR fullSK
 load Subset.mat
