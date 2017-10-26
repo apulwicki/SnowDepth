@@ -36,23 +36,15 @@ end
 
 G13size = size(topoParam.G13);
 
-width  = 0.3;
+width  = 0.59;
 height = 2.3;
-ystart = -0.64;
+ystart = -0.7;
 pos_axis    = [0.00     ystart   width     height; 
-               0.08     ystart   width     height; 
-               0.33     ystart   width     height];
+               0.095     ystart   width     height; 
+               0.50     ystart   width     height];
 
 %Colormap choice
-if  strcmp(paramName, 'banana') 
-    Cmap = phasemap;
-elseif  strcmp(paramName, 'hot') 
-    Cmap = hot;
-elseif  strcmp(paramName, 'summer') 
-    Cmap = cbrewer('seq', 'BuPu', 100,'PCHIP');
-else
     Cmap = parula;
-end
  
 for i = 1:3
         name    = char(options.glacier(i)); 
@@ -60,32 +52,21 @@ for i = 1:3
         data    = [ nan(G13size(1,1)-Gsize(1,1),Gsize(1,2)); topoParam.(name)];
         data    = [data, nan(G13size(1,1), G13size(1,2)-Gsize(1,2))];
         
-        s = subplot(1,3,i);
-                if ~all(isnan(topoParam.(name)(:)))
-                h = imagesc(data); hold on
-                set(h,'alphadata',~isnan(data)); end
-                colormap(Cmap)
+        s(i) = subplot(1,3,i);
+                h(i) = imagesc(data); hold on
+                colormap(Cmap); set(h(i),'alphadata',~isnan(data));
                         minE = min(rig.(name)(:,1));
                         minN = min(rig.(name)(:,2));
-                    Eg = (rig.(name)(:,1) - minE)/40;
                     Ng = (rig.(name)(:,2) - minN)/40;  Ng = (max(Ng)-Ng);
                     Ng = Ng + (G13size(1,1)-max(Ng));
                     
-                if all(isnan(topoParam.(name)(:))) || strcmp(sweDOTS,'symmetric')
-                    if i ==3 %Deals with G13 multiple parts
-                        plot(Eg(1:304),Ng(1:304),'k'); hold on
-                        plot(Eg(305:330),Ng(305:330),'k');
-                        plot(Eg(331:356),Ng(331:356),'k');
-                        plot(Eg(357:end),Ng(357:end),'k');
-                    else
-                        plot(Eg,Ng,'k'); hold on; end
+
                    %ELA
                     Eela = (rig.ELA(ELA_d(i,1):ELA_d(i,2),1) - minE)/40;
                     Nela = (rig.ELA(ELA_d(i,1):ELA_d(i,2),2) - minN)/40; Nela = (max(Ng)-Nela);
                     plot(Eela,Nela ,'k--')
                     xlim([0 G13size(1,1)]); ylim([0 G13size(1,2)])
                     set(gca,'Ydir','reverse')
-                end
                 
                 %Plotting dots
                  caxis([x_min x_max]); caxis(caxis);
@@ -95,68 +76,48 @@ for i = 1:3
                  Na = (P2(i).utm(:,2)-minN)/40; N2 = max(Ng)-Na;
                 if      strcmp(sweDOTS,'black')
                     plot(E1,N1,'k.', 'MarkerSize',3); hold on
-                    plot(E2,N2,'ko', 'MarkerSize',4); 
-                elseif  strcmp(sweDOTS,'colour')
-                    INN = ~isnan(P1(i).swe);
-                    scatter(E1(INN),N1(INN), 13, P1(i).swe(INN),'filled'); 
-                elseif  strcmp(sweDOTS,'sweONswe')
-                    scatter(E1,N1 , 13, P1(i).swe,'filled'); 
-                elseif   strcmp(sweDOTS,'symmetric')
-                    plot(E1,N1,'k.', 'MarkerSize',5); hold on
-                        mc = max(abs([x_min x_max]));
-                    caxis([-mc mc]); caxis(caxis); 
-                    C = cbrewer('div', 'PRGn', 21, 'PCHIP');
-                        colormap(flipud(C))
+                    plot(E2,N2,'ko', 'MarkerSize',3); 
                 end        
                 
                 %Axis Properties
                 axis equal
-                s.Position   = pos_axis(i,:);
-                s.Box        = 'off';  axis off 
+                ylim([0 160]) 
+                s(i).Box        = 'off';  axis off 
+
+end
+
+for i = 1:3;
+        s(i).Position   = pos_axis(i,:);
 end
 
 %Colour bar
-    c = colorbar('location','eastoutside');  ylabel(c,cLabel)
-    set(c,'Position',[0.64 0.2 0.03 0.55]);
+    c = colorbar;  ylabel(c,cLabel)
+    set(c,'Position',[0.87 0.5 0.03 0.37]);
 
 %Flow direction
-if ~all(isnan(topoParam.(name)(:)))
-    annotation('arrow',[.11 .15],[.35 .25]) %G4
-    annotation('arrow',[.29 .21],[.52 .58]) %G2
-    annotation('arrow',[.59 .52],[.45 .58]) %G13
-elseif all(isnan(topoParam.(name)(:)))
-    annotation('arrow',[.13 .17],[.52 .42]) %G4
-    annotation('arrow',[.39 .31],[.55 .61]) %G2
-    annotation('arrow',[.76 .70],[.47 .59]) %G13
-end  
+    arG4 = annotation('arrow',[.18 .25],[.32 .26]); arG4.HeadLength = 5; arG4.HeadWidth = 5; %G4
+    arG2 = annotation('arrow',[.39 .31],[.49 .52]); arG2.HeadLength = 5; arG2.HeadWidth = 5; %G2
+    arG3 = annotation('arrow',[.78 .70],[.57 .64]); arG3.HeadLength = 5; arG3.HeadWidth = 5; %G13
+
 
 % Glacier labels
-    annotation('textbox',[.06 .04 .1 .1],'String', 'Glacier 4','EdgeColor','none','FontWeight','bold')
-    annotation('textbox',[.24 .04 .1 .1],'String', 'Glacier 2','EdgeColor','none','FontWeight','bold')
-    annotation('textbox',[.43 .04 .1 .1],'String', 'Glacier 13','EdgeColor','none','FontWeight','bold')
+    annotation('textbox',[.06 0.05 .1 .1],'String', 'Glacier 4','EdgeColor','none','FontWeight','bold')
+    annotation('textbox',[.40 0.05 .1 .1],'String', 'Glacier 2','EdgeColor','none','FontWeight','bold')
+    annotation('textbox',[.67 0.05 .1 .1],'String', 'Glacier 13','EdgeColor','none','FontWeight','bold')
 
-% Winter balance
-     if strcmp(massB, 'massB')
-     annotation('textbox',[.06 0 .1 .1],'String',...
-         [num2str(round(nanmean(topoParam.G4(:)),2), '%.2f'),' m w.e.'],'EdgeColor','none')    
-     annotation('textbox',[.24 0 .1 .1],'String',...
-         [num2str(round(nanmean(topoParam.G2(:)),2), '%.2f'),' m w.e.'],'EdgeColor','none')    
-     annotation('textbox',[.43 0 .1 .1],'String',...
-         [num2str(round(nanmean(topoParam.G13(:)),2), '%.2f'),' m w.e.'],'EdgeColor','none')    
-     end
 % North arrow
     Narrow = imread('Narrow.jpg');
-    a = axes('position',[0.60,0.82,0.12,0.12]); 
+    a = axes('position',[0,0.75,0.1,0.1]); 
     imshow(Narrow, Cmap);
     colormap(a,gray)    
     axis off; 
 
 % Scale bar
-    axes('position',[0.45,0.82,0.2,0.12]); axis off; 
-    scalebar('ScaleLength', 0.4, 'Location',[0.58,0.55])
-    annotation(gcf,'textbox',[0.53,0.83,.08,.05],...
+    axes('position',[0.16,0.75,0.2,0.12]); axis off; 
+    scalebar('ScaleLength', 0.8, 'Location',[0.18,0.55])
+    annotation(gcf,'textbox',[0.3,0.76,0.15,0.05],...
                 'String',{'2 km'}, 'LineStyle','none','FitBoxToText','off','EdgeColor',[1 1 1],'BackgroundColor',[1 1 1]); hold on
-    annotation(gcf,'textbox',[0.478,0.83,.05,.05],...
+    annotation(gcf,'textbox',[0.17,0.76,.05,.05],...
                 'String',{'0'}, 'LineStyle','none','FitBoxToText','off','EdgeColor',[1 1 1],'BackgroundColor',[1 1 1]); hold on
 
 end

@@ -17,13 +17,13 @@ for g = 1:3;    glacier = options.glacier{g};
     UTMout.(namesP{p}).(glacier) = UTM.(namesP{p}).(glacier)(I,:);
         
     %TOPO select data
-     param = fields(TOPO.circle.G4);
+     param = fields(TOPO.(namesP{1}).G4);
     for f = 1:length(param);    field = param{f};
     TOPOout.(namesP{p}).(glacier).(field) = TOPO.(namesP{p}).(glacier).(field)(I);
     end
     
     end
-        UTMout.random.(glacier)(:,1) = [];
+        UTMout.Random.(glacier)(:,1) = [];
 end
 end
 
