@@ -159,12 +159,10 @@ for p = 1:length(namesP)
 for g = 1:3; 
     glacier = options.glacier{g};
 
-for ss = 8:length(pWB.(namesP{p}).(glacier))
+for ss = 40%8:length(pWB.(namesP{p}).(glacier))
 
    [WBinput(ss), TOPOinput(ss), UTMinput(ss)] = SubsetSampleSize( pWB, pTOPO, pUTM, ss );
-end
-end
-end
+
     
     display(['Glacier:',glacier,' Sample size: ',num2str(ss),' Pattern: ',namesP{p}])
     
@@ -283,3 +281,66 @@ end
 end
 
 %% PLOTTING - see Plot_PaperII
+
+%% Distance travelled of random design
+
+%%%%%%%%%%%%%%%%%%%%%%% All n %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+figure(1); %clf; clc
+
+for g = 1:3;    glacier = options.glacier{g};
+
+E = pUTM.Random.(glacier)(2:end,2);      N = pUTM.Random.(glacier)(2:end,3);
+Es = E(1);    Ns = N(1);
+
+Dtravel = zeros(length(E),1);
+
+for i = 1:length(E)
+dist = sqrt((E-Es).^2 + (N-Ns).^2);
+
+[D,I] = min(dist);      Dtravel(i+1) = Dtravel(i) + D;
+Es = E(I);      Ns = N(I);
+E(I) = [];      N(I) = [];
+end
+
+Dtravel = Dtravel/1000;
+plot(Dtravel); hold on
+
+display([glacier, ' ', num2str(Dtravel(40))])
+
+end
+
+legend(options.glacier, 'Location','northwest')
+%%
+
+%%%%%%%%%%%%%%%%%%%%%%% One n, diff random spots %%%%%%%%%%%%%%%%%%%%%%%%%
+n = 40; clc
+    Dtravel = zeros(n,nRuns);
+
+for g = 1:3;    glacier = options.glacier{g};
+for r = 1:nRuns
+    Eruns = repmat(pUTM.Random.(glacier)(:,2),1,nRuns);
+    Nruns = repmat(pUTM.Random.(glacier)(:,3),1,nRuns);
+    ch = randperm(size(Eruns,1),40);
+Eruns = Eruns(ch);  Nruns = Nruns(ch); 
+
+E = Eruns(2:end);      N = Nruns(2:end);
+Es = Eruns(1);         Ns = Nruns(1);
+
+for i = 1:length(E)
+dist = sqrt((E-Es).^2 + (N-Ns).^2);
+
+[D,I] = min(dist);      Dtravel(i+1,r) = Dtravel(i,r) + D;
+Es = E(I);      Ns = N(I);
+E(I) = [];      N(I) = [];
+end
+
+%Dtravel = Dtravel/1000;
+
+end
+%display([glacier, ' ', num2str(min(Dtravel(n,:))/1000),' ',num2str(max(Dtravel(n,:))/1000)])
+display([glacier, ' ', num2str(mean(Dtravel(n,:))/1000)])
+
+end
+plot(Dtravel);
+
+

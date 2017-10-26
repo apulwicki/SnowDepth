@@ -27,7 +27,7 @@ load Full.mat fullLR
 run OPTIONS
 
 %************ Change thing to plot here ********
-    namesP = fieldnames(SynObs_High);  order = [2 3 1 4 5 7 6]; namesP = namesP(order);
+    namesP = fieldnames(SynObs_High);  order = [2 3 1 4 5 6 7]; namesP = namesP(order);
     N1 = {'Midline',''}; N2 = {'Mid &','Transverse'}; N3 = {'Circle',''};
     N4 = {'Hourglass',''}; N5 = {'Hourglass','& Circle'}; N6 = {'Safe','Random'}; N7 = {'Random',''};
     namesPfull = [N1; N2; N3; N4;N5;N6;N7];
@@ -204,24 +204,37 @@ SizeToView = 40;
 n = 1;
 
 [ha, pos] = tight_subplot(3,length(namesP),[0 0],[0 0],[0 0]);
+annStart = [0.061 0.77 .1 .1];
 
 for g = 1:3; 
 for p = 1:length(namesP)
     glacier = options.glacier{g};
 %Calculate relative uncertainty and plot
-    T = nansum(fullSynObs_High.(namesP{p})(SizeToView).(glacier),3);
-    T = T/max(T(:));
+    C = fullLR.S2.(glacier);    C = repmat(C,[1 1 nRuns]);
+    D = fullSynObs_High.(namesP{p})(SizeToView).(glacier)-C;
+    RMSEdist = sqrt(sum(D.^2,3)/nRuns);     
+    
+        c = nanmean(fullLR.S2.(glacier)(:)); 
+        d = nanmean(fullSynObs_High.(namesP{p})(SizeToView).(glacier),2);
+        d = nanmean(d,1);   d = d(:)-c;
+    RMSEglacier = sqrt(sum(d.^2)/nRuns);
+    
 axes(ha(n));    
-h(n) = imagesc(T); hold on
-    colormap(cbrewer('seq', 'BuPu', 100,'PCHIP')); set(h(n),'alphadata',T~=0);
+h(n) = imagesc(RMSEdist); hold on
+    colormap(cbrewer('seq', 'BuPu', 100,'PCHIP')); set(h(n),'alphadata',~isnan(RMSEdist));
     axis square; axis off;
-
+    caxis([0 1])
+    
 %Plot sampling locations
     E = (UTMinput(SizeToView).(namesP{p}).(glacier)(:,1)-min(options.rig.(glacier)(:,1)))/40;
         minN = min(options.rig.(glacier)(:,2));
         Ng = (options.rig.(glacier)(:,2) - minN)/40; 
     N = (UTMinput(SizeToView).(namesP{p}).(glacier)(:,2)-minN)/40; N = max(Ng)-N;
-plot(E,N,'ko','MarkerSize',1.5)
+plot(E,N,'k.','MarkerSize',4.5)
+
+%Add RMSE of glacier-wide WB
+    annotation('textbox',[annStart(1)+(p-1)*0.17 annStart(2)-(g-1)*0.3 .1 .1],...
+        'String', num2str(round(RMSEglacier,2),'%1.2f'),'EdgeColor','none','FontWeight','bold')
 
     if g==1; title(namesPfull(p,:)); end
 
