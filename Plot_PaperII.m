@@ -20,13 +20,12 @@ PlotTopoParameter_DD(fullLR.S2, 'modelledSWE', 'WB (m w.e.)', patternFULL, patte
 	saveFIG_HP(['SampleDesign_',P{t}],1,8.6)
 end
 
-%% Figure 3 - Synthetic sampling
+%% Figure 3 - Synthetic data WB 
     clear
 load Patterns.mat 
 load Full.mat fullLR
 run OPTIONS
 
-%************ Change thing to plot here ********
     namesP = fieldnames(SynObs_High);  order = [2 3 1 4 5 6 7]; namesP = namesP(order);
     N1 = {'Midline',''}; N2 = {'Mid &','Transverse'}; N3 = {'Circle',''};
     N4 = {'Hourglass',''}; N5 = {'Hourglass','& Circle'}; N6 = {'Safe','Random'}; N7 = {'Random',''};
@@ -103,14 +102,13 @@ end
 
 	saveFIG_HP('SyntheticObsWB',2,12)
 
-%% Figure 4 - Data sampling
+%% Figure 4 - Real data
     clear
 load Patterns.mat 
 load Full.mat fullLR
 run OPTIONS
 
-%************ Change thing to plot here ********
-    namesP = fieldnames(DataObs_High);  order = [2 3 1 4 5 6]; namesP = namesP(order);
+    namesP = fieldnames(DataObs_HighRMSE);  order = [2 3 1 4 5 6]; namesP = namesP(order);
     N1 = {'Midline',''}; N2 = {'Mid &','Transverse'}; N3 = {'Circle',''};
     N4 = {'Hourglass',''}; N5 = {'Hourglass','& Circle'}; N6 = {'Safe','Random'}; N7 = {'Random',''};
     namesPfull = [N1; N2; N3; N4;N5;N6;N7];
@@ -127,12 +125,12 @@ run OPTIONS
      clf; n = 1;
 for g = 1:3; glacier = options.glacier{g};
 for p = 1:length(namesP)
-   numPoints = 8:size(DataObs_High.(namesP{p}).(glacier),1);
+   numPoints = 8:size(DataObs_HighRMSE.(namesP{p}).(glacier),1);
 
 
-meanWB = mean(DataObs_High.(namesP{p}).(glacier)(8:end,:),2);
-stdWB_H  = std(DataObs_High.(namesP{p}).(glacier)(8:end,:),[],2);
-stdWB_L  = std(DataObs_Low.(namesP{p}).(glacier)(8:end,:),[],2);
+meanWB = mean(DataObs_HighRMSE.(namesP{p}).(glacier)(8:end,:),2);
+stdWB_H  = std(DataObs_HighRMSE.(namesP{p}).(glacier)(8:end,:),[],2);
+stdWB_L  = std(DataObs_HighRMSE.(namesP{p}).(glacier)(8:end,:),[],2);
 
 N10    = find((stdWB_H(12:end)./meanWB(12:end))<0.1,1); N10 = N10+11;
     subplot(3,length(namesP),n);
@@ -159,7 +157,7 @@ end
     if g ==1 && p==1; ylabel('G4 WB (m w.e.)'); 
     elseif g ==2 && p==1; ylabel('G2 WB (m w.e.)'); 
     elseif g ==3 && p==1; ylabel('G13 WB (m w.e.)'); 
-    else set(gca,'YTickLabel',[]); 
+    else; set(gca,'YTickLabel',[]); 
     end
     if n>12; xlabel('Sample size'); end
 ylim([0.2 1.1])
@@ -186,6 +184,24 @@ end
 
 	saveFIG_HP('DataObsWB',2,12)
 
+    %Fitting function %%%%%%%%%%%%%%%%%%%%%%%%%%
+    x = 8:maxN;
+    y = DataObs_HighRMSE.(type).(glacier)(8:end);
+    F = fit(x',y,'exp2');
+    T = F(x);
+    
+        sampledtemp = fullLR.S2.(glacier)(options.ENgrid.(glacier)(:,2),options.ENgrid.(glacier)(:,1));
+        estGrid     = diag(sampledtemp);
+        realGrid    = ObsInCell(fullSWE.(den).input, topo_sampled);
+    RMSEfull = sqrt(mean((estGrid-realGrid.(glacier)(:,1)).^2));
+        
+    good = find(T<RMSEfull*1.5,1);
+    
+    plot(x,y); hold on
+    plot(F)
+    plot([8 88],[RMSEfull RMSEfull],'k')
+    plot([good good],[0 2],'k--')
+    ylim([0 0.5])
     
 %% Figure 5 - Relative uncertainty
     %clear

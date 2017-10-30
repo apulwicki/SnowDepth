@@ -156,7 +156,7 @@ nRuns = 100;
 %for i = 1:100;
 
 for p = 1:length(namesP)
-for g = 1:3; 
+for g = 1:3 
     glacier = options.glacier{g};
 
 for ss = 40%8:length(pWB.(namesP{p}).(glacier))
@@ -216,14 +216,14 @@ run OPTIONS
 
 for g = 1:3;    glacier = options.glacier{g};
  
-for t = 100%[6,1,3,4,5,100]
+for t = 6%[6,1,3,4,5,100]
 if     t == 6; type = 'Circle';           subset = 'pattern';       
 elseif t == 1; type = 'Centreline';       subset = 'pattern';     
 elseif t == 3; type = 'CentreTransect';   subset = 'pattern';   
 elseif t == 4; type = 'Hourglass';        subset = 'pattern';  
 elseif t == 5; type = 'HourCircle';       subset = 'pattern';
 elseif t == 100; type = 'RandomSafe';     subset = 'random';
-else continue
+else; continue
 end
 
 input.SWE = fullSWE.(den); input.topo_sampled = topo_sampled; 
@@ -246,7 +246,7 @@ for n = 8:maxN
       
 % Linear regression
 
-    for mc = 1:nRuns;
+    for mc = 1%:nRuns
     %Add some noise
     WBinputN = WBnoise(WBinput(n).(type),'high');
     
@@ -271,6 +271,13 @@ for n = 8:maxN
         sweMLR.(glacier)(sweMLR.(glacier)<0) = 0;
         
         DataObs_High.(type).(glacier)(n,mc) = nanmean(sweMLR.(glacier)(:));
+        
+        %RMSE
+            sampledtemp = sweMLR.(glacier)(options.ENgrid.(glacier)(:,2),options.ENgrid.(glacier)(:,1));
+        estGrid     = diag(sampledtemp);
+        realGrid    = ObsInCell(fullSWE.(den).input, topo_sampled);
+
+        DataObs_HighRMSE.(type).(glacier)(n,mc) = sqrt(mean((estGrid-realGrid.(glacier)(:,1)).^2));
         
     end
         
