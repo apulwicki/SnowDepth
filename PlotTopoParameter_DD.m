@@ -1,4 +1,4 @@
-function [ ] = PlotTopoParameter_DD( topoParam, paramName, cLabel, P1, P2, sweDOTS, massB)
+function [ ] = PlotTopoParameter_DD( topoParam, cLabel, P1, P2, sweDOTS )
 %Used for plotting sampling pattern or overlaying multiple set of
 %measurement locations on the glaciers
 %Inputs: data structure, parameter name, colorbar label, pattern1, pattern2, color of
@@ -45,6 +45,7 @@ pos_axis    = [0.00     ystart   width     height;
 
 %Colormap choice
     Cmap = parula;
+    %Cmap = cbrewer('div','YlGnBu',100);
  
 for i = 1:3
         name    = char(options.glacier(i)); 
@@ -75,8 +76,8 @@ for i = 1:3
                  E2 = (P2(i).utm(:,1)-minE)/40;
                  Na = (P2(i).utm(:,2)-minN)/40; N2 = max(Ng)-Na;
                 if      strcmp(sweDOTS,'black')
-                    plot(E1,N1,'k.', 'MarkerSize',3); hold on
-                    plot(E2,N2,'ko', 'MarkerSize',3); 
+                    plot(E1,N1,'k.', 'MarkerSize',1); hold on
+                    plot(E2,N2,'ko', 'MarkerSize',2); 
                 end        
                 
                 %Axis Properties

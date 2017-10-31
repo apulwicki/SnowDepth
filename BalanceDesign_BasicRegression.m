@@ -159,7 +159,7 @@ for p = 1:length(namesP)
 for g = 1:3 
     glacier = options.glacier{g};
 
-for ss = 40%8:length(pWB.(namesP{p}).(glacier))
+for ss = 8:length(pWB.(namesP{p}).(glacier))
 
    [WBinput(ss), TOPOinput(ss), UTMinput(ss)] = SubsetSampleSize( pWB, pTOPO, pUTM, ss );
 
@@ -190,8 +190,11 @@ for ss = 40%8:length(pWB.(namesP{p}).(glacier))
             %Set min to 0
         sweMLR.(glacier)(sweMLR.(glacier)<0) = 0;
         
-        %SynObs_High.(namesP{p}).(glacier)(ss,mc) = nanmean(sweMLR.(glacier)(:));
+        SynObs_High.(namesP{p}).(glacier)(ss,mc) = nanmean(sweMLR.(glacier)(:));
+        
+        if ss == 40;
         fullSynObs_High.(namesP{p})(ss).(glacier)(:,:,mc) = sweMLR.(glacier);
+        end
     end
 end
 end
@@ -216,14 +219,14 @@ run OPTIONS
 
 for g = 1:3;    glacier = options.glacier{g};
  
-for t = 6%[6,1,3,4,5,100]
+for t = [6,1,3,4,5,100]
 if     t == 6; type = 'Circle';           subset = 'pattern';       
 elseif t == 1; type = 'Centreline';       subset = 'pattern';     
 elseif t == 3; type = 'CentreTransect';   subset = 'pattern';   
 elseif t == 4; type = 'Hourglass';        subset = 'pattern';  
 elseif t == 5; type = 'HourCircle';       subset = 'pattern';
 elseif t == 100; type = 'RandomSafe';     subset = 'random';
-else; continue
+else continue
 end
 
 input.SWE = fullSWE.(den); input.topo_sampled = topo_sampled; 
@@ -246,7 +249,7 @@ for n = 8:maxN
       
 % Linear regression
 
-    for mc = 1%:nRuns
+    for mc = 1:nRuns
     %Add some noise
     WBinputN = WBnoise(WBinput(n).(type),'high');
     
