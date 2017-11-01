@@ -232,6 +232,100 @@ end
 end 
 
 	saveFIG_HP('DataObsWB',2,12)
+    
+    %% Figure 4 - Real data ALTERNATIVE
+    clear
+load Patterns.mat 
+load Full.mat fullLR fullSWE
+load TopoSWE.mat topo_sampled
+run OPTIONS
+
+    namesP = fieldnames(DataObs_HighRMSE);  order = [2 3 1 4 5 6]; namesP = namesP(order);
+    N1 = {'Midline',''}; N2 = {'Mid &','Transverse'}; N3 = {'Circle',''};
+    N4 = {'Hourglass',''}; N5 = {'Hourglass','& Circle'}; N6 = {'Safe',''}; 
+    namesPfull = [N1; N2; N3; N4;N5;N6];
+    pUTM.Random.G2(:,1) = []; pUTM.Random.G4(:,1) = []; pUTM.Random.G13(:,1) = [];   
+    C =[     0    0.4470    0.7410;...
+        0.8500    0.3250    0.0980;...
+        0.9290    0.6940    0.1250;...
+        0.4940    0.1840    0.5560;...
+        0.4660    0.6740    0.1880;...
+        0.3010    0.7450    0.9330;...
+        0.0588    0.3490    0.1216];
+
+  % Figure  
+     clf; n = 1;
+%[ha, ~] = tight_subplot(1,3,[0.01 .01],[.08 0],[.05 0]);
+for g = 1:3; glacier = options.glacier{g};
+for p = 1:length(namesP)
+   numPoints = 8:size(DataObs_RMSE.(namesP{p}).(glacier),1);
+
+meanWB   = mean(DataObs_RMSE.(namesP{p}).(glacier)(8:end,:),2);
+
+%axes(ha(g))
+subplot(1,3,g)
+plot(numPoints,meanWB,'LineWidth',1.1,'Color',C(p,:)); hold on
+
+
+    %Best sample size Fitting function %%%%%%%%%%%%%%%%%%%%%%%%%%
+    F = fit(numPoints',meanWB,'exp2');
+    T = F(numPoints);
+        sampledtemp = fullLR.S2.(glacier)(options.ENgrid.(glacier)(:,2),options.ENgrid.(glacier)(:,1));
+        estGrid     = diag(sampledtemp);
+        realGrid    = ObsInCell(fullSWE.S2.input, topo_sampled);
+    RMSEfull = sqrt(mean((estGrid-realGrid.(glacier)(:,1)).^2));
+
+    plot(numPoints, T,'--','Color',C(p,:)); hold on
+    plot([min(numPoints) max(numPoints)],[RMSEfull,RMSEfull],'--k')
+
+    % difference of <0.05
+    good = find(T-RMSEfull<0.05,1);
+        if ~isempty(good)
+        plot([good+min(numPoints) good+min(numPoints)],[0 2],'k:','LineWidth',0.05)
+        end
+    % 50% of GW mean
+%     good = find(T-RMSEfull<0.50*RMSEfull,1);
+%         if ~isempty(good)
+%         plot([good+min(numPoints) good+min(numPoints)],[0 2],'k-.','LineWidth',0.25)
+%         end
+    %High STD <0.01
+%     FN  = fit(numPoints',stdWB_H,'exp2');
+%     TN  = FN(numPoints);
+%     N10 = find(TN<0.01,1); N10 = N10+min(numPoints)-1;
+%     %N10 = find(stdWB_H<0.1,1);  N10 = N10+min(numPoints)-1;
+%         if ~isempty(N10) 
+%         plot([N10 N10],[0 1.2],'-.k','LineWidth',0.5)
+%         end
+
+
+    %titles
+    title(options.GName{g})
+    %y labels
+    if g ==1; ylabel('RMSE (m w.e.)');
+    else set(gca,'YTickLabel',[]);
+    end
+    if g==2; xlabel('Sample size');     end
+ylim([0 0.6])
+xlim([7 45])
+
+% ax = get(gca,'Position');
+% set(gca,'Position', [ax(1) ax(2) ax(3) 0.28]);
+% 
+%     if n==2 || n == 14; yInd = 0.002; else yInd = 0.14; end
+%     if g ==1; sizeG = 0.12; xoff = 0.04; yInd = yInd+0.02; else sizeG = 0.14; xoff = 0.036; end
+% axes('position',[ax(1)+xoff ax(2)+yInd sizeG sizeG])
+% pInd = 1:10:length(pUTM.(namesP{p}).(glacier));
+% if g == 3; fill(options.rig.(glacier)(1:304,1),options.rig.(glacier)(1:304,2),...
+%                 [199, 201, 204]/255, 'EdgeColor','none'); hold on
+% else fill(options.rig.(glacier)(:,1),options.rig.(glacier)(:,2),...
+%                 [199, 201, 204]/255, 'EdgeColor','none'); hold on
+% end
+% plot(pUTM.(namesP{p}).(glacier)(pInd,1),pUTM.(namesP{p}).(glacier)(pInd,2),'k.','MarkerSize',1.5); 
+%     axis off; axis equal
+end
+end 
+
+	saveFIG_HP('DataObsWB',2,6)
 
     
 %% Figure 5 - Relative uncertainty
