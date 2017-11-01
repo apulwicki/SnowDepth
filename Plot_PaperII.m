@@ -47,11 +47,12 @@ for g = 1:3; glacier = options.glacier{g};
 for p = 1:length(namesP)
    numPoints = 8:size(SynObs_High.(namesP{p}).(glacier),1);
 
-meanWB = mean(SynObs_High.(namesP{p}).(glacier)(8:end,:),2);
+    M1   = mean(SynObs_High.(namesP{p}).(glacier)(8:end,:),2);
+    M2   = mean(SynObs_Low.(namesP{p}).(glacier)(8:end,:),2);   
+meanWB   = mean([M1 M2],2);
 stdWB_H  = std(SynObs_High.(namesP{p}).(glacier)(8:end,:),[],2);
 stdWB_L  = std(SynObs_Low.(namesP{p}).(glacier)(8:end,:),[],2);
 
-%N10    = find((stdWB_H(12:end)./meanWB(12:end))<0.1,1); N10 = N10+11;
 
 axes(ha(n));    
 plot(numPoints,meanWB,'LineWidth',1.1,'Color',C(p,:)); hold on
@@ -74,19 +75,23 @@ fill([numPoints flip(numPoints)],[upper',flip(lower')],...
     plot([min(numPoints) max(numPoints)],[GWmean,GWmean],'--k')
 
     % 5% of GW mean
-    good = find(T-GWmean<0.05*GWmean,1);
+    good = find(T-GWmean<0.05,1);
         if ~isempty(good)
         plot([good+min(numPoints) good+min(numPoints)],[0 2],'k:','LineWidth',0.05)
         end
     % 1% of GW mean
-    good = find(T-GWmean<0.01*GWmean,1);
-        if ~isempty(good)
-        plot([good+min(numPoints) good+min(numPoints)],[0 2],'k-.','LineWidth',0.25)
+%     good = find(T-GWmean<0.01*GWmean,1);
+%         if ~isempty(good)
+%         plot([good+min(numPoints) good+min(numPoints)],[0 2],'k-.','LineWidth',0.25)
+%         end
+    %High STD within 10% of mean
+    FN  = fit(numPoints',stdWB_H,'exp2');
+    TN  = FN(numPoints);
+    N10 = find(TN<0.15,1); N10 = N10+min(numPoints)-1;
+    %N10 = find(stdWB_H<0.1,1);  N10 = N10+min(numPoints)-1;
+        if ~isempty(N10) 
+        plot([N10 N10],[0 1.2],'-.k','LineWidth',0.75)
         end
-    
-% if ~isempty(N10)
-% plot([N10 N10],[0 1.2],'-.k','LineWidth',0.75)
-% end
 
     %titles
     if g==1; title(namesPfull(p,:)); end
@@ -99,7 +104,7 @@ fill([numPoints flip(numPoints)],[upper',flip(lower')],...
     if n==15; xlabel('                    Sample size'); end
     if g==1 || g == 2; set(gca,'XTickLabel',[]); end
 ylim([0.2 1.1])
-xlim([8 40])
+xlim([7 45])
 n = n+1;
 
 ax = get(gca,'Position');
@@ -124,7 +129,8 @@ end
 %% Figure 4 - Real data
     clear
 load Patterns.mat 
-load Full.mat fullLR
+load Full.mat fullLR fullSWE
+load TopoSWE.mat topo_sampled
 run OPTIONS
 
     namesP = fieldnames(DataObs_HighRMSE);  order = [2 3 1 4 5 6]; namesP = namesP(order);
@@ -145,19 +151,18 @@ run OPTIONS
 [ha, ~] = tight_subplot(3,length(namesP),[0.01 .01],[.08 0],[.05 0]);
 for g = 1:3; glacier = options.glacier{g};
 for p = 1:length(namesP)
-   numPoints = 8:size(DataObs_HighRMSE.(namesP{p}).(glacier),1);
+   numPoints = 8:size(DataObs_RMSE.(namesP{p}).(glacier),1);
 
-meanWB = mean(DataObs_HighRMSE.(namesP{p}).(glacier)(8:end,:),2);
-stdWB_H  = std(DataObs_HighRMSE.(namesP{p}).(glacier)(8:end,:),[],2);
-%stdWB_L  = std(DataObs_LowRMSE.(namesP{p}).(glacier)(8:end,:),[],2);
+meanWB   = mean(DataObs_RMSE.(namesP{p}).(glacier)(8:end,:),2);
+%stdWB_H  = std(DataObs_HighRMSE.(namesP{p}).(glacier)(8:L+7,:),[],2);
+%stdWB_L  = std(DataObs_LowRMSE.(namesP{p}).(glacier)(8:L+7,:),[],2);
 
-%N10    = find((stdWB_H(12:end)./meanWB(12:end))<0.1,1); N10 = N10+11;
 axes(ha(n))
 plot(numPoints,meanWB,'LineWidth',1.1,'Color',C(p,:)); hold on
-    upper = meanWB + stdWB_H;
-    lower = meanWB - stdWB_H;
-fill([numPoints flip(numPoints)],[upper',flip(lower')],...
-     C(p,:),'FaceAlpha',0.2,'EdgeColor','none')
+%     upper = meanWB + stdWB_H;
+%     lower = meanWB - stdWB_H;
+% fill([numPoints flip(numPoints)],[upper',flip(lower')],...
+%      C(p,:),'FaceAlpha',0.2,'EdgeColor','none')
 %     upper = meanWB + stdWB_L;
 %     lower = meanWB - stdWB_L;
 % fill([numPoints flip(numPoints)],[upper',flip(lower')],...
@@ -169,24 +174,31 @@ fill([numPoints flip(numPoints)],[upper',flip(lower')],...
     T = F(numPoints);
         sampledtemp = fullLR.S2.(glacier)(options.ENgrid.(glacier)(:,2),options.ENgrid.(glacier)(:,1));
         estGrid     = diag(sampledtemp);
-        realGrid    = ObsInCell(fullSWE.(den).input, topo_sampled);
+        realGrid    = ObsInCell(fullSWE.S2.input, topo_sampled);
     RMSEfull = sqrt(mean((estGrid-realGrid.(glacier)(:,1)).^2));
 
     plot(numPoints, T,'k'); hold on
     plot([min(numPoints) max(numPoints)],[RMSEfull,RMSEfull],'--k')
 
-    % 80% of GW mean
-    good = find(T-RMSEfull<0.80*RMSEfull,1);
+    % difference of <0.05
+    good = find(T-RMSEfull<0.05,1);
         if ~isempty(good)
         plot([good+min(numPoints) good+min(numPoints)],[0 2],'k:','LineWidth',0.05)
         end
     % 50% of GW mean
-    good = find(T-RMSEfull<0.50*RMSEfull,1);
-        if ~isempty(good)
-        plot([good+min(numPoints) good+min(numPoints)],[0 2],'k-.','LineWidth',0.25)
-        end
-    
-    %plot([N10 N10],[0 1.2],'-.k','LineWidth',0.75)
+%     good = find(T-RMSEfull<0.50*RMSEfull,1);
+%         if ~isempty(good)
+%         plot([good+min(numPoints) good+min(numPoints)],[0 2],'k-.','LineWidth',0.25)
+%         end
+    %High STD <0.01
+%     FN  = fit(numPoints',stdWB_H,'exp2');
+%     TN  = FN(numPoints);
+%     N10 = find(TN<0.01,1); N10 = N10+min(numPoints)-1;
+%     %N10 = find(stdWB_H<0.1,1);  N10 = N10+min(numPoints)-1;
+%         if ~isempty(N10) 
+%         plot([N10 N10],[0 1.2],'-.k','LineWidth',0.5)
+%         end
+
 
     %titles
     if g==1; title(namesPfull(p,:)); end
@@ -198,14 +210,14 @@ fill([numPoints flip(numPoints)],[upper',flip(lower')],...
     end
     if n==15; xlabel('                    Sample size'); end
     if g==1 || g == 2; set(gca,'XTickLabel',[]); end
-ylim([0 0.8])
-xlim([8 40])
+ylim([0 0.6])
+xlim([7 45])
 n = n+1;
 
 ax = get(gca,'Position');
 set(gca,'Position', [ax(1) ax(2) ax(3) 0.28]);
 
-    if n==1 || n == 14; yInd = 0.002; else yInd = 0.14; end
+    if n==2 || n == 14; yInd = 0.002; else yInd = 0.14; end
     if g ==1; sizeG = 0.12; xoff = 0.04; yInd = yInd+0.02; else sizeG = 0.14; xoff = 0.036; end
 axes('position',[ax(1)+xoff ax(2)+yInd sizeG sizeG])
 pInd = 1:10:length(pUTM.(namesP{p}).(glacier));

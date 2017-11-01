@@ -249,9 +249,10 @@ for n = 8:maxN
       
 % Linear regression
 
-    for mc = 1:nRuns
+    for mc = 1%:nRuns
     %Add some noise
-    WBinputN = WBnoise(WBinput(n).(type),'high');
+    %WBinputN = WBnoise(WBinput(n).(type),'low');
+    WBinputN = WBinput(n).(type);
     
     %Linear regresion
         swe	    = WBinputN.(glacier)(:,1);
@@ -273,14 +274,14 @@ for n = 8:maxN
             %Set min to 0
         sweMLR.(glacier)(sweMLR.(glacier)<0) = 0;
         
-        DataObs_High.(type).(glacier)(n,mc) = nanmean(sweMLR.(glacier)(:));
+        DataObs.(type).(glacier)(n,mc) = nanmean(sweMLR.(glacier)(:));
         
         %RMSE
             sampledtemp = sweMLR.(glacier)(options.ENgrid.(glacier)(:,2),options.ENgrid.(glacier)(:,1));
         estGrid     = diag(sampledtemp);
         realGrid    = ObsInCell(fullSWE.(den).input, topo_sampled);
 
-        DataObs_HighRMSE.(type).(glacier)(n,mc) = sqrt(mean((estGrid-realGrid.(glacier)(:,1)).^2));
+        DataObs_RMSE.(type).(glacier)(n,mc) = sqrt(mean((estGrid-realGrid.(glacier)(:,1)).^2));
         
     end
         

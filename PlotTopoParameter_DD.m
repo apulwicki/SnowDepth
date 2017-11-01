@@ -76,8 +76,8 @@ for i = 1:3
                  E2 = (P2(i).utm(:,1)-minE)/40;
                  Na = (P2(i).utm(:,2)-minN)/40; N2 = max(Ng)-Na;
                 if      strcmp(sweDOTS,'black')
-                    plot(E1,N1,'k.', 'MarkerSize',1); hold on
-                    plot(E2,N2,'ko', 'MarkerSize',2); 
+                    plot(E1,N1,'k.', 'MarkerSize',3); hold on
+                    plot(E2,N2,'ko', 'MarkerSize',4); 
                 end        
                 
                 %Axis Properties
@@ -96,15 +96,15 @@ end
     set(c,'Position',[0.87 0.5 0.03 0.37]);
 
 %Flow direction
-    arG4 = annotation('arrow',[.18 .25],[.32 .26]); arG4.HeadLength = 5; arG4.HeadWidth = 5; %G4
+    arG4 = annotation('arrow',[.17 .21],[.32 .25]); arG4.HeadLength = 5; arG4.HeadWidth = 5; %G4
     arG2 = annotation('arrow',[.39 .31],[.49 .52]); arG2.HeadLength = 5; arG2.HeadWidth = 5; %G2
-    arG3 = annotation('arrow',[.78 .70],[.57 .64]); arG3.HeadLength = 5; arG3.HeadWidth = 5; %G13
+    arG3 = annotation('arrow',[.78 .72],[.58 .64]); arG3.HeadLength = 5; arG3.HeadWidth = 5; %G13
 
 
 % Glacier labels
-    annotation('textbox',[.06 0.05 .1 .1],'String', 'Glacier 4','EdgeColor','none','FontWeight','bold')
-    annotation('textbox',[.40 0.05 .1 .1],'String', 'Glacier 2','EdgeColor','none','FontWeight','bold')
-    annotation('textbox',[.67 0.05 .1 .1],'String', 'Glacier 13','EdgeColor','none','FontWeight','bold')
+    annotation('textbox',[.06 0.0 .1 .1],'String', 'Glacier 4','EdgeColor','none','FontWeight','bold')
+    annotation('textbox',[.40 0.0 .1 .1],'String', 'Glacier 2','EdgeColor','none','FontWeight','bold')
+    annotation('textbox',[.67 0.0 .1 .1],'String', 'Glacier 13','EdgeColor','none','FontWeight','bold')
 
 % North arrow
     Narrow = imread('Narrow.jpg');
@@ -116,9 +116,9 @@ end
 % Scale bar
     axes('position',[0.16,0.75,0.2,0.12]); axis off; 
     scalebar('ScaleLength', 0.8, 'Location',[0.18,0.55])
-    annotation(gcf,'textbox',[0.3,0.76,0.15,0.05],...
+    annotation(gcf,'textbox',[0.3,0.765,0.15,0.05],...
                 'String',{'2 km'}, 'LineStyle','none','FitBoxToText','off','EdgeColor',[1 1 1],'BackgroundColor',[1 1 1]); hold on
-    annotation(gcf,'textbox',[0.17,0.76,.05,.05],...
+    annotation(gcf,'textbox',[0.17,0.765,.05,.05],...
                 'String',{'0'}, 'LineStyle','none','FitBoxToText','off','EdgeColor',[1 1 1],'BackgroundColor',[1 1 1]); hold on
 
 end
