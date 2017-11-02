@@ -166,7 +166,7 @@ for ss = 8:length(pWB.(namesP{p}).(glacier))
     
     display(['Glacier:',glacier,' Sample size: ',num2str(ss),' Pattern: ',namesP{p}])
     
-    for mc = 1:nRuns;
+    for mc = 1:nRuns
     %Add some noise
     WBinputN = WBnoise(WBinput(ss).(namesP{p}),'high');
     
@@ -217,9 +217,8 @@ end
 load TopoSWE.mat
 run OPTIONS
 
-for g = 1:3;    glacier = options.glacier{g};
  
-for t = [6,1,3,4,5,100]
+for t = 6%[6,1,3,4,5,100]
 if     t == 6; type = 'Circle';           subset = 'pattern';       
 elseif t == 1; type = 'Centreline';       subset = 'pattern';     
 elseif t == 3; type = 'CentreTransect';   subset = 'pattern';   
@@ -238,24 +237,24 @@ input.topo_sampled_ns = topo_sampled_ns;
 
 maxN = length(subsetSWE_temp.G4);
 
-for n = 8:maxN
-    
-     display([glacier, ',' type, ' n=',num2str(n)])
+ for n = 8%:maxN
 
-[ WBinput(n).(type), TOPOinput(n).(type) ] = SortNSelect( subsetSWE_temp, TOPOdata_temp, n );
+for g = 1:3;    glacier = options.glacier{g};
+
+     display([glacier, ',' type, ' n=',num2str(n)])
+    for mc = 1:nRuns
+
+    nI = randperm(maxN, n);
+    WBinput(n).(type).(glacier)   = subsetSWE_temp.(glacier)(nI,:);
+        ff = fieldnames(TOPOdata_temp.(glacier));
+    for i = 1:length(ff);    fname = ff{i};
+    TOPOinput(n).(type).(glacier).(fname)  = TOPOdata_temp.(glacier).(fname)(nI,:); end
 
     % Correct the centreline values for invertable matrix when only centreline
     if strcmp(type,'Centreline'); TOPOinput(n).(type).G13 =  rmfield(TOPOinput(n).(type).G13, 'centreD'); end
       
-% Linear regression
-
-    for mc = 1%:nRuns
-    %Add some noise
-    %WBinputN = WBnoise(WBinput(n).(type),'low');
-    WBinputN = WBinput(n).(type);
-    
-    %Linear regresion
-        swe	    = WBinputN.(glacier)(:,1);
+% Linear regression    
+        swe	    = WBinput(n).(type).(glacier)(:,1);
         Xt      = struct2array(TOPOinput(n).(type).(glacier));
         X       = [ones(length(Xt),1), Xt];
 
@@ -288,8 +287,9 @@ for n = 8:maxN
 end
 % figure; plot(WBinput(n).(type).G4(:,2),WBinput(n).(type).G4(:,3),'.')
 % title(type)
+ end
 end
-end
+
 
 %% PLOTTING - see Plot_PaperII
 
