@@ -42,6 +42,9 @@ run OPTIONS
 
   % Figure  
      clf; n = 1;
+     ConvTable   = nan(3,6);  ConvTable = array2table(ConvTable,'VariableNames',namesP);  
+     VarTable    = nan(3,6);  VarTable  = array2table(VarTable,'VariableNames',namesP);
+
 [ha, ~] = tight_subplot(3,length(namesP),[0.01 .01],[.08 0],[.05 0]);
 for g = 1:3; glacier = options.glacier{g};
 for p = 1:length(namesP)
@@ -55,43 +58,46 @@ stdWB_L  = std(SynObs_Low.(namesP{p}).(glacier)(8:end,:),[],2);
 
 
 axes(ha(n));    
-plot(numPoints,meanWB,'LineWidth',1.1,'Color',C(p,:)); hold on
+%plot(numPoints,meanWB,'LineWidth',1.1,'Color',C(p,:)); hold on
     upper = meanWB + stdWB_H;
     lower = meanWB - stdWB_H;
 fill([numPoints flip(numPoints)],[upper',flip(lower')],...
-     C(p,:),'FaceAlpha',0.2,'EdgeColor','none')
+     C(p,:),'FaceAlpha',0.2,'EdgeColor','none'); hold on
      upper = meanWB + stdWB_L;
     lower = meanWB - stdWB_L;
 fill([numPoints flip(numPoints)],[upper',flip(lower')],...
      C(p,:),'FaceAlpha',0.4,'EdgeColor','none')
 
 %Best sample size Fitting function %%%%%%%%%%%%%%%%%%%%%%%%%%
-    
+   
     GWmean = nanmean(fullLR.S2.(glacier)(:));
-    F = fit(numPoints',meanWB,'exp2');
-    T = F(numPoints);
     
-    plot(numPoints, T,'k'); hold on
+    smoothSize = 6;
+        M = zeros(smoothSize, length(meanWB)-smoothSize+1);
+    for h = 1:smoothSize;  M(h,:) = meanWB(h:end-(smoothSize-h));  end
+    T = mean(M);    
+    
+    plot(numPoints(h/2:end-h/2), T,'LineWidth',1.1,'Color',C(p,:)); 
     plot([min(numPoints) max(numPoints)],[GWmean,GWmean],'--k')
 
     % 5% of GW mean
-    good = find(T-GWmean<0.05,1);
+    good = find(T-GWmean<0.05,1);   
         if ~isempty(good)
-        plot([good+min(numPoints) good+min(numPoints)],[0 2],'k:','LineWidth',0.05)
+        good = good + min(numPoints)-1;
+        plot([good good],[0 2],'k:','LineWidth',0.05)
+        ConvTable{g,p}  = good;
         end
-    % 1% of GW mean
-%     good = find(T-GWmean<0.01*GWmean,1);
-%         if ~isempty(good)
-%         plot([good+min(numPoints) good+min(numPoints)],[0 2],'k-.','LineWidth',0.25)
-%         end
-    %High STD within 10% of mean
-    FN  = fit(numPoints',stdWB_H,'exp2');
-    TN  = FN(numPoints);
-    N10 = find(TN<0.15,1); N10 = N10+min(numPoints)-1;
-    %N10 = find(stdWB_H<0.1,1);  N10 = N10+min(numPoints)-1;
+    %High STD within 25% of mean
+        M = zeros(smoothSize, length(meanWB)-smoothSize+1);
+    for h = 1:smoothSize;  M(h,:) = stdWB_H(h:end-(smoothSize-h));  end
+    TN = mean(M);    
+    N10 = find(TN/GWmean<0.25,1); 
         if ~isempty(N10) 
+        N10 = N10+min(numPoints)-1;
         plot([N10 N10],[0 1.2],'-.k','LineWidth',0.75)
+        VarTable{g,p}   = N10;
         end
+        
 
     %titles
     if g==1; title(namesPfull(p,:)); end
@@ -124,7 +130,7 @@ plot(pUTM.(namesP{p}).(glacier)(pInd,1),pUTM.(namesP{p}).(glacier)(pInd,2),'k.',
 end
 end 
 
-	saveFIG_HP('SyntheticObsWB',2,12)
+	%saveFIG_HP('SyntheticObsWB',2,12)
 
 %% Figure 4 - Real data
     clear
