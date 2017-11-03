@@ -216,16 +216,18 @@ end
 
 load TopoSWE.mat
 run OPTIONS
+clear DataObs_RMSE  
+
+realGrid    = ObsInCell(fullSWE.(den).input, topo_sampled);
 
  
-for t = 6%[6,1,3,4,5,100]
+for t = [6,1,3,4,5,100]
 if     t == 6; type = 'Circle';           subset = 'pattern';       
 elseif t == 1; type = 'Centreline';       subset = 'pattern';     
 elseif t == 3; type = 'CentreTransect';   subset = 'pattern';   
 elseif t == 4; type = 'Hourglass';        subset = 'pattern';  
 elseif t == 5; type = 'HourCircle';       subset = 'pattern';
 elseif t == 100; type = 'RandomSafe';     subset = 'random';
-else continue
 end
 
 input.SWE = fullSWE.(den); input.topo_sampled = topo_sampled; 
@@ -235,13 +237,13 @@ input.topo_sampled_ns = topo_sampled_ns;
 
 [ subsetSWE_temp, TOPOdata_temp ] = ObsInCell( subsetSWE_temp, TOPOdata_temp ); 
 
-maxN = length(subsetSWE_temp.G4);
+maxN = min([length(subsetSWE_temp.G4) length(subsetSWE_temp.G2) length(subsetSWE_temp.G13)]);
 
- for n = 8%:maxN
+ for n = 8:maxN
+     display([type, ' n=',num2str(n)])
 
 for g = 1:3;    glacier = options.glacier{g};
 
-     display([glacier, ',' type, ' n=',num2str(n)])
     for mc = 1:nRuns
 
     nI = randperm(maxN, n);
@@ -251,7 +253,7 @@ for g = 1:3;    glacier = options.glacier{g};
     TOPOinput(n).(type).(glacier).(fname)  = TOPOdata_temp.(glacier).(fname)(nI,:); end
 
     % Correct the centreline values for invertable matrix when only centreline
-    if strcmp(type,'Centreline'); TOPOinput(n).(type).G13 =  rmfield(TOPOinput(n).(type).G13, 'centreD'); end
+    if g==3 && strcmp(type,'Centreline'); TOPOinput(n).(type).G13 =  rmfield(TOPOinput(n).(type).G13, 'centreD'); end
       
 % Linear regression    
         swe	    = WBinput(n).(type).(glacier)(:,1);
@@ -273,12 +275,11 @@ for g = 1:3;    glacier = options.glacier{g};
             %Set min to 0
         sweMLR.(glacier)(sweMLR.(glacier)<0) = 0;
         
-        DataObs.(type).(glacier)(n,mc) = nanmean(sweMLR.(glacier)(:));
+        %DataObs.(type).(glacier)(n,mc) = nanmean(sweMLR.(glacier)(:));
         
         %RMSE
-            sampledtemp = sweMLR.(glacier)(options.ENgrid.(glacier)(:,2),options.ENgrid.(glacier)(:,1));
+        sampledtemp = sweMLR.(glacier)(options.ENgrid.(glacier)(:,2),options.ENgrid.(glacier)(:,1));
         estGrid     = diag(sampledtemp);
-        realGrid    = ObsInCell(fullSWE.(den).input, topo_sampled);
 
         DataObs_RMSE.(type).(glacier)(n,mc) = sqrt(mean((estGrid-realGrid.(glacier)(:,1)).^2));
         
