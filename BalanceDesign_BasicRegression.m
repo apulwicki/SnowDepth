@@ -177,24 +177,25 @@ for ss = 8:length(pWB.(namesP{p}).(glacier))
 
         % Get coefficients
         MLR.(glacier)            = regress(swe, X);
+        ElevationSyn.(namesP{p}).(glacier)(ss,mc) = MLR.(glacier)(2);
         
         %Predict
-        sweMLR.(glacier) = repmat(MLR.(glacier)(1), options.mapsize(g,:));
-        mlrCoeff = MLR.(glacier)(2:end);    topoCoeff = fieldnames(topo_full.G4);
-            %multiply coeffs and add them
-        for n = 1:length(mlrCoeff)
-            param               = topoCoeff{n};
-            sweT                = topo_full.(glacier).(param)*mlrCoeff(n);
-            sweMLR.(glacier)    = sweMLR.(glacier) + sweT;
-        end
-            %Set min to 0
-        sweMLR.(glacier)(sweMLR.(glacier)<0) = 0;
-        
-        SynObs_High.(namesP{p}).(glacier)(ss,mc) = nanmean(sweMLR.(glacier)(:));
-        
-        if ss == 40;
-        fullSynObs_High.(namesP{p})(ss).(glacier)(:,:,mc) = sweMLR.(glacier);
-        end
+%         sweMLR.(glacier) = repmat(MLR.(glacier)(1), options.mapsize(g,:));
+%         mlrCoeff = MLR.(glacier)(2:end);    topoCoeff = fieldnames(topo_full.G4);
+%             %multiply coeffs and add them
+%         for n = 1:length(mlrCoeff)
+%             param               = topoCoeff{n};
+%             sweT                = topo_full.(glacier).(param)*mlrCoeff(n);
+%             sweMLR.(glacier)    = sweMLR.(glacier) + sweT;
+%         end
+%             %Set min to 0
+%         sweMLR.(glacier)(sweMLR.(glacier)<0) = 0;
+%         
+%         SynObs_High.(namesP{p}).(glacier)(ss,mc) = nanmean(sweMLR.(glacier)(:));
+%         
+%         if ss == 40;
+%         fullSynObs_High.(namesP{p})(ss).(glacier)(:,:,mc) = sweMLR.(glacier);
+%         end
     end
 end
 end
@@ -247,6 +248,7 @@ for g = 1:3;    glacier = options.glacier{g};
     for mc = 1:nRuns
 
     nI = randperm(maxN, n);
+    %nI = floor(linspace(1,maxN,n));
     WBinput(n).(type).(glacier)   = subsetSWE_temp.(glacier)(nI,:);
         ff = fieldnames(TOPOdata_temp.(glacier));
     for i = 1:length(ff);    fname = ff{i};
@@ -262,26 +264,27 @@ for g = 1:3;    glacier = options.glacier{g};
 
         % Get coefficients
         MLR.(glacier)            = regress(swe, X);
-        
-        %Predict
-        sweMLR.(glacier) = repmat(MLR.(glacier)(1), options.mapsize(g,:));
-        mlrCoeff = MLR.(glacier)(2:end);    topoCoeff = fieldnames(topo_full.G4);
-            %multiply coeffs and add them
-        for m = 1:length(mlrCoeff)
-            param               = topoCoeff{m};
-            sweT                = topo_full.(glacier).(param)*mlrCoeff(m);
-            sweMLR.(glacier)    = sweMLR.(glacier) + sweT;
-        end
-            %Set min to 0
-        sweMLR.(glacier)(sweMLR.(glacier)<0) = 0;
-        
-        %DataObs.(type).(glacier)(n,mc) = nanmean(sweMLR.(glacier)(:));
-        
-        %RMSE
-        sampledtemp = sweMLR.(glacier)(options.ENgrid.(glacier)(:,2),options.ENgrid.(glacier)(:,1));
-        estGrid     = diag(sampledtemp);
+        ElevationReal.(type).(glacier)(n,mc) = MLR.(glacier)(2);
 
-        DataObs_RMSE.(type).(glacier)(n,mc) = sqrt(mean((estGrid-realGrid.(glacier)(:,1)).^2));
+        %Predict
+%         sweMLR.(glacier) = repmat(MLR.(glacier)(1), options.mapsize(g,:));
+%         mlrCoeff = MLR.(glacier)(2:end);    topoCoeff = fieldnames(topo_full.G4);
+%             %multiply coeffs and add them
+%         for m = 1:length(mlrCoeff)
+%             param               = topoCoeff{m};
+%             sweT                = topo_full.(glacier).(param)*mlrCoeff(m);
+%             sweMLR.(glacier)    = sweMLR.(glacier) + sweT;
+%         end
+%             %Set min to 0
+%         sweMLR.(glacier)(sweMLR.(glacier)<0) = 0;
+%         
+%         %DataObs.(type).(glacier)(n,mc) = nanmean(sweMLR.(glacier)(:));
+%         
+%         %RMSE
+%         sampledtemp = sweMLR.(glacier)(options.ENgrid.(glacier)(:,2),options.ENgrid.(glacier)(:,1));
+%         estGrid     = diag(sampledtemp);
+% 
+%         DataObs_RMSEeven.(type).(glacier)(n,mc) = sqrt(mean((estGrid-realGrid.(glacier)(:,1)).^2));
         
     end
         
