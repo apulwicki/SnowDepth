@@ -149,7 +149,7 @@ Gsplit = [1, 1950, 3235, length(cells)]; Gsplit = flip(Gsplit);
 
     
 %% THEORETICAL - All n for WB
-
+load TopoSWE.mat topo_full
     namesP = fieldnames(pWB);
     %namesP = {'hourglass'};
 nRuns = 100;
@@ -168,7 +168,7 @@ for ss = 8:length(pWB.(namesP{p}).(glacier))
     
     for mc = 1:nRuns
     %Add some noise
-    WBinputN = WBnoise(WBinput(ss).(namesP{p}),'high');
+    WBinputN = WBnoise(WBinput(ss).(namesP{p}),'low');
     
     %Linear regresion
         swe	    = WBinputN.(glacier)(:,1);
@@ -180,19 +180,19 @@ for ss = 8:length(pWB.(namesP{p}).(glacier))
         ElevationSyn.(namesP{p}).(glacier)(ss,mc) = MLR.(glacier)(2);
         
         %Predict
-%         sweMLR.(glacier) = repmat(MLR.(glacier)(1), options.mapsize(g,:));
-%         mlrCoeff = MLR.(glacier)(2:end);    topoCoeff = fieldnames(topo_full.G4);
-%             %multiply coeffs and add them
-%         for n = 1:length(mlrCoeff)
-%             param               = topoCoeff{n};
-%             sweT                = topo_full.(glacier).(param)*mlrCoeff(n);
-%             sweMLR.(glacier)    = sweMLR.(glacier) + sweT;
-%         end
-%             %Set min to 0
-%         sweMLR.(glacier)(sweMLR.(glacier)<0) = 0;
-%         
-%         SynObs_High.(namesP{p}).(glacier)(ss,mc) = nanmean(sweMLR.(glacier)(:));
-%         
+        sweMLR.(glacier) = repmat(MLR.(glacier)(1), options.mapsize(g,:));
+        mlrCoeff = MLR.(glacier)(2:end);    topoCoeff = fieldnames(topo_full.G4);
+            %multiply coeffs and add them
+        for n = 1:length(mlrCoeff)
+            param               = topoCoeff{n};
+            sweT                = topo_full.(glacier).(param)*mlrCoeff(n);
+            sweMLR.(glacier)    = sweMLR.(glacier) + sweT;
+        end
+            %Set min to 0
+        sweMLR.(glacier)(sweMLR.(glacier)<0) = 0;
+        
+        SynObs_Low.(namesP{p}).(glacier)(ss,mc) = nanmean(sweMLR.(glacier)(:));
+        
 %         if ss == 40;
 %         fullSynObs_High.(namesP{p})(ss).(glacier)(:,:,mc) = sweMLR.(glacier);
 %         end

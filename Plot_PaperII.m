@@ -24,11 +24,10 @@ end
     clear
 load Patterns.mat 
 load Full.mat fullLR 
-%load TopoSWE.mat 
 run OPTIONS
 
     namesP = fieldnames(SynObs_High);  order = [2 3 1 4 5 7]; namesP = namesP(order);
-    N1 = {'Midline',''}; N2 = {'Midline &','Transverse'}; N3 = {'Circle',''};
+    N1 = {'Centreline',''}; N2 = {'Centreline &','Transverse'}; N3 = {'Circle',''};
     N4 = {'Hourglass',''}; N5 = {'Hourglass','& Circle'}; N6 = {'Random',''};
     namesPfull = [N1; N2; N3; N4;N5;N6];
     pUTM.Random.G2(:,1) = []; pUTM.Random.G4(:,1) = []; pUTM.Random.G13(:,1) = [];   
@@ -175,9 +174,7 @@ meanWB  = nanmean(Ftemp(8:end,:),2);
 stdWB   = nanstd(Ftemp(8:end,:),[],2);
 
 axes(ha(n))
-%plot(numPoints,meanWB,'LineWidth',0.5,'Color',C(p,:)); hold on
-SS = size(DataObs_RMSEeven.(namesP{p}).(glacier),1)-7;
-plot(numPoints(1:SS),DataObs_RMSEeven.(namesP{p}).(glacier)(8:end,:),'LineWidth',0.5,'Color',C(p,:)); hold on
+plot(numPoints,meanWB,'LineWidth',0.5,'Color',C(p,:)); hold on
     upper = meanWB + stdWB;
     lower = meanWB - stdWB;
 fill([numPoints flip(numPoints)],[upper',flip(lower')],...
@@ -189,6 +186,16 @@ fill([numPoints flip(numPoints)],[upper',flip(lower')],...
         estGrid     = diag(sampledtemp);
      RMSEfull = sqrt(mean((estGrid-realGrid.(glacier)(:,1)).^2));
 
+    %Smooth regularily spaced data 
+    smoothSize = 7;
+    data = DataObs_RMSEeven.(namesP{p}).(glacier)(8:end);
+    SS = numPoints(1:size(data,1));
+        M = zeros(smoothSize, length(data)-smoothSize+1);
+    for h = 1:smoothSize;  M(h,:) = data(h:end-(smoothSize-h));  end
+    T = mean(M);    
+    plot(SS((h-1)/2:end-(h-1)/2-1),T,'LineWidth',0.7,'Color','k'); hold on    
+     
+    %Smooth full data 
     smoothSize = 7;
         M = zeros(smoothSize, length(meanWB)-smoothSize+1);
     for h = 1:smoothSize;  M(h,:) = meanWB(h:end-(smoothSize-h));  end
@@ -253,13 +260,13 @@ end
     
 %% Figure 4 - Relative uncertainty
     %clear
-load Patterns.mat 
+%load Patterns.mat 
 load Full.mat fullLR
 run OPTIONS
 
     namesP = fieldnames(DataObs_High);  order = [2 3 1 4 5 6]; namesP = namesP(order);
-    N1 = {'Midline',''}; N2 = {'Mid &','Transverse'}; N3 = {'Circle',''};
-    N4 = {'Hourglass',''}; N5 = {'Hourglass','& Circle'}; N6 = {'Safe',''};
+    N1 = {'Centreline',''}; N2 = {'Centreline &','Transverse'}; N3 = {'Circle',''};
+    N4 = {'Hourglass',''}; N5 = {'Hourglass','& Circle'}; N6 = {'Random',''};
     namesPfull = [N1; N2; N3; N4;N5;N6];
 
 
