@@ -168,7 +168,7 @@ for ss = 8:length(pWB.(namesP{p}).(glacier))
     
     for mc = 1:nRuns
     %Add some noise
-    WBinputN = WBnoise(WBinput(ss).(namesP{p}),'low');
+    WBinputN = WBnoise(WBinput(ss).(namesP{p}),'high');
     
     %Linear regresion
         swe	    = WBinputN.(glacier)(:,1);
@@ -191,11 +191,11 @@ for ss = 8:length(pWB.(namesP{p}).(glacier))
             %Set min to 0
         sweMLR.(glacier)(sweMLR.(glacier)<0) = 0;
         
-        SynObs_Low.(namesP{p}).(glacier)(ss,mc) = nanmean(sweMLR.(glacier)(:));
+        SynObs_High.(namesP{p}).(glacier)(ss,mc) = nanmean(sweMLR.(glacier)(:));
         
-%         if ss == 40;
-%         fullSynObs_High.(namesP{p})(ss).(glacier)(:,:,mc) = sweMLR.(glacier);
-%         end
+        if ss == 40;
+        fullSynObs_High.(namesP{p})(ss).(glacier)(:,:,mc) = sweMLR.(glacier);
+        end
     end
 end
 end
