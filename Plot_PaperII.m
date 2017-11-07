@@ -21,8 +21,9 @@ PlotTopoParameter_DD(fullLR.S2, 'WB (m w.e.)', patternFULL, patternSUB, 'black')
 end
 
 %% Figure 3 - Synthetic data WB 
-    clear
-load Patterns.mat 
+%    clear
+%load Patterns.mat 
+load Patterns.mat pUTM
 load Full.mat fullLR 
 run OPTIONS
 
@@ -109,7 +110,7 @@ fill([numPoints flip(numPoints)],[upper',flip(lower')],...
     if n==15; xlabel('                            Sample size'); end
     if g==1 || g == 2; set(gca,'XTickLabel',[]); end
 ylim([0.2 1.1])
-xlim([7 45])
+xlim([min(numPoints)-1 45])
 n = n+1;
 
 ax = get(gca,'Position');
@@ -143,7 +144,7 @@ run OPTIONS
     N1 = {'Midline',''}; N2 = {'Mid &','Transverse'}; N3 = {'Circle',''};
     N4 = {'Hourglass',''}; N5 = {'Hourglass','& Circle'}; N6 = {'Random',''}; 
     namesPfull = [N1; N2; N3; N4;N5;N6];
-    %pUTM.Random.G2(:,1) = []; pUTM.Random.G4(:,1) = []; pUTM.Random.G13(:,1) = [];   
+    pUTM.Random.G2(:,1) = []; pUTM.Random.G4(:,1) = []; pUTM.Random.G13(:,1) = [];   
     C =[     0    0.4470    0.7410;...
         0.8500    0.3250    0.0980;...
         0.9290    0.6940    0.1250;...
@@ -294,7 +295,7 @@ axes(ha(n));
 h(n) = imagesc(RMSEdist); hold on
     colormap(cbrewer('seq', 'BuPu', 100,'PCHIP')); set(h(n),'alphadata',~isnan(RMSEdist));
     axis square; axis off;
-    caxis([0 1])
+    caxis([0 0.5])
     
 %Plot sampling locations
     E = (UTMinput(SizeToView).(namesP{p}).(glacier)(:,1)-min(options.rig.(glacier)(:,1)))/40;
@@ -314,18 +315,24 @@ end
 end
 
 	saveFIG_HP('RelativeUncertainty_SynObs',2,12)
+    
+    
 %% Figure NaN - Elevation Coefficient
 %    clear
-load Patterns.mat
+load Patterns.mat pUTM
 load Full.mat fullLR 
 load TopoSWE.mat 
 run OPTIONS
 
 %%%%%
-Elevation = ElevationReal;
-%Elevation = ElevationSyn;
+% Elevation = ElevationReal;    saveName = 'ElevationCoeffReal';    
+ Elevation = ElevationSyn;     saveName = 'ElevationCoeffSyn';    
+% Elevation = CentreSyn;        saveName = 'CentreCoeffSyn';
+% Elevation = SlopeSyn;         saveName = 'SlopeCoeffSyn';
+% Elevation = CurveSyn;         saveName = 'CurveCoeffSyn';
+% Elevation = WindSyn;          saveName = 'WindCoeffSyn';
 
-    namesP = fieldnames(Elevation);  order = [2 3 1 4 5 6]; namesP = namesP(order);
+    namesP = fieldnames(Elevation);  order = [2 3 1 4 5 7]; namesP = namesP(order);
     N1 = {'Midline',''}; N2 = {'Midline &','Transverse'}; N3 = {'Circle',''};
     N4 = {'Hourglass',''}; N5 = {'Hourglass','& Circle'}; N6 = {'Random',''};
     namesPfull = [N1; N2; N3; N4;N5;N6];
@@ -421,5 +428,4 @@ plot(pUTM.(namesP{p}).(glacier)(pInd,1),pUTM.(namesP{p}).(glacier)(pInd,2),'k.',
 end
 end 
 
-	%saveFIG_HP('SyntheticObsWB',2,12)
-    saveFIG_HP('ElevationCoeff',2,12)
+    saveFIG_HP(saveName,2,12)

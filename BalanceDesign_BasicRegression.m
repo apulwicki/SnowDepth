@@ -149,17 +149,28 @@ Gsplit = [1, 1950, 3235, length(cells)]; Gsplit = flip(Gsplit);
 
     
 %% THEORETICAL - All n for WB
+load Patterns.mat
 load TopoSWE.mat topo_full
     namesP = fieldnames(pWB);
     %namesP = {'hourglass'};
 nRuns = 100;
 %for i = 1:100;
 
+
+
 for p = 1:length(namesP)
 for g = 1:3 
     glacier = options.glacier{g};
 
-for ss = 8:length(pWB.(namesP{p}).(glacier))
+    %%%%%%%
+%     pTOPO.(namesP{p}).(glacier) = rmfield(pTOPO.(namesP{p}).(glacier),'centreD');
+%     pTOPO.(namesP{p}).(glacier) = rmfield(pTOPO.(namesP{p}).(glacier),'aspect');
+%     pTOPO.(namesP{p}).(glacier) = rmfield(pTOPO.(namesP{p}).(glacier),'northness');
+%     pTOPO.(namesP{p}).(glacier) = rmfield(pTOPO.(namesP{p}).(glacier),'slope');
+%     pTOPO.(namesP{p}).(glacier) = rmfield(pTOPO.(namesP{p}).(glacier),'curvature');
+%     pTOPO.(namesP{p}).(glacier) = rmfield(pTOPO.(namesP{p}).(glacier),'Sx');
+
+for ss = 8:50%length(pWB.(namesP{p}).(glacier))
 
    [WBinput(ss), TOPOinput(ss), UTMinput(ss)] = SubsetSampleSize( pWB, pTOPO, pUTM, ss );
 
@@ -177,7 +188,11 @@ for ss = 8:length(pWB.(namesP{p}).(glacier))
 
         % Get coefficients
         MLR.(glacier)            = regress(swe, X);
-        ElevationSyn.(namesP{p}).(glacier)(ss,mc) = MLR.(glacier)(2);
+%             ElevationSyn.(namesP{p}).(glacier)(ss,mc) = MLR.(glacier)(2);
+%             CentreSyn.(namesP{p}).(glacier)(ss,mc) = MLR.(glacier)(3);
+%             WindSyn.(namesP{p}).(glacier)(ss,mc) = MLR.(glacier)(8);
+%             SlopeSyn.(namesP{p}).(glacier)(ss,mc) = MLR.(glacier)(5);
+%             CurveSyn.(namesP{p}).(glacier)(ss,mc) = MLR.(glacier)(7);
         
         %Predict
         sweMLR.(glacier) = repmat(MLR.(glacier)(1), options.mapsize(g,:));
@@ -266,7 +281,7 @@ for g = 1:3;    glacier = options.glacier{g};
         MLR.(glacier)            = regress(swe, X);
         ElevationReal.(type).(glacier)(n,mc) = MLR.(glacier)(2);
 
-        %Predict
+%         %Predict
 %         sweMLR.(glacier) = repmat(MLR.(glacier)(1), options.mapsize(g,:));
 %         mlrCoeff = MLR.(glacier)(2:end);    topoCoeff = fieldnames(topo_full.G4);
 %             %multiply coeffs and add them
@@ -278,13 +293,13 @@ for g = 1:3;    glacier = options.glacier{g};
 %             %Set min to 0
 %         sweMLR.(glacier)(sweMLR.(glacier)<0) = 0;
 %         
-%         %DataObs.(type).(glacier)(n,mc) = nanmean(sweMLR.(glacier)(:));
+%         DataObs.(type).(glacier)(n,mc) = nanmean(sweMLR.(glacier)(:));
 %         
-%         %RMSE
+        %RMSE
 %         sampledtemp = sweMLR.(glacier)(options.ENgrid.(glacier)(:,2),options.ENgrid.(glacier)(:,1));
 %         estGrid     = diag(sampledtemp);
-% 
-%         DataObs_RMSEeven.(type).(glacier)(n,mc) = sqrt(mean((estGrid-realGrid.(glacier)(:,1)).^2));
+
+        %DataObs_RMSEeven.(type).(glacier)(n,mc) = sqrt(mean((estGrid-realGrid.(glacier)(:,1)).^2));
         
     end
         
