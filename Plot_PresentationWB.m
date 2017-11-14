@@ -160,20 +160,21 @@ p(g) = fill(x,y,options.RGB(g,:),'FaceAlpha',0.2, 'EdgeColor', 'none'); hold on
 end
     ylim([0 ylimmax(o)]); 
     %legend
-    if g == 3
-        [L, icons] = legend(p,options.GName,'location','northeast'); 
-        set(L, 'Position', [legendX(o), legendY(o), 0.01, 0.01])
-            L.Box='off';
-            for i = length(icons)/2+1:length(icons)
-            icons(i).Vertices(3:4,1) = icons(i).Vertices(3:4,1)/2;
-            end
-            for i = 1:length(icons)/2
-            icons(i).Position(1) = icons(i).Position(1)/2;
-            end
-    end
+%     if g == 3
+%         [L, icons] = legend(p,options.GName,'location','northeast'); 
+%         set(L, 'Position', [legendX(o), legendY(o), 0.01, 0.01])
+%             L.Box='off';
+%             for i = length(icons)/2+1:length(icons)
+%             icons(i).Vertices(3:4,1) = icons(i).Vertices(3:4,1)/2;
+%             end
+%             for i = 1:length(icons)/2
+%             icons(i).Position(1) = icons(i).Position(1)/2;
+%             end
+%     end
 
 end
-    xlim([min(x) 1])
+    xlim([0.25 0.75])
+
     title(t);
 end
 
@@ -194,19 +195,19 @@ ProbDenLR.(glacier) = fitdist(TLR.(glacier)(:),'Normal');
     std(yLR)
 subplot(1,3,3) 
 p(g) = fill(x,yLR,options.RGB(g,:),'FaceAlpha',0.8, 'EdgeColor', 'none'); hold on
-    if g == 3
-        [L1, icons1] = legend(p,options.GName,'location','northeast'); 
-        set(L1, 'Position', [0.88, 0.78, 0.01, 0.01])
-            L1.Box='off';
-            for i = length(icons1)/2+1:length(icons1)
-            icons1(i).Vertices(3:4,1) = icons1(i).Vertices(3:4,1)/2;
-            end
-            for i = 1:length(icons1)/2
-            icons1(i).Position(1) = icons1(i).Position(1)/2;
-            end
-    end
+%     if g == 3
+%         [L1, icons1] = legend(p,options.GName,'location','northeast'); 
+%         set(L1, 'Position', [0.88, 0.78, 0.01, 0.01])
+%             L1.Box='off';
+%             for i = length(icons1)/2+1:length(icons1)
+%             icons1(i).Vertices(3:4,1) = icons1(i).Vertices(3:4,1)/2;
+%             end
+%             for i = 1:length(icons1)/2
+%             icons1(i).Position(1) = icons1(i).Position(1)/2;
+%             end
+%     end
         ylim([0 15])
-        xlim([min(x) 1])
+        xlim([0.25 0.75])
     title([{'Gridscale & Density & Interpolation'}])
     xlabel('Glacier-wide WB (m w.e.)'); 
 
