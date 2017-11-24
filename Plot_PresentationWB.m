@@ -148,13 +148,14 @@ for o = 1:2
     elseif  o == 2; data = varB.LR.interp;  t = 'Interpolation';   
     end
 for g = 1:3;     glacier = options.glacier{g};
-for d = 1:8;     den = options.DenOpt{d};
+for d = 1:8;     
+    den = options.DenOpt{d};
     
 ProbDen.(den).(glacier) = fitdist(data.(den).(glacier)(:),'Normal');
     y = pdf(ProbDen.(den).(glacier),x);  
     
 subplot(1,3,o) 
-p(g) = fill(x,y,options.RGB(g,:),'FaceAlpha',0.2, 'EdgeColor', 'none'); hold on
+p(g) = fill(x,y,options.RGB(g,:),'FaceAlpha',0.4, 'EdgeColor', 'none'); hold on
     if      o == 1;         ylabel({'Linear regression','probablity density'});    end
     xlabel('Glacier-wide WB (m w.e.)'); 
 end
@@ -208,13 +209,28 @@ p(g) = fill(x,yLR,options.RGB(g,:),'FaceAlpha',0.8, 'EdgeColor', 'none'); hold o
 %     end
         ylim([0 15])
         xlim([0.25 0.75])
-    title([{'Gridscale & Density & Interpolation'}])
+    title([{'Depth & Density & Interpolation'}])
     xlabel('Glacier-wide WB (m w.e.)'); 
 
 end
 
 
 saveFIG('WSMBDistLR',16)
+
+% figure(2); clf
+% for g = 1:3;     glacier = options.glacier{g};
+% ProbDenLR.(glacier) = fitdist(TLR.(glacier)(:),'Normal');
+%     yLR     = pdf(ProbDenLR.(glacier),x);   %yLR = yLR/Pmax(1);  
+%     std(yLR)
+% subplot(1,3,g) 
+% p(g) = fill(x,yLR,options.RGB(g,:),'FaceAlpha',0.8, 'EdgeColor', 'none'); hold on
+%         ylim([0 15])
+%         xlim([0.25 0.75])
+%         xlabel('');         ylabel(''); 
+%         %set(gca,'xticklabel',{[]}) 
+%         set(gca,'yticklabel',{[]}) 
+% end
+% saveFIG('WSMBDisttemp',16)
 
 %% WSMB Distribution - total spatial variability 
 
@@ -269,8 +285,9 @@ alex(:,6) = [1.30;1.59;...
     
 figure(2); clf
     pt = plot(Fat);    set(pt,'Color','k'); set(pt, 'LineWidth',2); hold on
-L(2) = plot(Da(1:2),alex(1:2,6),'o', 'MarkerSize',Msize, 'Color',[234, 140, 46]/255, 'MarkerFaceColor',[234, 140, 46]/255);
-L(3) = errorbar(Da(3:5),alex(3:5,6),alexerr,'o', 'MarkerSize',Msize, 'Color',[234, 140, 46]/255);
+L(2) = plot(Da(1:2),alex(1:2,6),'^', 'MarkerSize',Msize, 'Color',[234, 140, 46]/255, 'MarkerFaceColor',[234, 140, 46]/255);
+L(3) = errorbar(Da(3:5),alex(3:5,6),alexerr,'o', 'MarkerSize',Msize-6, 'Color',[24, 145, 26]/255, 'MarkerFaceColor',[24, 145, 26]/255);
+L(3).LineWidth = 2;
 L(1) = plot(Dt,taylor(:,6),'s', 'MarkerSize',Msize, 'Color',[68, 181, 226]/255, 'MarkerFaceColor',[68, 181, 226]/255); hold on
     xlim([min(Dat), max(Dat)+1]); 
     grid on
@@ -292,3 +309,33 @@ L(1) = plot(Dt,taylor(:,6),'s', 'MarkerSize',Msize, 'Color',[68, 181, 226]/255, 
         
 saveFIG('AccumGradPres',22)
 
+%% G13 basic sampling
+
+load Patterns.mat
+clf
+lw = 6;
+Eg = options.rig.G13(:,1); Ng = options.rig.G13(:,2); 
+plot(Eg(1:304),Ng(1:304),'k','LineWidth',lw); hold on
+plot(Eg(305:330),Ng(305:330),'k','LineWidth',lw);
+plot(Eg(331:356),Ng(331:356),'k','LineWidth',lw);
+plot(Eg(357:end),Ng(357:end),'k','LineWidth',lw);
+plot(pUTM.Centreline.G13(1:20:120,1),pUTM.Centreline.G13(1:20:120,2),'.','MarkerSize',70,'Color',[45, 150, 48]/255) %summer
+%plot(pUTM.Centreline.G13(1:20:120,1),pUTM.Centreline.G13(1:20:120,2),'.','MarkerSize',70,'Color',[69 129 142]/255) %winter
+axis off
+axis square
+
+saveFIG('G13TypicalS',22)
+
+
+
+clf; load('Full.mat')
+data = fullLR.S2.G13;
+h = imagesc(data); hold on
+set(h,'alphadata',~isnan(data));
+ C = cbrewer('div','RdBu',40);
+ %colormap(C);
+ colormap(C(25:40,:));
+%c = colorbar;   
+axis square
+axis off
+saveFIG('G13TypicalWB',22)
