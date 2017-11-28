@@ -251,7 +251,7 @@ for i = 1:3 %go through each glacier
     z = pulldata(SD,'all',glacier,'all','all',1,'fat'); % pull transect data  
 
    data = z(5).depth(:,1:4);
-   data = data*mean(cell2mat(Density.snowpit(:,2)))/1000; %SWE conversion
+   data = data*mean(cell2mat(Density.snowpit(:,2)))/1000/100; %SWE conversion
    data = (data - repmat(nanmean(data,2),1,4));%./repmat(nanmean(data,2),1,4)*100;%./repmat(nanstd(data, [], 2),1,4);
          display([glacier,' 2 sigma ', num2str(2*nanstd(data(:)))]);
         %chi2gof(data(:))
@@ -259,9 +259,9 @@ for i = 1:3 %go through each glacier
    
    
    if i==1;     bins = round(sqrt(length(SWEzz(i).swe)));   end
-   edges   = linspace(-5,5,bins);
+   edges   = linspace(-0.05,0.05,bins);
    N       =  histcounts(data,edges);
-   plot([-5 (edges(:,1:end-1)+edges(:,2:end))/2 5],[0 N/sum(N) 0],...
+   plot([min(edges) (edges(:,1:end-1)+edges(:,2:end))/2 max(edges)],[0 N/sum(N) 0],...
        'Color',options.RGB(i,:),'LineWidth',3); hold on 
 
 stdtemp(i).swe = nanstd(z(5).depth(:,1:4), [], 2)./nanmean(z(5).depth(:,1:4),2)*100;

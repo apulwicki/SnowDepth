@@ -51,8 +51,8 @@ for opt = 2:9
 end
     clear filename modelled opt type fig glacier g 
 %% Modelled SWE Difference as %
-% modelled = sweMLR;
-% type = 'MLR';
+modelled = sweMLR;
+type = 'MLR';
 modelled = sweBMS;
 type = 'BMS';
 
@@ -66,18 +66,11 @@ for g = 1:3
 
 minSWE.(glacier)  = nanmin(stackSWE.(glacier),[],3);
 maxSWE.(glacier)  = nanmax(stackSWE.(glacier),[],3);
-    hereNan = isnan(sweMLR(2).(glacier));
-    minSWE.(glacier)(hereNan) = NaN;    maxSWE.(glacier)(hereNan) = NaN;   meanSWE.(glacier)(hereNan) = NaN; 
 
 diffSWE.(glacier) = maxSWE.(glacier)-minSWE.(glacier);
-    diffSWE.(glacier) = [nan(2,size(diffSWE.(glacier),2));diffSWE.(glacier);nan(2,size(diffSWE.(glacier),2))];
-    diffSWE.(glacier) = [nan(size(diffSWE.(glacier),1),2),diffSWE.(glacier),nan(size(diffSWE.(glacier),1),2)];
 diffSWE_p.(glacier) = (maxSWE.(glacier)-minSWE.(glacier))./minSWE.(glacier)*100;
     diffSWE_p.(glacier)(minSWE.(glacier)==0) = 0;    
     diffSWE_p.(glacier)(diffSWE_p.(glacier)>70) = 70;
-    diffSWE_p.(glacier) = [nan(2,size(diffSWE_p.(glacier),2));diffSWE_p.(glacier);nan(2,size(diffSWE_p.(glacier),2))];
-    diffSWE_p.(glacier) = [nan(size(diffSWE_p.(glacier),1),2),diffSWE_p.(glacier),nan(size(diffSWE_p.(glacier),1),2)];
-
 end
 diffSWE.rig = options.rig;   diffSWE_p.rig = options.rig; 
 
