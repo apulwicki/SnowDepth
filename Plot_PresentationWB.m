@@ -232,6 +232,43 @@ saveFIG('WSMBDistLR',16)
 % end
 % saveFIG('WSMBDisttemp',16)
 
+
+
+
+%% WSMB Distribution - LR sources of var as 4 plots
+
+%clear; load varWSMB.mat varB 
+run OPTIONS.m
+
+ylimmax = [50, 20, 5, 50, 5];
+legendX = [0.32, 0.60, 0, 0.32, 0.60];
+legendY = [0.78, 0.78, 0, 0.31, 0.31];
+
+x = 0:0.001:1;
+figure(1); clf;
+sigma_rho   = [0.86 1.90 2.13 2.90;...
+               1.80 3.37 3.09 4.90;...
+               1.12 1.68 2.80 3.2]*10e-3;
+mean_rho    = [0.59 0.58 0.38];
+ t = {'Snow depth';'Density estimation';...
+      'Interpolation';'All'};
+for g = 1:3;     glacier = options.glacier{g};
+for o = 1:4    
+    y = pdf('Normal',x,mean_rho(g),sigma_rho(g,o));  
+    
+subplot(2,2,o) 
+p(g) = fill(x,y,options.RGB(g,:),'FaceAlpha',0.8, 'EdgeColor', 'none'); hold on
+    if      o == 1 || o == 3;         ylabel({'Linear regression','probablity density'});    end
+    if      o >= 3; xlabel('Glacier-wide WB (m w.e.)'); end
+    %ylim([0 ylimmax(o)]); 
+    xlim([0.25 0.75])
+    title(t(o));
+end
+end
+
+saveFIG('WSMBDistLR_4',24)
+
+
 %% WSMB Distribution - total spatial variability 
 
 clear; load varWSMB.mat D* options
