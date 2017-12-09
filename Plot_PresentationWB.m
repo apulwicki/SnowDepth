@@ -1,5 +1,5 @@
 %% Measurement - Depth Boxplot and SP vs FS
-    clear; close all
+    clear; %close all
 load TopoSWE.mat allDepth Density
 run OPTIONS 
 
@@ -100,10 +100,33 @@ saveFIG(['LRobservedVSestimated_',den],20)
 %% Interp Method - Beta coeffs boxplot
     
     clear
-load Full.mat fullLR 
-load TestInterp.mat SigBetaDen
+load Full.mat 
 run OPTIONS.m
+load TopoSWE.mat 
 
+% Are fullLR beta values significant?
+for d = 1:8
+    den = options.DenOpt{d};
+[ dataSWE.(den), TOPOdata ] = ObsInCell( fullSWE.(den).input, topo_sampled);
+
+for g = 1:3;        glacier = options.glacier{g};
+    mu      = fullLR.(den).coeff{[8,1:7],g};
+
+ %Get Beta dist
+    X       = struct2table(TOPOdata.(glacier)); X = X{:,:}; X = [ones(length(X),1) X];
+    Y       = dataSWE.(den).(glacier)(:,1);
+    
+    %VarCov matrix from betas
+    sigmaSq = sum((Y-X*mu).^2)/(size(X,1)-size(X,2));
+    VarCov  = sigmaSq*(chol(X'*X)\inv(chol(X'*X))');
+    StdErr  = sqrt(diag(VarCov));     
+    sig     = (abs(mu)-StdErr)>0;
+    SigBeta.(den).(glacier)  = [mu, StdErr,sig];
+        SigBetaDen.(glacier)(:,d) = sig;
+end
+end
+
+run OPTIONS.m
 %Get betas for chosen density option
 d = 2;
 den = options.DenOpt{d};
@@ -117,14 +140,17 @@ end
 figure(8); clf        
 B = bar(betas(incB,:));
         for g = 1:3;    glacier = options.glacier{g};
-    B(g).FaceColor = options.RGB(g,:);
-    B(g).EdgeColor = 'none';
+    B(g).FaceColor  = options.RGB(g,:);
+    B(g).EdgeColor  = 'none';
+    B(g).BarWidth   = 0.9;
         end
     legend(options.GName); % Add a legend
     ylabel('Regression coefficient'); hold on 
-    F = gca; F.XTickLabel = {'Elevation','Centre dist.','Slope',...
-                             'Curvature','Wind redist.'};
-             F.XTickLabelRotation = 50;
+    F = gca; 
+%     F.XTickLabel = {'Elevation','Centre dist.','Slope',...
+%                              'Curvature','Wind redist.'};
+%              F.XTickLabelRotation = 50;
+    F.XTickLabel = {'\itz','\itd_C','\itm','\kappa','\itSx'};      
         ylim([-0.05 0.11])
         for i = 1:4
         line([i+0.5 i+0.5],ylim,'Color',[0 0 0],'LineStyle','--','LineWidth', 0.5)
@@ -266,7 +292,7 @@ p(g) = fill(x,y,options.RGB(g,:),'FaceAlpha',0.8, 'EdgeColor', 'none'); hold on
 end
 end
 
-saveFIG('WSMBDistLR_4',24)
+%saveFIG('WSMBDistLR_4',24)
 
 
 %% WSMB Distribution - total spatial variability 
