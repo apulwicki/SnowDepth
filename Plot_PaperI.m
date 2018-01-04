@@ -77,10 +77,10 @@ load TopoSWE.mat SWEzz
                     162,135,2;
                     242,202,2;
                     254,234,134;
-                    89,51,91;
-                    132,76,135;
-                    171,111,174;
-                    202,164,204]/255;
+                    46,27,49
+                    121, 74, 130;
+                    214, 190, 218;
+                    245, 239, 246]/255;
     STDzz = NaN(4,3);
 figure(5); clf
 c = 1;
@@ -97,7 +97,7 @@ c = 1;
                 if j ==1;   bins    = 20;   %round(sqrt(length(SWEzz(g).swe)));
                             edges   = linspace(-0.15,0.15,bins); end
                             N       = histcounts(ZZdata,edges);   
-            fill([0 (edges(:,1:end-1)+edges(:,2:end))/2 0],[0 N/sum(N) 0],Fcolor(c,:),...
+            fill([min(edges) (edges(:,1:end-1)+edges(:,2:end))/2 max(edges)],[0 N/sum(N) 0],Fcolor(c,:),...
                   'EdgeColor','none','FaceAlpha',0.75); hold on 
             xlabel('WB (m w.e.)');     ylabel('Probability')
             grid on
@@ -107,9 +107,10 @@ c = 1;
             c = c+1;
         end
             [L,icons] = legend(labels(1:length(zz),g));
-                X = [0.29, 0.57, 0.84];
-                Y = [0.73, 0.73, 0.67];
+                X = [0.30, 0.58, 0.85];
+                Y = [0.63, 0.63, 0.615];
             L.Position(1:2) = [X(g), Y(g)];
+            L.Position(3:4) = [0.05 0.3];
                 L.Box='off';
                 for i = length(icons)/2+1:length(icons)
                 icons(i).Vertices(3:4,1) = icons(i).Vertices(3:4,1)/2;
@@ -120,16 +121,16 @@ c = 1;
     end
             % ZZ maps
             Y = 0.6;    S = 0.32;
-             ZZmap = imread('/home/glaciology1/Documents/MastersDocuments/Paper I/ZZMapG4.jpeg');
-             %ZZmap = imread('/Users/Alexandra/Documents/SFU/MastersDocuments/Paper I/ZZMapG4.jpeg');
+             %ZZmap = imread('/home/glaciology1/Documents/MastersDocuments/Paper I/ZZMapG4.jpeg');
+             ZZmap = imread('/Users/Alexandra/Documents/SFU/MastersDocuments/Paper I/ZZMapG4.jpeg');
             axes('position',[0.062,Y+0.09,S*0.7,S*0.7]); 
             imshow(ZZmap);            axis off; 
-             ZZmap = imread('/home/glaciology1/Documents/MastersDocuments/Paper I/ZZMapG2.jpeg');
-             %ZZmap = imread('/Users/Alexandra/Documents/SFU/MastersDocuments/Paper I/ZZMapG2.jpeg');
+             %ZZmap = imread('/home/glaciology1/Documents/MastersDocuments/Paper I/ZZMapG2.jpeg');
+             ZZmap = imread('/Users/Alexandra/Documents/SFU/MastersDocuments/Paper I/ZZMapG2.jpeg');
             axes('position',[0.31,Y,S,S]); 
             imshow(ZZmap);            axis off;
-             ZZmap = imread('/home/glaciology1/Documents/MastersDocuments/Paper I/ZZMapG13.jpeg');
-             %ZZmap = imread('/Users/Alexandra/Documents/SFU/MastersDocuments/Paper I/ZZMapG13.jpeg');
+             %ZZmap = imread('/home/glaciology1/Documents/MastersDocuments/Paper I/ZZMapG13.jpeg');
+             ZZmap = imread('/Users/Alexandra/Documents/SFU/MastersDocuments/Paper I/ZZMapG13.jpeg');
             axes('position',[0.565,Y-0.025,S*1.1,S*1.1]); 
             imshow(ZZmap);            axis off;
 
@@ -201,8 +202,9 @@ saveFIG_IGS(['observedVSestimated_',den],2,10)
 %% Interp Method - Beta coeffs boxplot
     
     clear
-load Full.mat fullLR options
-load TestInterp.mat SigBetaDen
+load Full.mat fullLR 
+load LR_SK_RK.mat SigBetaDen
+OPTIONS
 
 %Get betas for all density options
 betas = zeros(8,7,3);
@@ -226,8 +228,9 @@ aboxplot(BETAS,'labels',options.topoVars(incB), ...
          'Colormap', options.RGB, 'OutlierMarkerSize',8,...
          'WidthS',1.9,'WidthE',1.3); % Advanced box plot
         L = legend('G4','G2','G13'); % Add a legend
-            set(L, 'Position', [0.75, 0.785, 0.05, 0.05])
+            set(L, 'Position', [0.7, 0.785, 0.05, 0.05])
 
+            xlabel('Topographic parameters')
             ylabel('Regression coefficient'); hold on 
         
         ylim([-0.06 0.12])
@@ -236,7 +239,7 @@ aboxplot(BETAS,'labels',options.topoVars(incB), ...
         line([i+0.5 i+0.5],ylim,'Color',[0 0 0],'LineStyle','--','LineWidth', 0.5)
         end
  
-saveFIG_IGS('BetaCoeffs',1,8)
+saveFIG_IGS('BetaCoeffs',1,9)
 
 %% WSMB Distribution - LR & SK sources of var
 

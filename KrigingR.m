@@ -23,26 +23,27 @@ cd Kriging
     save('residuals.mat','res','utm','sizexy')
 
     %Run Dice Kriging in R
-    !R CMD BATCH DiceKriging.R
-    %!/usr/local/bin/R CMD BATCH DiceKriging.R
+    %!R CMD BATCH DiceKriging.R
+    !/usr/local/bin/R CMD BATCH DiceKriging.R
 
     % load kriged data
     load kriging.mat
     
      %Model params
-    dataout.Model   =  model;
+    dataout.Model   = model;
     dataout.LOO     = LOO.mean;
 
      %Assign to structure
     dataout.pred    = flipud(pred);
     dataout.lower95 = flipud(lower95);
     dataout.upper95 = flipud(upper95);
+    dataout.std     = flipud(STD);
         
      %Set glacier boundries
     dataout.pred(options.mapNaN.(glacier))    = NaN;
     dataout.lower95(options.mapNaN.(glacier)) = NaN;
     dataout.upper95(options.mapNaN.(glacier)) = NaN;
-        
+    dataout.std(options.mapNaN.(glacier))     = NaN;        
 cd ..
 
 end

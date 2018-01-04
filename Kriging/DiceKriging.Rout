@@ -1,7 +1,7 @@
 
-R version 3.2.3 (2015-12-10) -- "Wooden Christmas-Tree"
-Copyright (C) 2015 The R Foundation for Statistical Computing
-Platform: x86_64-pc-linux-gnu (64-bit)
+R version 3.3.1 (2016-06-21) -- "Bug in Your Hair"
+Copyright (C) 2016 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin13.4.0 (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -39,8 +39,8 @@ The following objects are masked from ‘package:base’:
 > 
 > 
 > ## Load my data ##
-> #residuals = readMat('/Users/Alexandra/Documents/SFU/Data/SnowDepth/Kriging/residuals.mat')
-> residuals = readMat('/home/glaciology1/Documents/Data/SnowDepth/Kriging/residuals.mat')
+> residuals = readMat('/Users/Alexandra/Documents/SFU/Data/SnowDepth/Kriging/residuals.mat')
+> #residuals = readMat('/home/glaciology1/Documents/Data/SnowDepth/Kriging/residuals.mat')
 > res = residuals$res
 > utm = data.frame(residuals$utm)
 > sizexy = residuals$sizexy
@@ -58,161 +58,133 @@ optimisation start
   - type :  matern5_2 
   - nugget : unknown homogenous nugget effect 
   - parameters lower bounds :  1e-10 
-  - parameters upper bounds :  9197.05 
+  - parameters upper bounds :  7318.149 
   - upper bound for alpha   :  1 
-  - best initial criterion value(s) :  577.3706 567.5364 566.1841 561.0043 556.947 
+  - best initial criterion value(s) :  516.9991 488.9858 461.4341 458.7585 456.5126 
 
 N = 2, M = 5 machine precision = 2.22045e-16
 At X0, 0 variables are exactly at the bounds
-At iterate     0  f=      -577.37  |proj g|=      0.87707
-At iterate     1  f =      -591.84  |proj g|=       0.55954
-At iterate     2  f =      -592.22  |proj g|=       0.52574
-At iterate     3  f =       -592.9  |proj g|=       0.40388
-At iterate     4  f =      -592.91  |proj g|=      0.085903
-At iterate     5  f =      -592.91  |proj g|=      0.027116
-At iterate     6  f =      -592.91  |proj g|=      0.032466
-At iterate     7  f =      -592.91  |proj g|=       0.13802
-At iterate     8  f =      -592.91  |proj g|=       0.30592
-At iterate     9  f =      -592.91  |proj g|=       0.39434
-At iterate    10  f =      -592.92  |proj g|=       0.40012
-At iterate    11  f =      -592.93  |proj g|=       0.40953
-At iterate    12  f =      -592.97  |proj g|=        0.4249
-At iterate    13  f =      -593.07  |proj g|=       0.45071
-At iterate    14  f =      -593.35  |proj g|=       0.49516
-At iterate    15  f =      -594.11  |proj g|=        0.5745
-At iterate    16  f =      -594.88  |proj g|=       0.63711
-At iterate    17  f =      -597.37  |proj g|=       0.54572
-At iterate    18  f =      -598.29  |proj g|=       0.50505
-At iterate    19  f =      -598.58  |proj g|=       0.55461
-At iterate    20  f =      -598.62  |proj g|=       0.54783
-At iterate    21  f =      -598.63  |proj g|=      0.069548
-At iterate    22  f =      -598.65  |proj g|=       0.10315
-At iterate    23  f =      -598.65  |proj g|=      0.030646
-At iterate    24  f =      -598.65  |proj g|=     0.0037833
-At iterate    25  f =      -598.65  |proj g|=    9.2076e-05
+At iterate     0  f=         -517  |proj g|=      0.15966
+At iterate     1  f =      -519.62  |proj g|=       0.10582
+At iterate     2  f =      -519.78  |proj g|=      0.092851
+At iterate     3  f =      -519.78  |proj g|=       0.15635
+At iterate     4  f =      -519.78  |proj g|=       0.02289
+At iterate     5  f =      -519.78  |proj g|=      0.051707
+At iterate     6  f =      -519.78  |proj g|=      0.092535
+At iterate     7  f =      -519.78  |proj g|=      0.092677
+At iterate     8  f =      -519.78  |proj g|=      0.092902
+At iterate     9  f =      -519.78  |proj g|=      0.093263
+At iterate    10  f =      -519.78  |proj g|=      0.093831
+At iterate    11  f =      -519.79  |proj g|=      0.094704
+At iterate    12  f =       -519.8  |proj g|=      0.096004
+At iterate    13  f =      -519.83  |proj g|=      0.097692
+At iterate    14  f =      -519.89  |proj g|=      0.099071
+At iterate    15  f =      -520.02  |proj g|=      0.097631
+At iterate    16  f =      -520.26  |proj g|=      0.085189
+At iterate    17  f =      -520.29  |proj g|=       0.92185
+At iterate    18  f =      -520.29  |proj g|=      0.094406
+At iterate    19  f =      -520.29  |proj g|=      0.001773
+At iterate    20  f =      -520.29  |proj g|=     0.0027694
 
-iterations 25
-function evaluations 31
-segments explored during Cauchy searches 27
+iterations 20
+function evaluations 25
+segments explored during Cauchy searches 21
 BFGS updates skipped 0
 active bounds at final generalized Cauchy point 0
-norm of the final projected gradient 9.20762e-05
-final function value -598.655
+norm of the final projected gradient 0.00276943
+final function value -520.29
 
-F = -598.655
-final  value -598.654508 
+F = -520.29
+final  value -520.289715 
 converged
 N = 2, M = 5 machine precision = 2.22045e-16
 At X0, 0 variables are exactly at the bounds
-At iterate     0  f=      -567.54  |proj g|=      0.77325
-At iterate     1  f =      -579.46  |proj g|=        0.5016
-At iterate     2  f =      -584.13  |proj g|=        0.3011
-At iterate     3  f =      -585.54  |proj g|=       0.20016
-At iterate     4  f =      -585.78  |proj g|=       0.15511
-At iterate     5  f =      -585.78  |proj g|=        0.4053
-At iterate     6  f =      -585.78  |proj g|=      0.012429
-At iterate     7  f =      -585.78  |proj g|=     0.0073144
+At iterate     0  f=      -488.99  |proj g|=    0.0040719
+At iterate     1  f =      -488.99  |proj g|=     0.0038464
+At iterate     2  f =      -488.99  |proj g|=             1
+At iterate     3  f =      -488.99  |proj g|=             1
 
-iterations 7
-function evaluations 11
+iterations 3
+function evaluations 6
+segments explored during Cauchy searches 4
+BFGS updates skipped 0
+active bounds at final generalized Cauchy point 0
+norm of the final projected gradient 0.999995
+final function value -488.992
+
+F = -488.992
+final  value -488.992121 
+converged
+N = 2, M = 5 machine precision = 2.22045e-16
+At X0, 0 variables are exactly at the bounds
+At iterate     0  f=      -461.43  |proj g|=     0.046758
+At iterate     1  f =      -492.26  |proj g|=      0.026746
+ys=-1.209e+02  -gs= 1.413e+01, BFGS update SKIPPED
+At iterate     2  f =       -504.4  |proj g|=     0.0071947
+At iterate     3  f =      -504.42  |proj g|=     0.0062053
+At iterate     4  f =      -504.42  |proj g|=       0.99955
+At iterate     5  f =      -504.42  |proj g|=     0.0061163
+At iterate     6  f =      -504.42  |proj g|=      0.048303
+
+iterations 6
+function evaluations 17
 segments explored during Cauchy searches 9
-BFGS updates skipped 0
-active bounds at final generalized Cauchy point 0
-norm of the final projected gradient 0.00731437
-final function value -585.784
-
-F = -585.784
-final  value -585.784187 
-converged
-N = 2, M = 5 machine precision = 2.22045e-16
-At X0, 0 variables are exactly at the bounds
-At iterate     0  f=      -566.18  |proj g|=      0.70206
-At iterate     1  f =       -575.5  |proj g|=       0.45781
-At iterate     2  f =      -583.73  |proj g|=        0.1149
-At iterate     3  f =      -583.91  |proj g|=       0.92347
-At iterate     4  f =      -583.93  |proj g|=      0.089823
-At iterate     5  f =      -583.94  |proj g|=      0.086065
-At iterate     6  f =      -583.94  |proj g|=      0.027466
-At iterate     7  f =      -583.94  |proj g|=     0.0075259
-
-iterations 7
-function evaluations 10
-segments explored during Cauchy searches 9
-BFGS updates skipped 0
-active bounds at final generalized Cauchy point 0
-norm of the final projected gradient 0.00752595
-final function value -583.935
-
-F = -583.935
-final  value -583.935186 
-converged
-N = 2, M = 5 machine precision = 2.22045e-16
-At X0, 0 variables are exactly at the bounds
-At iterate     0  f=         -561  |proj g|=      0.79501
-At iterate     1  f =      -574.32  |proj g|=       0.51185
-At iterate     2  f =      -580.46  |proj g|=       0.29092
-At iterate     3  f =      -582.68  |proj g|=       0.19311
-At iterate     4  f =      -583.83  |proj g|=       0.12842
-At iterate     5  f =      -584.12  |proj g|=      0.090857
-At iterate     6  f =      -584.12  |proj g|=       0.11947
-At iterate     7  f =      -584.12  |proj g|=     0.0075243
-At iterate     8  f =      -584.12  |proj g|=      0.045007
-At iterate     9  f =      -584.12  |proj g|=       0.43458
-At iterate    10  f =      -584.12  |proj g|=       0.91102
-At iterate    11  f =      -584.13  |proj g|=       0.91238
-At iterate    12  f =      -584.13  |proj g|=       0.91432
-At iterate    13  f =      -584.15  |proj g|=       0.91708
-At iterate    14  f =      -584.21  |proj g|=       0.92037
-At iterate    15  f =      -584.36  |proj g|=       0.92277
-At iterate    16  f =       -584.8  |proj g|=       0.91798
-At iterate    17  f =      -585.58  |proj g|=       0.89205
-At iterate    18  f =      -594.12  |proj g|=       0.72264
-At iterate    19  f =      -597.13  |proj g|=        0.6408
-At iterate    20  f =      -597.86  |proj g|=       0.59909
-At iterate    21  f =      -598.62  |proj g|=       0.55364
-At iterate    22  f =      -598.65  |proj g|=       0.55004
-At iterate    23  f =      -598.65  |proj g|=      0.022415
-At iterate    24  f =      -598.65  |proj g|=     0.0004973
-
-iterations 24
-function evaluations 45
-segments explored during Cauchy searches 27
-BFGS updates skipped 0
-active bounds at final generalized Cauchy point 0
-norm of the final projected gradient 0.000497298
-final function value -598.655
-
-F = -598.655
-final  value -598.654508 
-converged
-N = 2, M = 5 machine precision = 2.22045e-16
-At X0, 0 variables are exactly at the bounds
-At iterate     0  f=      -556.95  |proj g|=      0.64568
-At iterate     1  f =      -564.56  |proj g|=       0.41848
-At iterate     2  f =      -577.29  |proj g|=       0.03123
-ys=-1.307e+01  -gs= 1.087e+01, BFGS update SKIPPED
-At iterate     3  f =      -577.88  |proj g|=      0.020778
-At iterate     4  f =      -578.03  |proj g|=       0.98616
-At iterate     5  f =      -578.04  |proj g|=      0.015542
-At iterate     6  f =      -578.04  |proj g|=      0.014904
-At iterate     7  f =      -578.04  |proj g|=       0.08224
-At iterate     8  f =      -578.04  |proj g|=     0.0062904
-
-iterations 8
-function evaluations 16
-segments explored during Cauchy searches 12
 BFGS updates skipped 1
 active bounds at final generalized Cauchy point 0
-norm of the final projected gradient 0.00629042
-final function value -578.041
+norm of the final projected gradient 0.0483026
+final function value -504.417
 
-F = -578.041
-final  value -578.041020 
+F = -504.417
+final  value -504.417234 
+converged
+N = 2, M = 5 machine precision = 2.22045e-16
+At X0, 0 variables are exactly at the bounds
+At iterate     0  f=      -458.76  |proj g|=      0.46565
+At iterate     1  f =      -478.85  |proj g|=       0.29835
+At iterate     2  f =      -514.38  |proj g|=      0.021617
+At iterate     3  f =       -514.4  |proj g|=      0.020126
+At iterate     4  f =       -514.4  |proj g|=       0.20039
+At iterate     5  f =       -514.4  |proj g|=      0.008865
+At iterate     6  f =       -514.4  |proj g|=      0.020903
+
+iterations 6
+function evaluations 15
+segments explored during Cauchy searches 9
+BFGS updates skipped 0
+active bounds at final generalized Cauchy point 0
+norm of the final projected gradient 0.0209031
+final function value -514.4
+
+F = -514.4
+final  value -514.400238 
+converged
+N = 2, M = 5 machine precision = 2.22045e-16
+At X0, 0 variables are exactly at the bounds
+At iterate     0  f=      -456.51  |proj g|=    0.0079634
+At iterate     1  f =      -476.32  |proj g|=     0.0098001
+ys=-9.922e+01  -gs= 7.232e+00, BFGS update SKIPPED
+At iterate     2  f =      -486.21  |proj g|=             1
+At iterate     3  f =      -486.51  |proj g|=     0.0037219
+At iterate     4  f =      -486.52  |proj g|=     0.0035908
+At iterate     5  f =      -486.52  |proj g|=             1
+At iterate     6  f =      -486.52  |proj g|=     0.0034883
+At iterate     7  f =      -486.52  |proj g|=             1
+
+iterations 7
+function evaluations 19
+segments explored during Cauchy searches 9
+BFGS updates skipped 1
+active bounds at final generalized Cauchy point 0
+norm of the final projected gradient 0.999998
+final function value -486.518
+
+F = -486.518
+final  value -486.518077 
 converged
 
 * The 5 best values (multistart) obtained are:
- -598.6545 -585.7842 -583.9352 -598.6545 -578.041 
-* The model corresponding to the best one (-598.6545) is stored. 
+ -520.2897 -488.9921 -504.4172 -514.4002 -486.5181 
+* The model corresponding to the best one (-520.2897) is stored. 
 Warning message:
 executing %dopar% sequentially: no parallel backend registered 
 >  
@@ -227,27 +199,28 @@ executing %dopar% sequentially: no parallel backend registered
 >     model = data.frame(intercept, nugget, maxLL, theta)
 > 
 >  #Cross validation (leave one out)
->  LOO = leaveOneOut.km(m, "SK",trend.reestim = TRUE)
+>  #LOO = leaveOneOut.km(m, "SK",trend.reestim = TRUE)
 >  
 >  
 > ## Kriging prediction surface ##
 > x = seq(from = 0, to = (sizexy[1,2]-1)*40, by = 40)
 > y = seq(from = 0, to = (sizexy[1,1]-1)*40, by = 40)
 > grid = expand.grid(X1=x, X2 = y)
-> pred.m = predict(m,grid,"SK")
+> pred.m = predict(m,grid,"UK", se.compute = TRUE)
 > 
 > 
 > pred = matrix(pred.m$mean, sizexy[1,1], sizexy[1,2], byrow = TRUE)
 > lower95 = matrix(pred.m$lower95, sizexy[1,1], sizexy[1,2], byrow = TRUE)
 > upper95 = matrix(pred.m$upper95, sizexy[1,1], sizexy[1,2], byrow = TRUE)
+> STD = matrix(pred.m$sd, sizexy[1,1], sizexy[1,2], byrow = TRUE)
 > 
 > 
-> writeMat('/home/glaciology1/Documents/Data/SnowDepth/Kriging/kriging.mat',
-+          pred=pred, lower95=lower95, upper95=upper95, model = model, LOO = LOO,
-+          fixNames=TRUE, matVersion="5", onWrite=NULL, verbose=FALSE)
-> #  writeMat('/Users/Alexandra/Documents/SFU/Data/SnowDepth/Kriging/kriging.mat',
-> #           pred=pred, lower95=lower95, upper95=upper95, model = model, LOO = LOO,
-> #           fixNames=TRUE, matVersion="5", onWrite=NULL, verbose=FALSE)
+> #writeMat('/home/glaciology1/Documents/Data/SnowDepth/Kriging/kriging.mat',
+> #         pred=pred, lower95=lower95, upper95=upper95, STD = STD, model = model, LOO = LOO,
+> #         fixNames=TRUE, matVersion="5", onWrite=NULL, verbose=FALSE)
+> writeMat('/Users/Alexandra/Documents/SFU/Data/SnowDepth/Kriging/kriging.mat',
++            pred=pred, lower95=lower95, upper95=upper95, STD = STD, model = model, LOO = LOO,
++            fixNames=TRUE, matVersion="5", onWrite=NULL, verbose=FALSE)
 > 
 > ## Install and load rgl package
 > #library(rgl)
@@ -266,4 +239,4 @@ executing %dopar% sequentially: no parallel backend registered
 > 
 > proc.time()
    user  system elapsed 
- 22.176   0.184  22.359 
+ 14.470   3.081  26.736 

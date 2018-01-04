@@ -11,7 +11,7 @@ colormap('default')
 %Set up SWE structure if not corretly formated
 if length(SWE) == 1
    SWEtemp(1).swe = SWE.G4(:,1);    SWEtemp(2).swe = SWE.G2(:,1);    SWEtemp(3).swe = SWE.G13(:,1); 
-   if SWE.G4(1,1)>100;
+   if SWE.G4(1,1)>100
    SWEtemp(1).utm = SWE.G4(:,1:2);  SWEtemp(2).utm = SWE.G2(:,1:2);  SWEtemp(3).utm = SWE.G13(:,1:2);     
    else
    SWEtemp(1).utm = SWE.G4(:,2:3);  SWEtemp(2).utm = SWE.G2(:,2:3);  SWEtemp(3).utm = SWE.G13(:,2:3); 

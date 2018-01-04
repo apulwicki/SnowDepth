@@ -91,3 +91,23 @@ legend([pt,pa],'Taylor1969','Alex2016')
     xlabel('Elevation (m a.s.l.)'); ylabel('SWE (m w.e.)')
     yl = ylim;
     ylim([0, yl(2)]);
+    
+    
+    
+    
+%% Winter balance-elevation gradients
+
+%clear
+%load TopoSWE.mat
+
+for g = 1:3; glacier = options.glacier{g};
+    [swe, topo] = ObsInCell(fullSWE.S2.input, topo_sampled_ns);
+    WB      = swe.(glacier)(:,1)*1000;
+    elev    = topo.(glacier).elevation/10; 
+        elev = [ones(length(elev),1), elev];
+    ElevGrad(:,g) = regress(WB,elev);
+    %subplot(1,3,g)
+    %plot(elev(:,2),WB,'.')
+end
+
+ElevGrad(2,:)

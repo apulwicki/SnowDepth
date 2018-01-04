@@ -415,3 +415,6 @@ ylabel('Mean WSMB (m w.e.)'); xlabel('Number of runs'); legend(options.glacier, 
     fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18)
     fig.PaperUnits = 'inches'; fig.PaperPosition = [0 0 7.3 7];
     saveFIG('MLRrunWSMB')
+
+    
+    

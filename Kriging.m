@@ -9,7 +9,7 @@ load TopoBMS_MLR.mat
 
 sweKRIG(9).G4.pred = 9999; 
 for g = 2%1:3
-        glacier = char(options.glacier(g));
+        glacier = options.glacier{g};
     for r = 7%2:9
     sweKRIG(r).(glacier) = KrigingR(sweOPT(r).(glacier)(:,1), SWE(g).utm, glacier);
     end
@@ -30,13 +30,14 @@ end
     
 %% Plotting -> SWE
     param = 'pred';
-    topoParam.G4  = sweKRIG(2).G4.(param);
-    topoParam.G2  = sweKRIG(2).G2.(param);
-    topoParam.G13 = sweKRIG(2).G13.(param);
+    r = 7;
+    topoParam.G4  = sweKRIG(r).G4.(param);
+    topoParam.G2  = sweKRIG(r).G2.(param);
+    topoParam.G13 = sweKRIG(r).G13.(param);
 figure(3)
     PlotTopoParameter(topoParam,param, 'SWE (m w.e.)', SWE, 'black','massB')
 
-    saveFIG('sweKriged','3G')
+    %saveFIG('sweKriged','3G')
     
 %% REGRESSION KRIGING
 
@@ -520,10 +521,39 @@ end
   
   
   
+%% Universal Kriging
+
+%clear; load LR_SK_RK.mat sweSK sweUK 
+OPTIONS
+%SK = sweSK(2:9);  UK = sweUK(2:9);    clear swe*
+
+%Plot diff between UK and SK (UK minus SK)
+sd = [1 5 2 6 3 7 4 8];
+for g = 1:3; glacier = options.glacier{g};
+   figure(3);
+    for d = 1:8; D = options.DenOpt{d};
+    subplot(2,4,sd(d))
+        Pdata = UK(d).(glacier).pred - SK(d).(glacier).pred;
+        h = imagesc(Pdata); colorbar
+            set(h,'alphadata',~isnan(Pdata));    axis off
+            title(D)
+    end
+    saveFIG(['UKminusSK_',glacier])
+end
   
-  
-  
-  
+%Plot UK WB estimate
+sd = [1 5 2 6 3 7 4 8];
+for g = 1:3; glacier = options.glacier{g};
+   figure(3);
+    for d = 1:8; D = options.DenOpt{d};
+    subplot(2,4,sd(d))
+        Pdata   = UK(d).(glacier).pred;
+        h = imagesc(Pdata); colorbar
+            set(h,'alphadata',~isnan(Pdata));    axis off
+            title([D,' (',num2str(round(nanmean(nanmean(Pdata)),2)),' m w.e.)'])
+    end
+    saveFIG(['UKestimatedWB_',glacier])
+end
   
   
   
