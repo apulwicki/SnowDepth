@@ -319,7 +319,8 @@ for g = 1:3;    glacier = options.glacier{g};
     varSWE.(glacier)  = random(varPD.(glacier), length(inputSWE.S1.(glacier)),1000);   
 end
 
-for d = 1:8
+clc; clock
+for d = 3%1:8
     den = options.DenOpt{d};
     display(den)
 for vc = 1:100%0
@@ -342,6 +343,7 @@ for g = 1:3
 end
 end
 end
+clock
 
 for g = 1:3;    glacier = options.glacier{g};
 for d = 1:8;    den = options.DenOpt{d};

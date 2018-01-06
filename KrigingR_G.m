@@ -18,8 +18,8 @@ cd Kriging
     save('residuals.mat','res','utm','sizexy')
 
     %Run Dice Kriging in R
-    !R CMD BATCH DiceKriging.R
-    %!/usr/local/bin/R CMD BATCH DiceKriging.R
+    %!R CMD BATCH DiceKriging.R
+    !/usr/local/bin/R CMD BATCH DiceKriging.R
 
     % load kriged data
     load kriging.mat

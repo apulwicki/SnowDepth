@@ -157,9 +157,10 @@ PlotTopoParameter_IGS(inputSK, 'modelledSWE', 'WB (m w.e.)', SWE, 'black', 'mass
 	saveFIG_IGS('SK_map',2,8.6)
 
 %% Interp Method - Observed vs Estimated SWE
-    clear
-load Full.mat fullLR fullSK
-load TopoSWE.mat SWE topo_sampled options
+%     clear
+% load Full.mat fullLR fullSK
+% load TopoSWE.mat SWE topo_sampled options
+OPTIONS
 
 den = 'S2';
     yObserved   = ObsInCell(SWE, topo_sampled);
@@ -167,10 +168,11 @@ den = 'S2';
     SKinput.(glacier) = fullSK.(den).(glacier).pred;
     end
     
-          locX = [.15 .43 .71]; locX = [locX locX];
-          locY = [.83; 0.35];     locY = repmat(locY,1,3); locY = [locY(1,:) locY(2,:)];
+          locX = [.05 .39 .72];     locX = [locX locX];
+          locY = [.89; 0.41];       locY = repmat(locY,1,3); locY = [locY(1,:) locY(2,:)];
 
 figure(7); clf
+[ha, ~] = tight_subplot(2,3,[0.03 .01],[.05 0.01],[0.01 0]);
 for y = 1:2
     if      y ==1;  yEstimated = SampledCell(fullLR.(den));   k = 0;
     elseif  y ==2;  yEstimated = SampledCell(SKinput);   k = 3;
@@ -178,7 +180,7 @@ for y = 1:2
 
 for g = 1:3;    glacier = options.glacier{g};
     
-subplot(2,3,g+k)
+axes(ha(g+k))
     axis([0 1.2 0 1.2]);    line = refline(1,0);    line.Color = 'k'; line.LineStyle = '--'; hold on
     plot(yObserved(g).swe, yEstimated.(glacier), 'o', 'Color', options.RGB(g,:),'MarkerSize',2); hold on
 
@@ -194,8 +196,11 @@ subplot(2,3,g+k)
         b = gca; legend(b,'off');
         
         annotation('textbox',[locX(g+k) locY(g+k) .1 .1],'String', options.glacier{g},'EdgeColor','none','FontWeight','bold')
+        annotation('textbox',[locX(g+k) locY(g+k)-0.05 .1 .1],'String', ['R^2= ',num2str(round(G.(glacier).rsquare,2))],'EdgeColor','none')
 end
 end
+            set(ha(1:6),'YTickLabel',num2cell(0:0.2:1)); set(ha(4:6),'XTickLabel',num2cell(0:0.5:1))
+
 
 saveFIG_IGS(['observedVSestimated_',den],2,10)
 

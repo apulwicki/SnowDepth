@@ -529,6 +529,7 @@ OPTIONS
 
 %Plot diff between UK and SK (UK minus SK)
 sd = [1 5 2 6 3 7 4 8];
+Cmap = flipud(cbrewer('div','RdBu',20,'PCHIP'));
 for g = 1:3; glacier = options.glacier{g};
    figure(3);
     for d = 1:8; D = options.DenOpt{d};
@@ -537,6 +538,7 @@ for g = 1:3; glacier = options.glacier{g};
         h = imagesc(Pdata); colorbar
             set(h,'alphadata',~isnan(Pdata));    axis off
             title(D)
+            colormap(Cmap)
     end
     saveFIG(['UKminusSK_',glacier])
 end
@@ -555,5 +557,37 @@ for g = 1:3; glacier = options.glacier{g};
     saveFIG(['UKestimatedWB_',glacier])
 end
   
-  
-  
+ %% 
+%Derek Plots
+GDen = [6,5];% corresponds to ['F3';'S3'];
+Cmap_diff   = flipud(cbrewer('div','RdBu',100,'PCHIP'));
+Cmap_wb     = cbrewer('seq','Greys',100,'PCHIP');
+   figure(3); clf; n=1;
+for g = 2:3; glacier = options.glacier{g};
+    d = GDen(g-1);
+    s1 = subplot(2,3,n);
+        Pdata   = SK(d).(glacier).pred;
+        h = imagesc(Pdata); Cbar = colorbar;
+            set(h,'alphadata',~isnan(Pdata));    axis off
+            title(['SK ',glacier,' (',num2str(round(nanmean(nanmean(Pdata)),2)),' m w.e.)'])
+            colormap(s1, Cmap_wb);     caxis([0 0.55]); 
+            ylabel(Cbar,'Winter balance (m w.e.)')        
+
+    s2 = subplot(2,3,n+1);
+        Pdata   = UK(d).(glacier).pred;
+        h = imagesc(Pdata); Cbar = colorbar;
+            set(h,'alphadata',~isnan(Pdata));    axis off
+            title(['OK ',glacier,' (',num2str(round(nanmean(nanmean(Pdata)),2)),' m w.e.)'])
+            colormap(s2, Cmap_wb);    caxis([0 0.55])        
+            ylabel(Cbar,'Winter balance (m w.e.)')        
+
+    s3 = subplot(2,3,n+2);
+        Pdata   = UK(d).(glacier).pred-SK(d).(glacier).pred;
+        h = imagesc(Pdata); Cbar = colorbar;
+            set(h,'alphadata',~isnan(Pdata));    axis off
+            title(['OK minus SK ',glacier])
+            colormap(s3, Cmap_diff)
+            ylabel(Cbar,'Winter balance (m w.e.)')        
+    n=4;        
+end
+    saveFIG('SKandOK_G2_G13')
