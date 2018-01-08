@@ -559,7 +559,7 @@ end
   
  %% 
 %Derek Plots
-GDen = [6,5];% corresponds to ['F3';'S3'];
+GDen = [6,5];% corresponds to ['F3';'S3'] on glaciers 2 and 13;
 Cmap_diff   = flipud(cbrewer('div','RdBu',100,'PCHIP'));
 Cmap_wb     = cbrewer('seq','Greys',100,'PCHIP');
    figure(3); clf; n=1;

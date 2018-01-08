@@ -17,7 +17,8 @@ utm = data.frame(residuals$utm)
 sizexy = residuals$sizexy
 
 ## Model ##
-m = km(~1, design = utm, response = res, covtype = "matern5_2", nugget.estim = TRUE, multistart = 5, iso = TRUE)
+m = km(y ~ 1, design = utm, response = res, covtype = "matern5_2", nugget.estim = TRUE, multistart = 5, iso = TRUE)
+
 
  #plot(m)
  #m
@@ -44,7 +45,6 @@ pred = matrix(pred.m$mean, sizexy[1,1], sizexy[1,2], byrow = TRUE)
 lower95 = matrix(pred.m$lower95, sizexy[1,1], sizexy[1,2], byrow = TRUE)
 upper95 = matrix(pred.m$upper95, sizexy[1,1], sizexy[1,2], byrow = TRUE)
 STD = matrix(pred.m$sd, sizexy[1,1], sizexy[1,2], byrow = TRUE)
-
 
 #writeMat('/home/glaciology1/Documents/Data/SnowDepth/Kriging/kriging.mat',
 #         pred=pred, lower95=lower95, upper95=upper95, STD = STD, model = model, LOO = LOO,

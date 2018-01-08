@@ -28,7 +28,18 @@ boxplot([SWE(1).depth;SWE(2).depth;SWE(3).depth], [SWE(1).glacier;SWE(2).glacier
     set(findall(fig,'-property','FontSize'),'FontSize',17) 
     
     print([options.path1,'box_depth_noZZ'],'-dpng'); print([options.path2,'box_depth_noZZ'],'-dpng') 
-        clear fig        
+        clear fig 
+        
+ % Boxplot of gridcell-averaged WB (b_w) values 
+ load LR_SK_RK.mat sweOPT
+ GGG = [repmat({'G4'},length(sweOPT(4).G4),1); ...
+        repmat({'G2'},length(sweOPT(4).G2),1); ...
+        repmat({'G13'},length(sweOPT(4).G13),1)]; 
+ boxplot([sweOPT(4).G4(:,1);sweOPT(4).G2(:,1);sweOPT(4).G13(:,1);], GGG,...
+    'GroupOrder',{'G4','G2','G13'},'labels',{'Glacier 4','Glacier 2','Glacier 13'})
+    ylabel('Gridcell-averaged winter balance (m w.e)')
+saveFIG('GridcellWB_boxplot')
+
 %% Zigzag Plot
 
 zig_lab = ['G04\_Z3A\_ZZ0'; 'G04\_Z2A\_ZZ0'; 'G04\_Z5B\_ZZ0';...
