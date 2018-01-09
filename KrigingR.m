@@ -31,7 +31,7 @@ cd Kriging
     
      %Model params
     dataout.Model   = model;
-    dataout.LOO     = LOO.mean;
+    %dataout.LOO     = LOO.mean;
 
      %Assign to structure
     dataout.pred    = flipud(pred);

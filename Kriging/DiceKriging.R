@@ -9,36 +9,67 @@ library(DiceOptim)
 library(foreach)
 
 
-## Load my data ##
+# ## Load my data ##
+# residuals = readMat('/Users/Alexandra/Documents/SFU/Data/SnowDepth/Kriging/residuals.mat')
+# #residuals = readMat('/home/glaciology1/Documents/Data/SnowDepth/Kriging/residuals.mat')
+# res = residuals$res
+# utm = data.frame(residuals$utm)
+# sizexy = residuals$sizexy
+# 
+# ## Model ##
+# m = km(y ~ 1, design = utm, response = res, covtype = "matern5_2", nugget.estim = TRUE, multistart = 5, iso = TRUE)
+# 
+# 
+#  #plot(m)
+#  #m
+#  
+#  #Return model paramaters
+#  maxLL = -m@logLik
+#  intercept = m@trend.coef
+#  nugget = m@covariance@nugget
+#  theta = m@covariance@range.val
+#     model = data.frame(intercept, nugget, maxLL, theta)
+# 
+#  #Cross validation (leave one out)
+#  #LOO = leaveOneOut.km(m, "SK",trend.reestim = TRUE)
+#  
+#  
+# ## Kriging prediction surface ##
+# x = seq(from = 0, to = (sizexy[1,2]-1)*40, by = 40)
+# y = seq(from = 0, to = (sizexy[1,1]-1)*40, by = 40)
+# grid = expand.grid(X1=x, X2 = y)
+# pred.m = predict(m,grid,"UK", se.compute = TRUE)
+
+## UNIVERSAL KRIGING WITH LINEAR TREND
+# Comparing doing estimation and prediction with universal 
+#   kriging with a linear term in both X and Y (named X1 and X2 
+#   in the utm variable)
+#
+# This will likely need even more multistarts because of the 
+#   extra difficulty fitting the coefficients for X1 and X2
 residuals = readMat('/Users/Alexandra/Documents/SFU/Data/SnowDepth/Kriging/residuals.mat')
-#residuals = readMat('/home/glaciology1/Documents/Data/SnowDepth/Kriging/residuals.mat')
-res = residuals$res
-utm = data.frame(residuals$utm)
-sizexy = residuals$sizexy
+res       = residuals$res
+utm       = data.frame(residuals$utm)
+sizexy    = residuals$sizexy
 
-## Model ##
-m = km(y ~ 1, design = utm, response = res, covtype = "matern5_2", nugget.estim = TRUE, multistart = 5, iso = TRUE)
+m = km(~., design   = utm, 
+       response     = res, 
+       covtype      = "matern5_2",
+       iso          = TRUE, 
+       multistart   = 1,
+       nugget.estim = TRUE)
 
+maxLL     = -m@logLik
+intercept = m@trend.coef
+nugget    = m@covariance@nugget
+theta     = m@covariance@range.val
+model     = data.frame(intercept, nugget, maxLL, theta)
 
- #plot(m)
- #m
- 
- #Return model paramaters
- maxLL = -m@logLik
- intercept = m@trend.coef
- nugget = m@covariance@nugget
- theta = m@covariance@range.val
-    model = data.frame(intercept, nugget, maxLL, theta)
-
- #Cross validation (leave one out)
- #LOO = leaveOneOut.km(m, "SK",trend.reestim = TRUE)
- 
- 
-## Kriging prediction surface ##
 x = seq(from = 0, to = (sizexy[1,2]-1)*40, by = 40)
 y = seq(from = 0, to = (sizexy[1,1]-1)*40, by = 40)
-grid = expand.grid(X1=x, X2 = y)
-pred.m = predict(m,grid,"UK", se.compute = TRUE)
+
+grid    = expand.grid(X1=x, X2 = y)
+pred.m  = predict(m,grid,"UK", se.compute = TRUE)
 
 
 pred = matrix(pred.m$mean, sizexy[1,1], sizexy[1,2], byrow = TRUE)
@@ -50,7 +81,7 @@ STD = matrix(pred.m$sd, sizexy[1,1], sizexy[1,2], byrow = TRUE)
 #         pred=pred, lower95=lower95, upper95=upper95, STD = STD, model = model, LOO = LOO,
 #         fixNames=TRUE, matVersion="5", onWrite=NULL, verbose=FALSE)
 writeMat('/Users/Alexandra/Documents/SFU/Data/SnowDepth/Kriging/kriging.mat',
-           pred=pred, lower95=lower95, upper95=upper95, STD = STD, model = model, LOO = LOO,
+           pred=pred, lower95=lower95, upper95=upper95, STD = STD, model = model,
            fixNames=TRUE, matVersion="5", onWrite=NULL, verbose=FALSE)
 
 ## Install and load rgl package

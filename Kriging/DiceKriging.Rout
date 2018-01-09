@@ -38,177 +38,120 @@ The following objects are masked from ‘package:base’:
 > library(foreach)
 > 
 > 
-> ## Load my data ##
-> residuals = readMat('/Users/Alexandra/Documents/SFU/Data/SnowDepth/Kriging/residuals.mat')
-> #residuals = readMat('/home/glaciology1/Documents/Data/SnowDepth/Kriging/residuals.mat')
-> res = residuals$res
-> utm = data.frame(residuals$utm)
-> sizexy = residuals$sizexy
+> # ## Load my data ##
+> # residuals = readMat('/Users/Alexandra/Documents/SFU/Data/SnowDepth/Kriging/residuals.mat')
+> # #residuals = readMat('/home/glaciology1/Documents/Data/SnowDepth/Kriging/residuals.mat')
+> # res = residuals$res
+> # utm = data.frame(residuals$utm)
+> # sizexy = residuals$sizexy
+> # 
+> # ## Model ##
+> # m = km(y ~ 1, design = utm, response = res, covtype = "matern5_2", nugget.estim = TRUE, multistart = 5, iso = TRUE)
+> # 
+> # 
+> #  #plot(m)
+> #  #m
+> #  
+> #  #Return model paramaters
+> #  maxLL = -m@logLik
+> #  intercept = m@trend.coef
+> #  nugget = m@covariance@nugget
+> #  theta = m@covariance@range.val
+> #     model = data.frame(intercept, nugget, maxLL, theta)
+> # 
+> #  #Cross validation (leave one out)
+> #  #LOO = leaveOneOut.km(m, "SK",trend.reestim = TRUE)
+> #  
+> #  
+> # ## Kriging prediction surface ##
+> # x = seq(from = 0, to = (sizexy[1,2]-1)*40, by = 40)
+> # y = seq(from = 0, to = (sizexy[1,1]-1)*40, by = 40)
+> # grid = expand.grid(X1=x, X2 = y)
+> # pred.m = predict(m,grid,"UK", se.compute = TRUE)
 > 
-> ## Model ##
-> m = km(~1, design = utm, response = res, covtype = "matern5_2", nugget.estim = TRUE, multistart = 5, iso = TRUE)
+> ## UNIVERSAL KRIGING WITH LINEAR TREND
+> # Comparing doing estimation and prediction with universal 
+> #   kriging with a linear term in both X and Y (named X1 and X2 
+> #   in the utm variable)
+> #
+> # This will likely need even more multistarts because of the 
+> #   extra difficulty fitting the coefficients for X1 and X2
+> residuals = readMat('/Users/Alexandra/Documents/SFU/Data/SnowDepth/Kriging/residuals.mat')
+> res       = residuals$res
+> utm       = data.frame(residuals$utm)
+> sizexy    = residuals$sizexy
+> 
+> m = km(~., design   = utm, 
++        response     = res, 
++        covtype      = "matern5_2",
++        iso          = TRUE, 
++        multistart   = 1,
++        nugget.estim = TRUE)
 
 optimisation start
 ------------------
 * estimation method   : MLE 
 * optimisation method : BFGS 
 * analytical gradient : used
-* trend model : ~1
+* trend model : ~X1 + X2
 * covariance model : 
   - type :  matern5_2 
   - nugget : unknown homogenous nugget effect 
   - parameters lower bounds :  1e-10 
-  - parameters upper bounds :  7318.149 
+  - parameters upper bounds :  9197.05 
   - upper bound for alpha   :  1 
-  - best initial criterion value(s) :  512.9052 481.5514 453.3783 451.7567 443.6004 
+  - best initial criterion value(s) :  579.2322 
 
 N = 2, M = 5 machine precision = 2.22045e-16
 At X0, 0 variables are exactly at the bounds
-At iterate     0  f=      -512.91  |proj g|=      0.13311
-At iterate     1  f =      -512.95  |proj g|=        0.1362
-At iterate     2  f =      -512.95  |proj g|=       0.20926
-At iterate     3  f =      -512.96  |proj g|=       0.13631
-At iterate     4  f =      -512.96  |proj g|=       0.13603
-At iterate     5  f =      -512.96  |proj g|=       0.13527
-At iterate     6  f =      -512.98  |proj g|=       0.13406
-At iterate     7  f =      -513.01  |proj g|=       0.13166
-At iterate     8  f =      -513.11  |proj g|=       0.13308
-At iterate     9  f =      -513.34  |proj g|=       0.14028
-At iterate    10  f =      -513.88  |proj g|=       0.14968
-At iterate    11  f =      -515.04  |proj g|=       0.15679
-At iterate    12  f =      -517.51  |proj g|=        0.1419
-At iterate    13  f =      -519.02  |proj g|=       0.90581
-At iterate    14  f =      -519.98  |proj g|=      0.090083
-At iterate    15  f =      -520.25  |proj g|=       0.92034
-At iterate    16  f =      -520.29  |proj g|=      0.080536
-At iterate    17  f =      -520.29  |proj g|=       0.17807
-At iterate    18  f =      -520.29  |proj g|=    0.00029464
-At iterate    19  f =      -520.29  |proj g|=    5.7325e-05
+At iterate     0  f=      -579.23  |proj g|=      0.87758
+At iterate     1  f =      -593.76  |proj g|=         0.563
+At iterate     2  f =      -595.04  |proj g|=       0.48598
+At iterate     3  f =      -595.66  |proj g|=       0.63958
+At iterate     4  f =      -595.71  |proj g|=       0.39231
+At iterate     5  f =      -595.71  |proj g|=      0.070072
+At iterate     6  f =      -595.71  |proj g|=      0.032348
+At iterate     7  f =      -595.71  |proj g|=      0.032334
+At iterate     8  f =      -595.71  |proj g|=       0.11067
+At iterate     9  f =      -595.71  |proj g|=       0.21886
+At iterate    10  f =      -595.71  |proj g|=       0.42261
+At iterate    11  f =      -595.71  |proj g|=       0.61858
+At iterate    12  f =      -595.72  |proj g|=       0.62158
+At iterate    13  f =      -595.73  |proj g|=       0.62613
+At iterate    14  f =      -595.75  |proj g|=       0.63276
+At iterate    15  f =      -595.82  |proj g|=       0.64119
+At iterate    16  f =      -596.01  |proj g|=       0.64802
+At iterate    17  f =      -596.53  |proj g|=       0.64027
+At iterate    18  f =      -600.21  |proj g|=       0.54739
+At iterate    19  f =      -600.27  |proj g|=       0.52613
+At iterate    20  f =      -600.27  |proj g|=       0.54185
+At iterate    21  f =      -600.27  |proj g|=      0.016684
+At iterate    22  f =      -600.27  |proj g|=    0.00013447
+At iterate    23  f =      -600.27  |proj g|=    6.2151e-06
 
-iterations 19
-function evaluations 25
-segments explored during Cauchy searches 21
+iterations 23
+function evaluations 34
+segments explored during Cauchy searches 24
 BFGS updates skipped 0
 active bounds at final generalized Cauchy point 0
-norm of the final projected gradient 5.73251e-05
-final function value -520.29
+norm of the final projected gradient 6.21512e-06
+final function value -600.27
 
-F = -520.29
-final  value -520.289715 
+F = -600.27
+final  value -600.270229 
 converged
-N = 2, M = 5 machine precision = 2.22045e-16
-At X0, 0 variables are exactly at the bounds
-At iterate     0  f=      -481.55  |proj g|=     0.027878
-At iterate     1  f =      -504.71  |proj g|=      0.012309
-ys=-2.496e+01  -gs= 1.040e+01, BFGS update SKIPPED
-At iterate     2  f =      -505.29  |proj g|=     0.0064426
-At iterate     3  f =      -505.29  |proj g|=        0.9994
-At iterate     4  f =      -505.29  |proj g|=     0.0062749
-At iterate     5  f =      -505.29  |proj g|=      0.057648
-
-iterations 5
-function evaluations 11
-segments explored during Cauchy searches 7
-BFGS updates skipped 1
-active bounds at final generalized Cauchy point 0
-norm of the final projected gradient 0.0576478
-final function value -505.287
-
-F = -505.287
-final  value -505.287117 
-converged
-N = 2, M = 5 machine precision = 2.22045e-16
-At X0, 0 variables are exactly at the bounds
-At iterate     0  f=      -453.38  |proj g|=     0.012163
-At iterate     1  f =      -476.31  |proj g|=      0.013039
-ys=-1.079e+02  -gs= 9.514e+00, BFGS update SKIPPED
-At iterate     2  f =      -491.87  |proj g|=     0.0047122
-At iterate     3  f =      -491.89  |proj g|=     0.0042798
-At iterate     4  f =      -491.89  |proj g|=       0.99999
-At iterate     5  f =      -491.89  |proj g|=     0.0042401
-At iterate     6  f =      -491.89  |proj g|=       0.53733
-
-iterations 6
-function evaluations 16
-segments explored during Cauchy searches 9
-BFGS updates skipped 1
-active bounds at final generalized Cauchy point 0
-norm of the final projected gradient 0.537327
-final function value -491.887
-
-F = -491.887
-final  value -491.886732 
-converged
-N = 2, M = 5 machine precision = 2.22045e-16
-At X0, 0 variables are exactly at the bounds
-At iterate     0  f=      -451.76  |proj g|=      0.19748
-At iterate     1  f =      -493.69  |proj g|=      0.034185
-ys=-1.240e+02  -gs= 2.592e+01, BFGS update SKIPPED
-At iterate     2  f =      -508.09  |proj g|=       0.99832
-At iterate     3  f =      -508.09  |proj g|=     0.0076314
-At iterate     4  f =      -508.09  |proj g|=      0.016507
-
-iterations 4
-function evaluations 15
-segments explored during Cauchy searches 6
-BFGS updates skipped 1
-active bounds at final generalized Cauchy point 0
-norm of the final projected gradient 0.0165072
-final function value -508.086
-
-F = -508.086
-final  value -508.085942 
-converged
-N = 2, M = 5 machine precision = 2.22045e-16
-At X0, 0 variables are exactly at the bounds
-At iterate     0  f=       -443.6  |proj g|=     0.012421
-At iterate     1  f =      -468.31  |proj g|=      0.010389
-ys=-9.958e+01  -gs= 1.150e+01, BFGS update SKIPPED
-At iterate     2  f =      -488.03  |proj g|=     0.0082942
-ys=-4.820e+01  -gs= 7.242e+00, BFGS update SKIPPED
-At iterate     3  f =       -489.4  |proj g|=     0.0062879
-At iterate     4  f =      -489.92  |proj g|=     0.0042614
-At iterate     5  f =      -489.92  |proj g|=     0.0039644
-At iterate     6  f =      -489.92  |proj g|=       0.99999
-At iterate     7  f =      -489.92  |proj g|=       0.99999
-
-iterations 7
-function evaluations 19
-segments explored during Cauchy searches 11
-BFGS updates skipped 2
-active bounds at final generalized Cauchy point 0
-norm of the final projected gradient 0.999994
-final function value -489.924
-
-F = -489.924
-final  value -489.924104 
-converged
-
-* The 5 best values (multistart) obtained are:
- -520.2897 -505.2871 -491.8867 -508.0859 -489.9241 
-* The model corresponding to the best one (-520.2897) is stored. 
-Warning message:
-executing %dopar% sequentially: no parallel backend registered 
 > 
->  #plot(m)
->  #m
->  
->  #Return model paramaters
->  maxLL = -m@logLik
->  intercept = m@trend.coef
->  nugget = m@covariance@nugget
->  theta = m@covariance@range.val
->     model = data.frame(intercept, nugget, maxLL, theta)
+> maxLL     = -m@logLik
+> intercept = m@trend.coef
+> nugget    = m@covariance@nugget
+> theta     = m@covariance@range.val
+> model     = data.frame(intercept, nugget, maxLL, theta)
 > 
->  #Cross validation (leave one out)
->  #LOO = leaveOneOut.km(m, "SK",trend.reestim = TRUE)
->  
->  
-> ## Kriging prediction surface ##
 > x = seq(from = 0, to = (sizexy[1,2]-1)*40, by = 40)
 > y = seq(from = 0, to = (sizexy[1,1]-1)*40, by = 40)
-> grid = expand.grid(X1=x, X2 = y)
-> pred.m = predict(m,grid,"UK", se.compute = TRUE)
+> 
+> grid    = expand.grid(X1=x, X2 = y)
+> pred.m  = predict(m,grid,"UK", se.compute = TRUE)
 > 
 > 
 > pred = matrix(pred.m$mean, sizexy[1,1], sizexy[1,2], byrow = TRUE)
@@ -216,12 +159,11 @@ executing %dopar% sequentially: no parallel backend registered
 > upper95 = matrix(pred.m$upper95, sizexy[1,1], sizexy[1,2], byrow = TRUE)
 > STD = matrix(pred.m$sd, sizexy[1,1], sizexy[1,2], byrow = TRUE)
 > 
-> 
 > #writeMat('/home/glaciology1/Documents/Data/SnowDepth/Kriging/kriging.mat',
 > #         pred=pred, lower95=lower95, upper95=upper95, STD = STD, model = model, LOO = LOO,
 > #         fixNames=TRUE, matVersion="5", onWrite=NULL, verbose=FALSE)
 > writeMat('/Users/Alexandra/Documents/SFU/Data/SnowDepth/Kriging/kriging.mat',
-+            pred=pred, lower95=lower95, upper95=upper95, STD = STD, model = model, LOO = LOO,
++            pred=pred, lower95=lower95, upper95=upper95, STD = STD, model = model,
 +            fixNames=TRUE, matVersion="5", onWrite=NULL, verbose=FALSE)
 > 
 > ## Install and load rgl package
@@ -242,4 +184,4 @@ executing %dopar% sequentially: no parallel backend registered
 > 
 > proc.time()
    user  system elapsed 
- 13.733   2.852  21.679 
+ 17.310   2.651  28.163 
