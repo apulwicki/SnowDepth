@@ -35,14 +35,14 @@ cd Kriging
 
      %Assign to structure
     dataout.pred    = flipud(pred);
-    dataout.lower95 = flipud(lower95);
-    dataout.upper95 = flipud(upper95);
+    %dataout.lower95 = flipud(lower95);
+    %dataout.upper95 = flipud(upper95);
     dataout.std     = flipud(STD);
         
      %Set glacier boundries
     dataout.pred(options.mapNaN.(glacier))    = NaN;
-    dataout.lower95(options.mapNaN.(glacier)) = NaN;
-    dataout.upper95(options.mapNaN.(glacier)) = NaN;
+    %dataout.lower95(options.mapNaN.(glacier)) = NaN;
+    %dataout.upper95(options.mapNaN.(glacier)) = NaN;
     dataout.std(options.mapNaN.(glacier))     = NaN;        
 cd ..
 
