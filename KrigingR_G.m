@@ -18,8 +18,8 @@ cd Kriging
     save('residuals.mat','res','utm','sizexy')
 
     %Run Dice Kriging in R
-    %!R CMD BATCH DiceKriging.R
-    !/usr/local/bin/R CMD BATCH DiceKriging.R
+    !R CMD BATCH DiceKriging.R
+    %!/usr/local/bin/R CMD BATCH DiceKriging.R
 
     % load kriged data
     load kriging.mat
@@ -30,13 +30,15 @@ cd Kriging
 
      %Assign to structure
     dataout.(glacier).pred    = flipud(pred);
-    dataout.(glacier).lower95 = flipud(lower95);
-    dataout.(glacier).upper95 = flipud(upper95);
+    dataout.(glacier).std     = flipud(STD);
+    %dataout.(glacier).lower95 = flipud(lower95);
+    %dataout.(glacier).upper95 = flipud(upper95);
         
      %Set glacier boundries
     dataout.(glacier).pred(options.mapNaN.(glacier))    = NaN;
-    dataout.(glacier).lower95(options.mapNaN.(glacier)) = NaN;
-    dataout.(glacier).upper95(options.mapNaN.(glacier)) = NaN;
+    dataout.(glacier).std(options.mapNaN.(glacier))     = NaN;
+    %dataout.(glacier).lower95(options.mapNaN.(glacier)) = NaN;
+    %dataout.(glacier).upper95(options.mapNaN.(glacier)) = NaN;
         
 cd ..
 

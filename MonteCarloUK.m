@@ -48,7 +48,8 @@
 %% Basic kriging (no Monte Carlo) to get distributed b_w        
         
 clc; format shortg; clock
-    for d = 1:8;        den = options.DenOpt{d};
+    for d = 1:8        
+        den = options.DenOpt{d};
         display(den)    %Displays which density option the code is on at the moment 
     %Kriging
       fullUK.(den) =  KrigingR_G( inputSWE.(den) );
@@ -80,7 +81,7 @@ save('MonteCarloUKtemp.mat','-v7.3')
 numMC = 5;    %Number of Monte Carlo runs (paper says 1000)
 
 clc; format shortg; clock
-    for d = 3%1:8
+    for d = 1:8
         den = options.DenOpt{d};
         display(den)    %Displays which density option the code is on at the moment 
 
