@@ -53,11 +53,11 @@ res       = residuals$res
 utm       = data.frame(residuals$utm)
 sizexy    = residuals$sizexy
 
-m = km(~., design   = utm, 
+m = km(~1, design   = utm, 
        response     = res, 
        covtype      = "matern5_2",
        iso          = TRUE, 
-       multistart   = 100,
+       multistart   = 50,
        nugget.estim = TRUE)
 
 maxLL     = -m@logLik

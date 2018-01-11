@@ -62,7 +62,7 @@ clock
     for d = 1:8;    den = options.DenOpt{d};
     for g = 1:3;    glacier = options.glacier{g};
         UKsigmaINT.mean{d,g}  = nanmean(fullUK.(den).(glacier).pred(:));
-        %sigmaINT.std{d,g}   = sqrt(nanmean(fullUK.(den).(glacier).std(:).^2));  %glacier-wide std = sqrt of average variance  
+        sigmaINT.std{d,g}   = sqrt(nanmean(fullUK.(den).(glacier).std(:).^2));  %glacier-wide std = sqrt of average variance  
     end
     end
     
@@ -79,7 +79,7 @@ save('MonteCarloUKtemp.mat','-v7.3')
 %  # multistarts = 
 %  universal kriging prediction with linear trend in easting and northing
 
-numMC = 5;    %Number of Monte Carlo runs (paper says 1000)
+numMC = 1000;    %Number of Monte Carlo runs (paper says 1000)
 
 clc; format shortg; clock
     for d = 1:8
