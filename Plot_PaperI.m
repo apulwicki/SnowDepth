@@ -62,7 +62,7 @@ end
 saveFIG_IGS('DepthBoxplot_SPvsFS',1,15)
 
 %% Grid Cell - Zigzag histrogram
-    clear; close all
+    %clear; close all
 load TopoSWE.mat SWEzz 
     
 %     labels(:,1) = {'G4 LZ';'G4 MZ';'G4 UZ';'none'}; 
@@ -99,7 +99,7 @@ c = 1;
                             N       = histcounts(ZZdata,edges);   
             fill([min(edges) (edges(:,1:end-1)+edges(:,2:end))/2 max(edges)],[0 N/sum(N) 0],Fcolor(c,:),...
                   'EdgeColor','none','FaceAlpha',0.75); hold on 
-            xlabel('WB (m w.e.)');     ylabel('Probability')
+            xlabel('b_w (m w.e.)');     ylabel('Probability')
             grid on
             xlim([-0.15 0.15])
             %title(options.glacier{g})
@@ -143,39 +143,39 @@ saveFIG_IGS('ZigzagHistogram',2,6);
 
 %% Interp Method - LR & SK map
     clear
-load Full.mat fullLR fullSK options
+load Full.mat fullLR fullUK options
 load TopoSWE.mat SWE
 for g = 1:3;    glacier = options.glacier{g};
-    inputSK.(glacier) = fullSK.S2.(glacier).pred;
+    inputUK.(glacier) = fullUK.S2.(glacier).std;
 end
 
 figure(6); clf
-PlotTopoParameter_IGS(fullLR.S2, 'modelledSWE', 'WB (m w.e.)', SWE, 'black', 'massB')
+PlotTopoParameter_IGS(fullLR.S2, 'modelledSWE', 'b_w (m w.e.)', SWE, 'black', 'massB')
 	saveFIG_IGS('LR_map',2,8.6)
 figure(6); clf
-PlotTopoParameter_IGS(inputSK, 'modelledSWE', 'WB (m w.e.)', SWE, 'black', 'massB')
-	saveFIG_IGS('SK_map',2,8.6)
+PlotTopoParameter_IGS(inputUK, 'modelledSWE', 'b_w (m w.e.)', SWE, 'black', 'massB')
+	saveFIG_IGS('UK_map',2,8.6)
 
 %% Interp Method - Observed vs Estimated SWE
 %     clear
-% load Full.mat fullLR fullSK
+% load Full.mat fullLR fullUK
 % load TopoSWE.mat SWE topo_sampled options
 OPTIONS
 
 den = 'S2';
     yObserved   = ObsInCell(SWE, topo_sampled);
     for g = 1:3;    glacier = options.glacier{g};
-    SKinput.(glacier) = fullSK.(den).(glacier).pred;
+    UKinput.(glacier) = fullUK.(den).(glacier).pred;
     end
     
-          locX = [.05 .39 .72];     locX = [locX locX];
+          locX = [.06 .39 .72];     locX = [locX locX];
           locY = [.89; 0.41];       locY = repmat(locY,1,3); locY = [locY(1,:) locY(2,:)];
 
 figure(7); clf
-[ha, ~] = tight_subplot(2,3,[0.03 .01],[.05 0.01],[0.01 0]);
+[ha, ~] = tight_subplot(2,3,[0.03 .01],[.05 0.01],[0.02 0]);
 for y = 1:2
     if      y ==1;  yEstimated = SampledCell(fullLR.(den));   k = 0;
-    elseif  y ==2;  yEstimated = SampledCell(SKinput);   k = 3;
+    elseif  y ==2;  yEstimated = SampledCell(UKinput);   k = 3;
     end
 
 for g = 1:3;    glacier = options.glacier{g};
@@ -189,8 +189,8 @@ axes(ha(g+k))
             xlabel(''); ylabel('')
             set(p,'Color',options.RGB(g,:)); set(p, 'LineWidth',1.5);     
         if      y ==2; xlabel([{'Gridcell-averaged'}, {'WB (m w.e.)'}]); end
-        if      y ==1 && g ==1;  ylabel([{'LR gridcell-'}, {'estimated WB (m w.e.)'}]);
-        elseif  y ==2 && g ==1;  ylabel([{'SK gridcell-'}, {'estimated WB (m w.e.)'}]);
+        if      y ==1 && g ==1;  ylabel([{'LR gridcell-'}, {'estimated b_w (m w.e.)'}]);
+        elseif  y ==2 && g ==1;  ylabel([{'UK gridcell-'}, {'estimated b_w (m w.e.)'}]);
         end
                 axis square;    box on;     grid on
         b = gca; legend(b,'off');
@@ -333,7 +333,7 @@ p(g) = fill(x,yLR,options.RGB(g,:),'FaceAlpha',0.8, 'EdgeColor', 'none'); hold o
     title('\sigma_{GS} & \sigma_{\rho} & \sigma_{INT}')
 subplot(2,3,6)     
 q(g) = fill([x 0],[0 ySK],options.RGB(g,:),'FaceAlpha',0.8, 'EdgeColor', 'none'); hold on
-    xlabel('Glacier-wide WB (m w.e.)'); 
+    xlabel('B_w (m w.e.)'); 
     title('\sigma_{GS} & \sigma_{\rho} & \sigma_{INT}')
     xlim([min(x) 1])
     if g == 3
@@ -413,7 +413,7 @@ L(1) = plot(Dt,taylor(:,6),'s', 'MarkerSize',6, 'Color',[68, 181, 226]/255, 'Mar
     xlim([min(Dat), max(Dat)+1]); 
     ylim([0 2])
     grid on
-        xlabel('Distance from topographic divide (km)'); ylabel('WB (m w.e.)')
+        xlabel('Distance from topographic divide (km)'); ylabel('Winter balance (m w.e.)')
         LEG = legend(L,{'P-WB (1969)','P-WB (2016)','G-WB (2016)'});
             LEG.Position(1:2) = [0.58 0.755];
 %             set(LEG,'PlotBoxAspectRatioMode','manual');
@@ -433,7 +433,7 @@ L(1) = plot(Dt,taylor(:,6),'s', 'MarkerSize',6, 'Color',[68, 181, 226]/255, 'Mar
         
 saveFIG_IGS('AccumGrad',1,7.8)
 
-%% Topo Params - Full vs measured dist
+%% SUPPLEMENTARY Topo Params - Full vs measured dist
 clear
 load TopoSWE.mat topo* options
     GT = {'Glacier 4','Glacier 2','Glacier 13'};

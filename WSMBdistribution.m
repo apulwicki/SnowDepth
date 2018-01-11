@@ -701,13 +701,13 @@ end
 %%% APPLY MASK TO *FULL* LR AND SK MAPS
 
 load Full.mat
-% LR & SK
+% LR & UK
 for d = 1:8;    den = options.DenOpt{d};
 for g = 1:3; glacier = options.glacier{g};    
     map = fullLR.(den).(glacier);
     map(nanMask.(glacier)) = NaN;
 ablB.LR(d,g) = nanmean(map(:));
-    map = fullSK.(den).(glacier).pred;
+    map = fullUK.(den).(glacier).pred;
     map(nanMask.(glacier)) = NaN;
 ablB.SK(d,g) = nanmean(map(:));
 end
@@ -749,3 +749,7 @@ end
     xlim([min(x) max(x)])
     title(t);
 end
+
+
+%% UNIVERSAL KRIGING
+

@@ -24,8 +24,8 @@ if fixed_color == 0
     minSWE  = nanmin([SWE(1).swe(:);SWE(2).swe(:);SWE(3).swe(:)]);
     maxSWE  = nanmax([SWE(1).swe(:);SWE(2).swe(:);SWE(3).swe(:)]);
 elseif fixed_color == 1
-    x_min = 0;      minSWE  = x_min;
-    x_max = 1;    maxSWE  = x_max;
+    x_min = 0.05;      minSWE  = x_min;
+    x_max = 0.18;    maxSWE  = x_max;
 end
 
 G13size = size(topoParam.G13);

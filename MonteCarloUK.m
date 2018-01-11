@@ -53,8 +53,9 @@ clc; format shortg; clock
         display(den)    %Displays which density option the code is on at the moment 
     %Kriging
       fullUK.(den) =  KrigingR_G( inputSWE.(den) );
-    end
 clock
+    end
+
 
 %Getting mean and std of Bw for plotting
 %(***sigma_INT***)
