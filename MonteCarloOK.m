@@ -46,43 +46,43 @@
             clear g glacier varPD den d fullSWE topo_sampled
 
 %% Basic kriging (no Monte Carlo) to get distributed b_w        
-        
-clc; format shortg; clock
-    for d = 1:8        
-        den = options.DenOpt{d};
-        display(den)    %Displays which density option the code is on at the moment 
-    %Kriging
-      fullOK.(den) =  KrigingR_G( inputSWE.(den) );
-clock
-    end
-
-
-%Getting mean and std of Bw for plotting
-%(***sigma_INT***)
-    for d = 1:8;    den = options.DenOpt{d};
-    for g = 1:3;    glacier = options.glacier{g};
-        OKsigmaINT.mean{d,g}  = nanmean(fullOK.(den).(glacier).pred(:));
-        sigmaINT.std{d,g}   = sqrt(nanmean(fullOK.(den).(glacier).std(:).^2));  %glacier-wide std = sqrt of average variance  
-    end
-    end
-    
-%(***sigma_RHO***)
-    for g = 1:3; glacier = options.glacier{g};
-        OKsigmaRHO{1,g} = mean(OKsigmaINT.mean.(glacier));
-        OKsigmaRHO{2,g} = std(OKsigmaINT.mean.(glacier));
-    end
-    clear d den g glacier
-
-save('MonteCarloOKtemp.mat','-v7.3')
+%         
+% clc; format shortg; clock
+%     for d = 1:8        
+%         den = options.DenOpt{d};
+%         display(den)    %Displays which density option the code is on at the moment 
+%     %Kriging
+%       fullOK.(den) =  KrigingR_G( inputSWE.(den) );
+% clock
+%     end
+% 
+% 
+% %Getting mean and std of Bw for plotting
+% %(***sigma_INT***)
+%     for d = 1:8;    den = options.DenOpt{d};
+%     for g = 1:3;    glacier = options.glacier{g};
+%         OKsigmaINT.mean{d,g}  = nanmean(fullOK.(den).(glacier).pred(:));
+%         sigmaINT.std{d,g}   = sqrt(nanmean(fullOK.(den).(glacier).std(:).^2));  %glacier-wide std = sqrt of average variance  
+%     end
+%     end
+%     
+% %(***sigma_RHO***)
+%     for g = 1:3; glacier = options.glacier{g};
+%         OKsigmaRHO{1,g} = mean(OKsigmaINT.mean.(glacier));
+%         OKsigmaRHO{2,g} = std(OKsigmaINT.mean.(glacier));
+%     end
+%     clear d den g glacier
+% 
+% save('MonteCarloOKtemp.mat','-v7.3')
     
 %% Kriging of the input data with Monte Carlo
 %  # multistarts = 50
 %  ordinary kriging prediction
 
-numMC = 1000;    %Number of Monte Carlo runs (paper says 1000)
+numMC = 5;    %Number of Monte Carlo runs (paper says 1000)
 
 clc; format shortg; clock
-    for d = 1:8
+    for d = 1%:8
         den = options.DenOpt{d};
         display(den)    %Displays which density option the code is on at the moment 
 
@@ -107,7 +107,7 @@ clock
 %% Calculating glacier-wide winter balance for plotting purposes
     
 for g = 1:3;    glacier = options.glacier{g};
-for d = 1:8;    den = options.DenOpt{d};
+for d = 1%:8;    den = options.DenOpt{d};
 
 %Calculate glacier-wide winter balance and std for all runs
 %(***sigms_GS***)
