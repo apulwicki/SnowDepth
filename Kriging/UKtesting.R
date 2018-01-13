@@ -13,54 +13,63 @@
 
 residuals = readMat('/Users/Alexandra/Documents/SFU/Data/SnowDepth/Kriging/residuals.mat')
 res       = residuals$res
-utm       = data.frame(residuals$utm)
+utm       = data.frame(X = residuals$utm)
 sizexy    = residuals$sizexy
+
+elev = residuals$EE
+Xelev = data.frame(X = as.vector(elev))
 
 m = km(~., design   = utm, 
        response     = res, 
        covtype      = "matern5_2",
        iso          = TRUE, 
-       multistart   = 100,
+       multistart   = 1,
        nugget.estim = TRUE)
+predELEV  = predict(m,Xelev,"UK", se.compute = TRUE)
+pred = matrix(predELEV$mean, sizexy[1,1], sizexy[1,2], byrow = FALSE)
 
-maxLL     = -m@logLik
-intercept = m@trend.coef
-nugget    = m@covariance@nugget
-theta     = m@covariance@range.val
-model     = data.frame(intercept, nugget, maxLL, theta)
+writeMat('/Users/Alexandra/Documents/SFU/Data/SnowDepth/Kriging/UKelevTest.mat',
+         predELEV=pred,
+         fixNames=TRUE, matVersion="5", onWrite=NULL, verbose=FALSE)
 
-x = seq(from = 0, to = (sizexy[1,2]-1)*40, by = 40)
-y = seq(from = 0, to = (sizexy[1,1]-1)*40, by = 40)
+# maxLL     = -m@logLik
+# intercept = m@trend.coef
+# nugget    = m@covariance@nugget
+# theta     = m@covariance@range.val
+# model     = data.frame(intercept, nugget, maxLL, theta)
 
-grid    = expand.grid(X1=x, X2 = y)
-G4pred100    = predict(m,grid,"UK", se.compute = TRUE)
+#x = seq(from = 0, to = (sizexy[1,2]-1)*40, by = 40)
+#y = seq(from = 0, to = (sizexy[1,1]-1)*40, by = 40)
+
+#grid    = expand.grid(X1=x, X2 = y)
+#G4pred100    = predict(m,grid,"UK", se.compute = TRUE)
 
 ##
 
-m = km(~., design   = utm, 
-       response     = res, 
-       covtype      = "matern5_2",
-       iso          = TRUE, 
-       multistart   = 1000,
-       nugget.estim = TRUE)
-
-maxLL     = -m@logLik
-intercept = m@trend.coef
-nugget    = m@covariance@nugget
-theta     = m@covariance@range.val
-model     = data.frame(intercept, nugget, maxLL, theta)
-
-x = seq(from = 0, to = (sizexy[1,2]-1)*40, by = 40)
-y = seq(from = 0, to = (sizexy[1,1]-1)*40, by = 40)
-
-grid    = expand.grid(X1=x, X2 = y)
-G4pred1000    = predict(m,grid,"UK", se.compute = TRUE)
-
-sd( G4pred1000$mean - G4pred100$mean )
+# m = km(~., design   = utm, 
+#        response     = res, 
+#        covtype      = "matern5_2",
+#        iso          = TRUE, 
+#        multistart   = 1000,
+#        nugget.estim = TRUE)
+# 
+# maxLL     = -m@logLik
+# intercept = m@trend.coef
+# nugget    = m@covariance@nugget
+# theta     = m@covariance@range.val
+# model     = data.frame(intercept, nugget, maxLL, theta)
+# 
+# x = seq(from = 0, to = (sizexy[1,2]-1)*40, by = 40)
+# y = seq(from = 0, to = (sizexy[1,1]-1)*40, by = 40)
+# 
+# grid    = expand.grid(X1=x, X2 = y)
+# G4pred1000    = predict(m,grid,"UK", se.compute = TRUE)
+# 
+# sd( G4pred1000$mean - G4pred100$mean )
 
 ## Plotting the data ##
 #library(rgl)
-# pred = matrix(pred.m$mean, sizexy[1,1], sizexy[1,2], byrow = TRUE)
+# pred = matrix(pred$mean, sizexy[1,1], sizexy[1,2], byrow = TRUE)
 # trend = matrix(pred.m$trend, sizexy[1,1], sizexy[1,2], byrow = TRUE)
 # 
 # plot3d(utm[,1],utm[,2],res, xlim=c(0,5000),ylim=c(0,5000),zlim=0:1)
@@ -70,7 +79,4 @@ sd( G4pred1000$mean - G4pred100$mean )
 #summary( pred.m$mean - pred.m2$mean ) 
 
 
-# writeMat('/Users/Alexandra/Documents/SFU/Data/SnowDepth/Kriging/UKmultistarttest.mat',
-#          pred1000=pred1000,  pred700=pred700, pred500=pred500, pred400=pred400, pred300=pred300,
-#          pred200=pred200, pred150=pred150, pred100=pred100, pred70=pred70,
-#          fixNames=TRUE, matVersion="5", onWrite=NULL, verbose=FALSE)
+

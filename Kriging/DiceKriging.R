@@ -1,5 +1,5 @@
 ############################################################################
-#Dice Kriging
+#Dice Kriging - Ordinary kriging
 ############################################################################
 
 ## Libraries
@@ -10,43 +10,6 @@ library(foreach)
 
 
 # ## Load my data ##
-# residuals = readMat('/Users/Alexandra/Documents/SFU/Data/SnowDepth/Kriging/residuals.mat')
-# #residuals = readMat('/home/glaciology1/Documents/Data/SnowDepth/Kriging/residuals.mat')
-# res = residuals$res
-# utm = data.frame(residuals$utm)
-# sizexy = residuals$sizexy
-# 
-# ## Model ##
-# m = km(y ~ 1, design = utm, response = res, covtype = "matern5_2", nugget.estim = TRUE, multistart = 5, iso = TRUE)
-# 
-# 
-#  #plot(m)
-#  #m
-#  
-#  #Return model paramaters
-#  maxLL = -m@logLik
-#  intercept = m@trend.coef
-#  nugget = m@covariance@nugget
-#  theta = m@covariance@range.val
-#     model = data.frame(intercept, nugget, maxLL, theta)
-# 
-#  #Cross validation (leave one out)
-#  #LOO = leaveOneOut.km(m, "SK",trend.reestim = TRUE)
-#  
-#  
-# ## Kriging prediction surface ##
-# x = seq(from = 0, to = (sizexy[1,2]-1)*40, by = 40)
-# y = seq(from = 0, to = (sizexy[1,1]-1)*40, by = 40)
-# grid = expand.grid(X1=x, X2 = y)
-# pred.m = predict(m,grid,"UK", se.compute = TRUE)
-
-## UNIVERSAL KRIGING WITH LINEAR TREND
-# Comparing doing estimation and prediction with universal 
-#   kriging with a linear term in both X and Y (named X1 and X2 
-#   in the utm variable)
-#
-# This will likely need even more multistarts because of the 
-#   extra difficulty fitting the coefficients for X1 and X2
 #residuals = readMat('/Users/Alexandra/Documents/SFU/Data/SnowDepth/Kriging/residuals.mat')
 residuals = readMat('/home/glaciology1/Documents/Data/SnowDepth/Kriging/residuals.mat')
 res       = residuals$res

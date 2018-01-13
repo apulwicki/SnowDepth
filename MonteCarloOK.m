@@ -1,4 +1,4 @@
-%% Universal Kriging with Monte Carlo Uncertainty Analysis
+%% Ordinary Kriging with Monte Carlo Uncertainty Analysis
     %Alex Pulwicki, Jan 2018
 %This script runs a Monte Carlo analysis of winter-balance data using the 
 %DiceKriging package in R. 
@@ -15,14 +15,14 @@
 %   sigma_ALL = mean and total std of data from MC
 
 
-%% Generating input data for universal kriging
+%% Generating input data for ordinary kriging
 
     %Loads input data: point-scale b_w, topographic parameters from sampled
     %cells, and options
     load TopoSWE.mat fullSWE topo_sampled
     run OPTIONS
 
-    %Generates gridcell-averaged b_w values for input to the UK algorithm
+    %Generates gridcell-averaged b_w values for input to the OK algorithm
     for d = 1:8;    den = options.DenOpt{d};
     [ inputSWE.(den), TOPOdata ] = ObsInCell( fullSWE.(den).input, topo_sampled);
     end
@@ -37,11 +37,11 @@
     end
 
     %Initializing variables for uncertainty plotting (table format)   
-    UKsigmaGS.mean = table(zeros(8,1),zeros(8,1),zeros(8,1),'VariableNames',options.glacier,'RowNames',options.DenOpt);
-        UKsigmaGS.std  = UKsigmaGS.mean;      stdDen = UKsigmaGS.mean;
-    UKsigmaINT.mean = UKsigmaGS.mean;     UKsigmaINT.std = UKsigmaGS.mean;
-    UKsigmaALL     = table(zeros(2,1),zeros(2,1),zeros(2,1),'VariableNames',options.glacier,'RowNames',{'mean','std'});
-    UKsigmaRHO     = UKsigmaALL;     
+    OKsigmaGS.mean = table(zeros(8,1),zeros(8,1),zeros(8,1),'VariableNames',options.glacier,'RowNames',options.DenOpt);
+        OKsigmaGS.std  = OKsigmaGS.mean;      stdDen = OKsigmaGS.mean;
+    OKsigmaINT.mean = OKsigmaGS.mean;     OKsigmaINT.std = OKsigmaGS.mean;
+    OKsigmaALL     = table(zeros(2,1),zeros(2,1),zeros(2,1),'VariableNames',options.glacier,'RowNames',{'mean','std'});
+    OKsigmaRHO     = OKsigmaALL;     
 
             clear g glacier varPD den d fullSWE topo_sampled
 
@@ -52,7 +52,7 @@ clc; format shortg; clock
         den = options.DenOpt{d};
         display(den)    %Displays which density option the code is on at the moment 
     %Kriging
-      fullUK.(den) =  KrigingR_G( inputSWE.(den) );
+      fullOK.(den) =  KrigingR_G( inputSWE.(den) );
 clock
     end
 
@@ -61,23 +61,23 @@ clock
 %(***sigma_INT***)
     for d = 1:8;    den = options.DenOpt{d};
     for g = 1:3;    glacier = options.glacier{g};
-        UKsigmaINT.mean{d,g}  = nanmean(fullUK.(den).(glacier).pred(:));
-        sigmaINT.std{d,g}   = sqrt(nanmean(fullUK.(den).(glacier).std(:).^2));  %glacier-wide std = sqrt of average variance  
+        OKsigmaINT.mean{d,g}  = nanmean(fullOK.(den).(glacier).pred(:));
+        sigmaINT.std{d,g}   = sqrt(nanmean(fullOK.(den).(glacier).std(:).^2));  %glacier-wide std = sqrt of average variance  
     end
     end
     
 %(***sigma_RHO***)
     for g = 1:3; glacier = options.glacier{g};
-        UKsigmaRHO{1,g} = mean(UKsigmaINT.mean.(glacier));
-        UKsigmaRHO{2,g} = std(UKsigmaINT.mean.(glacier));
+        OKsigmaRHO{1,g} = mean(OKsigmaINT.mean.(glacier));
+        OKsigmaRHO{2,g} = std(OKsigmaINT.mean.(glacier));
     end
     clear d den g glacier
 
-save('MonteCarloUKtemp.mat','-v7.3')
+save('MonteCarloOKtemp.mat','-v7.3')
     
 %% Kriging of the input data with Monte Carlo
-%  # multistarts = 
-%  universal kriging prediction with linear trend in easting and northing
+%  # multistarts = 50
+%  ordinary kriging prediction
 
 numMC = 1000;    %Number of Monte Carlo runs (paper says 1000)
 
@@ -100,7 +100,7 @@ clc; format shortg; clock
     %Kriging
       KRIGzz.(den)(mc) =  KrigingR_G( dataSWE.(den) );
     end
-save('MonteCarloUKtemp.mat','KRIGzz','-v7.3') %save current data to temp file
+save('MonteCarloOKtemp.mat','KRIGzz','-v7.3') %save current data to temp file
 clock
     end
 
@@ -115,17 +115,17 @@ for d = 1:8;    den = options.DenOpt{d};
         BwKRIG.(den).(glacier)(mc,1) = nanmean(KRIGzz.(den)(mc).(glacier).pred(:));
         BwKRIG.(den).(glacier)(mc,2) = sqrt(nanmean(KRIGzz.(den)(mc).(glacier).std(:).^2));
     end
-    UKsigmaGS.mean{d,g} = mean(BwKRIG.(den).(glacier)(mc,1));
-    UKsigmaGS.std{d,g}  = std(BwKRIG.(den).(glacier)(mc,1));
+    OKsigmaGS.mean{d,g} = mean(BwKRIG.(den).(glacier)(mc,1));
+    OKsigmaGS.std{d,g}  = std(BwKRIG.(den).(glacier)(mc,1));
     
     stdDen{d,g} = mean(BwKRIG.(den).(glacier)(mc,2)); %std from interpolation and zigzags
 end
 %Bw and mean std for each density option
 %(***sigms_ALL***)
-    UKsigmaALL{1,g} = mean(UKsigmaGS.mean.(glacier)); 
-    UKsigmaALL{2,g} = sqrt(mean(stdDen.(glacier).^2));  
+    OKsigmaALL{1,g} = mean(OKsigmaGS.mean.(glacier)); 
+    OKsigmaALL{2,g} = sqrt(mean(stdDen.(glacier).^2));  
 end
     clear mc g d glacier den
     
 %% Save final data set
-save('MonteCarloUK.mat')
+save('MonteCarloOK.mat')

@@ -143,29 +143,29 @@ saveFIG_IGS('ZigzagHistogram',2,6);
 
 %% Interp Method - LR & SK map
     clear
-load Full.mat fullLR fullUK options
+load Full.mat fullLR fullOK options
 load TopoSWE.mat SWE
 for g = 1:3;    glacier = options.glacier{g};
-    inputUK.(glacier) = fullUK.S2.(glacier).std;
+    inputOK.(glacier) = fullOK.S2.(glacier).pred;
 end
 
 figure(6); clf
 PlotTopoParameter_IGS(fullLR.S2, 'modelledSWE', 'b_w (m w.e.)', SWE, 'black', 'massB')
 	saveFIG_IGS('LR_map',2,8.6)
 figure(6); clf
-PlotTopoParameter_IGS(inputUK, 'modelledSWE', 'b_w (m w.e.)', SWE, 'black', 'massB')
-	saveFIG_IGS('UK_map',2,8.6)
+PlotTopoParameter_IGS(inputOK, 'modelledSWE', 'b_w (m w.e.)', SWE, 'black', 'massB')
+	saveFIG_IGS('OK_map',2,8.6)
 
 %% Interp Method - Observed vs Estimated SWE
 %     clear
-% load Full.mat fullLR fullUK
+% load Full.mat fullLR fullOK
 % load TopoSWE.mat SWE topo_sampled options
 OPTIONS
 
 den = 'S2';
     yObserved   = ObsInCell(SWE, topo_sampled);
     for g = 1:3;    glacier = options.glacier{g};
-    UKinput.(glacier) = fullUK.(den).(glacier).pred;
+    OKinput.(glacier) = fullOK.(den).(glacier).pred;
     end
     
           locX = [.06 .39 .72];     locX = [locX locX];
@@ -175,7 +175,7 @@ figure(7); clf
 [ha, ~] = tight_subplot(2,3,[0.03 .01],[.05 0.01],[0.02 0]);
 for y = 1:2
     if      y ==1;  yEstimated = SampledCell(fullLR.(den));   k = 0;
-    elseif  y ==2;  yEstimated = SampledCell(UKinput);   k = 3;
+    elseif  y ==2;  yEstimated = SampledCell(OKinput);   k = 3;
     end
 
 for g = 1:3;    glacier = options.glacier{g};
@@ -190,7 +190,7 @@ axes(ha(g+k))
             set(p,'Color',options.RGB(g,:)); set(p, 'LineWidth',1.5);     
         if      y ==2; xlabel([{'Gridcell-averaged'}, {'WB (m w.e.)'}]); end
         if      y ==1 && g ==1;  ylabel([{'LR gridcell-'}, {'estimated b_w (m w.e.)'}]);
-        elseif  y ==2 && g ==1;  ylabel([{'UK gridcell-'}, {'estimated b_w (m w.e.)'}]);
+        elseif  y ==2 && g ==1;  ylabel([{'OK gridcell-'}, {'estimated b_w (m w.e.)'}]);
         end
                 axis square;    box on;     grid on
         b = gca; legend(b,'off');

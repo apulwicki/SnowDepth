@@ -707,13 +707,14 @@ for g = 1:3; glacier = options.glacier{g};
     map = fullLR.(den).(glacier);
     map(nanMask.(glacier)) = NaN;
 ablB.LR(d,g) = nanmean(map(:));
-    map = fullUK.(den).(glacier).pred;
+    map = fullOK.(den).(glacier).pred;
     map(nanMask.(glacier)) = NaN;
 ablB.SK(d,g) = nanmean(map(:));
 end
 end
 
 D = [mean(ablB.LR); mean(ablB.SK)];
+diff(D)./mean(D)*100 %diff between ablation area estimates
 bar(D'); title('Ablation only winter balance'); legend('LR','SK')
 %%
 %%% PLOT
