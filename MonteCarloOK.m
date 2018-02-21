@@ -82,14 +82,14 @@ save('MonteCarloOKtemp.mat','-v7.3')
 %  # multistarts = 50
 %  ordinary kriging prediction
 
-numMC = 5;    %Number of Monte Carlo runs (paper says 1000)
+numMC = 20;    %Number of Monte Carlo runs (paper says 1000)
 
 clc; format shortg; clock
     for d = 1:8
         den = options.DenOpt{d};
         display(den)    %Displays which density option the code is on at the moment 
 
-    for mc = 1:numMC
+    for mc = 6:numMC
         if floor(mc/10)==mc/10; display(num2str(mc)); end %Displays which MC run the code is on
 
     %Adds the sigma_GS variability to input data
@@ -125,8 +125,8 @@ for d = 1:8;    den = options.DenOpt{d};
 end
 %Bw and mean std for each density option
 %(***sigms_ALL***)
-    OKsigmaALL{1,g} = mean(OKsigmaGS.mean.(glacier)); 
-    OKsigmaALL{2,g} = sqrt(mean(stdDen.(glacier).^2));  
+    OKsigmaALL{1,g} = mean(cell2mat(OKsigmaGS.mean(:,g))); 
+    OKsigmaALL{2,g} = sqrt(mean(cell2mat(stdDen(:,g)).^2));  
     
             X = 0:0.01:1.5;
     BwKRIGall.(glacier) = normpdf(X, OKsigmaALL{1,g}, OKsigmaALL{2,g});
