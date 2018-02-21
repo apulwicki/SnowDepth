@@ -89,7 +89,7 @@ clc; format shortg; clock
         den = options.DenOpt{d};
         display(den)    %Displays which density option the code is on at the moment 
 
-    for mc = 1:numMC
+    for mc = 21:numMC
         if floor(mc/10)==mc/10; display(num2str(mc)); end %Displays which MC run the code is on
 
     %Adds the sigma_GS variability to input data
