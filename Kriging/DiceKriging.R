@@ -44,7 +44,7 @@ STD = matrix(pred.m$sd, sizexy[1,1], sizexy[1,2], byrow = TRUE)
 writeMat('/home/glaciology1/Documents/Data/SnowDepth/Kriging/kriging.mat',
         pred=pred,  STD = STD, model = model,
         fixNames=TRUE, matVersion="5", onWrite=NULL, verbose=FALSE)
-# writeMat('/Users/Alexandra/Documents/SFU/Data/SnowDepth/Kriging/kriging.mat',
+#writeMat('/Users/Alexandra/Documents/SFU/Data/SnowDepth/Kriging/kriging.mat',
 #            pred=pred, STD = STD, model = model,
 #            fixNames=TRUE, matVersion="5", onWrite=NULL, verbose=FALSE)
 

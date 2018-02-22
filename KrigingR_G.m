@@ -17,9 +17,9 @@ cd Kriging
 
     save('residuals.mat','res','utm','sizexy')
 
-    %Run Dice Kriging in R
-    !R CMD BATCH DiceKriging.R
-    %!/usr/local/bin/R CMD BATCH DiceKriging.R
+    %Run Dice Kriging in R                      %SFU Ubuntu (below)
+    !R CMD BATCH DiceKriging.R                  
+    %!/usr/local/bin/R CMD BATCH DiceKriging.R  %Mac laptop
 
     % load kriged data
     load kriging.mat

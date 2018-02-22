@@ -48,7 +48,7 @@
 %% Basic kriging (no Monte Carlo) to get distributed b_w        
         
 clc; format shortg; clock
-    for d = 1:8        
+    for d = 2:8        
         den = options.DenOpt{d};
         display(den)    %Displays which density option the code is on at the moment 
     %Kriging
@@ -62,7 +62,7 @@ clock
     for d = 1:8;    den = options.DenOpt{d};
     for g = 1:3;    glacier = options.glacier{g};
         OKsigmaINT.mean{d,g}  = nanmean(fullOK.(den).(glacier).pred(:));
-        sigmaINT.std{d,g}   = sqrt(nanmean(fullOK.(den).(glacier).std(:).^2));  %glacier-wide std = sqrt of average variance  
+        OKsigmaINT.std{d,g}   = sqrt(nanmean(fullOK.(den).(glacier).std(:).^2));  %glacier-wide std = sqrt of average variance  
         
             X = 0:0.01:1.5;
         BwKRIGinterp.(den).(glacier) = normpdf(X, OKsigmaINT.mean{d,g}, sigmaINT.std{d,g});
@@ -82,14 +82,14 @@ save('MonteCarloOKtemp.mat','-v7.3')
 %  # multistarts = 50
 %  ordinary kriging prediction
 
-numMC = 100;    %Number of Monte Carlo runs (paper says 1000)
+numMC = 500;    %Number of Monte Carlo runs (paper says 1000)
 
 clc; format shortg; clock
     for d = 1:8
         den = options.DenOpt{d};
         display(den)    %Displays which density option the code is on at the moment 
 
-    for mc = 21:numMC
+    for mc = 101:numMC
         if floor(mc/10)==mc/10; display(num2str(mc)); end %Displays which MC run the code is on
 
     %Adds the sigma_GS variability to input data
@@ -103,12 +103,13 @@ clc; format shortg; clock
     %Kriging
       KRIGzz.(den)(mc) =  KrigingR_G( dataSWE.(den) );
     end
-save('MonteCarloOKtemp.mat','KRIGzz','-v7.3') %save current data to temp file
+save('MonteCarloOKtemp.mat','KRIGzz','-append') %save current data to temp file
 clock
     end
 
 %% Calculating glacier-wide winter balance for plotting purposes
-    
+
+    averagestdGS = OKsigmaGS.mean;
 for g = 1:3;    glacier = options.glacier{g};
 for d = 1:8;    den = options.DenOpt{d};
 
@@ -117,16 +118,17 @@ for d = 1:8;    den = options.DenOpt{d};
     for mc = 1:numMC
         BwKRIGzz.(den).(glacier)(mc) = nanmean(KRIGzz.(den)(mc).(glacier).pred(:));
         BwKRIGzz_std.(den).(glacier)(mc) = sqrt(nanmean(KRIGzz.(den)(mc).(glacier).std(:).^2));
+               
     end
-    OKsigmaGS.mean{d,g} = mean(BwKRIGzz.(den).(glacier)(mc));
-    OKsigmaGS.std{d,g}  = std(BwKRIGzz_std.(den).(glacier)(mc));
+    OKsigmaGS.mean{d,g} = mean(BwKRIGzz.(den).(glacier));
+    OKsigmaGS.std{d,g}  = std(BwKRIGzz.(den).(glacier));
     
-    stdDen{d,g} = mean(BwKRIGzz_std.(den).(glacier)(mc)); %std from interpolation and zigzags
+    averagestdGS{d,g} = sqrt(mean(BwKRIGzz_std.(den).(glacier).^2));
 end
 %Bw and mean std for each density option
 %(***sigms_ALL***)
-    OKsigmaALL{1,g} = mean(cell2mat(OKsigmaGS.mean(:,g))); 
-    OKsigmaALL{2,g} = sqrt(mean(cell2mat(stdDen(:,g)).^2));  
+    OKsigmaALL{1,g} = mean(OKsigmaGS.mean{:,g}); 
+    OKsigmaALL{2,g} = sqrt(mean(averagestdGS{:,g}.^2));  
     
             X = 0:0.01:1.5;
     BwKRIGall.(glacier) = normpdf(X, OKsigmaALL{1,g}, OKsigmaALL{2,g});
@@ -136,51 +138,60 @@ end
 
     
 %% Relative uncertainty calculation
-% Sorry, didn't have enough time to comment this nicely
-
-data = KRIGzz; method = 'SK'; t = 'krigingzz';
+% Calculates the differences in estaimted WB for each gridcell for the
+% first 100 runs of the OK and then normalizes it. This corresponds to the 
+% relative uncertainity (i.e. how much the value varies at each gridcell)
 
 for d = 1:8 
                 den = options.DenOpt{d};
 for g = 1:3 
                 glacier = options.glacier{g};
-s = size(data.(den)(1).(glacier).pred);
+clear F G A H U W X %clearing needed temporary variables
 
-clear F G A H U W X 
-n = 1; p = 1;
-runs = 100;
-for i = 1:runs
-    F(n:n+s(1)-1,:) = data.(den)(i).(glacier).pred;
-    G(:,p:p+s(2)-1) = data.(den)(i).(glacier).pred;
-    n = n+s(1);
+%Initializing variables
+    s = size(KRIGzz.(den)(1).(glacier).pred); %size of glacier grid
+    n = 1; p = 1; % counters
+    runs = 20;   % num of OK runs over which to calculate relative uncertainity (~100 to keep matrices reasonable size)
+%Create stack of OK runs
+    for i = 1:runs
+    F(n:n+s(1)-1,:) = KRIGzz.(den)(i).(glacier).pred; %stack along first matrix dimension
+    G(:,p:p+s(2)-1) = KRIGzz.(den)(i).(glacier).pred; %stack along second matrix dimension
+    n = n+s(1); %increase counters by size of glacier grid
     p = p+s(2);
-end
+    end
+%Repeat stack along other matrix dimension (gets all possible combinations
+%of gridcells)
+    F = repmat(F,1,runs);
+    G = repmat(G,runs,1);
 
-F = repmat(F,1,runs);
-G = repmat(G,runs,1);
+%Subtract two matrices to get all differences
+    H = F-G;
+    H = tril(H);   %Remove repeat data
+    H(H<=0) = NaN; %Select only positives (negatives are repeats)
+    U = isnan(H);  %Will be used to remove data in subsequent matrices
 
-H = F-G;
-H = tril(H);
-H(H<=0) = NaN;
-U = isnan(H);
+%Reshaping H and U to be a 3D matrix (glacier size by runs)
+        n=1;
+    for i = 1:s(1):size(H,1)
+    for j = 1:s(2):size(H,2)
+        A(:,:,n) = H(i:i+s(1)-1,j:j+s(2)-1);
+        W(:,:,n) = U(i:i+s(1)-1,j:j+s(2)-1);
+        n=n+1;
+    end
+    end
 
-n=1;
-for i = 1:s(1):size(H,1)
-for j = 1:s(2):size(H,2)
-    A(:,:,n) = H(i:i+s(1)-1,j:j+s(2)-1);
-    W(:,:,n) = U(i:i+s(1)-1,j:j+s(2)-1);
-    n=n+1;
-end
-end
+%Find where W (reshaped U, which is all nan values) is all nan and remove
+%data
+    for i = size(A,3):-1:1
+    X(i) = all(all(W(:,:,i))); %Indices for where W is all nan
+    end
+    A(:,:,X) = []; %Remove all nan data
 
-for i = size(A,3):-1:1
-   X(i) = all(all(W(:,:,i)));
-end
-A(:,:,X) = [];
-    
-DOK.(method).(den).(glacier) = nansum(A,3);
-    DOK.(method).(den).(glacier) = D.(method).(den).(glacier)/max(D.(method).(den).(glacier)(:));
-    DOK.(method).(den).(glacier)(options.mapNaN.(glacier)) = NaN;
+%Sum all differences and make it relative    
+    D = nansum(A,3); %Sum all differences
+
+    DOK.(den).(glacier) = D/max(D(:)); %Calculate difference in relation to max diff for each glacier
+    DOK.(den).(glacier)(options.mapNaN.(glacier)) = NaN; %Set glacier outlines
 end
 end
 %% Save final data set
