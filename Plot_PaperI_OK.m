@@ -1,3 +1,15 @@
+%% bw Map
+
+%load Full.mat fullLR fullOK options
+load TopoSWE.mat SWE
+for g = 1:3;    glacier = options.glacier{g};
+    inputOK.(glacier) = fullOK.S2.(glacier).pred;
+end
+
+figure(6); clf
+PlotTopoParameter_IGS(inputOK, 'modelledSWE', 'b_w (m w.e.)', SWE, 'black', 'massB')
+	saveFIG_IGS('OK_map',2,8.6)
+
 %% WSMB Distribution - LR & SK sources of var
 
 %clear; close all
@@ -20,11 +32,11 @@ T = fitdist(varB.LR.interp.(den).(glacier)(:),'Normal');
 end
 end
 
-    ylimmax = [50, 20, 15, 180, 5, 5]; %Manual control over y limits on plot (feel free to change them)
+    ylimmax = [50, 20, 15, 240, 5, 5]; %Manual control over y limits on plot (feel free to change them)
 
     % Legend locations    
-legendX = [0.32, 0.60, 0.90, 0.32, 0.60, 0.90];
-legendY = [0.78, 0.78, 0.78, 0.31, 0.31, 0.31];
+legendX = [0.27, 0.55, 0.83, 0.27, 0.55, 0.83];
+legendY = [0.75, 0.75, 0.75, 0.29, 0.29, 0.29];
 
 x = 0:0.001:1.2;
 
@@ -48,7 +60,7 @@ for d = 1:8;     den = options.DenOpt{d};
 subplot(2,3,o); 
 p(g) = fill([x 0],[0 y],options.RGB(g,:),'FaceAlpha',Falpha, 'EdgeColor', 'none'); hold on
     if      o == 1;         ylabel({'LR probablity','density'});
-    elseif  o == 4;         ylabel({'SK probablity','density'});  
+    elseif  o == 4;         ylabel({'OK probablity','density'});  
     end
     if  o == 4||o == 5; xlabel('Glacier-wide WB (m w.e.)');  end
 end
@@ -56,7 +68,7 @@ end
     %legend
     if g == 3
         [L, icons] = legend(p,options.glacier,'location','northeast'); 
-        set(L, 'Position', [legendX(o), legendY(o), 0.01, 0.01])
+        set(L, 'Position', [legendX(o), legendY(o), 0.09, 0.16])
             L.Box='off';
             for i = length(icons)/2+1:length(icons)
             icons(i).Vertices(3:4,1) = icons(i).Vertices(3:4,1)/2;
@@ -76,7 +88,6 @@ end
 for g = 1:3;    glacier = options.glacier{g};
 for d = 1:8;    den = options.DenOpt{d};
     TLR.(glacier)(:,:,d)    = varB.LR.zzinterp.(den).(glacier);
-    TSK.(glacier)           = BwKRIGall.(glacier);
 end
 end
 
@@ -93,7 +104,7 @@ subplot(2,3,o)
 p(g) = fill([x 0],[0 y],options.RGB(g,:),'FaceAlpha',0.8, 'EdgeColor', 'none'); hold on
     if g == 3
         [L, icons] = legend(p,options.glacier,'location','northeast'); 
-        set(L, 'Position', [legendX(o), legendY(o), 0.01, 0.01])
+        set(L, 'Position', [legendX(o), legendY(o), 0.09, 0.16])
             L.Box='off';
             for i = length(icons)/2+1:length(icons)
             icons(i).Vertices(3:4,1) = icons(i).Vertices(3:4,1)/2;
@@ -102,17 +113,7 @@ p(g) = fill([x 0],[0 y],options.RGB(g,:),'FaceAlpha',0.8, 'EdgeColor', 'none'); 
             icons(i).Position(1) = icons(i).Position(1)/2;
             end
     end
-%     if g == 3
-%         [L1, icons1] = legend(p,options.glacier,'location','northeast'); 
-%         set(L1, 'Position', [0.88, 0.78, 0.01, 0.01])
-%             L1.Box='off';
-%             for i = length(icons1)/2+1:length(icons1)
-%             icons1(i).Vertices(3:4,1) = icons1(i).Vertices(3:4,1)/2;
-%             end
-%             for i = 1:length(icons1)/2
-%             icons1(i).Position(1) = icons1(i).Position(1)/2;
-%             end
-%     end
+
     ylim([0 ylimmax(o)])
     xlim([min(x) 1])
     title('\sigma_{GS} & \sigma_{\rho} & \sigma_{INT}')
@@ -121,7 +122,7 @@ p(g) = fill([x 0],[0 y],options.RGB(g,:),'FaceAlpha',0.8, 'EdgeColor', 'none'); 
 end
 end
     
-saveFIG_IGS('WSMBDist',2,8)
+saveFIG_IGS('WSMBDist',2,9.5)
 
 %% WSMB Distribution - total spatial variability 
 
@@ -131,7 +132,7 @@ load TopoSWE.mat SWE
 run OPTIONS
     D.OK = DOK;
 
-for o = 1:2
+for o = 2%1:2
     if o == 1;      s = 'LR';   m = 0.6; %Change these m values to scale the color accordinly
     elseif o == 2;  s = 'OK';   m = 0.6;
     end
@@ -148,5 +149,50 @@ end
 
 figure(o);
 PlotTopoParameter_IGS(DPlot,'summer','Relative uncertainity',SWE,'none','nomassB')
-%    saveFIG_IGS(['SpatialVar_',s],2,8.6)
+    saveFIG_IGS(['SpatialVar_',s],2,8.6)
 end
+
+
+%% 100 runs vs 500 runs (S1)
+
+        M = zeros(2,3); S = M;
+for g = 1:3; glacier = options.glacier{g};
+   subplot(1,3,g)
+   histogram(BwKRIGzz500.S1.(glacier),'FaceAlpha',0.7,'EdgeColor','none'); hold on
+   histogram(BwKRIGzz100.S1.(glacier),'FaceAlpha',0.7,'EdgeColor','none')
+        legend('500 runs','100 runs')
+        title(glacier)
+   M(1,g) = mean(BwKRIGzz500.S1.(glacier));        M(2,g) = mean(BwKRIGzz100.S1.(glacier));
+   S(1,g) = std(BwKRIGzz500.S1.(glacier));         S(2,g) = std(BwKRIGzz100.S1.(glacier));
+
+end
+
+%% Updating tables
+
+%Table 3 (Bw and RMSE)
+OKsigmaALL{1,:}
+
+        RMSE = zeros(8,3);
+for d = 1:8;    den = options.DenOpt{d};
+for g = 1:3; glacier = options.glacier{g};
+    InP.(glacier) = fullOK.(den).(glacier).pred;
+end
+    est.(den) = SampledCell(InP); %Model values
+end
+
+for d = 1:8;    den = options.DenOpt{d};
+for g = 1:3; glacier = options.glacier{g};
+    RMSE(d,g) = sqrt(mean((est.(den).(glacier)-inputSWE.(den).(glacier)(:,1)).^2));
+end
+end
+mean(RMSE)
+
+mean(RMSE)./OKsigmaALL{1,:}*100
+
+
+
+%Table 4 (std of distribution)
+mean(OKsigmaGS.std{:,:})*10^2
+OKsigmaRHO{2,:}*10^2
+mean(OKsigmaINT.std{:,:})*10^2
+OKsigmaALL{2,:}*10^2

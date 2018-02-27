@@ -48,7 +48,7 @@
 %% Basic kriging (no Monte Carlo) to get distributed b_w        
         
 clc; format shortg; clock
-    for d = 2:8        
+    for d = 1:8        
         den = options.DenOpt{d};
         display(den)    %Displays which density option the code is on at the moment 
     %Kriging
@@ -65,7 +65,7 @@ clock
         OKsigmaINT.std{d,g}   = sqrt(nanmean(fullOK.(den).(glacier).std(:).^2));  %glacier-wide std = sqrt of average variance  
         
             X = 0:0.01:1.5;
-        BwKRIGinterp.(den).(glacier) = normpdf(X, OKsigmaINT.mean{d,g}, sigmaINT.std{d,g});
+        BwKRIGinterp.(den).(glacier) = normpdf(X, OKsigmaINT.mean{d,g}, OKsigmaINT.std{d,g});
     end
     end
     
@@ -85,7 +85,7 @@ save('MonteCarloOKtemp.mat','-v7.3')
 numMC = 500;    %Number of Monte Carlo runs (paper says 1000)
 
 clc; format shortg; clock
-    for d = 1:8
+    for d = 4:8
         den = options.DenOpt{d};
         display(den)    %Displays which density option the code is on at the moment 
 
@@ -103,7 +103,7 @@ clc; format shortg; clock
     %Kriging
       KRIGzz.(den)(mc) =  KrigingR_G( dataSWE.(den) );
     end
-save('MonteCarloOKtemp.mat','KRIGzz','-append') %save current data to temp file
+save('MonteCarloOKtemp.mat','-v7.3') %save current data to temp file
 clock
     end
 
@@ -194,5 +194,7 @@ clear F G A H U W X %clearing needed temporary variables
     DOK.(den).(glacier)(options.mapNaN.(glacier)) = NaN; %Set glacier outlines
 end
 end
+        clear F G A H U W X d D den g glacier i j n p runs s ans %clearing needed temporary variables
+        
 %% Save final data set
 save('MonteCarloOK.mat')
