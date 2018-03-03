@@ -161,6 +161,7 @@ PlotTopoParameter_IGS(inputOK, 'modelledSWE', 'b_w (m w.e.)', SWE, 'black', 'mas
 % load Full.mat fullLR fullOK
 % load TopoSWE.mat SWE topo_sampled options
 OPTIONS
+    clear F G
 
 den = 'S2';
     yObserved   = ObsInCell(SWE, topo_sampled);
@@ -202,7 +203,7 @@ end
             set(ha(1:6),'YTickLabel',num2cell(0:0.2:1)); set(ha(4:6),'XTickLabel',num2cell(0:0.5:1))
 
 
-saveFIG_IGS(['observedVSestimated_',den],2,10)
+%saveFIG_IGS(['observedVSestimated_',den],2,10)
 
 %% Interp Method - Beta coeffs boxplot
     

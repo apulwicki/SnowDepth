@@ -36,7 +36,7 @@ end
 
     % Legend locations    
 legendX = [0.27, 0.55, 0.83, 0.27, 0.55, 0.83];
-legendY = [0.75, 0.75, 0.75, 0.29, 0.29, 0.29];
+legendY = [0.74, 0.74, 0.74, 0.26, 0.26, 0.26];
 
 x = 0:0.001:1.2;
 
@@ -155,18 +155,21 @@ end
 
 %% 100 runs vs 500 runs (S1)
 
+        clf;
         M = zeros(2,3); S = M;
 for g = 1:3; glacier = options.glacier{g};
    subplot(1,3,g)
-   histogram(BwKRIGzz500.S1.(glacier),'FaceAlpha',0.7,'EdgeColor','none'); hold on
-   histogram(BwKRIGzz100.S1.(glacier),'FaceAlpha',0.7,'EdgeColor','none')
-        legend('500 runs','100 runs')
+   histogram(BwKRIGzz500.S1.(glacier),20,'FaceAlpha',0.7,'EdgeColor','none'); hold on
+   histogram(BwKRIGzz100.S1.(glacier),20,'FaceAlpha',0.7,'EdgeColor','none')
+        if g ==3; legend('500 runs','100 runs'); end
         title(glacier)
+        xlabel('Glacier-wide WB (m w.e.)'); 
+        if g ==1; ylabel({'OK probablity','density'}); end
    M(1,g) = mean(BwKRIGzz500.S1.(glacier));        M(2,g) = mean(BwKRIGzz100.S1.(glacier));
    S(1,g) = std(BwKRIGzz500.S1.(glacier));         S(2,g) = std(BwKRIGzz100.S1.(glacier));
 
 end
-
+    saveFIG_IGS('MCruns1000vs500',2,8.6)
 %% Updating tables
 
 %Table 3 (Bw and RMSE)

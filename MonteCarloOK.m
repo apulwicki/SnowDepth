@@ -82,14 +82,14 @@ save('MonteCarloOKtemp.mat','-v7.3')
 %  # multistarts = 50
 %  ordinary kriging prediction
 
-numMC = 500;    %Number of Monte Carlo runs (paper says 1000)
+numMC = 1000;    %Number of Monte Carlo runs (paper says 1000)
 
 clc; format shortg; clock
-    for d = 4:8
+    for d = 1
         den = options.DenOpt{d};
         display(den)    %Displays which density option the code is on at the moment 
 
-    for mc = 101:numMC
+    for mc = 501:numMC
         if floor(mc/10)==mc/10; display(num2str(mc)); end %Displays which MC run the code is on
 
     %Adds the sigma_GS variability to input data
