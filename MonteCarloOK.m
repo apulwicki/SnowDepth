@@ -21,91 +21,92 @@
     %cells, and options
     load TopoSWE.mat fullSWE topo_sampled
     run OPTIONS
+    load MonteCarloOK500.mat
 
-    %Generates gridcell-averaged b_w values for input to the OK algorithm
-    for d = 1:8;    den = options.DenOpt{d};
-    [ inputSWE.(den), TOPOdata ] = ObsInCell( fullSWE.(den).input, topo_sampled);
-    end
-
-    %Generates normal distribution of b_w values based on zigzag std for each
-    %glacier and a set of randomly chosen values from this distribution to add
-    %to the input data (sigma_GS)
-    varSIG = [0.027, 0.035, 0.04];      %zigzag std
-    for g = 1:3;    glacier = options.glacier{g};
-        varPD.(glacier)   = makedist('Normal','mu',0,'sigma',varSIG(g));    %normal distributions
-        varSWE.(glacier)  = random(varPD.(glacier), length(inputSWE.S1.(glacier)),1000);   %set of b_w values to add 
-    end
-
-    %Initializing variables for uncertainty plotting (table format)   
-    OKsigmaGS.mean = table(zeros(8,1),zeros(8,1),zeros(8,1),'VariableNames',options.glacier,'RowNames',options.DenOpt);
-        OKsigmaGS.std  = OKsigmaGS.mean;      stdDen = OKsigmaGS.mean;
-    OKsigmaINT.mean = OKsigmaGS.mean;     OKsigmaINT.std = OKsigmaGS.mean;
-    OKsigmaALL     = table(zeros(2,1),zeros(2,1),zeros(2,1),'VariableNames',options.glacier,'RowNames',{'mean','std'});
-    OKsigmaRHO     = OKsigmaALL;     
-
-            clear g glacier varPD den d fullSWE topo_sampled
-
-%% Basic kriging (no Monte Carlo) to get distributed b_w        
-        
-clc; format shortg; clock
-    for d = 1:8        
-        den = options.DenOpt{d};
-        display(den)    %Displays which density option the code is on at the moment 
-    %Kriging
-      fullOK.(den) =  KrigingR_G( inputSWE.(den) );
-clock
-    end
-
-
-%Getting mean and std of Bw for plotting
-%(***sigma_INT***)
-    for d = 1:8;    den = options.DenOpt{d};
-    for g = 1:3;    glacier = options.glacier{g};
-        OKsigmaINT.mean{d,g}  = nanmean(fullOK.(den).(glacier).pred(:));
-        OKsigmaINT.std{d,g}   = sqrt(nanmean(fullOK.(den).(glacier).std(:).^2));  %glacier-wide std = sqrt of average variance  
-        
-            X = 0:0.01:1.5;
-        BwKRIGinterp.(den).(glacier) = normpdf(X, OKsigmaINT.mean{d,g}, OKsigmaINT.std{d,g});
-    end
-    end
-    
-%(***sigma_RHO***)
-    for g = 1:3; glacier = options.glacier{g};
-        OKsigmaRHO{1,g} = mean(OKsigmaINT.mean.(glacier));
-        OKsigmaRHO{2,g} = std(OKsigmaINT.mean.(glacier));
-    end
-    clear d den g glacier
-
-save('MonteCarloOKtemp.mat','-v7.3')
-    
-%% Kriging of the input data with Monte Carlo
-%  # multistarts = 50
-%  ordinary kriging prediction
-
-numMC = 1000;    %Number of Monte Carlo runs (paper says 1000)
-
-clc; format shortg; clock
-    for d = 1
-        den = options.DenOpt{d};
-        display(den)    %Displays which density option the code is on at the moment 
-
-    for mc = 501:numMC
-        if floor(mc/10)==mc/10; display(num2str(mc)); end %Displays which MC run the code is on
-
-    %Adds the sigma_GS variability to input data
-        for g = 1:3;        glacier = options.glacier{g};
-            dataSWE.(den).(glacier)      = inputSWE.(den).(glacier);
-            dataSWE.(den).(glacier)(:,1) = inputSWE.(den).(glacier)(:,1) + varSWE.(glacier)(:,mc);
-            I = (dataSWE.(den).(glacier)(:,1)<0);
-            dataSWE.(den).(glacier)(I,1) = 0;
-        end
-
-    %Kriging
-      KRIGzz.(den)(mc) =  KrigingR_G( dataSWE.(den) );
-    end
-save('MonteCarloOKtemp.mat','-v7.3') %save current data to temp file
-clock
-    end
+%     %Generates gridcell-averaged b_w values for input to the OK algorithm
+%     for d = 1:8;    den = options.DenOpt{d};
+%     [ inputSWE.(den), TOPOdata ] = ObsInCell( fullSWE.(den).input, topo_sampled);
+%     end
+% 
+%     %Generates normal distribution of b_w values based on zigzag std for each
+%     %glacier and a set of randomly chosen values from this distribution to add
+%     %to the input data (sigma_GS)
+%     varSIG = [0.027, 0.035, 0.04];      %zigzag std
+%     for g = 1:3;    glacier = options.glacier{g};
+%         varPD.(glacier)   = makedist('Normal','mu',0,'sigma',varSIG(g));    %normal distributions
+%         varSWE.(glacier)  = random(varPD.(glacier), length(inputSWE.S1.(glacier)),1000);   %set of b_w values to add 
+%     end
+% 
+%     %Initializing variables for uncertainty plotting (table format)   
+%     OKsigmaGS.mean = table(zeros(8,1),zeros(8,1),zeros(8,1),'VariableNames',options.glacier,'RowNames',options.DenOpt);
+%         OKsigmaGS.std  = OKsigmaGS.mean;      stdDen = OKsigmaGS.mean;
+%     OKsigmaINT.mean = OKsigmaGS.mean;     OKsigmaINT.std = OKsigmaGS.mean;
+%     OKsigmaALL     = table(zeros(2,1),zeros(2,1),zeros(2,1),'VariableNames',options.glacier,'RowNames',{'mean','std'});
+%     OKsigmaRHO     = OKsigmaALL;     
+% 
+%             clear g glacier varPD den d fullSWE topo_sampled
+% 
+% %% Basic kriging (no Monte Carlo) to get distributed b_w        
+%         
+% clc; format shortg; clock
+%     for d = 1:8        
+%         den = options.DenOpt{d};
+%         display(den)    %Displays which density option the code is on at the moment 
+%     %Kriging
+%       fullOK.(den) =  KrigingR_G( inputSWE.(den) );
+% clock
+%     end
+% 
+% 
+% %Getting mean and std of Bw for plotting
+% %(***sigma_INT***)
+%     for d = 1:8;    den = options.DenOpt{d};
+%     for g = 1:3;    glacier = options.glacier{g};
+%         OKsigmaINT.mean{d,g}  = nanmean(fullOK.(den).(glacier).pred(:));
+%         OKsigmaINT.std{d,g}   = sqrt(nanmean(fullOK.(den).(glacier).std(:).^2));  %glacier-wide std = sqrt of average variance  
+%         
+%             X = 0:0.01:1.5;
+%         BwKRIGinterp.(den).(glacier) = normpdf(X, OKsigmaINT.mean{d,g}, OKsigmaINT.std{d,g});
+%     end
+%     end
+%     
+% %(***sigma_RHO***)
+%     for g = 1:3; glacier = options.glacier{g};
+%         OKsigmaRHO{1,g} = mean(OKsigmaINT.mean.(glacier));
+%         OKsigmaRHO{2,g} = std(OKsigmaINT.mean.(glacier));
+%     end
+%     clear d den g glacier
+% 
+% save('MonteCarloOKtemp.mat','-v7.3')
+%     
+% %% Kriging of the input data with Monte Carlo
+% %  # multistarts = 50
+% %  ordinary kriging prediction
+% 
+% numMC = 1000;    %Number of Monte Carlo runs (paper says 1000)
+% 
+% clc; format shortg; clock
+%     for d = 1
+%         den = options.DenOpt{d};
+%         display(den)    %Displays which density option the code is on at the moment 
+% 
+%     for mc = 501:numMC
+%         if floor(mc/10)==mc/10; display(num2str(mc)); end %Displays which MC run the code is on
+% 
+%     %Adds the sigma_GS variability to input data
+%         for g = 1:3;        glacier = options.glacier{g};
+%             dataSWE.(den).(glacier)      = inputSWE.(den).(glacier);
+%             dataSWE.(den).(glacier)(:,1) = inputSWE.(den).(glacier)(:,1) + varSWE.(glacier)(:,mc);
+%             I = (dataSWE.(den).(glacier)(:,1)<0);
+%             dataSWE.(den).(glacier)(I,1) = 0;
+%         end
+% 
+%     %Kriging
+%       KRIGzz.(den)(mc) =  KrigingR_G( dataSWE.(den) );
+%     end
+% save('MonteCarloOKtemp.mat','-v7.3') %save current data to temp file
+% clock
+%     end
 
 %% Calculating glacier-wide winter balance for plotting purposes
 
@@ -197,4 +198,4 @@ end
         clear F G A H U W X d D den g glacier i j n p runs s ans %clearing needed temporary variables
         
 %% Save final data set
-save('MonteCarloOK.mat')
+save('MonteCarloOK500_full.mat')
