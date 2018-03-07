@@ -54,7 +54,7 @@ t = cputime;
 %load Full.mat; load TopoSWE.mat
 %clear fullQbeta
 
-for d = 1:8
+for d = 3%1:8
     den = options.DenOpt{d};
 [ dataSWE.(den), TOPOdata ] = ObsInCell( fullSWE.(den).input, topo_sampled);
     
@@ -94,6 +94,27 @@ end
 end
 clock
 e = (cputime-t)/60/60
+
+%STD of b_w 
+    den = options.DenOpt{3};
+
+    for g = 1:3;        glacier = options.glacier{g};
+        stack = zeros(options.mapsize(g,1),options.mapsize(g,2),1000);
+    for mc = 1:1000
+        stack(:,:,mc) = LRtemp.(den)(mc).(glacier);
+    end
+        stdMap.LR.int.(glacier) = std(stack,[],3);
+    end
+    
+    figure(1)
+    for g = 1:3;        glacier = options.glacier{g};
+        subplot(1,3,g)
+        imagesc(stdMap.LR.int.(glacier))
+           
+        max(stdMap.LR.int.(glacier)(:))
+    end
+
+
 
 %save('WSMBDistribution.mat','var*','LR*','options','-v7.3')
 

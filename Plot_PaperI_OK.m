@@ -10,6 +10,99 @@ figure(6); clf
 PlotTopoParameter_IGS(inputOK, 'modelledSWE', 'b_w (m w.e.)', SWE, 'black', 'massB')
 	saveFIG_IGS('OK_map',2,8.6)
 
+%% STD MAP
+
+ % INTERPOLATION
+%OK     
+load Full.mat
+for g = 1:3;    glacier = options.glacier{g};
+    stdMap.OK.int.(glacier) = fullOK.S2.(glacier).std;
+    max(stdMap.OK.int.(glacier)(:))
+end
+
+    
+ % DENSITY
+ for i = 1:2
+    for g = 1:3;        glacier = options.glacier{g};
+        stack = zeros(options.mapsize(g,1),options.mapsize(g,2),8);
+    for d = 1:8;        den = options.DenOpt{d};
+        if i == 1;      stack(:,:,d) = fullLR.(den).(glacier);        t = 'LR'; 
+        elseif i ==2;   stack(:,:,d) = fullSK.(den).(glacier).pred;   t = 'OK';
+        end
+    end
+        stdMap.(t).den.(glacier) = std(stack,[],3);
+            max(stdMap.(t).den.(glacier)(:))
+    end
+  end
+ 
+ % GRIDCELL
+ %LR
+        %load('LRstdGS.mat')
+     for g = 1:3;        glacier = options.glacier{g};
+         stack = zeros(options.mapsize(g,1),options.mapsize(g,2),1000);
+     for mc = 1:1000
+        stack(:,:,mc) = LRstdGS(mc).(glacier);
+     end
+     stdMap.LR.gs.(glacier) = std(stack,[],3);
+     end
+     
+ %OK    
+     for g = 1:3;        glacier = options.glacier{g};
+         stack = zeros(options.mapsize(g,1),options.mapsize(g,2),500);
+     for mc = 1:500
+        stack(:,:,mc) = KRIGzz.S2(mc).(glacier).pred;
+     end
+     stdMap.OK.gs.(glacier) = std(stack,[],3);
+     end
+
+
+% COMBINING ALL
+     for g = 1:3;        glacier = options.glacier{g};
+         clear S
+        S(:,:,1) = stdMap.LR.int.(glacier);
+        S(:,:,2) = stdMap.LR.den.(glacier); 
+        S(:,:,3) = stdMap.LR.gs.(glacier);
+        stdMap.LR.ALL.(glacier) = sqrt(sum(S.^2,3));
+        
+        S(:,:,1) = stdMap.OK.int.(glacier);
+        S(:,:,2) = stdMap.OK.den.(glacier); 
+        S(:,:,3) = stdMap.OK.gs.(glacier);
+        stdMap.OK.ALL.(glacier) = sqrt(sum(S.^2,3));
+            max(stdMap.LR.ALL.(glacier)(:))
+     end
+   %%  
+   load stdMap.mat
+   lr_scale = 0.1;
+   ok_scale = 0.2;
+   
+figure(6); clf
+PlotTopoParameter_IGS(stdMap.LR.gs, 'summer', 'STD of b_w (m w.e.)', SWE, 'black', 'massB',lr_scale)
+	saveFIG_IGS('LRstd_map_gridcell',2,8.6)
+figure(7); clf
+PlotTopoParameter_IGS(stdMap.OK.gs, 'summer', 'STD of b_w (m w.e.)', SWE, 'black', 'massB',ok_scale)
+	saveFIG_IGS('OKstd_map_gridcell',2,8.6)
+     
+figure(6); clf
+PlotTopoParameter_IGS(stdMap.LR.den, 'summer', 'STD of b_w (m w.e.)', SWE, 'black', 'massB',lr_scale)
+	saveFIG_IGS('LRstd_map_density',2,8.6)
+figure(7); clf
+PlotTopoParameter_IGS(stdMap.OK.den, 'summer', 'STD of b_w (m w.e.)', SWE, 'black', 'massB',ok_scale)
+	saveFIG_IGS('OKstd_map_density',2,8.6)
+  
+figure(6); clf
+PlotTopoParameter_IGS(stdMap.LR.int, 'summer', 'STD of b_w (m w.e.)', SWE, 'black', 'massB',lr_scale)
+	saveFIG_IGS('LRstd_map_int',2,8.6)
+figure(7); clf
+PlotTopoParameter_IGS(stdMap.OK.int, 'summer', 'STD of b_w (m w.e.)', SWE, 'black', 'massB',ok_scale)
+	saveFIG_IGS('OKstd_map_int',2,8.6)
+         
+figure(6); clf
+PlotTopoParameter_IGS(stdMap.LR.ALL, 'summer', 'Combined STD of b_w (m w.e.)', SWE, 'black', 'massB',lr_scale)
+	saveFIG_IGS('LRstd_map_ALL',2,8.6)
+figure(7); clf
+PlotTopoParameter_IGS(stdMap.OK.ALL, 'summer', 'Combined STD of b_w (m w.e.)', SWE, 'black', 'massB',ok_scale)
+	saveFIG_IGS('OKstd_map_ALL',2,8.6)
+
 %% WSMB Distribution - LR & SK sources of var
 
 %clear; close all
@@ -126,10 +219,10 @@ saveFIG_IGS('WSMBDist',2,9.5)
 
 %% WSMB Distribution - total spatial variability 
 
-load varWSMB.mat D* 
-load MonteCarloOK.mat DOK
-load TopoSWE.mat SWE
-run OPTIONS
+% load varWSMB.mat D* 
+% load MonteCarloOK.mat DOK
+ load TopoSWE.mat SWE
+% run OPTIONS
     D.OK = DOK;
 
 for o = 2%1:2
@@ -153,20 +246,33 @@ PlotTopoParameter_IGS(DPlot,'summer','Relative uncertainity',SWE,'none','nomassB
 end
 
 
-%% 100 runs vs 500 runs (S1)
+%% 1000 runs vs 500 runs (S1)
 
+for g = 1:3;    glacier = options.glacier{g};
+for d = 1;    den = options.DenOpt{d};
+
+%Calculate glacier-wide winter balance and std for all runs
+%(***sigms_GS***)
+    for mc = 1:500
+        BwKRIGzz500.(den).(glacier)(mc) = nanmean(KRIGzz500.(den)(mc).(glacier).pred(:));               
+    end
+    for mc = 1:1000
+        BwKRIGzz1000.(den).(glacier)(mc) = nanmean(KRIGzz1000.(den)(mc).(glacier).pred(:));               
+    end
+end
+end
         clf;
         M = zeros(2,3); S = M;
 for g = 1:3; glacier = options.glacier{g};
    subplot(1,3,g)
-   histogram(BwKRIGzz500.S1.(glacier),20,'FaceAlpha',0.7,'EdgeColor','none'); hold on
-   histogram(BwKRIGzz100.S1.(glacier),20,'FaceAlpha',0.7,'EdgeColor','none')
-        if g ==3; legend('500 runs','100 runs'); end
+   histogram(BwKRIGzz1000.S1.(glacier),20,'FaceAlpha',0.7,'EdgeColor','none'); hold on
+   histogram(BwKRIGzz500.S1.(glacier),20,'FaceAlpha',0.7,'EdgeColor','none')
+        if g ==3; legend('1000 runs','500 runs'); end
         title(glacier)
         xlabel('Glacier-wide WB (m w.e.)'); 
         if g ==1; ylabel({'OK probablity','density'}); end
-   M(1,g) = mean(BwKRIGzz500.S1.(glacier));        M(2,g) = mean(BwKRIGzz100.S1.(glacier));
-   S(1,g) = std(BwKRIGzz500.S1.(glacier));         S(2,g) = std(BwKRIGzz100.S1.(glacier));
+   M(1,g) = mean(BwKRIGzz500.S1.(glacier));        M(2,g) = mean(BwKRIGzz1000.S1.(glacier));
+   S(1,g) = std(BwKRIGzz500.S1.(glacier));         S(2,g) = std(BwKRIGzz1000.S1.(glacier));
 
 end
     saveFIG_IGS('MCruns1000vs500',2,8.6)

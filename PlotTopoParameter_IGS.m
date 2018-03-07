@@ -1,4 +1,4 @@
-function [ ] = PlotTopoParameter_IGS( topoParam, paramName, cLabel, SWE, sweDOTS, massB)
+function [ ] = PlotTopoParameter_IGS( topoParam, paramName, cLabel, SWE, sweDOTS, massB, colormax)
 %Inputs: data structure, parameter name, colorbar label, full SWE, color of
 %dots, 'massB'
 %Color of dots: black, colour, sweONswe, symmetric
@@ -25,7 +25,7 @@ if fixed_color == 0
     maxSWE  = nanmax([SWE(1).swe(:);SWE(2).swe(:);SWE(3).swe(:)]);
 elseif fixed_color == 1
     x_min = 0;      minSWE  = x_min;
-    x_max = 1;    maxSWE  = x_max;
+    x_max = colormax;    maxSWE  = x_max;
 end
 
 G13size = size(topoParam.G13);
