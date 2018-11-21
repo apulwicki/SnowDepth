@@ -18,6 +18,7 @@ global options
 
 for g = 1:3 %For all glaciers
 %% Make Cal Val data sets
+
  %Initialize
     glacier = options.glacier{g}; display(['glacier = ', glacier]);
     y = swe.(glacier)(:,1);
@@ -48,8 +49,8 @@ for i = 1:runs                                  %for number of runs
         save mat2R.mat sweG topoG
         
          %Run BMS code in R though the terminal
-        !R CMD BATCH BMS_matlab.R
-        %!/usr/local/bin/R CMD BATCH BMS_matlab.R
+        %!R CMD BATCH BMS_matlab.R
+        !/usr/local/bin/R CMD BATCH BMS_matlab.R
         
          %Load data from R
         load R2mat.mat                                  
@@ -82,6 +83,7 @@ semiR = table(zeros(length(beta),1),'RowNames',beta);    %initalize
 semiR.Properties.VariableNames = {'SemiR2'};
 
     M = struct2table(topoSampled.(glacier));
+try
 cx = cov([y,M{:,:}]);   %Covariance matrix of data
 dx = inv(cx);           %Inverse covariance matrix
 pc = -corrcov(dx);      %Convert correlations to covariance
@@ -96,7 +98,11 @@ semiR{:,1} = kk(1,2:end)';  %Assign to table
     %Alternative method = calculate residuals of var of interest with other
     %vars and then correlate residuals with y {res = fitlm([deg',disp'],BC); 
     %corr(hl',res.Residuals.Raw)}
-
+catch
+   semiR{:,1} =  NaN([length(beta),1]);
+   disp('Error handled')
+end
+    
 %--------Univariate R-squared
 uniR = table(zeros(length(beta),1),'RowNames',beta);    %initalize
 uniR.Properties.VariableNames = {'UnivarR2'};

@@ -150,10 +150,10 @@ for g = 1:3;    glacier = options.glacier{g};
 end
 
 figure(6); clf
-PlotTopoParameter_IGS(fullLR.S2, 'modelledSWE', 'b_w (m w.e.)', SWE, 'black', 'massB')
+PlotTopoParameter_IGS(fullLR.S2, 'modelledSWE', 'b_w (m w.e.)', SWE, 'black', 'massB',1)
 	saveFIG_IGS('LR_map',2,8.6)
 figure(6); clf
-PlotTopoParameter_IGS(inputOK, 'modelledSWE', 'b_w (m w.e.)', SWE, 'black', 'massB')
+PlotTopoParameter_IGS(inputOK, 'modelledSWE', 'b_w (m w.e.)', SWE, 'black', 'massB',1)
 	saveFIG_IGS('OK_map',2,8.6)
 
 %% Interp Method - Observed vs Estimated SWE

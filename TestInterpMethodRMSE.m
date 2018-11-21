@@ -97,7 +97,8 @@ load Full.mat
 
     yObserved  = ObsInCell(SWE, topo_sampled);
 
-for d = 1%:8;    den = options.DenOpt{d};
+for d = 2%:8;    
+    den = options.DenOpt{d};
     yEstimated = SampledCell(fullLR.(den));
 
 for g = 1:3;    glacier = options.glacier{g};
@@ -117,3 +118,21 @@ end
 end
 
 
+%% RMSE between observed and predicted values
+
+% load TopoSWE.mat 
+% load Full.mat
+
+    yObserved  = ObsInCell(SWE, topo_sampled);
+rmse = zeros(3,8);
+
+for d = 1:8    
+    den = options.DenOpt{d};
+    yEstimated = SampledCell(fullLR.(den));
+
+for g = 1:3;    glacier = options.glacier{g};
+
+    rmse(g,d) = sum((yObserved(g).swe-yEstimated.(glacier)).^2)/length(yEstimated.(glacier));
+    
+end
+end

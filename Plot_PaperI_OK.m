@@ -8,7 +8,7 @@ end
 
 figure(6); clf
 PlotTopoParameter_IGS(inputOK, 'modelledSWE', 'b_w (m w.e.)', SWE, 'black', 'massB')
-	saveFIG_IGS('OK_map',2,8.6)
+% 	saveFIG_IGS('OK_map',2,8.6)
 
 %% STD MAP
 
@@ -279,29 +279,43 @@ end
 %% Updating tables
 
 %Table 3 (Bw and RMSE)
-OKsigmaALL{1,:}
+%OKsigmaALL{1,:}
+
+load TopoSWE.mat 
+load Full.mat
+    yObserved  = ObsInCell(SWE, topo_sampled);
 
         RMSE = zeros(8,3);
 for d = 1:8;    den = options.DenOpt{d};
 for g = 1:3; glacier = options.glacier{g};
-    InP.(glacier) = fullOK.(den).(glacier).pred;
+%     InP.(glacier) = fullOK.(den).(glacier).pred;
+    InP.(glacier) = fullLR.(den).(glacier);
 end
     est.(den) = SampledCell(InP); %Model values
 end
 
 for d = 1:8;    den = options.DenOpt{d};
 for g = 1:3; glacier = options.glacier{g};
-    RMSE(d,g) = sqrt(mean((est.(den).(glacier)-inputSWE.(den).(glacier)(:,1)).^2));
+    RMSE(d,g) = sqrt(mean((est.(den).(glacier)-yObserved(g).swe).^2));
 end
 end
 mean(RMSE)
 
-mean(RMSE)./OKsigmaALL{1,:}*100
+
+for d = 3;    den = options.DenOpt{d};
+for g = 1:3; glacier = options.glacier{g};
+%     Bw = nanmean(nanmean(fullOK.(den).(glacier).pred))
+    Bw = nanmean(nanmean(fullLR.(den).(glacier)))
+end
+end
 
 
-
-%Table 4 (std of distribution)
-mean(OKsigmaGS.std{:,:})*10^2
-OKsigmaRHO{2,:}*10^2
-mean(OKsigmaINT.std{:,:})*10^2
-OKsigmaALL{2,:}*10^2
+% % mean(RMSE)./OKsigmaALL{1,:}*100
+% % 
+% % 
+% % 
+% % %Table 4 (std of distribution)
+% % mean(OKsigmaGS.std{:,:})*10^2
+% % OKsigmaRHO{2,:}*10^2
+% % mean(OKsigmaINT.std{:,:})*10^2
+% % OKsigmaALL{2,:}*10^2

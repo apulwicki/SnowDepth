@@ -1,7 +1,7 @@
 
-R version 3.2.3 (2015-12-10) -- "Wooden Christmas-Tree"
-Copyright (C) 2015 The R Foundation for Statistical Computing
-Platform: x86_64-pc-linux-gnu (64-bit)
+R version 3.3.1 (2016-06-21) -- "Bug in Your Hair"
+Copyright (C) 2016 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin13.4.0 (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -34,23 +34,25 @@ The following objects are masked from ‘package:base’:
     getOption, isOpen
 
 > 
-> importG = readMat('/home/glaciology1/Documents/Data/SnowDepth/BMS/mat2R.mat')
-> #importG = readMat('/Users/Alexandra/Documents/SFU/Data/SnowDepth/BMS/mat2R.mat')
+> #importG = readMat('/home/glaciology1/Documents/Data/SnowDepth/BMS/mat2R.mat')
+> importG = readMat('/Users/Alexandra/Documents/SFU/Data/SnowDepth/BMS/mat2R.mat')
 > 
 > #Glacier data
 >     params = attr(importG$topoG, "dimnames")[[1]]
 >     params = c("swe",params)
 >     elevation = importG$topoG[1]
->     centreD = importG$topoG[2]
->     aspect = importG$topoG[3]
->     slope = importG$topoG[4]
->     northness = importG$topoG[5]
->     curvature = importG$topoG[6]
->     Sx = importG$topoG[7]
-> G = data.frame(importG$sweG,  elevation, centreD, aspect, slope, northness, curvature, Sx)
+>     #centreD = importG$topoG[2]
+>     #aspect = importG$topoG[3]
+>     slope = importG$topoG[2]
+>     #northness = importG$topoG[5]
+>     curvature = importG$topoG[3]
+>     Sx = importG$topoG[4]
+> #G = data.frame(importG$sweG,  elevation, centreD, aspect, slope, northness, curvature, Sx)
+> G = data.frame(importG$sweG,  elevation, slope, curvature, Sx)
 > colnames(G) = params
 > 
-> rm(aspect, elevation, northness, curvature, slope, Sx, centreD, params, importG)
+> #rm(aspect, elevation, northness, curvature, slope, Sx, centreD, params, importG)
+> rm(elevation, curvature, slope, Sx, params, importG)
 >   
 > 
 > ####### Glacier BMS ##########
@@ -83,10 +85,10 @@ The following objects are masked from ‘package:base’:
 >      Gcoeffs = data.frame(GC_uni)
 > 
 > ###### Saving to matlab file  
->   writeMat('/home/glaciology1/Documents/Data/SnowDepth/BMS/R2mat.mat',Gcoeffs=Gcoeffs,
-+            fixNames=TRUE, matVersion="5", onWrite=NULL, verbose=FALSE)
-> #  writeMat('/Users/Alexandra/Documents/SFU/Data/SnowDepth/BMS/R2mat.mat',Gcoeffs=Gcoeffs,
+> #  writeMat('/home/glaciology1/Documents/Data/SnowDepth/BMS/R2mat.mat',Gcoeffs=Gcoeffs,
 > #           fixNames=TRUE, matVersion="5", onWrite=NULL, verbose=FALSE)
+>   writeMat('/Users/Alexandra/Documents/SFU/Data/SnowDepth/BMS/R2mat.mat',Gcoeffs=Gcoeffs,
++            fixNames=TRUE, matVersion="5", onWrite=NULL, verbose=FALSE)
 >     
 >     
 >     
@@ -106,4 +108,4 @@ The following objects are masked from ‘package:base’:
 > 
 > proc.time()
    user  system elapsed 
-  0.604   0.012   0.616 
+  1.315   0.122   2.900 

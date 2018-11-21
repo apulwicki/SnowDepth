@@ -28,6 +28,11 @@ fullWB = fullLR.S2;
 % Obtaining pattern data for utm, topo, and wb
 
  %Get csv files
+% pattern.Circle = csvread('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Sampling/CellNum_Circle.csv',1,0);
+% pattern.Centreline = csvread('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Sampling/CellNum_Centreline.csv',1,0);
+% pattern.CentreTransect = csvread('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Sampling/CellNum_Transverse.csv',1,0);
+% pattern.Hourglass = csvread('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Sampling/CellNum_Hourglass.csv',1,0);
+% pattern.HourCircle = csvread('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Sampling/CellNum_HourglassCircle.csv',1,0);
 pattern.Circle = csvread('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Sampling/CellNum_Circle.csv',1,0);
 pattern.Centreline = csvread('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Sampling/CellNum_Centreline.csv',1,0);
 pattern.CentreTransect = csvread('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Sampling/CellNum_Transverse.csv',1,0);
@@ -374,3 +379,35 @@ end
 plot(Dtravel);
 
 
+%% Basic LR on all data
+
+%Get basic LR coeffs
+for g = 1:3
+    glacier = char(options.glacier(g));
+    X = [struct2table(topo_sampled.(glacier)), table(SWE(g).swe,'VariableNames',{'swe'})];
+    basicLR.(glacier) = fitlm(X);
+end
+
+% Plot with full LR from paper
+cmap = cbrewer('qual','Dark2',3);
+figure(1);  clf
+load Full.mat fullLR 
+
+    %full LR coeffs
+betas = zeros(7,3,8);
+for d = 1:8; den = options.DenOpt{d};
+    betas(:,:,d) = fullLR.(den).coeff{1:7,:}; 
+end
+fullLR_coeff = mean(betas,3);
+
+title_list = {'G4','G2','G13'};
+for g=1:3
+    coeffs = [basicLR.(glacier).Coefficients{2:8,1}, fullLR_coeff(:,g)];
+    subplot(1,3,g)
+    B = bar(coeffs, 'EdgeColor','none');
+    for i = 1:2; B(i).FaceColor = cmap(i,:); end
+    legend('Basic','Full')
+    title(title_list(g))
+    set(gca,'xticklabel',options.topoVars)
+end
+  

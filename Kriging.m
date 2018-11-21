@@ -109,7 +109,7 @@ end
 
     load Full.mat fullRK
     load TopoSWE.mat SWE
-PlotTopoParameter(fullRK.S2,'RK', 'SWE (m w.e.)', SWE, 'black', 'massB')   
+PlotTopoParameter(fullRK.S2, 'RK', 'SWE (m w.e.)', SWE, 'colour', 'massB')   
     saveFIG('RegressionKriging',18,'3G')
 
     
