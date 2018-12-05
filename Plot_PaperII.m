@@ -22,7 +22,7 @@ end
 
 %% Figure 3 - Synthetic data WB 
 %    clear
-%load Patterns.mat 
+load Patterns.mat 
 load Patterns.mat pUTM
 load Full.mat fullLR 
 run OPTIONS
@@ -48,7 +48,8 @@ run OPTIONS
 [ha, ~] = tight_subplot(3,length(namesP),[0.01 .01],[.08 0],[.05 0]);
 for g = 1:3; glacier = options.glacier{g};
 for p = 1:length(namesP)
-   numPoints = 8:size(SynObs_High.(namesP{p}).(glacier),1);
+%    numPoints = 8:size(SynObs_High.(namesP{p}).(glacier),1);
+   numPoints = 6:3:45;
 
     M1   = mean(SynObs_High.(namesP{p}).(glacier)(8:end,:),2);
     M2   = mean(SynObs_Low.(namesP{p}).(glacier)(8:end,:),2);   

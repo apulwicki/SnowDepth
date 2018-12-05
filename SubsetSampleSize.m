@@ -23,7 +23,7 @@ for g = 1:3;    glacier = options.glacier{g};
     end
     
     end
-        UTMout.Random.(glacier)(:,1) = [];
+%         UTMout.Random.(glacier)(:,1) = [];
 end
 end
 

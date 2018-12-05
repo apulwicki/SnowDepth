@@ -30,10 +30,16 @@ rm(elevation, curvature, slope, Sx, params, importG)
   
     ##uniform prior model
       #mprior is uniform model prior, used UPI
-      attG = bms(G, mprior = "uniform", user.int = F)
+     
+      #attG = bms(G, mprior = "uniform", user.int = F)
+      attG = tryCatch(bms(G, mprior = "uniform", user.int = F), error=function(e) NA)
           #get coefficients
-        GC_uni = coef(attG,order.by.pip = F,include.constant = T)
-    
+          bad_form = data.frame(matrix(0, ncol = 5, nrow = 5))
+         colnames(bad_form) = c("Post_Mean", "Post_SD", "PIP", "Cond_Pos_Sign")
+       GC_uni = tryCatch(coef(attG,order.by.pip = F,include.constant = T), error=function(e) bad_form)
+ 
+   Gcoeffs = data.frame(GC_uni)
+       
     ##binomial prior model
 #    att_fixedG = bms(G, mprior = "fixed", mprior.size = 2, user.int = T)
 #        GC_fix = coef(att_fixedG, order.by.pip = F, include.constant = T)
@@ -53,7 +59,7 @@ rm(elevation, curvature, slope, Sx, params, importG)
     ###return coeffs as structure
 #    Gcoeffs = data.frame(GC_uni, GC_fix, GC_rand, GC_vari, GC_mcmc)
 #    Gcoeffs = data.frame(GC_uni, GC_fix, GC_rand, GC_vari)
-     Gcoeffs = data.frame(GC_uni)
+#     Gcoeffs = data.frame(d)
 
 ###### Saving to matlab file  
 #  writeMat('/home/glaciology1/Documents/Data/SnowDepth/BMS/R2mat.mat',Gcoeffs=Gcoeffs,
