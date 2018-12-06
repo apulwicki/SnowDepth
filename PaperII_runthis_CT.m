@@ -34,11 +34,11 @@ for g = 1:3;    glacier = options.glacier{g};
     TOPOdata_temp.(glacier) = rmfield(TOPOdata_temp.(glacier),'northness');
 end
 
-BMS_CentreTransect.G4 = zeros(maxN, numRand,7);
-BMS_CentreTransect.G2 = zeros(maxN, numRand,7);
-BMS_CentreTransect.G13 = zeros(maxN, numRand,7);
+% BMS_CentreTransect.G4 = zeros(maxN, numRand,7);
+% BMS_CentreTransect.G2 = zeros(maxN, numRand,7);
+% BMS_CentreTransect.G13 = zeros(maxN, numRand,7);
 
-for n = 6:3:maxN
+for n = 15:3:20
 
  for x = 1:numRand  
      disp([type, ' n=',num2str(n), ' run=',num2str(x)])

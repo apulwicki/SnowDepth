@@ -53,9 +53,14 @@ for i = 1:runs                                  %for number of runs
 %         !/usr/local/bin/R CMD BATCH BMS_matlab.R  
         
         %Load data from R
-       load R2mat_RN.mat
-       delete R2mat_RN.mat
-
+       try
+            load R2mat_RN.mat 
+            delete R2mat_RN.mat
+        catch
+            !R --no-save CMD BATCH BMS_matlab_RN.R
+            load R2mat_RN.mat 
+            delete R2mat_RN.mat
+        end
             
          %Make table of coefficients for each run
             tableCol = {'Coefficient','SD', 'PIP','PSP'};   %variable names

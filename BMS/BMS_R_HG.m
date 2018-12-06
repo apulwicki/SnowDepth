@@ -53,9 +53,15 @@ for i = 1:runs                                  %for number of runs
 %         !/usr/local/bin/R CMD BATCH BMS_matlab.R  
         
         %Load data from R
-        load R2mat_HG.mat
-        delete R2mat_HG.mat
-            
+        try
+            load R2mat_HG.mat 
+            delete R2mat_HG.mat
+        catch
+            !R --no-save CMD BATCH BMS_matlab_HG.R
+            load R2mat_HG.mat 
+            delete R2mat_HG.mat
+        end
+        
          %Make table of coefficients for each run
             tableCol = {'Coefficient','SD', 'PIP','PSP'};   %variable names
             tableRow = [heads; {'Intercept'}];              %parameters names as row names

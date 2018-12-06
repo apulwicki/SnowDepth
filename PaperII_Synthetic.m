@@ -1,3 +1,8 @@
+%% Set up
+%file_path = '/Users/Alexandra/Documents/SFU/Data/SnowDepth/';
+file_path = '/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Sampling/';
+
+load PaperII_Syntheic.mat
 %% Get synthetic snow distributions
 
 % Beta coeff ranges
@@ -16,8 +21,8 @@ curv_beta   = normrnd(mean(curv_range), std(curv_range), [1,num_models]);
 slope_beta  = normrnd(mean(slope_range),std(slope_range),[1,num_models]);
 
 % Generate snow dist models
-load TopoSWE.mat topo_full
-run OPTIONS.m
+% load TopoSWE.mat topo_full
+% run OPTIONS.m
 
     % Remove dc, aspect and Northness
     for g = 1:3;    glacier = options.glacier{g};
@@ -45,7 +50,6 @@ for g = 1:3;    glacier = options.glacier{g};
     
 end
 end
-    clear c g glacier m param slope* sx* topo* curv* elev* betaCoeff intercept sweT syn_model
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -53,7 +57,7 @@ end
 
 % Get WB field that is the "true" field
    % clear; close all
-load TopoSWE.mat topo_full
+% load TopoSWE.mat topo_full
 
  %Make matrix with utm of each grid cell
 for g = 1:3;    glacier = options.glacier{g};
@@ -66,30 +70,21 @@ minN = min(options.rig.(glacier)(:,2));
     utmGridE.(glacier) = repmat([1:nE]*40+minE,nN,1);   
     utmGridN.(glacier) = repmat([nN:-1:1]'*40+minN,1,nE); 
 end
- clear g* min* n*
+%  clear g* min* n*
 
-for mc = 1%:num_models
+for mc = 1:num_models
 
 %Additing noise to distributed WB
 fullWB = snowdist_model(mc);
-%     for g = 1:3;    glacier = options.glacier{g};
-%     noise = normrnd( 0, options.zzstd(g), size(fullWB.(glacier),1),size(fullWB.(glacier),2));
-%     fullWB.(glacier) = fullWB.(glacier) + noise;
-%     end
  
 % Obtaining pattern data for utm, topo, and wb
 
  %Get csv files
-% pattern.Circle = csvread('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Sampling/CellNum_Circle.csv',1,0);
-% pattern.Centreline = csvread('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Sampling/CellNum_Centreline.csv',1,0);
-% pattern.CentreTransect = csvread('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Sampling/CellNum_Transverse.csv',1,0);
-% pattern.Hourglass = csvread('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Sampling/CellNum_Hourglass.csv',1,0);
-% pattern.HourCircle = csvread('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Sampling/CellNum_HourglassCircle.csv',1,0);
-pattern.Circle = csvread('/Users/Alexandra/Documents/SFU/Data/SnowDepth/CellNum_Circle.csv',1,0);
-pattern.Centreline = csvread('/Users/Alexandra/Documents/SFU/Data/SnowDepth/CellNum_Centreline.csv',1,0);
-pattern.CentreTransect = csvread('/Users/Alexandra/Documents/SFU/Data/SnowDepth/CellNum_Transverse.csv',1,0);
-pattern.Hourglass = csvread('/Users/Alexandra/Documents/SFU/Data/SnowDepth/CellNum_Hourglass.csv',1,0);
-pattern.HourCircle = csvread('/Users/Alexandra/Documents/SFU/Data/SnowDepth/CellNum_HourglassCircle.csv',1,0);
+pattern.Circle = csvread([file_path,'CellNum_Circle.csv'],1,0);
+pattern.Centreline = csvread([file_path,'CellNum_Centreline.csv'],1,0);
+pattern.CentreTransect = csvread([file_path,'CellNum_Transverse.csv'],1,0);
+pattern.Hourglass = csvread([file_path,'CellNum_Hourglass.csv'],1,0);
+pattern.HourCircle = csvread([file_path,'CellNum_HourglassCircle.csv'],1,0);
 
 namesP = fieldnames(pattern);
 for p = 1:length(namesP)
@@ -128,17 +123,13 @@ end
        pTOPO.(namesP{p}).(glacier).(topoparams{f})(i,1) = topo_full.(glacier).(topoparams{f})(t2,t1); 
        end
     end
-% figure(p)
-% subplot(1,3,g)
-% plot(pUTM.(namesP{p}).(glacier)(:,1),pUTM.(namesP{p}).(glacier)(:,2),'.')
 end
 end
 
 % RANDOM - SAFE AREA   
 sizeR = 200;
 
-% cells = dlmread('/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Sampling/SafeArea.csv');
-cells = dlmread('/Users/Alexandra/Documents/SFU/Data/SnowDepth/SafeArea.csv');
+cells = dlmread([file_path,'SafeArea.csv']);
 
 cells = cells(1:5:end-5,2:3);   
 Gsplit = [1, 1950, 3235, length(cells)]; Gsplit = flip(Gsplit);
@@ -169,37 +160,22 @@ Gsplit = [1, 1950, 3235, length(cells)]; Gsplit = flip(Gsplit);
     end
  end
 
-
-namesP = fieldnames(pWB);
-for p = 1:length(namesP)
-for g = 1:3;    glacier = options.glacier{g};
-    pTOPO.(namesP{p}).(glacier) = rmfield(pTOPO.(namesP{p}).(glacier),'centreD');
-    pTOPO.(namesP{p}).(glacier) = rmfield(pTOPO.(namesP{p}).(glacier),'aspect');
-    pTOPO.(namesP{p}).(glacier) = rmfield(pTOPO.(namesP{p}).(glacier),'northness');
-%     pTOPO.(namesP{p}).(glacier) = rmfield(pTOPO.(namesP{p}).(glacier),'slope');
-%     pTOPO.(namesP{p}).(glacier) = rmfield(pTOPO.(namesP{p}).(glacier),'curvature');
-%     pTOPO.(namesP{p}).(glacier) = rmfield(pTOPO.(namesP{p}).(glacier),'Sx');
-end
-end
-    clear c* data f* g* i param row Gsplit safeR
-    clear e f g* i* I* n* p pattern t1 t2 topoparams utm* wb WB*
-
-load PaperII_AblationArea.mat AblationArea
+% load PaperII_AblationArea.mat AblationArea
 for g=1:3; glacier = options.glacier{g};
 AblationArea.(glacier)(AblationArea.(glacier)==-0.1)=NaN;
 AblationArea.(glacier)(~isnan(AblationArea.(glacier)))=1;
 end
     
 %%
-namesP = fieldnames(pWB);
-    %namesP = {'hourglass'};
+% namesP = fieldnames(pWB);
+ namesP = {'RandomSafe'};
 
 real_measure = SampledCell(snowdist_model(mc));
 
-for p = 1%:length(namesP)
+for p = 1:length(namesP)
 
 for ss = 6:3:45%length(pWB.(namesP{p}).(glacier))
-   display([' Sample size: ',num2str(ss),' Pattern: ',namesP{p}])
+   display([' Sample size: ',num2str(ss),' Pattern: ',namesP{p}, ' Run:',num2str(mc)])
 
    [WBinput(ss), TOPOinput(ss), UTMinput(ss)] = SubsetSampleSize( pWB, pTOPO, pUTM, ss );
 
@@ -213,7 +189,7 @@ for ss = 6:3:45%length(pWB.(namesP{p}).(glacier))
         topo_input = TOPOinput(ss).(namesP{p});
 
         cd BMS
-        [BMSinit, BMSres] = BMS_R(swe_input, topo_input);
+        [BMSinit, BMSres] = BMS_R_RN(swe_input, topo_input);
         cd ..
 
         for g = 1:3;        glacier = char(options.glacier(g));
@@ -249,3 +225,4 @@ end
 end
 end
 
+save('PaperII_Synthetic_RandomSafe.mat')

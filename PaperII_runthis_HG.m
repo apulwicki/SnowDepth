@@ -34,11 +34,11 @@ for g = 1:3;    glacier = options.glacier{g};
     TOPOdata_temp.(glacier) = rmfield(TOPOdata_temp.(glacier),'northness');
 end
 
-BMS_Hourglass.G4 = zeros(maxN, numRand,7);
-BMS_Hourglass.G2 = zeros(maxN, numRand,7);
-BMS_Hourglass.G13 = zeros(maxN, numRand,7);
+% BMS_Hourglass.G4 = zeros(maxN, numRand,7);
+% BMS_Hourglass.G2 = zeros(maxN, numRand,7);
+% BMS_Hourglass.G13 = zeros(maxN, numRand,7);
 
-for n = 6:3:maxN
+for n = 6:3:30
      display([type, ' n=',num2str(n)])
 
  for x = 1:numRand  

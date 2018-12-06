@@ -38,9 +38,9 @@ end
 % BMS_HourCircle.G2 = zeros(maxN, numRand,7);
 % BMS_HourCircle.G13 = zeros(maxN, numRand,7);
 
-for n = 12:3:maxN
+for n = 42:3:maxN
 
- for x = 1:numRand  
+ for x = 1:14%:numRand  
      disp([type, ' n=',num2str(n), ' run=',num2str(x)])
      
 for g = 1:3;    glacier = options.glacier{g};
