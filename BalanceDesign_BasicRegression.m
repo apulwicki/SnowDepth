@@ -232,7 +232,7 @@ end
 % Selecting Data from Pattern
 
     den = 'S2';
-    nRuns = 100;
+    nRuns = 30;
 
 
 load TopoSWE.mat
@@ -260,7 +260,7 @@ input.topo_sampled_ns = topo_sampled_ns;
 
 maxN = min([length(subsetSWE_temp.G4) length(subsetSWE_temp.G2) length(subsetSWE_temp.G13)]);
 
- for n = 8:maxN
+ for n = 6:3:maxN
      display([type, ' n=',num2str(n)])
 
 for g = 1:3;    glacier = options.glacier{g};
@@ -283,8 +283,8 @@ for g = 1:3;    glacier = options.glacier{g};
         X       = [ones(length(Xt),1), Xt];
 
         % Get coefficients
-        MLR.(glacier)            = regress(swe, X);
-        ElevationReal.(type).(glacier)(n,mc) = MLR.(glacier)(2);
+        MLR(n).(type).(glacier)            = regress(swe, X);
+%         ElevationReal.(type).(glacier)(n,mc) = MLR.(glacier)(2);
 
 %         %Predict
 %         sweMLR.(glacier) = repmat(MLR.(glacier)(1), options.mapsize(g,:));

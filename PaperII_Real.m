@@ -1,5 +1,17 @@
+%     N1 = {'Midline',''}; N2 = {'Mid &','Transverse'}; N3 = {'Circle',''};
+%     N4 = {'Hourglass',''}; N5 = {'Hourglass','& Circle'}; N6 = {'Random',''}; 
+clear realCoeffs
+load BMS_Centreline.mat
+realCoeffs.Centreline = BMS_Centreline;
+
+load BMS_CentreTransect.mat
+realCoeffs.CentreTransect = BMS_CentreTransect;
+
 load BMS_Circle.mat
 realCoeffs.Circle = BMS_Circle;
+
+load BMS_Hourglass.mat
+realCoeffs.Hourglass = BMS_Hourglass;
 
 load BMS_HourCircle.mat
 realCoeffs.HourCircle = BMS_HourCircle;
@@ -80,6 +92,7 @@ load Full.mat fullLR fullSWE
 load TopoSWE.mat topo_sampled
 run OPTIONS
 load Patterns.mat pUTM
+load PaperII_AblationArea.mat
 
     namesP = fieldnames(realRMSE);  %order = [2 3 1 4 5 6]; namesP = namesP(order);
     N1 = {'Midline',''}; N2 = {'Mid &','Transverse'}; N3 = {'Circle',''};
@@ -94,8 +107,8 @@ load Patterns.mat pUTM
         0.3010    0.7450    0.9330;...
         0.0588    0.3490    0.1216];
     realGrid    = ObsInCell(fullSWE.S2.input, topo_sampled);
-%      ConvTable   = nan(3,6);  ConvTable = array2table(ConvTable,'VariableNames',namesP);  
-%      VarTable    = nan(3,6);  VarTable  = array2table(VarTable,'VariableNames',namesP);
+     ConvTable   = nan(3,6);  ConvTable = array2table(ConvTable,'VariableNames',namesP);  
+     VarTable    = nan(3,6);  VarTable  = array2table(VarTable,'VariableNames',namesP);
 
 
 
@@ -187,7 +200,7 @@ n = n+1;
 ax = get(gca,'Position');
 set(gca,'Position', [ax(1) ax(2) ax(3) 0.28]);
 
-    if n==2; yInd = 0.002; else yInd = 0.14; end
+    if n==2; yInd = 0.002; else; yInd = 0.14; end
     if g ==1; sizeG = 0.12; xoff = 0.04; yInd = yInd+0.02; else sizeG = 0.14; xoff = 0.036; end
 axes('position',[ax(1)+xoff ax(2)+yInd sizeG sizeG])
 pInd = 1:10:length(pUTM.(namesP{p}).(glacier));
@@ -201,6 +214,5 @@ plot(pUTM.(namesP{p}).(glacier)(pInd,1),pUTM.(namesP{p}).(glacier)(pInd,2),'k.',
 end
 end 
 
-	%saveFIG_HP('DataObsWB',2,12)
-%     saveFIG_HP('Pulwicki_Fig5',2,12)
+%     saveFIG_HP('PII_AA_RealData',2,12)
     

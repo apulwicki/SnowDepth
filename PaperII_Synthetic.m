@@ -1,6 +1,6 @@
 %% Set up
-%file_path = '/Users/Alexandra/Documents/SFU/Data/SnowDepth/';
-file_path = '/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Sampling/';
+file_path = '/Users/Alexandra/Documents/SFU/Data/SnowDepth/';
+% file_path = '/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Sampling/';
 
 load PaperII_Syntheic.mat
 %% Get synthetic snow distributions
@@ -13,7 +13,7 @@ slope_range = [-0.09, 0.277];
 intercept   = [0.6205, 0.2627, 0.2354];
 
 % Normal random beta values
-num_models = 30;
+num_models = 100;
 
 elev_beta   = normrnd(mean(elev_range), std(elev_range), [1,num_models]);
 sx_beta     = normrnd(mean(sx_range),   std(sx_range),   [1,num_models]);
@@ -167,56 +167,69 @@ AblationArea.(glacier)(~isnan(AblationArea.(glacier)))=1;
 end
     
 %%
-% namesP = fieldnames(pWB);
- namesP = {'RandomSafe'};
+namesP = fieldnames(pWB);
+%  namesP = {'Circle'};
 
 real_measure = SampledCell(snowdist_model(mc));
 
 for p = 1:length(namesP)
 
-for ss = 6:3:45%length(pWB.(namesP{p}).(glacier))
+for ss = 6:45%length(pWB.(namesP{p}).(glacier))
    display([' Sample size: ',num2str(ss),' Pattern: ',namesP{p}, ' Run:',num2str(mc)])
 
-   [WBinput(ss), TOPOinput(ss), UTMinput(ss)] = SubsetSampleSize( pWB, pTOPO, pUTM, ss );
+   [WBinput, TOPOinput, UTMinput] = SubsetSampleSize( pWB, pTOPO, pUTM, ss );
 
 
     %Add some noise
-    WBinputN = WBnoise(WBinput(ss).(namesP{p}),'low');
+    WBinputN = WBnoise(WBinput.(namesP{p}),'low');
     
     %Linear regresion
-        % BMA
-        swe_input = WBinputN;
-        topo_input = TOPOinput(ss).(namesP{p});
-
-        cd BMS
-        [BMSinit, BMSres] = BMS_R_RN(swe_input, topo_input);
-        cd ..
-
+%         % BMA
+%         swe_input = WBinputN;
+%         topo_input = TOPOinput(ss).(namesP{p});
+% 
+%         cd BMS
+%         [BMSinit, BMSres] = BMS_R_CI(swe_input, topo_input);
+%         cd ..
+% 
         for g = 1:3;        glacier = char(options.glacier(g));
+% 
+%         BMS.(glacier) = BMSinit.(glacier)(:,1);   
+        
+        % BASIC LR
+        swe	    = WBinputN.(glacier)(:,1);
+        Xt      = struct2array(TOPOinput.(namesP{p}).(glacier));
+        X       = [ones(length(Xt),1), Xt];
 
-        BMS.(glacier) = BMSinit.(glacier)(:,1);   
+        % Get coefficients
+        coeffs = regress(swe, X);
+        synMLR(ss).(namesP{p})(mc).(glacier)   = coeffs;
         
         %Predict
-        swe_pred.(glacier) = repmat(BMS.(glacier){5,1}, options.mapsize(g,:));
-        betaCoeff = BMS.(glacier){1:4,1};    topoCoeff = fieldnames(topo_full.G4);
+%         swe_pred.(glacier) = repmat(BMS.(glacier){5,1}, options.mapsize(g,:));
+%         betaCoeff = BMS.(glacier){1:4,1};    topoCoeff = fieldnames(topo_full.G4);
+       swe_pred = repmat(coeffs(1), options.mapsize(g,:));
+        betaCoeff = coeffs(2:end);    topoCoeff = fieldnames(topo_full.G4);
             %multiply coeffs and add them
         for num_models = 1:length(betaCoeff)
-            param               = topoCoeff{num_models};
-            sweT                = topo_full.(glacier).(param)*betaCoeff(num_models);
-            swe_pred.(glacier)   = swe_pred.(glacier) + sweT;
+            param      = topoCoeff{num_models};
+            sweT       = topo_full.(glacier).(param)*betaCoeff(num_models);
+            swe_pred   = swe_pred + sweT;
         end
             %Set min to 0
-        swe_pred.(glacier)(swe_pred.(glacier)<0) = 0;
-        swe_pred.(glacier) = swe_pred.(glacier).*AblationArea.(glacier); 
-        end
-        SynPred(ss).(namesP{p})(mc) = swe_pred;
+        swe_pred(swe_pred<0) = 0;
+        swe_pred = swe_pred.*AblationArea.(glacier); 
+        
+%         SynPred(ss).(namesP{p})(mc) = swe_pred;
 
         % Calculate RMSE
-        syn_measure = SampledCell(swe_pred);
+%         syn_measure = SampledCell(swe_pred);
+        sampledtemp     = swe_pred(options.ENgrid.(glacier)(:,2),options.ENgrid.(glacier)(:,1));
+        syn_measure     = diag(sampledtemp);
         
-        for g = 1:3;        glacier = char(options.glacier(g));
-        real_measure_tmp = real_measure.(glacier)(~isnan(syn_measure.(glacier)));
-        syn_measure_tmp = syn_measure.(glacier)(~isnan(syn_measure.(glacier)));
+%         for g = 1:3;        glacier = char(options.glacier(g));
+        real_measure_tmp = real_measure.(glacier)(~isnan(syn_measure));
+        syn_measure_tmp = syn_measure(~isnan(syn_measure));
         
         SynRMSE.(namesP{p}).(glacier)(ss,mc) = sqrt(mean((syn_measure_tmp-real_measure_tmp).^2));
         end
@@ -224,5 +237,4 @@ for ss = 6:3:45%length(pWB.(namesP{p}).(glacier))
 end
 end
 end
-
-save('PaperII_Synthetic_RandomSafe.mat')
+% save('PaperII_Synthetic_Circle.mat')

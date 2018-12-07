@@ -38,10 +38,10 @@ end
 % BMS_Hourglass.G2 = zeros(maxN, numRand,7);
 % BMS_Hourglass.G13 = zeros(maxN, numRand,7);
 
-for n = 6:3:30
+for n =21%24:3:30
      display([type, ' n=',num2str(n)])
 
- for x = 1:numRand  
+ for x = 26:30%1:numRand  
      disp(['run=',num2str(x)])
      
 for g = 1:3;    glacier = options.glacier{g};
