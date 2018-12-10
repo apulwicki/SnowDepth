@@ -173,7 +173,7 @@ real_measure = SampledCell(snowdist_model(mc));
 
 for p = 1:length(namesP)
 
-for ss = 20 %6:45%length(pWB.(namesP{p}).(glacier))
+for ss = 45:57 %6:45%length(pWB.(namesP{p}).(glacier))
    display([' Sample size: ',num2str(ss),' Pattern: ',namesP{p}, ' Run:',num2str(mc)])
 
    [WBinput, TOPOinput, UTMinput] = SubsetSampleSize( pWB, pTOPO, pUTM, ss );
@@ -191,7 +191,7 @@ for ss = 20 %6:45%length(pWB.(namesP{p}).(glacier))
 
         % Get coefficients
         coeffs = regress(swe, X);
-        synMLR(ss).(namesP{p})(mc).(glacier)   = coeffs;
+%         synMLR(ss).(namesP{p})(mc).(glacier)   = coeffs;
         
         %Predict
         swe_pred = repmat(coeffs(1), options.mapsize(g,:));
@@ -206,7 +206,7 @@ for ss = 20 %6:45%length(pWB.(namesP{p}).(glacier))
         swe_pred(swe_pred<0) = 0;
         swe_pred = swe_pred.*AblationArea.(glacier); 
         
-        SynPred(ss).(namesP{p})(mc).(glacier) = swe_pred;
+%         SynPred(ss).(namesP{p})(mc).(glacier) = swe_pred;
 
         % Calculate RMSE
         true_dist = snowdist_model(mc).(glacier);
@@ -222,6 +222,7 @@ end
 
 % synRMSE_high = synRMSE;
 % synCOEF_high = synMLR;
+test = test2;
 synPred_utm = UTMinput;
 save('PII_FastRuns.mat','SynPred', 'synPred_utm', 'snowdist_model', '-append')
 % save('PII_FastRuns.mat','synRMSE_high','synCOEF_high','-append')
@@ -479,3 +480,51 @@ end
 end
 
 % 	saveFIG_HP('PII_AA_DistributedRMSE',2,12)
+
+
+%% nc calculation
+
+% load PII_FastRuns.mat
+% load PaperII_AblationArea.mat sweBMS_alldata
+% load Full.mat fullLR fullSWE
+% load TopoSWE.mat topo_sampled
+% run OPTIONS
+
+numPoints   = 6:57;
+namesP      = fieldnames(synRMSE_low);
+nc_table    = nan(3,6);     nc_table = array2table(nc_table,'VariableNames',namesP);  
+nv_table    = nan(3,6);     nv_table = array2table(nv_table,'VariableNames',namesP);  
+realGrid    = ObsInCell(fullSWE.S2.input, topo_sampled);
+RMSEfull    = mean(bestSynRMSE);
+
+
+for g = 1:3; glacier = options.glacier{g};
+for p = 1:length(namesP)
+    
+meanWB  = mean(synRMSE_low.(namesP{p}).(glacier)(numPoints,:),2);
+stdWB   = std(synRMSE_low.(namesP{p}).(glacier)(numPoints,:),[],2);
+
+    %Smooth mean 
+    smoothSize = 3;
+        M = zeros(smoothSize, length(meanWB)-smoothSize+1);
+    for h = 1:smoothSize;  M(h,:) = meanWB(h:end-(smoothSize-h));  end
+    meanSmooth = mean(M); 
+    %Smooth std  
+        M = zeros(smoothSize, length(stdWB)-smoothSize+1);
+    for h = 1:smoothSize;  M(h,:) = stdWB(h:end-(smoothSize-h));  end
+    stdSmooth = mean(M);    
+
+
+
+nc = find(meanSmooth-RMSEfull(g)<RMSEfull(g)*0.1,1);
+if isempty(nc); nc = nan; 
+else; nc = nc + min(numPoints); end
+nc_table{g,p}   = nc;
+
+nv = find(stdSmooth+meanSmooth-RMSEfull(g)<RMSEfull(g)*0.5,1);
+if isempty(nv); nv=nan; 
+else; nv = nv + min(numPoints); end
+nv_table{g,p}   = nv;
+    
+end 
+end

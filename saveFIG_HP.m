@@ -18,7 +18,7 @@ set(findall(fig,'-property','FontName'),'FontName','Arial')
 
 % print(['/home/glaciology1/Documents/MastersDocuments/Paper II/', filename],'-dpdf','-fillpage'); 
 print(['/Users/Alexandra/Documents/SFU/MastersDocuments/Paper II/', filename],'-dpdf','-fillpage'); 
-%print(['/Users/Alexandra/Documents/SFU/MastersDocuments/Paper II/', filename],'-deps'); 
+print(['/Users/Alexandra/Documents/SFU/MastersDocuments/Paper II/', filename],'-dpng'); 
 
 %print([options.path1, filename],'-dpng'); 
 % print([options.path2, filename],'-dpdf','-fillpage');  

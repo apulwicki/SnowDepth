@@ -30,7 +30,7 @@ if fixed_color == 0
     minSWE  = nanmin([P1(1).swe(:);P1(2).swe(:);P1(3).swe(:)]);
     maxSWE  = nanmax([P1(1).swe(:);P1(2).swe(:);P1(3).swe(:)]);
 elseif fixed_color == 1
-    x_min = 0;      minSWE  = x_min;
+    x_min = -0.10;      minSWE  = x_min;
     x_max = 1;    maxSWE  = x_max;
 end
 
@@ -45,6 +45,7 @@ pos_axis    = [0.00     ystart   width     height;
 
 %Colormap choice
     Cmap = parula;
+    Cmap(1,:) = [199, 201, 204]/255;
     %Cmap = cbrewer('div','YlGnBu',100);
  
 for i = 1:3
@@ -65,7 +66,7 @@ for i = 1:3
                    %ELA
                     Eela = (rig.ELA(ELA_d(i,1):ELA_d(i,2),1) - minE)/40;
                     Nela = (rig.ELA(ELA_d(i,1):ELA_d(i,2),2) - minN)/40; Nela = (max(Ng)-Nela);
-                    plot(Eela,Nela ,'k--')
+%                     plot(Eela,Nela ,'k--')
                     xlim([0 G13size(1,1)]); ylim([0 G13size(1,2)])
                     set(gca,'Ydir','reverse')
                 
@@ -102,9 +103,9 @@ end
 
 
 % Glacier labels
-    annotation('textbox',[.06 0.0 .1 .1],'String', 'Glacier 4','EdgeColor','none','FontWeight','bold')
-    annotation('textbox',[.40 0.0 .1 .1],'String', 'Glacier 2','EdgeColor','none','FontWeight','bold')
-    annotation('textbox',[.67 0.0 .1 .1],'String', 'Glacier 13','EdgeColor','none','FontWeight','bold')
+%     annotation('textbox',[.06 0.0 .1 .1],'String', 'Glacier 4','EdgeColor','none','FontWeight','bold')
+%     annotation('textbox',[.40 0.0 .1 .1],'String', 'Glacier 2','EdgeColor','none','FontWeight','bold')
+%     annotation('textbox',[.67 0.0 .1 .1],'String', 'Glacier 13','EdgeColor','none','FontWeight','bold')
 
 % North arrow
     Narrow = imread('Narrow.jpg');
@@ -114,12 +115,12 @@ end
     axis off; 
 
 % Scale bar
-    axes('position',[0.16,0.75,0.2,0.12]); axis off; 
-    scalebar('ScaleLength', 0.8, 'Location',[0.18,0.55])
-    annotation(gcf,'textbox',[0.3,0.765,0.15,0.05],...
-                'String',{'2 km'}, 'LineStyle','none','FitBoxToText','off','EdgeColor',[1 1 1],'BackgroundColor',[1 1 1]); hold on
-    annotation(gcf,'textbox',[0.17,0.765,.05,.05],...
-                'String',{'0'}, 'LineStyle','none','FitBoxToText','off','EdgeColor',[1 1 1],'BackgroundColor',[1 1 1]); hold on
+%     axes('position',[0.16,0.75,0.2,0.12]); axis off; 
+%     scalebar('ScaleLength', 0.8, 'Location',[0.18,0.55])
+%     annotation(gcf,'textbox',[0.3,0.765,0.15,0.05],...
+%                 'String',{'2 km'}, 'LineStyle','none','FitBoxToText','off','EdgeColor',[1 1 1],'BackgroundColor',[1 1 1]); hold on
+%     annotation(gcf,'textbox',[0.17,0.765,.05,.05],...
+%                 'String',{'0'}, 'LineStyle','none','FitBoxToText','off','EdgeColor',[1 1 1],'BackgroundColor',[1 1 1]); hold on
 
 end
 

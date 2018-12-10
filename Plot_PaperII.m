@@ -1,9 +1,17 @@
 %% Figure 2 - Synthetic sampling designs 
-
+    load PaperII_AblationArea.mat AblationArea
     load Patterns.mat pUTM 
     load Full.mat fullLR
     run OPTIONS
 NumSubPoints = 15;
+
+% Blank our accum area
+for g = 1:3;    glacier = options.glacier{g};
+    abla_area.(glacier) = fullLR.S2.(glacier);
+    abla_area.(glacier)(AblationArea.(glacier)==-0.1)=-0.1;
+end
+
+
     P = fieldnames(pUTM);
 for t = 1:length(P)
     clear pattern*
@@ -16,7 +24,7 @@ patternSUB.(glacier)(:,2:3) = pUTM.(P{t}).(glacier)(I,:);
 end
 
 figure(1)
-PlotTopoParameter_DD(fullLR.S2, 'WB (m w.e.)', patternFULL, patternSUB, 'black')
+PlotTopoParameter_DD(abla_area, 'WB (m w.e.)', patternFULL, patternSUB, 'black')
 	saveFIG_HP(['SampleDesign_',P{t}],1,8.6)
 end
 

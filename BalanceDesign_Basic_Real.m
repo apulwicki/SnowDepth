@@ -209,3 +209,49 @@ end
 
 %     saveFIG_HP('PII_AA_RealData',2,12)
     
+%% nc and nv calculation
+
+load PII_FastRuns.mat
+load PaperII_AblationArea.mat sweBMS_alldata
+load Full.mat fullLR fullSWE
+load TopoSWE.mat topo_sampled
+run OPTIONS
+
+numPoints   = 6:45;
+namesP      = fieldnames(realRMSE);
+nc_table    = nan(3,6);     nc_table = array2table(nc_table,'VariableNames',namesP);  
+nv_table    = nan(3,6);     nv_table = array2table(nv_table,'VariableNames',namesP);  
+realGrid    = ObsInCell(fullSWE.S2.input, topo_sampled);
+
+for g = 1:3; glacier = options.glacier{g};
+    estGrid     = SampledCell(sweBMS_alldata);
+    RMSEfull    = sqrt(mean((estGrid.(glacier)-realGrid.(glacier)(:,1)).^2));
+for p = 1:length(namesP)
+    
+meanWB  = mean(realRMSE.(namesP{p}).(glacier)(numPoints,:),2);
+stdWB   = std(realRMSE.(namesP{p}).(glacier)(numPoints,:),[],2);
+
+    %Smooth mean 
+    smoothSize = 3;
+        M = zeros(smoothSize, length(meanWB)-smoothSize+1);
+    for h = 1:smoothSize;  M(h,:) = meanWB(h:end-(smoothSize-h));  end
+    meanSmooth = mean(M); 
+    %Smooth std  
+        M = zeros(smoothSize, length(stdWB)-smoothSize+1);
+    for h = 1:smoothSize;  M(h,:) = stdWB(h:end-(smoothSize-h));  end
+    stdSmooth = mean(M);    
+
+
+
+nc = find(meanSmooth-RMSEfull<RMSEfull*0.1,1);
+if isempty(nc); nc = nan; 
+else; nc = nc + min(numPoints); end
+nc_table{g,p}   = nc;
+
+nv = find(stdSmooth+meanSmooth-RMSEfull<RMSEfull*0.25,1);
+if isempty(nv); nv=nan; 
+else; nv = nv + min(numPoints); end
+nv_table{g,p}   = nv;
+    
+end 
+end
