@@ -1,16 +1,15 @@
-clear
+%% Compare beta coefficients and resulting distributions from simple LR and BMA
+
 load PaperII_Syntheic.mat
-% load PaperII_FinalLRruns.mat snowdist_model coeffSYN
+load PaperII_Compare_allbeta.mat snowdist_model coeffSYN
 
 file_path = '/Users/Alexandra/Documents/SFU/Data/SnowDepth/';
 %file_path = '/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Sampling/';
 
-% noise_number = 100;
-num_models = 200;
-nn = 6:30;
+noise_number = 100;
+num_models = 10;
+nn = 18;
 %% Get synthetic snow distributions
-
-Bw_obs = [0.6, 0.52, 0.39];
 
 % Beta coeff ranges
 elev_range  = [0.585, 0.810];
@@ -24,6 +23,7 @@ sx_range    = [-0.294, 0.260];
 intercept   = [0.6205, 0.2627, 0.2354];
 
 % Normal random beta values
+
 elev_beta   = normrnd(mean(elev_range), std(elev_range), [1,num_models]);
 dc_beta     = normrnd(mean(dc_range), std(dc_range), [1,num_models]);
 aspect_beta = normrnd(mean(aspect_range), std(aspect_range), [1,num_models]);
@@ -31,36 +31,24 @@ slope_beta  = normrnd(mean(slope_range), std(slope_range), [1,num_models]);
 N_beta      = normrnd(mean(N_range),std(N_range),[1,num_models]);
 curv_beta   = normrnd(mean(curv_range), std(curv_range), [1,num_models]);
 sx_beta     = normrnd(mean(sx_range),   std(sx_range),   [1,num_models]);
-    %In general, you can generate N random numbers in the interval (a,b) 
-    %with the formula r = a + (b-a).*rand(N,1). -> rand_uni
-%     rand_uni = @(a,b,N) a + (b-a).*rand(1,N);
-% elev_beta   = rand_uni(0.585, 0.810, num_models);
-% dc_beta     = rand_uni(0, 0.015, num_models);
-% aspect_beta = rand_uni(0, 0.093, num_models);
-% slope_beta  = rand_uni(-0.09, 0.277, num_models);
-% N_beta      = rand_uni(-0.414, 0.172, num_models);
-% curv_beta   = rand_uni(-0.077, 0.02, num_models);
-% sx_beta     = rand_uni(-0.294, 0.260, num_models);
 
-% coeffSYN = [elev_beta', dc_beta', aspect_beta', slope_beta', N_beta', curv_beta', sx_beta'];
-coeffSYN = [elev_beta', aspect_beta', slope_beta', N_beta', curv_beta', sx_beta'];
-% coeffSYN = [elev_beta', slope_beta', curv_beta', sx_beta'];
-
+coeffSYN = [elev_beta', dc_beta', aspect_beta', slope_beta', N_beta', curv_beta', sx_beta'];
 % Generate snow dist models
 % load TopoSWE.mat topo_full
 % run OPTIONS.m
 
     % Remove dc, aspect and Northness
-    for g = 1:3;    glacier = options.glacier{g};
-    topo_full.(glacier) = rmfield(topo_full.(glacier),'centreD');
+%     for g = 1:3;    glacier = options.glacier{g};
+%     topo_full.(glacier) = rmfield(topo_full.(glacier),'centreD');
 %     topo_full.(glacier) = rmfield(topo_full.(glacier),'aspect');
 %     topo_full.(glacier) = rmfield(topo_full.(glacier),'northness');
-    end
+%     end
 
 for m = 1:num_models
 
 for g = 1:3;    glacier = options.glacier{g};
     syn_model   = repmat(intercept(g), options.mapsize(g,:));
+%     betaCoeff   = [elev_beta(m), sx_beta(m), curv_beta(m), slope_beta(m)];   
     betaCoeff   = coeffSYN(m,:);   
     topoCoeff   = fieldnames(topo_full.G4);
     
@@ -72,19 +60,17 @@ for g = 1:3;    glacier = options.glacier{g};
         
     syn_model(syn_model<0) = 0; %Set min to 0
    
-    scale_to_obs = nanmean(syn_model(:))/Bw_obs(g);
-
-    snowdist_model(m).(glacier) = syn_model/scale_to_obs;
-
+    snowdist_model(m).(glacier) = syn_model;
+    
 end
 end
-% save('PaperII_uniform_beta.mat','snowdist_model','coeffSYN')
+% save('PaperII_Compare_allbeta.mat','snowdist_model','coeffSYN')
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Plot synthetic models
 %     load PaperII_Syntheic.mat
 %     load Full.mat fullSWE
-
+% 
 % for m =1:num_models
 %     figure(m);
 %     PlotTopoParameter(snowdist_model(m), 'none', 'WB (m w.e.)', fullSWE.S2.input, 'black', 'none')
@@ -204,14 +190,14 @@ AblationArea.(glacier)(~isnan(AblationArea.(glacier)))=1;
 end
     
 %%
-namesP = fieldnames(pWB);
-%  namesP = {'CentreTransect'};
+% namesP = fieldnames(pWB);
+ namesP = {'CentreTransect'};
 
 real_measure = SampledCell(snowdist_model(mc));
 
 for p = 1:length(namesP)
 
-for ss = nn
+for ss = nn %6:45
    [WBinput, TOPOinput, UTMinput] = SubsetSampleSize( pWB, pTOPO, pUTM, ss );
 
        display([' Sample size: ',num2str(ss),' Pattern: ',namesP{p}, ' Run:',num2str(mc)])
@@ -219,55 +205,45 @@ for ss = nn
     %Add some noise
     WBinputN = WBnoise(WBinput.(namesP{p}),'low');
     
-%         % BMA
-%         swe_input.(glacier) = WBinputN.(glacier);
-%         topo_input = TOPOinput.(namesP{p});
-% 
-%         cd BMS
-%         [BMSinit, BMSres] = BMS_R(swe_input, topo_input);
-%         cd ..
-% 
-%         for g = 3;        glacier = char(options.glacier(g));
-%         BMS.(glacier) = BMSinit.(glacier)(:,1);   
-%         coeffsBMA(ss).(namesP{p})(mc).(glacier)   = BMS.(glacier){1:8,1};
-% 
-%         swe_pred = repmat(BMS.(glacier){8,1}, options.mapsize(g,:));
-%         betaCoeff = BMS.(glacier){1:7,1};    topoCoeff = fieldnames(topo_full.G4);
-%         for num_models = 1:length(betaCoeff)
-%             param      = topoCoeff{num_models};
-%             sweT       = topo_full.(glacier).(param)*betaCoeff(num_models);
-%             swe_pred   = swe_pred + sweT;
-%         end
-%         swe_pred(swe_pred<0) = 0;
-%         swe_pred = swe_pred.*AblationArea.(glacier); 
-%         predBMA(ss).(namesP{p})(mc).(glacier) = swe_pred;
-%         
-%         sampledtemp             = swe_pred(options.ENgrid.(glacier)(:,2),options.ENgrid.(glacier)(:,1));
-%         syn_measure.(glacier)   = diag(sampledtemp);
-%         
-%         real_measure_tmp.(glacier) = real_measure.(glacier)(~isnan(syn_measure.(glacier)));
-% 
-%             syn_measure_tmp.(glacier) = syn_measure.(glacier)(~isnan(syn_measure.(glacier)));
-%         rmseBMA.(namesP{p}).(glacier)(ss,mc) = sqrt(mean((syn_measure_tmp.(glacier)-real_measure_tmp.(glacier)).^2));
-%         end
+        % BMA
+        swe_input.(glacier) = WBinputN.(glacier);
+        topo_input = TOPOinput.(namesP{p});
+
+        cd BMS
+        [BMSinit, BMSres] = BMS_R(swe_input, topo_input);
+        cd ..
+
+        for g = 3;        glacier = char(options.glacier(g));
+        BMS.(glacier) = BMSinit.(glacier)(:,1);   
+        coeffsBMA(ss).(namesP{p})(mc).(glacier)   = BMS.(glacier){1:8,1};
+
+        swe_pred = repmat(BMS.(glacier){8,1}, options.mapsize(g,:));
+        betaCoeff = BMS.(glacier){1:7,1};    topoCoeff = fieldnames(topo_full.G4);
+        for num_models = 1:length(betaCoeff)
+            param      = topoCoeff{num_models};
+            sweT       = topo_full.(glacier).(param)*betaCoeff(num_models);
+            swe_pred   = swe_pred + sweT;
+        end
+        swe_pred(swe_pred<0) = 0;
+        swe_pred = swe_pred.*AblationArea.(glacier); 
+        predBMA(ss).(namesP{p})(mc).(glacier) = swe_pred;
+        
+        sampledtemp             = swe_pred(options.ENgrid.(glacier)(:,2),options.ENgrid.(glacier)(:,1));
+        syn_measure.(glacier)   = diag(sampledtemp);
+        
+        real_measure_tmp.(glacier) = real_measure.(glacier)(~isnan(syn_measure.(glacier)));
+
+            syn_measure_tmp.(glacier) = syn_measure.(glacier)(~isnan(syn_measure.(glacier)));
+        rmseBMA.(namesP{p}).(glacier)(ss,mc) = sqrt(mean((syn_measure_tmp.(glacier)-real_measure_tmp.(glacier)).^2));
+        end
         
         
         % BASIC LR        
-        for g = 1:3;        glacier = char(options.glacier(g));
+        for g = 3;        glacier = char(options.glacier(g));
 
         swe	    = WBinputN.(glacier)(:,1);
-%         swe	    = WBinput.(namesP{p}).(glacier)(:,1);
         Xt      = struct2array(TOPOinput.(namesP{p}).(glacier));
-%         swe_tmp   = snowdist_model(mc).(glacier)(:);
-%         swe       = swe_tmp(~isnan(swe_tmp));
-%         topoCoeff = fieldnames(topo_full.G4); Xt = zeros(length(swe),length(topoCoeff));
-%         for t=1:length(topoCoeff)
-%             Xt_temp = topo_full.(glacier).(topoCoeff{t})(:);
-%             Xt_temp = Xt_temp(~isnan(swe_tmp));
-%             Xt(:,t) = Xt_temp;
-%         end
-        
-        X       = [ones(size(Xt,1),1), Xt];
+        X       = [ones(length(Xt),1), Xt];
 
         coeffs = regress(swe, X);
         coeffsLR(ss).(namesP{p})(mc).(glacier)   = coeffs;
@@ -290,81 +266,134 @@ for ss = nn
         syn_measure_tmp = syn_measure(~isnan(syn_measure));
         
         rmseLR.(namesP{p}).(glacier)(ss,mc) = sqrt(mean((syn_measure_tmp-real_measure_tmp).^2));
-        
-        % RMSPE 100%*sum(abs(obs - sim)/obs)
-%         x = abs(syn_measure_tmp-real_measure_tmp)./real_measure_tmp;
-%         x = x(~isinf(x));
-%         x = x(~isnan(x));
-%         mpeLR.(namesP{p}).(glacier)(ss,mc) = 100*sum(x)/length(syn_measure_tmp);
-
         end
-        
 end
 end
 end
 
-% save('PaperII_FinalLRruns_lownoise.mat')
+%% Plot coeffs
 
-
-%% Calculate best RMSE using all data
-
-% load PaperII_FinalLRruns
-for mc = 1:num_models
-
-%Additing noise to distributed WB
-real_measure = SampledCell(snowdist_model(mc));
-
-topoparam = fieldnames(topo_full.G4);
-for num_param = 1:length(topoparam)
-    for g = 1:3;        glacier = char(options.glacier(g));
-    tmp_topo.(glacier) = topo_full.(glacier).(topoparam{num_param});
-    end    
-    tmp_sampled.(topoparam{num_param}) = SampledCell(tmp_topo);
-end
-for g = 1:3;        glacier = char(options.glacier(g));
-    for num_param = 1:length(topoparam)
-sampled_topo.(glacier).(topoparam{num_param}) = tmp_sampled.(topoparam{num_param}).(glacier);
+pattern = 'CentreTransect';
+m = 1;
+for i=1:10
+    for g = 3;        glacier = char(options.glacier(g));
+     subplot(5,2,m)
+%     plot_coeffs = [coeffSYN(i,:)',coeffsLR(nn).(pattern)(i).(glacier)(2:end), coeffsBMA(nn).(pattern)(i).(glacier)(1:7);
+%                     intercept(g), coeffsLR(nn).(pattern)(i).(glacier)(1), coeffsBMA(nn).(pattern)(i).(glacier)(8)];
+    plot_coeffs = [coeffSYN(i,:)',coeffsLR(nn).(pattern)(i).(glacier)(2:end);
+                    intercept(g), coeffsLR(nn).(pattern)(i).(glacier)(1)];
+   bar(plot_coeffs)
+    params={'z','\alpha','m','N','\kappa','Sx','intercept'};
+    set(gca,'xticklabel',params)
+    ylabel('\beta')
+    title(['Model ',num2str(i),' ',glacier])
+    m=m+1;
+%     legend('Model','Simple LR','BMA')
     end
-end        
-        % BASIC LR        
-for g = 1:3;        glacier = char(options.glacier(g));
-
-        swe	    = real_measure.(glacier)(:,1);
-        Xt      = struct2array(sampled_topo.(glacier));
-        X       = [ones(length(Xt),1), Xt];
-
-        coeffs = regress(swe, X);
-        tmp_best_coeffsLR.(glacier)(mc,:)   = coeffs;
-
-        swe_pred = repmat(coeffs(1), options.mapsize(g,:));
-        betaCoeff = coeffs(2:end);    topoCoeff = fieldnames(topo_full.G4);
-        for num_param = 1:length(betaCoeff)
-            param      = topoCoeff{num_param};
-            sweT       = topo_full.(glacier).(param)*betaCoeff(num_param);
-            swe_pred   = swe_pred + sweT;
-        end
-        swe_pred(swe_pred<0) = 0;
-        swe_pred = swe_pred.*AblationArea.(glacier); 
-%         best_predLR.(glacier) = swe_pred;
-        
-        sampledtemp     = swe_pred(options.ENgrid.(glacier)(:,2),options.ENgrid.(glacier)(:,1));
-        syn_measure     = diag(sampledtemp);
-        
-        real_measure_tmp = real_measure.(glacier)(~isnan(syn_measure));
-        syn_measure_tmp = syn_measure(~isnan(syn_measure));
-        
-        tmp_best_rmseLR.(glacier)(mc) = sqrt(mean((syn_measure_tmp-real_measure_tmp).^2));
-        
-        % RMSPE 100%*sum(abs(obs - sim)/obs)
-%         x = abs(syn_measure_tmp-real_measure_tmp)./real_measure_tmp;
-%         x = x(~isinf(x));
-%         x = x(~isnan(x));
-%         best_mpeLR.(glacier)(mc) = 100*sum(x)/length(syn_measure_tmp);
-
-end   
 end
 
-for g = 1:3;        glacier = char(options.glacier(g));
-best_rmseLR.(glacier) = mean(tmp_best_rmseLR.(glacier));
-best_coeffsLR.(glacier) = mean(tmp_best_coeffsLR.(glacier));
+%% Plot estimated distributions
+
+pattern = 'CentreTransect';
+
+for m =10%1:num_models
+    figure(1);
+    PlotTopoParameter(predLR(nn).(pattern)(m), 'none', 'WB (m w.e.)', pUTM.(pattern), 'black', 'none')
+    figure(2);
+    PlotTopoParameter(predBMA(nn).(pattern)(m), 'none', 'WB (m w.e.)', pUTM.(pattern), 'black', 'none')
+    
 end
+
+%% 
+
+pattern = 'CentreTransect';
+m = 1;
+for i=1:5
+    for g = 3;        glacier = char(options.glacier(g));
+    subplot(5,2,m)
+    actual = snowdist_model(i).(glacier).*AblationArea.(glacier);
+    imagesc(actual); colorbar
+        caxis([0 2]); caxis(caxis);
+    title({['Model ',num2str(i)],['Model ', glacier, ' B_W=', num2str(nanmean(actual(:)))]})
+    axis('off')
+    
+    subplot(5,2,m+1)
+    imagesc(predLR(nn).(pattern)(i).(glacier)); colorbar
+        caxis([0 2]); caxis(caxis);
+    title({['Model ',num2str(i)],['Simple LR ', glacier, ' B_W=', num2str(nanmean(predLR(nn).(pattern)(i).(glacier)(:)))]})
+    axis('off')
+    
+%     subplot(5,3,m+2)
+%     imagesc(predBMA(nn).(pattern)(i).(glacier)); colorbar
+%         caxis([0 2]); caxis(caxis);
+%     title({['Model ',num2str(i)],['BMA ', glacier, ' B_W=', num2str(nanmean(predBMA(nn).(pattern)(i).(glacier)(:)))]})
+%     axis('off')
+    
+    m=m+2;
+%     legend('Simple LR','BMA')
+    end
+end
+
+
+%%
+glacier='G13';
+for i=1:10
+x(i)=nanmean(nanmean(snowdist_model(i).(glacier).*AblationArea.(glacier)));
+end
+
+
+%% Plot beta distributions
+
+elev_range  = [0.585, 0.810];
+dc_range    = [0, 0.015];
+aspect_range = [0, 0.093];
+slope_range = [-0.09, 0.277];
+N_range     = [-0.414, 0.172];
+curv_range  = [-0.077, 0.02];
+sx_range    = [-0.294, 0.260];
+
+intercept   = [0.6205, 0.2627, 0.2354];
+
+% Normal random beta values
+
+x = [-1:.01:1.5];
+elev_beta   = normpdf(x, mean(elev_range), std(elev_range));
+dc_beta     = normpdf(x, mean(dc_range), std(dc_range));
+aspect_beta = normpdf(x, mean(aspect_range), std(aspect_range));
+slope_beta  = normpdf(x, mean(slope_range), std(slope_range));
+N_beta      = normpdf(x, mean(N_range),std(N_range));
+curv_beta   = normpdf(x, mean(curv_range), std(curv_range));
+sx_beta     = normpdf(x, mean(sx_range),   std(sx_range));
+
+plot(x,elev_beta); hold on
+plot(x,dc_beta); hold on
+plot(x,aspect_beta); hold on
+plot(x,slope_beta); hold on
+plot(x,N_beta); hold on
+plot(x,curv_beta); hold on
+plot(x,sx_beta); hold on
+legend('z','d_c','\alpha','m','N','\kappa','Sx');
+title('\beta distirbutions')
+xlabel('\beta')
+ylabel('Probability')
+
+
+%% Number of synthetic models
+load PaperII_LR_runtest
+
+pattern = 'CentreTransect';
+glacier = 'G13';
+ss = 18;
+edges = 0:0.03:0.6;
+
+histogram(rmseLR500.(pattern).(glacier)(ss,:), edges); hold on
+histogram(rmseLR200.(pattern).(glacier)(ss,:), edges); hold on
+histogram(rmseLR100.(pattern).(glacier)(ss,:), edges); hold on
+legend('100','200','500')
+title('Number of synthetic models')
+ylabel('Frequency')
+xlabel('RMSE')
+
+display([mean(rmseLR500.(pattern).(glacier)(ss,:)), std(rmseLR500.(pattern).(glacier)(ss,:))])
+display([mean(rmseLR200.(pattern).(glacier)(ss,:)), std(rmseLR200.(pattern).(glacier)(ss,:))])
+display([mean(rmseLR100.(pattern).(glacier)(ss,:)), std(rmseLR100.(pattern).(glacier)(ss,:))])

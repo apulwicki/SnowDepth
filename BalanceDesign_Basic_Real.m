@@ -15,16 +15,16 @@ real_measure    = ObsInCell(fullSWE.(den).input, topo_sampled);
     % Remove dc, aspect and Northness
     for g = 1:3;    glacier = options.glacier{g};
     topo_full.(glacier) = rmfield(topo_full.(glacier),'centreD');
-    topo_full.(glacier) = rmfield(topo_full.(glacier),'aspect');
-    topo_full.(glacier) = rmfield(topo_full.(glacier),'northness');
+%     topo_full.(glacier) = rmfield(topo_full.(glacier),'aspect');
+%     topo_full.(glacier) = rmfield(topo_full.(glacier),'northness');
     
     topo_sampled.(glacier) = rmfield(topo_sampled.(glacier),'centreD');
-    topo_sampled.(glacier) = rmfield(topo_sampled.(glacier),'aspect');
-    topo_sampled.(glacier) = rmfield(topo_sampled.(glacier),'northness');
+%     topo_sampled.(glacier) = rmfield(topo_sampled.(glacier),'aspect');
+%     topo_sampled.(glacier) = rmfield(topo_sampled.(glacier),'northness');
     
     topo_sampled_ns.(glacier) = rmfield(topo_sampled_ns.(glacier),'centreD');
-    topo_sampled_ns.(glacier) = rmfield(topo_sampled_ns.(glacier),'aspect');
-    topo_sampled_ns.(glacier) = rmfield(topo_sampled_ns.(glacier),'northness');
+%     topo_sampled_ns.(glacier) = rmfield(topo_sampled_ns.(glacier),'aspect');
+%     topo_sampled_ns.(glacier) = rmfield(topo_sampled_ns.(glacier),'northness');
     
     end
 
@@ -51,7 +51,7 @@ input.topo_sampled_ns = topo_sampled_ns;
 [ subsetSWE_temp, TOPOdata_temp ] = ObsInCell( subsetSWE_temp, TOPOdata_temp ); 
 
 
- for n = 6:45
+ for n = 9:45
      display([type, ' n=',num2str(n)])
 
 for g = 1:3;    glacier = options.glacier{g};
@@ -107,6 +107,7 @@ end
  end
 end
 
+save('PaperII_realdataLR.mat')
 %% Plotting
 
 load PII_FastRuns.mat
@@ -170,7 +171,7 @@ fill([numPoints flip(numPoints)],[upper',flip(lower')],...
 %       good = find(2*stdWB<0.05,1);
         if ~isempty(good)
         good = good + min(numPoints);%-1+(smoothSize-1)/2;
-        plot([good good],[0 2],'k-.','LineWidth',0.05)
+%         plot([good good],[0 2],'k-.','LineWidth',0.05)
         ConvTable{g,p}  = good;
         end
 
@@ -185,7 +186,7 @@ fill([numPoints flip(numPoints)],[upper',flip(lower')],...
     if n==15; xlabel('                            Sample size'); end
     if g==1 || g == 2; set(gca,'XTickLabel',[]); end
 ylim([0 0.5])
-xlim([min(numPoints) 25])
+xlim([min(numPoints) 30])
 n = n+1;
 
 ax = get(gca,'Position');
@@ -195,19 +196,19 @@ set(gca,'Position', [ax(1) ax(2) ax(3) 0.28]);
     yInd = 0.14;
     if g ==1; sizeG = 0.12; xoff = 0.04; yInd = yInd+0.02; else sizeG = 0.14; xoff = 0.036; end
 axes('position',[ax(1)+xoff ax(2)+yInd sizeG sizeG])
-pInd = 1:10:length(pUTM.(namesP{p}).(glacier));
+pInd = 1:length(pUTM.(namesP{p}).(glacier));
 if g == 3; fill(options.rig.(glacier)(1:304,1),options.rig.(glacier)(1:304,2),...
                 [199, 201, 204]/255, 'EdgeColor','none'); hold on
 else; fill(options.rig.(glacier)(:,1),options.rig.(glacier)(:,2),...
                 [199, 201, 204]/255, 'EdgeColor','none'); hold on
 end
 plot(pUTM.(namesP{p}).(glacier)(pInd,1),pUTM.(namesP{p}).(glacier)(pInd,2),'k.','MarkerSize',1.5); 
-plot(options.rig.ELA(ela_ind(g,1):ela_ind(g,2),1)+ela_m(g,1), options.rig.ELA(ela_ind(g,1):ela_ind(g,2),2)+ela_m(g,2),'-.k');
+plot(options.rig.ELA(ela_ind(g,1):ela_ind(g,2),1)+ela_m(g,1), options.rig.ELA(ela_ind(g,1):ela_ind(g,2),2)+ela_m(g,2),'-k');
     axis off; axis equal
 end
 end 
 
-%     saveFIG_HP('PII_AA_RealData',2,12)
+    saveFIG_HP('PII_AA_RealData',2,12)
     
 %% nc and nv calculation
 

@@ -49,15 +49,16 @@ for i = 1:runs                                  %for number of runs
         save mat2R_CE.mat sweG topoG
         
          %Run BMS code in R though the terminal (top SFU, bottom Mac)
-        !R --no-save CMD BATCH BMS_matlab_CE.R 
-%         !/usr/local/bin/R CMD BATCH BMS_matlab.R  
+%         !R --no-save CMD BATCH BMS_matlab_CE.R 
+        !/usr/local/bin/R CMD BATCH BMS_matlab_CE.R  
         
         %Load data from R
        try
             load R2mat_CE.mat 
             delete R2mat_CE.mat
         catch
-            !R --no-save CMD BATCH BMS_matlab_CE.R
+            %!R --no-save CMD BATCH BMS_matlab_CE.R
+            !/usr/local/bin/R CMD BATCH BMS_matlab_CE.R
             load R2mat_CE.mat 
             delete R2mat_CE.mat
         end

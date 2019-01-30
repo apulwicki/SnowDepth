@@ -173,7 +173,7 @@ real_measure = SampledCell(snowdist_model(mc));
 
 for p = 1:length(namesP)
 
-for ss = 45:57 %6:45%length(pWB.(namesP{p}).(glacier))
+for ss = 6:55
    display([' Sample size: ',num2str(ss),' Pattern: ',namesP{p}, ' Run:',num2str(mc)])
 
    [WBinput, TOPOinput, UTMinput] = SubsetSampleSize( pWB, pTOPO, pUTM, ss );
@@ -484,11 +484,11 @@ end
 
 %% nc calculation
 
-% load PII_FastRuns.mat
-% load PaperII_AblationArea.mat sweBMS_alldata
-% load Full.mat fullLR fullSWE
-% load TopoSWE.mat topo_sampled
-% run OPTIONS
+load PII_FastRuns.mat
+load PaperII_AblationArea.mat sweBMS_alldata
+load Full.mat fullLR fullSWE
+load TopoSWE.mat topo_sampled
+run OPTIONS
 
 numPoints   = 6:57;
 namesP      = fieldnames(synRMSE_low);
@@ -521,7 +521,7 @@ if isempty(nc); nc = nan;
 else; nc = nc + min(numPoints); end
 nc_table{g,p}   = nc;
 
-nv = find(stdSmooth+meanSmooth-RMSEfull(g)<RMSEfull(g)*0.5,1);
+nv = find(stdSmooth+meanSmooth-RMSEfull(g)<RMSEfull(g)*0.75,1);
 if isempty(nv); nv=nan; 
 else; nv = nv + min(numPoints); end
 nv_table{g,p}   = nv;

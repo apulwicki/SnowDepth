@@ -33,6 +33,7 @@ end
 load Patterns.mat 
 load Patterns.mat pUTM
 load Full.mat fullLR 
+% load PaperII_FinalLRruns rmseLR mpeLR
 run OPTIONS
 
     namesP = fieldnames(SynObs_High);  order = [2 3 1 4 5 7]; namesP = namesP(order);
@@ -47,7 +48,9 @@ run OPTIONS
         0.4660    0.6740    0.1880;...
         0.3010    0.7450    0.9330;...
         0.0588    0.3490    0.1216];
-
+    ela_ind = [1 7; 8 15; 16 23];
+    ela_m = [0 0; -0.04*10^5 -0.0088*10^6; 0.04*10^5 0.0086*10^6];
+    
   % Figure  
      clf; n = 1;
      ConvTable   = nan(3,6);  ConvTable = array2table(ConvTable,'VariableNames',namesP);  
@@ -57,13 +60,14 @@ run OPTIONS
 for g = 1:3; glacier = options.glacier{g};
 for p = 1:length(namesP)
 %    numPoints = 8:size(SynObs_High.(namesP{p}).(glacier),1);
-   numPoints = 6:3:45;
+   numPoints = 5:30;
 
-    M1   = mean(SynObs_High.(namesP{p}).(glacier)(8:end,:),2);
-    M2   = mean(SynObs_Low.(namesP{p}).(glacier)(8:end,:),2);   
-meanWB   = mean([M1 M2],2);
-stdWB  = std(SynObs_High.(namesP{p}).(glacier)(8:end,:),[],2);
-stdWB_L  = std(SynObs_Low.(namesP{p}).(glacier)(8:end,:),[],2);
+%     M1   = mean(rmseLR_nonoise.(namesP{p}).(glacier)(numPoints,:),2);
+%     M2   = mean(rmseLR_low.(namesP{p}).(glacier)(numPoints,:),2);   
+% meanWB   = mean([M1 M2],2);
+meanWB = mean(rmseLR.(namesP{p}).(glacier)(numPoints,:),2);
+stdWB  = std(rmseLR.(namesP{p}).(glacier)(numPoints,:),[],2);
+% stdWB_L  = std(rmseLR_low.(namesP{p}).(glacier)(numPoints,:),[],2);
 
 
 axes(ha(n));    
@@ -71,39 +75,39 @@ plot(numPoints,meanWB,'LineWidth',0.5,'Color',C(p,:)); hold on
     upper = meanWB + stdWB;
     lower = meanWB - stdWB;
 fill([numPoints flip(numPoints)],[upper',flip(lower')],...
-     C(p,:),'FaceAlpha',0.2,'EdgeColor','none'); hold on
-     upper = meanWB + stdWB_L;
-    lower = meanWB - stdWB_L;
-fill([numPoints flip(numPoints)],[upper',flip(lower')],...
-     C(p,:),'FaceAlpha',0.4,'EdgeColor','none')
+     C(p,:),'FaceAlpha',0.5,'EdgeColor','none'); hold on
+%      upper = meanWB + stdWB_L;
+%     lower = meanWB - stdWB_L;
+% fill([numPoints flip(numPoints)],[upper',flip(lower')],...
+%      C(p,:),'FaceAlpha',0.4,'EdgeColor','none'); hold on
 
 %Best sample size Fitting function %%%%%%%%%%%%%%%%%%%%%%%%%%
    
-    GWmean = nanmean(fullLR.S2.(glacier)(:));
+    GWmean = best_rmseLR.(glacier); %nanmean(fullLR.S2.(glacier)(:));
     
     smoothSize = 7;
         M = zeros(smoothSize, length(meanWB)-smoothSize+1);
     for h = 1:smoothSize;  M(h,:) = meanWB(h:end-(smoothSize-h));  end
     T = mean(M);    
     
-    plot(numPoints((h-1)/2:end-(h-1)/2-1), T,'LineWidth',1.1,'Color',C(p,:)); 
+    plot(numPoints((h-1)/2:end-(h-1)/2-1), T,'LineWidth',1.6,'Color',C(p,:)); 
     plot([min(numPoints) max(numPoints)],[GWmean,GWmean],'--k')
 
     % 5% of GW mean
     good = find(T-GWmean<0.05,1);   
         if ~isempty(good)
         good = good + min(numPoints)-1+(smoothSize-1)/2;
-        plot([good good],[0 2],'k:','LineWidth',0.05)
+%         plot([good good],[0 2],'k:','LineWidth',0.05)
         ConvTable{g,p}  = good;
         end
     %High STD within 25% of mean
         M = zeros(smoothSize, length(meanWB)-smoothSize+1);
     for h = 1:smoothSize;  M(h,:) = stdWB(h:end-(smoothSize-h));  end
     TN = mean(M);    
-    N10 = find(TN/GWmean<0.25,1); 
+    N10 = find(TN/GWmean<0.75,1); 
         if ~isempty(N10) 
         N10 = N10+min(numPoints)-1+(smoothSize-1)/2;
-        plot([N10 N10],[0 1.2],'-.k','LineWidth',0.75)
+%         plot([N10 N10],[0 1.2],'-.k','LineWidth',0.75)
         VarTable{g,p}   = N10;
         end
         
@@ -111,36 +115,37 @@ fill([numPoints flip(numPoints)],[upper',flip(lower')],...
     %titles
     if g==1; title(namesPfull(p,:)); end
     %y labels
-    if g ==1 && p==1; ylabel('G4 WB (m w.e.)'); set(gca,'XTickLabel',[]);
-    elseif g ==2 && p==1; ylabel('G2 WB (m w.e.)'); set(gca,'XTickLabel',[]);
-    elseif g ==3 && p==1; ylabel('G13 WB (m w.e.)'); 
+    if g ==1 && p==1; ylabel('G4 MPE (%)'); set(gca,'XTickLabel',[]);
+    elseif g ==2 && p==1; ylabel('G2 MPE (%)'); set(gca,'XTickLabel',[]);
+    elseif g ==3 && p==1; ylabel('G13 MPE (%)'); 
     else set(gca,'YTickLabel',[]);
     end
     if n==15; xlabel('                            Sample size'); end
     if g==1 || g == 2; set(gca,'XTickLabel',[]); end
-ylim([0.2 1.1])
-xlim([min(numPoints)-1 45])
+ylim([0 0.3])
+xlim([0 30])
 n = n+1;
 
 ax = get(gca,'Position');
 set(gca,'Position', [ax(1) ax(2) ax(3) 0.28]);
 
-    if n==8; yInd = 0.002; else yInd = 0.14; end
+    if n==223; yInd = 0.002; else yInd = 0.14; end
     if g ==1; sizeG = 0.12; xoff = 0.04; yInd = yInd+0.02; else sizeG = 0.14; xoff = 0.036; end
 axes('position',[ax(1)+xoff ax(2)+yInd sizeG sizeG])
-pInd = 1:10:length(pUTM.(namesP{p}).(glacier));
+pInd = 1:length(pUTM.(namesP{p}).(glacier));
 if g == 3; fill(options.rig.(glacier)(1:304,1),options.rig.(glacier)(1:304,2),...
                 [199, 201, 204]/255, 'EdgeColor','none'); hold on
 else fill(options.rig.(glacier)(:,1),options.rig.(glacier)(:,2),...
                 [199, 201, 204]/255, 'EdgeColor','none'); hold on
 end
-plot(pUTM.(namesP{p}).(glacier)(pInd,1),pUTM.(namesP{p}).(glacier)(pInd,2),'k.','MarkerSize',1.5); 
+plot(pUTM.(namesP{p}).(glacier)(pInd,1),pUTM.(namesP{p}).(glacier)(pInd,2),'k.','MarkerSize',1.5);
+plot(options.rig.ELA(ela_ind(g,1):ela_ind(g,2),1)+ela_m(g,1), options.rig.ELA(ela_ind(g,1):ela_ind(g,2),2)+ela_m(g,2),'-k');
     axis off; axis equal
 end
 end 
 
 	%saveFIG_HP('SyntheticObsWB',2,12)
-    saveFIG_HP('Pulwicki_Fig3',2,12)
+%     saveFIG_HP('Pulwicki_Fig3_MPE',2,12)
 
 %% Figure 5 - Real data
     clear
