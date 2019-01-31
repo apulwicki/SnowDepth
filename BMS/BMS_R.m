@@ -16,7 +16,7 @@ function [ BMSbest, residuals ] = BMS_R( swe, topoSampled )
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 global options
 
-for g = 3 %For all glaciers
+for g = 1:3 %For all glaciers
 %% Make Cal Val data sets
 
  %Initialize
@@ -49,8 +49,8 @@ for i = 1:runs                                  %for number of runs
         save mat2R.mat sweG topoG
         
          %Run BMS code in R though the terminal (top SFU, bottom Mac)
-%         !R --no-save CMD BATCH BMS_matlab.R
-        !/usr/local/bin/R --no-save CMD BATCH BMS_matlab.R    
+        !R --no-save CMD BATCH BMS_matlab.R
+%         !/usr/local/bin/R --no-save CMD BATCH BMS_matlab.R    
 %         !Rscript --no-save BMS_matlab.R
         
         %Load data from R
@@ -58,8 +58,8 @@ for i = 1:runs                                  %for number of runs
             load R2mat.mat 
             delete R2mat.mat
         catch
-            %!R --no-save CMD BATCH BMS_matlab.R
-            !/usr/local/bin/R CMD BATCH BMS_matlab.R
+            !R --no-save CMD BATCH BMS_matlab.R
+%             !/usr/local/bin/R CMD BATCH BMS_matlab.R
             load R2mat.mat 
             delete R2mat.mat
         end

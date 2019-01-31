@@ -219,45 +219,45 @@ for ss = nn
     %Add some noise
     WBinputN = WBnoise(WBinput.(namesP{p}),'low');
     
-%         % BMA
-%         swe_input.(glacier) = WBinputN.(glacier);
-%         topo_input = TOPOinput.(namesP{p});
-% 
-%         cd BMS
-%         [BMSinit, BMSres] = BMS_R(swe_input, topo_input);
-%         cd ..
-% 
-%         for g = 3;        glacier = char(options.glacier(g));
-%         BMS.(glacier) = BMSinit.(glacier)(:,1);   
-%         coeffsBMA(ss).(namesP{p})(mc).(glacier)   = BMS.(glacier){1:8,1};
-% 
-%         swe_pred = repmat(BMS.(glacier){8,1}, options.mapsize(g,:));
-%         betaCoeff = BMS.(glacier){1:7,1};    topoCoeff = fieldnames(topo_full.G4);
-%         for num_models = 1:length(betaCoeff)
-%             param      = topoCoeff{num_models};
-%             sweT       = topo_full.(glacier).(param)*betaCoeff(num_models);
-%             swe_pred   = swe_pred + sweT;
-%         end
-%         swe_pred(swe_pred<0) = 0;
-%         swe_pred = swe_pred.*AblationArea.(glacier); 
+        % BMA
+        swe_input = WBinputN;
+        topo_input = TOPOinput.(namesP{p});
+
+        cd BMS
+        [BMSinit, BMSres] = BMS_R(swe_input, topo_input);
+        cd ..
+
+        for g = 1:3;        glacier = char(options.glacier(g));
+        BMS.(glacier) = BMSinit.(glacier)(:,1);   
+        coeffsBMA(ss).(namesP{p})(mc).(glacier)   = BMS.(glacier){1:8,1};
+
+        swe_pred = repmat(BMS.(glacier){8,1}, options.mapsize(g,:));
+        betaCoeff = BMS.(glacier){1:7,1};    topoCoeff = fieldnames(topo_full.G4);
+        for num_models = 1:length(betaCoeff)
+            param      = topoCoeff{num_models};
+            sweT       = topo_full.(glacier).(param)*betaCoeff(num_models);
+            swe_pred   = swe_pred + sweT;
+        end
+        swe_pred(swe_pred<0) = 0;
+        swe_pred = swe_pred.*AblationArea.(glacier); 
 %         predBMA(ss).(namesP{p})(mc).(glacier) = swe_pred;
-%         
-%         sampledtemp             = swe_pred(options.ENgrid.(glacier)(:,2),options.ENgrid.(glacier)(:,1));
-%         syn_measure.(glacier)   = diag(sampledtemp);
-%         
-%         real_measure_tmp.(glacier) = real_measure.(glacier)(~isnan(syn_measure.(glacier)));
-% 
-%             syn_measure_tmp.(glacier) = syn_measure.(glacier)(~isnan(syn_measure.(glacier)));
-%         rmseBMA.(namesP{p}).(glacier)(ss,mc) = sqrt(mean((syn_measure_tmp.(glacier)-real_measure_tmp.(glacier)).^2));
-%         end
+        
+        sampledtemp             = swe_pred(options.ENgrid.(glacier)(:,2),options.ENgrid.(glacier)(:,1));
+        syn_measure.(glacier)   = diag(sampledtemp);
+        
+        real_measure_tmp.(glacier) = real_measure.(glacier)(~isnan(syn_measure.(glacier)));
+
+            syn_measure_tmp.(glacier) = syn_measure.(glacier)(~isnan(syn_measure.(glacier)));
+        rmseBMA.(namesP{p}).(glacier)(ss,mc) = sqrt(mean((syn_measure_tmp.(glacier)-real_measure_tmp.(glacier)).^2));
+        end
         
         
         % BASIC LR        
-        for g = 1:3;        glacier = char(options.glacier(g));
+%         for g = 1:3;        glacier = char(options.glacier(g));
 
-        swe	    = WBinputN.(glacier)(:,1);
+%         swe	    = WBinputN.(glacier)(:,1);
 %         swe	    = WBinput.(namesP{p}).(glacier)(:,1);
-        Xt      = struct2array(TOPOinput.(namesP{p}).(glacier));
+%         Xt      = struct2array(TOPOinput.(namesP{p}).(glacier));
 %         swe_tmp   = snowdist_model(mc).(glacier)(:);
 %         swe       = swe_tmp(~isnan(swe_tmp));
 %         topoCoeff = fieldnames(topo_full.G4); Xt = zeros(length(swe),length(topoCoeff));
@@ -266,38 +266,31 @@ for ss = nn
 %             Xt_temp = Xt_temp(~isnan(swe_tmp));
 %             Xt(:,t) = Xt_temp;
 %         end
-        
-        X       = [ones(size(Xt,1),1), Xt];
-
-        coeffs = regress(swe, X);
-        coeffsLR(ss).(namesP{p})(mc).(glacier)   = coeffs;
-
-        swe_pred = repmat(coeffs(1), options.mapsize(g,:));
-        betaCoeff = coeffs(2:end);    topoCoeff = fieldnames(topo_full.G4);
-        for num_models = 1:length(betaCoeff)
-            param      = topoCoeff{num_models};
-            sweT       = topo_full.(glacier).(param)*betaCoeff(num_models);
-            swe_pred   = swe_pred + sweT;
-        end
-        swe_pred(swe_pred<0) = 0;
-        swe_pred = swe_pred.*AblationArea.(glacier); 
-        predLR(ss).(namesP{p})(mc).(glacier) = swe_pred;
-        
-        sampledtemp     = swe_pred(options.ENgrid.(glacier)(:,2),options.ENgrid.(glacier)(:,1));
-        syn_measure     = diag(sampledtemp);
-        
-        real_measure_tmp = real_measure.(glacier)(~isnan(syn_measure));
-        syn_measure_tmp = syn_measure(~isnan(syn_measure));
-        
-        rmseLR.(namesP{p}).(glacier)(ss,mc) = sqrt(mean((syn_measure_tmp-real_measure_tmp).^2));
-        
-        % RMSPE 100%*sum(abs(obs - sim)/obs)
-%         x = abs(syn_measure_tmp-real_measure_tmp)./real_measure_tmp;
-%         x = x(~isinf(x));
-%         x = x(~isnan(x));
-%         mpeLR.(namesP{p}).(glacier)(ss,mc) = 100*sum(x)/length(syn_measure_tmp);
-
-        end
+%         
+%         X       = [ones(size(Xt,1),1), Xt];
+% 
+%         coeffs = regress(swe, X);
+%         coeffsLR(ss).(namesP{p})(mc).(glacier)   = coeffs;
+% 
+%         swe_pred = repmat(coeffs(1), options.mapsize(g,:));
+%         betaCoeff = coeffs(2:end);    topoCoeff = fieldnames(topo_full.G4);
+%         for num_models = 1:length(betaCoeff)
+%             param      = topoCoeff{num_models};
+%             sweT       = topo_full.(glacier).(param)*betaCoeff(num_models);
+%             swe_pred   = swe_pred + sweT;
+%         end
+%         swe_pred(swe_pred<0) = 0;
+%         swe_pred = swe_pred.*AblationArea.(glacier); 
+%         predLR(ss).(namesP{p})(mc).(glacier) = swe_pred;
+%         
+%         sampledtemp     = swe_pred(options.ENgrid.(glacier)(:,2),options.ENgrid.(glacier)(:,1));
+%         syn_measure     = diag(sampledtemp);
+%         
+%         real_measure_tmp = real_measure.(glacier)(~isnan(syn_measure));
+%         syn_measure_tmp = syn_measure(~isnan(syn_measure));
+%         
+%         rmseLR.(namesP{p}).(glacier)(ss,mc) = sqrt(mean((syn_measure_tmp-real_measure_tmp).^2));
+%         end
         
 end
 end

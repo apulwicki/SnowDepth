@@ -62,12 +62,12 @@ for p = 1:length(namesP)
 %    numPoints = 8:size(SynObs_High.(namesP{p}).(glacier),1);
    numPoints = 5:30;
 
-%     M1   = mean(rmseLR_nonoise.(namesP{p}).(glacier)(numPoints,:),2);
-%     M2   = mean(rmseLR_low.(namesP{p}).(glacier)(numPoints,:),2);   
-% meanWB   = mean([M1 M2],2);
+    M1   = mean(rmseLR_nonoise.(namesP{p}).(glacier)(numPoints,:),2);
+    M2   = mean(rmseLR_low.(namesP{p}).(glacier)(numPoints,:),2);   
+meanWB   = mean([M1 M2],2);
 meanWB = mean(rmseLR.(namesP{p}).(glacier)(numPoints,:),2);
-stdWB  = std(rmseLR.(namesP{p}).(glacier)(numPoints,:),[],2);
-% stdWB_L  = std(rmseLR_low.(namesP{p}).(glacier)(numPoints,:),[],2);
+stdWB  = std(rmseLR_nonoise.(namesP{p}).(glacier)(numPoints,:),[],2);
+stdWB_L  = std(rmseLR_low.(namesP{p}).(glacier)(numPoints,:),[],2);
 
 
 axes(ha(n));    
@@ -76,10 +76,10 @@ plot(numPoints,meanWB,'LineWidth',0.5,'Color',C(p,:)); hold on
     lower = meanWB - stdWB;
 fill([numPoints flip(numPoints)],[upper',flip(lower')],...
      C(p,:),'FaceAlpha',0.5,'EdgeColor','none'); hold on
-%      upper = meanWB + stdWB_L;
-%     lower = meanWB - stdWB_L;
-% fill([numPoints flip(numPoints)],[upper',flip(lower')],...
-%      C(p,:),'FaceAlpha',0.4,'EdgeColor','none'); hold on
+     upper = meanWB + stdWB_L;
+    lower = meanWB - stdWB_L;
+fill([numPoints flip(numPoints)],[upper',flip(lower')],...
+     C(p,:),'FaceAlpha',0.4,'EdgeColor','none'); hold on
 
 %Best sample size Fitting function %%%%%%%%%%%%%%%%%%%%%%%%%%
    
