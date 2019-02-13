@@ -7,7 +7,7 @@ file_path = '/Users/Alexandra/Documents/SFU/Data/SnowDepth/';
 
 % noise_number = 100;
 num_models = 200;
-nn = 6:30;
+nn = 7:30;
 %% Get synthetic snow distributions
 
 Bw_obs = [0.6, 0.52, 0.39];
@@ -204,8 +204,8 @@ AblationArea.(glacier)(~isnan(AblationArea.(glacier)))=1;
 end
     
 %%
-namesP = fieldnames(pWB);
-%  namesP = {'CentreTransect'};
+% namesP = fieldnames(pWB);
+ namesP = {'CentreTransect'};
 
 real_measure = SampledCell(snowdist_model(mc));
 

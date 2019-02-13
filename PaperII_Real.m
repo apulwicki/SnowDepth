@@ -1,23 +1,4 @@
-%     N1 = {'Midline',''}; N2 = {'Mid &','Transverse'}; N3 = {'Circle',''};
-%     N4 = {'Hourglass',''}; N5 = {'Hourglass','& Circle'}; N6 = {'Random',''}; 
-clear realCoeffs
-load BMS_Centreline.mat
-realCoeffs.Centreline = BMS_Centreline;
 
-load BMS_CentreTransect.mat
-realCoeffs.CentreTransect = BMS_CentreTransect;
-
-load BMS_Circle.mat
-realCoeffs.Circle = BMS_Circle;
-
-load BMS_Hourglass.mat
-realCoeffs.Hourglass = BMS_Hourglass;
-
-load BMS_HourCircle.mat
-realCoeffs.HourCircle = BMS_HourCircle;
-
-load BMS_RandomSafe.mat
-realCoeffs.RandomSafe = BMS_RandomSafe;
 
 
 %% Predict bw and calculate RMSE
@@ -25,12 +6,13 @@ run OPTIONS.m
 load TestSFU.mat BMS_HourCircle
 load TopoSWE.mat topo_full
 load PaperII_AblationArea.mat
+load PaperII_RegularSampling.mat
 
     % Remove dc, aspect and Northness
 for g = 1:3;    glacier = options.glacier{g};
     topo_full.(glacier) = rmfield(topo_full.(glacier),'centreD');
-    topo_full.(glacier) = rmfield(topo_full.(glacier),'aspect');
-    topo_full.(glacier) = rmfield(topo_full.(glacier),'northness');
+%     topo_full.(glacier) = rmfield(topo_full.(glacier),'aspect');
+%     topo_full.(glacier) = rmfield(topo_full.(glacier),'northness');
 end
 
 
@@ -146,7 +128,7 @@ fill([numPoints flip(numPoints)],[upper',flip(lower')],...
         estGrid = SampledCell(sweBMS_alldata);
      RMSEfull = sqrt(mean((estGrid.(glacier)-realGrid.(glacier)(:,1)).^2));
 
-    %Smooth regularily spaced data 
+    %Regularily spaced data 
 %     smoothSize = 7;
 %     data = realRMSE.(namesP{p}).(glacier)(numPoints);
 %     SS = numPoints(1:size(data,1));

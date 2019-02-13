@@ -60,12 +60,12 @@ run OPTIONS
 for g = 1:3; glacier = options.glacier{g};
 for p = 1:length(namesP)
 %    numPoints = 8:size(SynObs_High.(namesP{p}).(glacier),1);
-   numPoints = 5:30;
+   numPoints = 8:30;
 
     M1   = mean(rmseLR_nonoise.(namesP{p}).(glacier)(numPoints,:),2);
     M2   = mean(rmseLR_low.(namesP{p}).(glacier)(numPoints,:),2);   
 meanWB   = mean([M1 M2],2);
-meanWB = mean(rmseLR.(namesP{p}).(glacier)(numPoints,:),2);
+% meanWB = mean(rmseLR.(namesP{p}).(glacier)(numPoints,:),2);
 stdWB  = std(rmseLR_nonoise.(namesP{p}).(glacier)(numPoints,:),[],2);
 stdWB_L  = std(rmseLR_low.(namesP{p}).(glacier)(numPoints,:),[],2);
 

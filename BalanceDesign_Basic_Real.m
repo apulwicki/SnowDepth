@@ -3,7 +3,7 @@
 % Selecting Data from Pattern
 
     den = 'S2';
-    nRuns = 100;
+    nRuns = 200;
 
 
 load TopoSWE.mat
@@ -15,16 +15,16 @@ real_measure    = ObsInCell(fullSWE.(den).input, topo_sampled);
     % Remove dc, aspect and Northness
     for g = 1:3;    glacier = options.glacier{g};
     topo_full.(glacier) = rmfield(topo_full.(glacier),'centreD');
-%     topo_full.(glacier) = rmfield(topo_full.(glacier),'aspect');
-%     topo_full.(glacier) = rmfield(topo_full.(glacier),'northness');
+    topo_full.(glacier) = rmfield(topo_full.(glacier),'aspect');
+    topo_full.(glacier) = rmfield(topo_full.(glacier),'northness');
     
     topo_sampled.(glacier) = rmfield(topo_sampled.(glacier),'centreD');
-%     topo_sampled.(glacier) = rmfield(topo_sampled.(glacier),'aspect');
-%     topo_sampled.(glacier) = rmfield(topo_sampled.(glacier),'northness');
+    topo_sampled.(glacier) = rmfield(topo_sampled.(glacier),'aspect');
+    topo_sampled.(glacier) = rmfield(topo_sampled.(glacier),'northness');
     
     topo_sampled_ns.(glacier) = rmfield(topo_sampled_ns.(glacier),'centreD');
-%     topo_sampled_ns.(glacier) = rmfield(topo_sampled_ns.(glacier),'aspect');
-%     topo_sampled_ns.(glacier) = rmfield(topo_sampled_ns.(glacier),'northness');
+    topo_sampled_ns.(glacier) = rmfield(topo_sampled_ns.(glacier),'aspect');
+    topo_sampled_ns.(glacier) = rmfield(topo_sampled_ns.(glacier),'northness');
     
     end
 
@@ -51,7 +51,7 @@ input.topo_sampled_ns = topo_sampled_ns;
 [ subsetSWE_temp, TOPOdata_temp ] = ObsInCell( subsetSWE_temp, TOPOdata_temp ); 
 
 
- for n = 9:45
+ for n = 6:30
      display([type, ' n=',num2str(n)])
 
 for g = 1:3;    glacier = options.glacier{g};
@@ -59,15 +59,20 @@ for g = 1:3;    glacier = options.glacier{g};
     maxN = length(subsetSWE_temp.(glacier));
     for mc = 1:nRuns
 
-    nI = randperm(maxN, n);
-    WBinput   = subsetSWE_temp.(glacier)(nI,1);
-        ff = fieldnames(TOPOdata_temp.(glacier));
-        TOPOinput = zeros(n,length(ff));
-    for i = 1:length(ff);    fname = ff{i};
-    TOPOinput(:,i)  = TOPOdata_temp.(glacier).(fname)(nI,:); end
+%     nI = randperm(maxN, n);
+%     WBinput   = subsetSWE_temp.(glacier)(nI,1);
+%         ff = fieldnames(TOPOdata_temp.(glacier));
+%         TOPOinput = zeros(n,length(ff));
+%     for i = 1:length(ff);    fname = ff{i};
+%     TOPOinput(:,i)  = TOPOdata_temp.(glacier).(fname)(nI,:); end
+
+    [WBinput,TOPOinput] = random_uniform(subsetSWE_temp.(glacier), TOPOdata_temp.(glacier), n);
+    
+%     samplingLOC_E.(type).(glacier)(:,mc) = WBinput(:,2);
+%     samplingLOC_N.(type).(glacier)(:,mc) = WBinput(:,3);
       
 % Linear regression    
-        swe	    = WBinput;
+        swe	    = WBinput(:,1);
         Xt      = TOPOinput;
         X       = [ones(length(Xt),1), Xt];
 
@@ -107,13 +112,13 @@ end
  end
 end
 
-save('PaperII_realdataLR.mat')
+% save('PaperII_realdataLR_4var_1t.mat')
 %% Plotting
 
-load PII_FastRuns.mat
-load Full.mat fullLR fullSWE
-load TopoSWE.mat topo_sampled
-run OPTIONS
+% load PII_FastRuns.mat
+% load Full.mat fullLR fullSWE
+% load TopoSWE.mat topo_sampled
+% run OPTIONS
 load Patterns.mat pUTM
 load PaperII_AblationArea.mat
 
@@ -133,7 +138,7 @@ load PaperII_AblationArea.mat
      VarTable    = nan(3,6);  VarTable  = array2table(VarTable,'VariableNames',namesP);
 
 
-numPoints = 6:45;
+numPoints = 6:20;
     ela_ind = [1 7; 8 15; 16 23];
     ela_m = [0 0; -0.04*10^5 -0.0088*10^6; 0.04*10^5 0.0086*10^6];
 
@@ -185,8 +190,8 @@ fill([numPoints flip(numPoints)],[upper',flip(lower')],...
     end
     if n==15; xlabel('                            Sample size'); end
     if g==1 || g == 2; set(gca,'XTickLabel',[]); end
-ylim([0 0.5])
-xlim([min(numPoints) 30])
+ylim([0 0.3])
+xlim([min(numPoints) max(numPoints)])
 n = n+1;
 
 ax = get(gca,'Position');
