@@ -1,6 +1,7 @@
 %% Figure 2 - Synthetic sampling designs 
     load PaperII_AblationArea.mat AblationArea
-    load Patterns.mat pUTM 
+%     load Patterns.mat pUTM
+    load PaperII_RegularSampling.mat 
     load Full.mat fullLR
     run OPTIONS
 NumSubPoints = 15;
@@ -12,19 +13,20 @@ for g = 1:3;    glacier = options.glacier{g};
 end
 
 
-    P = fieldnames(pUTM);
-for t = 1:length(P)
+    P = fieldnames(fullUTM);
+for t = length(P)
     clear pattern*
 for g = 1:3;    glacier = options.glacier{g};
-        if t == 6; pUTM.(P{t}).(glacier)(:,1) = []; end
-patternFULL.(glacier)(:,2:3) = pUTM.(P{t}).(glacier);
+%         if t == 6; fullUTM.(P{t}).(glacier)(:,1) = []; end
+patternFULL.(glacier)(:,2:3) = fullUTM.(P{t}).(glacier);
+patternSUB.(glacier)(:,2:3) = subUTM.(P{t}).(glacier);
+% I = floor(linspace(1,size(pUTM.(P{t}).(glacier),1),NumSubPoints));
+% patternSUB.(glacier)(:,2:3) = fullUTM.(P{t}).(glacier)(I,:);
 
-I = floor(linspace(1,size(pUTM.(P{t}).(glacier),1),NumSubPoints));
-patternSUB.(glacier)(:,2:3) = pUTM.(P{t}).(glacier)(I,:);
 end
 
 figure(1)
-PlotTopoParameter_DD(abla_area, 'WB (m w.e.)', patternFULL, patternSUB, 'black')
+PlotTopoParameter_DD(abla_area, 'B_w (m w.e.)', patternFULL, patternSUB, 'black')
 	saveFIG_HP(['SampleDesign_',P{t}],1,8.6)
 end
 
@@ -56,80 +58,105 @@ run OPTIONS
      ConvTable   = nan(3,6);  ConvTable = array2table(ConvTable,'VariableNames',namesP);  
      VarTable    = nan(3,6);  VarTable  = array2table(VarTable,'VariableNames',namesP);
 
-[ha, ~] = tight_subplot(3,length(namesP),[0.01 .01],[.08 0],[.05 0]);
+[ha, ~] = tight_subplot(3,length(namesP),[0.005 .005],[.08 0.06],[.06 0.01]);
 for g = 1:3; glacier = options.glacier{g};
 for p = 1:length(namesP)
 %    numPoints = 8:size(SynObs_High.(namesP{p}).(glacier),1);
-   numPoints = 8:30;
+   numPoints = 6:45;
 
-    M1   = mean(rmseLR_nonoise.(namesP{p}).(glacier)(numPoints,:),2);
-    M2   = mean(rmseLR_low.(namesP{p}).(glacier)(numPoints,:),2);   
-meanWB   = mean([M1 M2],2);
-% meanWB = mean(rmseLR.(namesP{p}).(glacier)(numPoints,:),2);
-stdWB  = std(rmseLR_nonoise.(namesP{p}).(glacier)(numPoints,:),[],2);
-stdWB_L  = std(rmseLR_low.(namesP{p}).(glacier)(numPoints,:),[],2);
+meanWB = nanmean(rmseLR.(namesP{p}).(glacier)(numPoints,:),2);
+stdWB  = nanstd(rmseLR.(namesP{p}).(glacier)(numPoints,:),[],2);
+det_meanWB = nanmean(det_rmseLR.(namesP{p}).(glacier)(numPoints,:),2);
+det_stdWB  = nanstd(det_rmseLR.(namesP{p}).(glacier)(numPoints,:),[],2);
+% det_meanWB = nanmean(rmseLR_random.(namesP{p}).(glacier)(numPoints,:),2);
+% det_stdWB  = nanstd(rmseLR_random.(namesP{p}).(glacier)(numPoints,:),[],2);
+% meanWB = nanmean(R2.(namesP{p}).(glacier)(numPoints,:),2);
+% stdWB  = nanstd(R2.(namesP{p}).(glacier)(numPoints,:),[],2);
+% det_meanWB = nanmean(det_R2.(namesP{p}).(glacier)(numPoints,:),2);
+% det_stdWB  = nanstd(det_R2.(namesP{p}).(glacier)(numPoints,:),[],2);
 
+randuni_mean.(glacier)(numPoints,p) = meanWB;
+randuni_std.(glacier)(numPoints,p) = stdWB;
+det_mean.(glacier)(numPoints,p) = det_meanWB;
+det_std.(glacier)(numPoints,p) = det_stdWB;
+save('PII_Syn_4var_Random_Plot2.mat','best_rmseLR','randuni_mean', 'randuni_std', 'det_mean','det_std');
+% truerandom_mean.(glacier)(numPoints,p) = det_meanWB;
+% truerandom_std.(glacier)(numPoints,p) = det_stdWB;
+% save('PII_Syn_4var_Random_Plot2.mat','best_rmseLR','randuni_mean', 'randuni_std', 'truerandom_mean','truerandom_std');
+% randuni_mean.(glacier)(numPoints,p) = meanWB;
+% randuni_std.(glacier)(numPoints,p) = stdWB;
+% det_mean.(glacier)(numPoints,p) = det_meanWB;
+% det_std.(glacier)(numPoints,p) = det_stdWB;
+% save('PII_Syn_4var_R2_Plot.mat','best_R2','randuni_mean', 'randuni_std', 'det_mean','det_std');
 
 axes(ha(n));    
 plot(numPoints,meanWB,'LineWidth',0.5,'Color',C(p,:)); hold on
     upper = meanWB + stdWB;
     lower = meanWB - stdWB;
 fill([numPoints flip(numPoints)],[upper',flip(lower')],...
+     C(p,:),'FaceAlpha',0.3,'EdgeColor','none'); hold on
+ 
+plot(numPoints,det_meanWB,':k');hold on 
+ upper = det_meanWB + det_stdWB;
+ lower = det_meanWB - det_stdWB;
+ fill([numPoints flip(numPoints)],[upper',flip(lower')],...
      C(p,:),'FaceAlpha',0.5,'EdgeColor','none'); hold on
-     upper = meanWB + stdWB_L;
-    lower = meanWB - stdWB_L;
-fill([numPoints flip(numPoints)],[upper',flip(lower')],...
-     C(p,:),'FaceAlpha',0.4,'EdgeColor','none'); hold on
+%  upper = meanWB + stdWB_L;
+%  lower = meanWB - stdWB_L;
+%  fill([numPoints flip(numPoints)],[upper',flip(lower')],...
+%      C(p,:),'FaceAlpha',0.4,'EdgeColor','none'); hold on
 
 %Best sample size Fitting function %%%%%%%%%%%%%%%%%%%%%%%%%%
-   
-    GWmean = best_rmseLR.(glacier); %nanmean(fullLR.S2.(glacier)(:));
-    
+       
     smoothSize = 7;
         M = zeros(smoothSize, length(meanWB)-smoothSize+1);
     for h = 1:smoothSize;  M(h,:) = meanWB(h:end-(smoothSize-h));  end
     T = mean(M);    
     
-    plot(numPoints((h-1)/2:end-(h-1)/2-1), T,'LineWidth',1.6,'Color',C(p,:)); 
-    plot([min(numPoints) max(numPoints)],[GWmean,GWmean],'--k')
+%     plot(numPoints((h-1)/2:end-(h-1)/2-1), T,'LineWidth',1.6,'Color',C(p,:)); 
+    
+    GWmean = best_rmseLR.(glacier); %nanmean(fullLR.S2.(glacier)(:));
+%     GWmean = best_R2.(glacier);
+%       best_rmse_line = [0.0366 0.0298 0.0154];
+%       GWmean = best_rmse_line(g);
+plot([min(numPoints) max(numPoints)],[GWmean,GWmean],'--k')
 
     % 5% of GW mean
-    good = find(T-GWmean<0.05,1);   
-        if ~isempty(good)
-        good = good + min(numPoints)-1+(smoothSize-1)/2;
-%         plot([good good],[0 2],'k:','LineWidth',0.05)
-        ConvTable{g,p}  = good;
-        end
+%     good = find(T-GWmean<0.05,1);   
+%         if ~isempty(good)
+%         good = good + min(numPoints)-1+(smoothSize-1)/2;
+% %         plot([good good],[0 2],'k:','LineWidth',0.05)
+%         ConvTable{g,p}  = good;
+%         end
     %High STD within 25% of mean
-        M = zeros(smoothSize, length(meanWB)-smoothSize+1);
-    for h = 1:smoothSize;  M(h,:) = stdWB(h:end-(smoothSize-h));  end
-    TN = mean(M);    
-    N10 = find(TN/GWmean<0.75,1); 
-        if ~isempty(N10) 
-        N10 = N10+min(numPoints)-1+(smoothSize-1)/2;
-%         plot([N10 N10],[0 1.2],'-.k','LineWidth',0.75)
-        VarTable{g,p}   = N10;
-        end
+%         M = zeros(smoothSize, length(meanWB)-smoothSize+1);
+%     for h = 1:smoothSize;  M(h,:) = stdWB(h:end-(smoothSize-h));  end
+%     TN = mean(M);    
+%     N10 = find(TN/GWmean<0.75,1); 
+%         if ~isempty(N10) 
+%         N10 = N10+min(numPoints)-1+(smoothSize-1)/2;
+% %         plot([N10 N10],[0 1.2],'-.k','LineWidth',0.75)
+%         VarTable{g,p}   = N10;
+%         end
         
 
     %titles
     if g==1; title(namesPfull(p,:)); end
     %y labels
-    if g ==1 && p==1; ylabel('G4 MPE (%)'); set(gca,'XTickLabel',[]);
-    elseif g ==2 && p==1; ylabel('G2 MPE (%)'); set(gca,'XTickLabel',[]);
-    elseif g ==3 && p==1; ylabel('G13 MPE (%)'); 
+    if g ==1 && p==1; ylabel('G4 RMSE (m w.e.)'); set(gca,'XTickLabel',[]);
+    elseif g ==2 && p==1; ylabel('G2 RMSE (m w.e.)'); set(gca,'XTickLabel',[]);
+    elseif g ==3 && p==1; ylabel('G13 RMSE (m w.e.)'); 
     else set(gca,'YTickLabel',[]);
     end
     if n==15; xlabel('                            Sample size'); end
     if g==1 || g == 2; set(gca,'XTickLabel',[]); end
-ylim([0 0.3])
-xlim([0 30])
-n = n+1;
+ylim([0 0.55])
+xlim([min(numPoints) max(numPoints)])
 
 ax = get(gca,'Position');
 set(gca,'Position', [ax(1) ax(2) ax(3) 0.28]);
 
-    if n==223; yInd = 0.002; else yInd = 0.14; end
+    if n<7; yInd = 0.002; else yInd = 0.14; end
     if g ==1; sizeG = 0.12; xoff = 0.04; yInd = yInd+0.02; else sizeG = 0.14; xoff = 0.036; end
 axes('position',[ax(1)+xoff ax(2)+yInd sizeG sizeG])
 pInd = 1:length(pUTM.(namesP{p}).(glacier));
@@ -141,10 +168,12 @@ end
 plot(pUTM.(namesP{p}).(glacier)(pInd,1),pUTM.(namesP{p}).(glacier)(pInd,2),'k.','MarkerSize',1.5);
 plot(options.rig.ELA(ela_ind(g,1):ela_ind(g,2),1)+ela_m(g,1), options.rig.ELA(ela_ind(g,1):ela_ind(g,2),2)+ela_m(g,2),'-k');
     axis off; axis equal
+n = n+1;
+
 end
 end 
 
-	%saveFIG_HP('SyntheticObsWB',2,12)
+% 	saveFIG_HP('Syn_4var_Random2',2,12)
 %     saveFIG_HP('Pulwicki_Fig3_MPE',2,12)
 
 %% Figure 5 - Real data
@@ -292,7 +321,7 @@ n = 1;
 [ha, pos] = tight_subplot(3,length(namesP),[0 0],[0 0],[0 0]);
 annStart = [0.061 0.77 .1 .1];
 
-for g = 1:3; 
+for g = 1:3 
 for p = 1:length(namesP)
     glacier = options.glacier{g};
 %Calculate relative uncertainty and plot

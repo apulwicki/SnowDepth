@@ -77,8 +77,8 @@ for i = 1:3
                  E2 = (P2(i).utm(:,1)-minE)/40;
                  Na = (P2(i).utm(:,2)-minN)/40; N2 = max(Ng)-Na;
                 if      strcmp(sweDOTS,'black')
-                    plot(E1,N1,'k.', 'MarkerSize',3); hold on
-                    plot(E2,N2,'ko', 'MarkerSize',4); 
+                    plot(E1,N1,'k.', 'MarkerSize',5); hold on
+                    plot(E2,N2,'k.', 'MarkerSize',20); 
                 end        
                 
                 %Axis Properties

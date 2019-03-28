@@ -101,10 +101,12 @@ Gsplit = [1, 1950, 3235, length(cells)]; Gsplit = flip(Gsplit);
  clear e n wb cells g glacier Gsplit I* i* min* n* p pattern s* t1 t2 wb u*
 
  %% Get subset
- namesP = fieldnames(samplingSubset); 
+ load PaperII_RegularSampling
+ load PaperII_realdataLR_final samplingLOC
+ namesP = fieldnames(samplingLOC); 
  namesP = namesP([2,3,1,4,5]);
 
- sampleOptions = 8:13;
+ sampleOptions = 6:2:16;
  glacier = 'G4';
  n=1;
  figure(1); clf
@@ -114,7 +116,7 @@ for sampleSize = sampleOptions
     
     subplot(6,5,n)
     plot(fullUTM.(namesP{p}).(glacier)(:,1),fullUTM.(namesP{p}).(glacier)(:,2),'.', 'MarkerFace',[128,128,128]/255); hold on
-    plot(samplingSubset.(namesP{p})(sampleSize).(glacier)(:,1),samplingSubset.(namesP{p})(sampleSize).(glacier)(:,2),'ok')
+    plot(samplingLOC.(namesP{p})(sampleSize).(glacier)(:,1),samplingLOC.(namesP{p})(sampleSize).(glacier)(:,2),'ok')
     axis off
     axis square
     axis tight

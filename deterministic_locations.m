@@ -1,3 +1,5 @@
+function [swe_out, topo_out] = deterministic_locations(subsetSWE, subsetTOPO, n)
+
 %% ************************************************************************
 % This maximin sort-of design is deterministic and therefore unique for a 
 % given n. It begins with point #1 in the list and adds subsequent points 
@@ -7,34 +9,25 @@
 % added). Various metrics were tried to create uniform sampling, including 
 % max total or mean distances between all points and minimum standard 
 % deviation between distances. Maximin worked the best empirically.
-
-run OPTIONS
-load('PaperII_RegularSampling.mat')
-
-namesP = fieldnames(fullUTM);
-
-
-for p = 1:length(namesP);   pattern = namesP{p};
-for g=1:3;                  glacier = options.glacier{g};
     
-E = fullUTM.(pattern).(glacier)(:,1);
-N = fullUTM.(pattern).(glacier)(:,2);
-
-for n = 6:30            % Set number of samples
-
-close all
-clear  i j k dset dmin dsum dvec dvecsum dbest dabsmin 
-clear Ebest Nbest Eleft Nleft kkbest p Eset Nset
-clear stdvec furthest
+    E = subsetSWE(:,2);
+    N = subsetSWE(:,3);
+    SWE = subsetSWE(:,1);
 
 q = length(N);
+param = fieldnames(subsetTOPO);
 
 % Do the first two calculations outside of the main loop 
-Nbest(1) = N(1);
-Ebest(1) = E(1);
+nnn = 50;
+Nbest(1) = N(nnn);
+Ebest(1) = E(nnn);
+SWEbest(1) = SWE(nnn);
+for t = 1:length(param); TOPObest.(param{t})(1) = subsetTOPO.(param{t})(nnn);  end
 
-Nleft = N(2:end);
-Eleft = E(2:end);
+Nleft = N([1:nnn-1,nnn+1:end]);
+Eleft = E([1:nnn-1,nnn+1:end]);
+SWEleft = SWE([1:nnn-1,nnn+1:end]);
+for t = 1:length(param); TOPOleft.(param{t}) = subsetTOPO.(param{t})([1:nnn-1,nnn+1:end]);  end
 
 clear dvec
 for i=1:length(Nleft)
@@ -44,13 +37,16 @@ end
 [furthest] = find (dvec == max(dvec));
 Nbest(2) = Nleft(furthest(1));
 Ebest(2) = Eleft(furthest(1));
+SWEbest(2) = SWEleft(furthest(1));
+for t = 1:length(param); TOPObest.(param{t})(2) = TOPOleft.(param{t})(furthest(1));  end
 
 Nleft = Nleft([1:furthest-1,furthest+1:end]);
 Eleft = Eleft([1:furthest-1,furthest+1:end]);
-
+SWEleft = SWEleft([1:furthest-1,furthest+1:end]);
+for t = 1:length(param); TOPOleft.(param{t}) = TOPOleft.(param{t})([1:furthest-1,furthest+1:end]);  end
 
 % loop over the remainder of the samples n 
-   for k=3:n  
+    for k=3:n  
 
   clear dvec
   
@@ -67,18 +63,16 @@ Eleft = Eleft([1:furthest-1,furthest+1:end]);
   
   Nbest(k) = Nleft(furthest(1));
   Ebest(k) = Eleft(furthest(1));
+  SWEbest(k) = SWEleft(furthest(1));
+  for t = 1:length(param); TOPObest.(param{t})(k) = TOPOleft.(param{t})(furthest(1));  end
+
 
   Nleft = Nleft([1:furthest-1,furthest+1:end]);
   Eleft = Eleft([1:furthest-1,furthest+1:end]);
-end
-    samplingSubset.(pattern)(n).(glacier)(:,1:2) = [Ebest', Nbest'];
+  SWEleft = SWEleft([1:furthest-1,furthest+1:end]);
+  for t = 1:length(param); TOPOleft.(param{t}) = TOPOleft.(param{t})([1:furthest-1,furthest+1:end]);  end
 
-    figure(1)
-    plot(E,N,'.')
-    hold on
-    plot(Ebest,Nbest,'ko')
-    pause
+    end
+    swe_out = [SWEbest', Ebest', Nbest'];
+    topo_out = TOPObest;
 end
-end 
-end
-
