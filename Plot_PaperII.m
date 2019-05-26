@@ -1,20 +1,31 @@
 %% Figure 2 - Synthetic sampling designs 
-    load PaperII_AblationArea.mat AblationArea
+    load PaperII_AblationArea.mat AblationArea AccumulationArea
 %     load Patterns.mat pUTM
     load PaperII_RegularSampling.mat 
     load Full.mat fullLR
     run OPTIONS
 NumSubPoints = 15;
 
-% Blank our accum area
-for g = 1:3;    glacier = options.glacier{g};
-    abla_area.(glacier) = fullLR.S2.(glacier);
-    abla_area.(glacier)(AblationArea.(glacier)==-0.1)=-0.1;
-end
+% Remove Accum Area SP
+    density_old = [0.348,   0.3327,     0.3487];
+%     density_new = [0.3422,  0.344,     0.3692];
+    p_acc = [0.36,    0.3,        0.308];
+    p_abl = [0.3422,  0.353,     0.3692];
+
+Bw_alldata_fullG = zeros(1,3);
+Bw_alldata_abl = zeros(1,3);
+    for g = 1:3;    glacier = options.glacier{g};
+        swe_temp = fullLR.S2.(glacier);
+        swe_temp(AccumulationArea.(glacier)==1) = swe_temp(AccumulationArea.(glacier)==1)*p_acc(g)/density_old(g);
+        swe_temp(AblationArea.(glacier)==1) = swe_temp(AblationArea.(glacier)==1)*p_abl(g)/density_old(g);
+        abla_area.(glacier) = swe_temp;
+        % Blank out accum area
+        abla_area.(glacier)(AblationArea.(glacier)==-0.1)=-0.1;
+    end
 
 
     P = fieldnames(fullUTM);
-for t = length(P)
+for t = 1:length(P)
     clear pattern*
 for g = 1:3;    glacier = options.glacier{g};
 %         if t == 6; fullUTM.(P{t}).(glacier)(:,1) = []; end

@@ -138,89 +138,107 @@
 % 
 % sweBMS_alldata = sweBMS;
 % save('PaperII_AblationArea.mat','sweBMS_alldata', '-append')
-%% Blank out accum area %
-% load Full.mat fullSWE
-% load PaperII_AblationArea.mat sweBMS_alldata
-% run OPTIONS.m
-% 
-% % Glacier 4
-% AblationArea.G4 = sweBMS_alldata.G4;
-% x = repmat(1:options.mapsize(1,2),options.mapsize(1,1),1);
-% y = repmat((1:options.mapsize(1,1))',1,options.mapsize(1,2));
-% 
-% ELA.G4 = [60,19;54,20;50,21;35,23;28,29;29,36;30,38];
-% for i = 2:length(ELA.G4)
-%     m = (ELA.G4(i,1)-ELA.G4(i-1,1))/(ELA.G4(i,2)-ELA.G4(i-1,2));
-%     b = ELA.G4(i,1)-m*ELA.G4(i,2);
-% 
-%     y_test = m*x+b;
-%     y_nan = y_test>y;
-%     AblationArea.G4(y_nan) = NaN;
-% end
-% 
-% T = AblationArea.G4 ~= sweBMS_alldata.G4;
-% AblationArea.G4(T) = -0.1;
-% AblationArea.G4(options.mapNaN.G4) = NaN;
-% 
-% % clf; imagesc(AblationArea.G4); hold on
-% % plot(ELA.G4(:,2),ELA.G4(:,1),'k--')
-% 
-% 
-% % Glacier 2
-% AblationArea.G2 = sweBMS_alldata.G2;
-% x = repmat(1:options.mapsize(2,2),options.mapsize(2,1),1);
-% y = repmat((1:options.mapsize(2,1))',1,options.mapsize(2,2));
-% 
-% ELA.G2 = [90,67;87,80;82,89;74,90;68,90];
-% for i = 2:length(ELA.G2)
-%     m = (ELA.G2(i,1)-ELA.G2(i-1,1))/(ELA.G2(i,2)-ELA.G2(i-1,2));
-%     b = ELA.G2(i,1)-m*ELA.G2(i,2);
-% 
-%     y_test = m*x+b;
-%     y_nan = y_test<y;
-%     AblationArea.G2(y_nan) = NaN;
-% end
-% T = AblationArea.G2 ~= sweBMS_alldata.G2;
-% AblationArea.G2(T) = -0.1;
-% AblationArea.G2(options.mapNaN.G2) = NaN;
-% 
-% % clf; imagesc(AblationArea.G2); hold on
-% % plot(ELA.G2(:,2),ELA.G2(:,1),'k--')
-% 
-% % Glacier 13
-% AblationArea.G13 = sweBMS_alldata.G13;
-% x = repmat(1:options.mapsize(3,2),options.mapsize(3,1),1);
-% y = repmat((1:options.mapsize(3,1))',1,options.mapsize(3,2));
-% 
-% ELA.G13 = [95,61;105,74;99,89;87,90];
-% for i = 2:length(ELA.G13)
-%     m = (ELA.G13(i,1)-ELA.G13(i-1,1))/(ELA.G13(i,2)-ELA.G13(i-1,2));
-%     b = ELA.G13(i,1)-m*ELA.G13(i,2);
-% 
-%     y_test = m*x+b;
-%     y_nan = y_test<y;
-%     AblationArea.G13(y_nan) = NaN;
-% end
-% 
-% extra_ELA = [60,28;73,46];
-% i = 2;
-% m = (extra_ELA(i,1)-extra_ELA(i-1,1))/(extra_ELA(i,2)-extra_ELA(i-1,2));
-% b = extra_ELA(i,1)-m*extra_ELA(i,2);
-% y_test = m*x+b;
-% y_nan(:,24:45) = y_test(:,24:45)<y(:,24:45);
-% AblationArea.G13(y_nan) = NaN;
-% 
-% T = AblationArea.G13 ~= sweBMS_alldata.G13;
-% AblationArea.G13(T) = -0.1;
-% AblationArea.G13(options.mapNaN.G13) = NaN;
-% 
-% % clf; imagesc(AblationArea.G13); hold on
-% % plot(ELA.G13(:,2),ELA.G13(:,1),'k--')
-% 
+
+% Blank out accum area %
+load Full.mat fullSWE
+load PaperII_AblationArea.mat sweBMS_alldata
+run OPTIONS.m
+
+% Glacier 4
+AblationArea.G4 = sweBMS_alldata.G4;
+x = repmat(1:options.mapsize(1,2),options.mapsize(1,1),1);
+y = repmat((1:options.mapsize(1,1))',1,options.mapsize(1,2));
+
+ELA.G4 = [60,19;54,20;50,21;35,23;28,29;29,36;30,38];
+for i = 2:length(ELA.G4)
+    m = (ELA.G4(i,1)-ELA.G4(i-1,1))/(ELA.G4(i,2)-ELA.G4(i-1,2));
+    b = ELA.G4(i,1)-m*ELA.G4(i,2);
+
+    y_test = m*x+b;
+    y_nan = y_test>y;
+    AblationArea.G4(y_nan) = NaN;
+end
+
+T = AblationArea.G4 ~= sweBMS_alldata.G4;
+AblationArea.G4(T) = -0.1;
+AblationArea.G4(options.mapNaN.G4) = NaN;
+
+AccumulationArea.G4 = AblationArea.G4==-0.1;
+AccumulationArea.G4(AccumulationArea.G4==-0.1) = 1;
+AccumulationArea.G4(60:end,:) = 0;
+
+% clf; imagesc(AccumulationArea.G4); hold on
+% clf; imagesc(AblationArea.G4); hold on
+% plot(ELA.G4(:,2),ELA.G4(:,1),'k--')
+
+
+% Glacier 2
+AblationArea.G2 = sweBMS_alldata.G2;
+x = repmat(1:options.mapsize(2,2),options.mapsize(2,1),1);
+y = repmat((1:options.mapsize(2,1))',1,options.mapsize(2,2));
+
+ELA.G2 = [90,67;87,80;82,89;74,90;68,90];
+for i = 2:length(ELA.G2)
+    m = (ELA.G2(i,1)-ELA.G2(i-1,1))/(ELA.G2(i,2)-ELA.G2(i-1,2));
+    b = ELA.G2(i,1)-m*ELA.G2(i,2);
+
+    y_test = m*x+b;
+    y_nan = y_test<y;
+    AblationArea.G2(y_nan) = NaN;
+end
+T = AblationArea.G2 ~= sweBMS_alldata.G2;
+AblationArea.G2(T) = -0.1;
+AblationArea.G2(options.mapNaN.G2) = NaN;
+
+
+AccumulationArea.G2 = AblationArea.G2==-0.1;
+AccumulationArea.G2(AccumulationArea.G2==-0.1) = 1;
+AccumulationArea.G2(1:90,1:67) = 0;
+
+% clf; imagesc(AccumulationArea.G2); hold on
+% clf; imagesc(AblationArea.G2); hold on
+% plot(ELA.G2(:,2),ELA.G2(:,1),'k--')
+
+% Glacier 13
+AblationArea.G13 = sweBMS_alldata.G13;
+x = repmat(1:options.mapsize(3,2),options.mapsize(3,1),1);
+y = repmat((1:options.mapsize(3,1))',1,options.mapsize(3,2));
+
+ELA.G13 = [95,61;105,74;99,89;87,90];
+for i = 2:length(ELA.G13)
+    m = (ELA.G13(i,1)-ELA.G13(i-1,1))/(ELA.G13(i,2)-ELA.G13(i-1,2));
+    b = ELA.G13(i,1)-m*ELA.G13(i,2);
+
+    y_test = m*x+b;
+    y_nan = y_test<y;
+    AblationArea.G13(y_nan) = NaN;
+end
+
+extra_ELA = [60,28;73,46];
+i = 2;
+m = (extra_ELA(i,1)-extra_ELA(i-1,1))/(extra_ELA(i,2)-extra_ELA(i-1,2));
+b = extra_ELA(i,1)-m*extra_ELA(i,2);
+y_test = m*x+b;
+y_nan(:,24:45) = y_test(:,24:45)<y(:,24:45);
+AblationArea.G13(y_nan) = NaN;
+
+T = AblationArea.G13 ~= sweBMS_alldata.G13;
+AblationArea.G13(T) = -0.1;
+AblationArea.G13(options.mapNaN.G13) = NaN;
+
+AccumulationArea.G13 = AblationArea.G13==-0.1;
+AccumulationArea.G13(AccumulationArea.G13==-0.1) = 1;
+AccumulationArea.G13(1:60,:) = 0;
+AccumulationArea.G13(60:90,60:90) = 0;
+
+% clf; imagesc(AccumulationArea.G13); hold on
+% clf; imagesc(AblationArea.G13); hold on
+% plot(ELA.G13(:,2),ELA.G13(:,1),'k--')
+
 % PlotTopoParameter(AblationArea, 'name', 'B_W (m w.e.)',fullSWE.S2.input, 'black','massB')
-% 
-% 
-% save('PaperII_AblationArea.mat','AblationArea', '-append')
+
+
+save('PaperII_AblationArea.mat','AblationArea', 'AccumulationArea', '-append')
 
 %% Predict - patterns data
 load PaperII_AblationArea.mat

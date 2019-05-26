@@ -88,7 +88,7 @@ for i = 1:3
 
 end
 
-for i = 1:3;
+for i = 1:3
         s(i).Position   = pos_axis(i,:);
 end
 

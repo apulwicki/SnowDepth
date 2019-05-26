@@ -9,14 +9,36 @@
 load TopoSWE.mat
 run OPTIONS
 clear DataObs_RMSE  
+load Full.mat fullLR
+
+load PaperII_AblationArea.mat AblationArea AccumulationArea
+for g=1:3; glacier = options.glacier{g};
+AblationArea.(glacier)(AblationArea.(glacier)==-0.1)=NaN;
+AblationArea.(glacier)(~isnan(AblationArea.(glacier)))=1;
+end
 
 % Remove Accum Area SP
-% density_old = [0.348,   0.3327,     0.3487];
-% density_new = [0.3422,  0.3436,     0.3692];
-%     for g = 1:3;    glacier = options.glacier{g};
-%     fullSWE.(den).input.(glacier) = fullSWE.(den).input.(glacier)*density_new(g)/density_old(g);
-%     fullSWE.(den).(glacier).swe = fullSWE.(den).(glacier).swe*density_new(g)/density_old(g);
-%     end
+    density_old = [0.348,   0.3327,     0.3487];
+%     density_new = [0.3422,  0.344,     0.3692];
+    p_acc = [0.36,    0.3,        0.308];
+    p_abl = [0.3422,  0.353,     0.3692];
+
+Bw_alldata_fullG = zeros(1,3);
+Bw_alldata_abl = zeros(1,3);
+    for g = 1:3;    glacier = options.glacier{g};
+        trueSWE = fullLR.(den).(glacier);%*density_new(g)/density_old(g);
+        display(nanmean(nanmean(trueSWE)))
+        swe_temp = fullLR.(den).(glacier);
+        swe_temp(AccumulationArea.(glacier)==1) = swe_temp(AccumulationArea.(glacier)==1)*p_acc(g)/density_old(g);
+        swe_temp(AblationArea.(glacier)==1) = swe_temp(AblationArea.(glacier)==1)*p_abl(g)/density_old(g);
+        Bw_alldata_fullG(g) = round(nanmean(swe_temp(:)),2);
+        
+        swe_temp(AccumulationArea.(glacier)==1) = NaN;
+        Bw_alldata_abl(g) = round(nanmean(swe_temp(:)),2);
+
+    fullSWE.(den).input.(glacier) = fullSWE.(den).input.(glacier)*p_abl(g)/density_old(g);
+    fullSWE.(den).(glacier).swe = fullSWE.(den).input.(glacier)*p_abl(g)/density_old(g);
+    end
 
 real_measure    = ObsInCell(fullSWE.(den).input, topo_sampled);
 
@@ -35,12 +57,6 @@ real_measure    = ObsInCell(fullSWE.(den).input, topo_sampled);
     topo_sampled_ns.(glacier) = rmfield(topo_sampled_ns.(glacier),'northness');
     
     end
-
-load PaperII_AblationArea.mat AblationArea
-for g=1:3; glacier = options.glacier{g};
-AblationArea.(glacier)(AblationArea.(glacier)==-0.1)=NaN;
-AblationArea.(glacier)(~isnan(AblationArea.(glacier)))=1;
-end
  
 for t = [6,1,3,4,5,100]
 if     t == 6; type = 'Circle';           subset = 'pattern';       
@@ -88,10 +104,9 @@ for g = 1:3;    glacier = options.glacier{g};
         Xt      = TOPOinput;
         X       = [ones(length(Xt),1), Xt];
 
-        
         % Get coefficients
         coeffs = regress(swe, X);
-        MLR(n).(type)(mc).(glacier)   = coeffs;
+        MLR_det(n).(type)(mc).(glacier)   = coeffs;
         
 %         display([swe, X])
 %         display(coeffs)
@@ -107,10 +122,15 @@ for g = 1:3;    glacier = options.glacier{g};
         end
             %Set min to 0
         sweMLR(sweMLR<0) = 0;
-            %Cut accum
-%         sweMLR = sweMLR.*AblationArea.(glacier);   
+
+        Bw_temp = sweMLR*p_acc(g)./p_abl(g);
+        Bw_temp(AblationArea.(glacier)==1) = Bw_temp(AblationArea.(glacier)==1)*p_abl(g)./p_acc(g);
+        realBw_det_wAccum.(type).(glacier)(n,mc) = nanmean(Bw_temp(:));
+
+            %Cut accum    
+        sweMLR = sweMLR.*AblationArea.(glacier);   
         
-%         DataObs.(type).(glacier)(n,mc) = nanmean(sweMLR(:));
+        realBw_det.(type).(glacier)(n,mc) = nanmean(sweMLR(:));
          
 %         RMSE
         sampledtemp     = sweMLR(options.ENgrid.(glacier)(:,2),options.ENgrid.(glacier)(:,1));
@@ -121,9 +141,9 @@ for g = 1:3;    glacier = options.glacier{g};
         
         xNaN = ~any(isnan([pred_measure_tmp,real_measure_tmp]),2);
         R = corrcoef(pred_measure_tmp(xNaN), real_measure_tmp(xNaN));
-        real_R2.(type).(glacier)(n,mc) = R(2,1)^2;
+        real_R2_det.(type).(glacier)(n,mc) = R(2,1)^2;
 
-        realRMSE.(type).(glacier)(n,mc) = sqrt(mean((pred_measure_tmp-real_measure_tmp).^2));
+        realRMSE_det.(type).(glacier)(n,mc) = sqrt(mean((pred_measure_tmp-real_measure_tmp).^2));
                 
     end
         
@@ -135,11 +155,26 @@ end
 % save('PaperII_realdataLR_4var_1000t.mat')
 %% Plotting
 
+rand_data   = realRMSE;
+det_data    = synRMSE_det;
+% dotted_line = [0.59, 0.34, 0.27];   %Bw ablation
+% dotted_line = [0.59, 0.57, 0.38];   %Bw accum
+% dotted_line = [0.12, 0.045, 0.04];  %RMSE (McG)
+% dotted_line = [0.0247, 0.0161, 0.0182];  %RMSE (Pul)
+% dotted_line = [0.1116, 0.0896, 0.0752];  %RMSE (McG) - calculated
+y_axis_lim  = [0 0.3];
+y_axis_lab  = 'RMSE';
+plot_data   = 'PII_Syn_Plot_RMSE_AccPul_18May1700.mat';
+plot_fig    = 'PII_Syn_Plot_RMSE_AccPul';
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 load PaperII_realdataLR_final density_new density_old
 load Patterns.mat pUTM
 load PaperII_AblationArea.mat
+load TopoSWE.mat
+run OPTIONS
 
-    namesP = fieldnames(realRMSE);  order = [2 3 1 4 5 6]; namesP = namesP(order);
+    namesP = fieldnames(rand_data);  order = [2 3 1 4 5 6]; namesP = namesP(order);
     N1 = {'Centreline',''}; N2 = {'Centreline &','Transverse'}; N3 = {'Circle',''};
     N4 = {'Hourglass',''}; N5 = {'Hourglass','& Circle'}; N6 = {'Random',''}; 
     namesPfull = [N1; N2; N3; N4;N5;N6];
@@ -158,8 +193,9 @@ load PaperII_AblationArea.mat
 numPoints = 6:45;
     ela_ind = [1 7; 8 15; 16 23];
     ela_m = [0 0; -0.04*10^5 -0.0088*10^6; 0.04*10^5 0.0086*10^6];
-
-
+Bw_alldata = [0.6, 0.32, 0.25];
+% Bw_alldata = [0.59, 0.56, 0.38];
+    
   % Figure  
      clf; n = 1;
 [ha, ~] = tight_subplot(3,length(namesP),[0.05 0.01],[.08 0.08],[.07 0.01]);
@@ -168,11 +204,18 @@ for p = 1:length(namesP)
     
 % meanWB  = mean(real_R2.(namesP{p}).(glacier)(numPoints,:),2);
 % stdWB   = std(real_R2.(namesP{p}).(glacier)(numPoints,:),[],2);
-randuni_meanWB = nanmean(realRMSE.(namesP{p}).(glacier)(numPoints,:),2);
-randuni_stdWB  = nanstd(realRMSE.(namesP{p}).(glacier)(numPoints,:),[],2);
-det_meanWB = nanmean(det_realRMSE.(namesP{p}).(glacier)(numPoints,:),2);
-det_stdWB  = nanstd(det_realRMSE.(namesP{p}).(glacier)(numPoints,:),[],2);
-randomWB = random_realRMSE.(namesP{p}).(glacier)(numPoints,1);
+% det_meanWB = nanmean(det_real_R2.(namesP{p}).(glacier)(numPoints,:),2);
+
+randuni_meanWB = nanmean(rand_data.(namesP{p}).(glacier)(numPoints,:),2);
+randuni_stdWB  = nanstd(rand_data.(namesP{p}).(glacier)(numPoints,:),[],2);
+det_meanWB = nanmean(det_data.(namesP{p}).(glacier)(numPoints,:),2);
+det_stdWB  = nanstd(det_data.(namesP{p}).(glacier)(numPoints,:),[],2);
+% randomWB = random_realRMSE.(namesP{p}).(glacier)(numPoints,1);
+
+% randuni_meanWB = nanmean(realBw_randUni.(namesP{p}).(glacier)(numPoints,:),2);
+% randuni_stdWB  = nanstd(realBw_randUni.(namesP{p}).(glacier)(numPoints,:),[],2);
+% det_meanWB = nanmean(realBw_det.(namesP{p}).(glacier)(numPoints,:),2);
+% det_stdWB  = nanstd(realBw_det.(namesP{p}).(glacier)(numPoints,:),[],2);
 
 % meanR2.(glacier)(numPoints,p) = meanWB;
 % stdR2.(glacier)(numPoints,p) = stdWB;
@@ -180,7 +223,7 @@ randuni_mean.(glacier)(numPoints,p) = randuni_meanWB;
 randuni_std.(glacier)(numPoints,p) = randuni_stdWB;
 det_mean.(glacier)(numPoints,p) = det_meanWB;
 det_std.(glacier)(numPoints,p) = det_stdWB;
-rand_mean.(glacier)(numPoints,p) = randomWB;
+% rand_mean.(glacier)(numPoints,p) = randomWB;
 
 axes(ha(n))
 plot(numPoints,randuni_meanWB,'LineWidth',0.5,'Color',C(p,:)); hold on
@@ -193,18 +236,22 @@ fill([numPoints flip(numPoints)],[upper',flip(lower')],...
 fill([numPoints flip(numPoints)],[x2upper',flip(x2lower')],...
      C(p,:),'FaceAlpha',0.2,'EdgeColor','none')
 
-    plot(numPoints,randomWB,'LineWidth',0.5,'Color',[105,105,105]/255); hold on
+%     plot(numPoints,randomWB,'LineWidth',0.5,'Color',[105,105,105]/255); hold on
     plot(numPoints, det_meanWB,':k','LineWidth',1)
 
     %Best sample size Fitting function %%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    for gg = 1:3; glacier2 = options.glacier{gg};
-    alldata.(glacier2) = sweBMS_alldata.(glacier2)*density_new(gg)/density_old(gg); end
-        estGrid = SampledCell(alldata);
-     best_rmseLR = sqrt(mean((estGrid.(glacier)-realGrid.(glacier)(:,1)).^2));
-    plot([min(numPoints) max(numPoints)],[best_rmseLR,best_rmseLR],'--k')
-    save('PII_Real_Plot.mat','best_rmseLR','randuni_mean', 'randuni_std', 'det_mean','det_std','rand_mean');
-
+%     for gg = 1:3; glacier2 = options.glacier{gg};
+%     alldata.(glacier2) = sweBMS_alldata.(glacier2)*density_new(gg)/density_old(gg); end
+%         estGrid = SampledCell(alldata);
+%      best_rmseLR = sqrt(mean((estGrid.(glacier)-realGrid.(glacier)(:,1)).^2));
+%      best_rmseLR = 0;
+%      best_rmseLR = Bw_alldata(g);
+    best_rmseLR = dotted_line;
+    plot([min(numPoints) max(numPoints)],[dotted_line(g),dotted_line(g)],'--k')
+    save(plot_data,'best_rmseLR','randuni_mean', 'randuni_std', 'det_mean','det_std');%,'rand_mean');
+   
+    
 %         R = corrcoef(estGrid.(glacier), realGrid.(glacier)(:,1));
 %      bestR2 = R(2,1)^2;
 %     plot([min(numPoints) max(numPoints)],[bestR2,bestR2],'--k')
@@ -223,14 +270,15 @@ fill([numPoints flip(numPoints)],[x2upper',flip(x2lower')],...
     %titles
     if g==1; title(namesPfull(p,:)); end
     %y labels
-    if g ==1 && p==1; ylabel({'G4 RMSE', '(m w.e.)'}); set(gca,'XTickLabel',[]);
-    elseif g ==2 && p==1; ylabel({'G2 RMSE', '(m w.e.)'}); set(gca,'XTickLabel',[]);
-    elseif g ==3 && p==1; ylabel({'G13 RMSE', '(m w.e.)'}); 
+    if g ==1 && p==1; ylabel({['G4 ',y_axis_lab], '(m w.e.)'}); set(gca,'XTickLabel',[]);
+    elseif g ==2 && p==1; ylabel({['G2 ',y_axis_lab], '(m w.e.)'}); set(gca,'XTickLabel',[]);
+    elseif g ==3 && p==1; ylabel({['G13 ',y_axis_lab], '(m w.e.)'}); 
     else set(gca,'YTickLabel',[]);
     end
     if n==15; xlabel('                            Sample size (N)'); end
     if g==1 || g == 2; set(gca,'XTickLabel',[]); end
-ylim([0 0.4])
+ylim(y_axis_lim)
+% ylim([-0.5 0.5])
 xlim([min(numPoints) max(numPoints)])
 fig=gcf; set(findall(fig,'-property','FontSize'),'FontSize',18)
 
@@ -239,8 +287,8 @@ ax = get(gca,'Position');
 set(gca,'Position', [ax(1) ax(2) ax(3) 0.28]);
 
 
-    if n==0; yInd = 0.002; else; yInd = 0.13; end
-%     yInd = 0.14;
+    if n<0; yInd = 0.002; else; yInd = 0.13; end
+%     yI = 0.14;
     if g ==1; sizeG = 0.12; xoff = 0.035; yInd = yInd+0.02; else sizeG = 0.14; xoff = 0.03; end
 axes('position',[ax(1)+xoff ax(2)+yInd sizeG sizeG])
 pInd = 1:length(pUTM.(namesP{p}).(glacier));
@@ -258,7 +306,7 @@ end
 % display(bestRMSE)
 end 
 
-%     saveFIG_HP('PII_AA_RealData_wRandom',2,12)
+    saveFIG_HP(plot_fig,2,12)
     
 %% nc and nv calculation
 
