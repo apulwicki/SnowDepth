@@ -265,7 +265,7 @@ end
 %%
 
 mc = 1;
-ss=6;
+ss=45;
 
 figure(1); clf
 n=1;
@@ -292,8 +292,155 @@ axis off
 % display(glacier)
 % display(coeffsLR(ss).(namesP{p})(mc).(glacier))
 % display(R2.(namesP{p}).(glacier)(ss,mc,sampleN))
-display(synRMSE_rand.(namesP{p}).(glacier)(ss,mc,sampleN))
+% display(synRMSE_rand.(namesP{p}).(glacier)(ss,mc,sampleN))
     end
 
 n=n+7;
+end
+
+
+%%
+figure(1); clf
+ela_ind = [1 7; 8 15; 16 23];
+    ela_m = [0 0; -0.04*10^5 -0.0088*10^6; 0.04*10^5 0.0086*10^6];
+for g = 1:3; glacier = options.glacier{g};
+subplot(1,3,g)
+if g == 3; fill(options.rig.(glacier)(1:304,1),options.rig.(glacier)(1:304,2),...
+                [199, 201, 204]/255, 'EdgeColor','none'); hold on
+else; fill(options.rig.(glacier)(:,1),options.rig.(glacier)(:,2),...
+                [199, 201, 204]/255, 'EdgeColor','none'); hold on
+end
+% plot(options.rig.ELA(ela_ind(g,1):ela_ind(g,2),1)+ela_m(g,1), options.rig.ELA(ela_ind(g,1):ela_ind(g,2),2)+ela_m(g,2),'-k');
+plot(option.ELA.(glacier)(:,1),option.ELA.(glacier)(:,2),'-k') 
+axis off; axis equal
+end
+
+%%
+
+%% Calculate best RMSE using all data
+
+
+% load PaperII_FinalLRruns
+for mc = num_models
+
+%Additing noise to distributed WB
+real_measure = SampledCell(snowdist_model(mc));
+
+topoparam = fieldnames(topo_full.G4);
+for num_param = 1:length(topoparam)
+    for g = 1:3;        glacier = char(options.glacier(g));
+    tmp_topo.(glacier) = topo_full.(glacier).(topoparam{num_param});
+    end    
+    tmp_sampled.(topoparam{num_param}) = SampledCell(tmp_topo);
+end
+for g = 1:3;        glacier = char(options.glacier(g));
+    for num_param = 1:length(topoparam)
+sampled_topo.(glacier).(topoparam{num_param}) = tmp_sampled.(topoparam{num_param}).(glacier);
+    end
+end        
+        % BASIC LR        
+for g = 1:3;        glacier = char(options.glacier(g));
+        display(mc)
+
+    for n=6:length(real_measure.(glacier))
+        swe	    = real_measure.(glacier)(:,1);
+            swe     = swe + normrnd( 0, options.zzstd(g), size(swe,1),1);
+            swe(swe<0) = 0;
+        Xt      = struct2array(sampled_topo.(glacier));
+        X       = [ones(length(Xt),1), Xt];
+        
+        X       = X(1:n,:); swe = swe(1:n);
+        
+        coeffs = regress(swe, X);
+        tmp_best_coeffsLR.(glacier)(mc,:)   = coeffs;
+
+        swe_pred = repmat(coeffs(1), options.mapsize(g,:));
+        betaCoeff = coeffs(2:end);    topoCoeff = fieldnames(topo_full.G4);
+        for num_param = 1:length(betaCoeff)
+            param      = topoCoeff{num_param};
+            sweT       = topo_full.(glacier).(param)*betaCoeff(num_param);
+            swe_pred   = swe_pred + sweT;
+        end
+        swe_pred(swe_pred<0) = 0;
+        if only_ablation
+            swe_pred = swe_pred.*AblationArea.(glacier);
+        end        
+        
+        rmse.(glacier)(n,mc) = sqrt(nanmean(nanmean((snowdist_model(mc).(glacier)-swe_pred).^2)));
+    end
+    
+end   
+end
+
+%%
+figure(1); clf
+
+for g = 1:3;        glacier = char(options.glacier(g));
+   subplot(1,3,g)
+%    plot(rmse.(glacier),'Color',[199, 201, 204]/255); hold on
+   plot(6:length(real_measure.(glacier)), mean(rmse.(glacier)(6:end,:),2),'k'); hold on
+   plot([0,length(real_measure.(glacier))],[best_rmseLR.(glacier) best_rmseLR.(glacier)],'--k')
+   ylim([0 0.5])
+   xlabel('N')
+   ylabel('RMSE (m w.e.)')
+   title(glacier)
+end
+
+%%
+mc = 1;
+ss=45;
+
+figure(1); clf
+n=0;
+namesP = {'Centreline', 'CentreTransect', 'Circle', 'Hourglass', 'HourCircle', 'RandomSafe'};
+for g = 1:3;    glacier = options.glacier{g};
+ 
+
+% subplot(3,7,n)
+% h=imagesc(snowdist_model(mc).(glacier));
+% set(h,'alphadata',~isnan(snowdist_model(mc).(glacier)));
+% caxis([0 1]); caxis(caxis);
+% title(['True, B_w=', num2str(round(nanmean(snowdist_model(mc).(glacier)(:)),2))])
+% axis off
+
+    for p = 1:length(namesP)    
+subplot(3,6,n+p)
+data = mean(pred_bw.(namesP{p}).(glacier),3);
+h=imagesc(data);
+set(h,'alphadata',~isnan(data));
+title({[namesP{p},', B_w=', num2str(round(nanmean(data(:)),2))]})%,...
+%             ['RMSE=',num2str(round(mean(synRMSE_rand.(namesP{p}).(glacier)(ss,mc,:)),2))]})
+caxis([0 1]); caxis(caxis);
+axis off 
+
+% display(glacier)
+% display(coeffsLR(ss).(namesP{p})(mc).(glacier))
+% display(R2.(namesP{p}).(glacier)(ss,mc,sampleN))
+% display(synRMSE_rand.(namesP{p}).(glacier)(ss,mc,sampleN))
+    end
+
+n=n+6;
+end
+
+
+%%
+
+beta_lab = {'elevation','slope','curvature','Sx'};
+nBins = 12;
+
+for n = 1:200
+ figure(1); clf
+for i =1:4
+subplot(2,2,i)
+histogram(topo_abl.G13.(beta_lab{i}),nBins,'Normalization','probability'); hold on
+histogram(topo_sampled.G13.(beta_lab{i}),nBins,'Normalization','probability'); hold on
+histogram(topo_hist.Hourglass(:,i,n),nBins,'Normalization','probability')
+histogram(topo_hist.Centreline(:,i,n),nBins,'Normalization','probability')
+
+ylim([0 0.5]); xlim([-10,10])
+legend('Full Ablation Area', 'Measured locations','Hourglass','Centreline')
+title(beta_lab(i))
+
+end
+pause
 end

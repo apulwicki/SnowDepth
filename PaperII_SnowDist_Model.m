@@ -1,12 +1,12 @@
 %% Get synthetic snow distributions
-
+clear
 load PaperII_Syntheic.mat topo_full
 load PaperII_AblationArea.mat AblationArea AccumulationArea
 run OPTIONS
 
-num_models = 1;
-only_ablation = false;
-save_name = 'PaperII_SynSnowDistModel_McG_accum.mat';
+num_models = 200;
+only_ablation = true;
+save_name = 'PaperII_SynSnowDistModel_Pul_Abl_DDA.mat';
 
 
 Bw_abl = [0.59, 0.34, 0.27]; % ablation area only
@@ -16,25 +16,28 @@ if only_ablation
 else
     Bw_obs = Bw_full;
 end
+    p_acc = [0.36,    0.3,        0.308];
+    p_abl = [0.3422,  0.353,     0.3692];
+
 
 % Beta coeff ranges
 % McGrath values
-elev_range  = [0.585, 0.810];
-dc_range    = [0, 0.015];
-aspect_range = [0, 0.093];
-slope_range = [-0.09, 0.277];
-N_range     = [-0.414, 0.172];
-curv_range  = [-0.077, 0.02];
-sx_range    = [-0.294, 0.260];
-
-% Our values
-% elev_range  = [0.005, 0.118];
+% elev_range  = [0.585, 0.810];
 % dc_range    = [0, 0.015];
 % aspect_range = [0, 0.093];
-% slope_range = [0, 0.038];
+% slope_range = [-0.09, 0.277];
 % N_range     = [-0.414, 0.172];
-% curv_range  = [-0.028, 0.035];
-% sx_range    = [-0.055, 0.04];
+% curv_range  = [-0.077, 0.02];
+% sx_range    = [-0.294, 0.260];
+
+% Our values
+elev_range  = [0.005, 0.118];
+dc_range    = [0, 0.015];
+aspect_range = [0, 0.093];
+slope_range = [0, 0.038];
+N_range     = [-0.414, 0.172];
+curv_range  = [-0.028, 0.035];
+sx_range    = [-0.055, 0.04];
 
 intercept_range   = [0.6205, 0.2627, 0.2354];
 
@@ -72,11 +75,16 @@ for g = 1:3;    glacier = options.glacier{g};
         syn_model = syn_model + sweT;
     end
     
-    syn_model = syn_model + abs(min(syn_model(:)));
-
+    syn_model = syn_model + abs(min(syn_model(:)));% + ...
+%                 normrnd(0, options.zzstd(g), size(syn_model,1), size(syn_model,2));
+    syn_model(syn_model<0) = 0;
+    
     if only_ablation
     syn_model(AblationArea.(glacier)==-0.1)=NaN;
     end
+    
+    syn_model(AccumulationArea.(glacier)==1) = syn_model(AccumulationArea.(glacier)==1)*p_acc(g)./p_abl(g);
+    
     scale_to_obs = nanmean(syn_model(:))/Bw_obs(g);
 
     snowdist_model(m).(glacier) = syn_model/scale_to_obs;
@@ -91,7 +99,7 @@ save(save_name)
 %% Check that Bw is accurate
 
 clear
-load PaperII_SynSnowDistModel_Pul_accum
+load PaperII_SynSnowDistModel_Pul_abl_noise
 options.glacier = {'G4','G2','G13'};
 
 Bw = zeros(200,3);
@@ -102,7 +110,7 @@ for i=1:200
 end
 
 %% Plot snow distributions
-load PaperII_SynSnowDistModel_McG_accum
+load PaperII_SynSnowDistModel_Pul_abl_noise
 
 i=40;
 

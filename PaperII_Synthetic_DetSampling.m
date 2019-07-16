@@ -1,20 +1,20 @@
-% clear
+clear
 load PaperII_Syntheic.mat
 load PaperII_RegularSampling
 load PaperII_AblationArea.mat AblationArea AccumulationArea
 
-load PaperII_SynSnowDistModel_McG_accum
-% load PaperII_SynSnowDistModel_Pul
+load PaperII_SynSnowDistModel_Pul_Abl_DDA
 
-file_path = '/Users/Alexandra/Documents/SFU/Data/SnowDepth/';
-% file_path = '/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Sampling/';
+% file_path = '/Users/Alexandra/Documents/SFU/Data/SnowDepth/';
+file_path = '/home/glaciology1/Documents/QGIS/Donjek_Glaciers/Sampling/';
 
 sampling_number = 200;
-num_models = 1;%200;
-nn = 6;%6:45;
+num_models = 1:200;
+nn = 6;
 
-only_ablation = false;
+only_ablation = true;
 
+file_name_save = 'PII_Syn_July5_Pul_abl.mat';
 
 Bw_abl = [0.59, 0.34, 0.27]; % ablation area only
 Bw_full = [0.59, 0.57, 0.38]; % whole glacier
@@ -159,6 +159,8 @@ for ss = nn
     TOPOinput(:,i)  = TOPOinput_temp.(fname); end
     clear syn_measure_tmp syn_measure real_measure_tmp
         swe	    = WBinput(:,1);
+            swe     = swe + normrnd( 0, options.zzstd(g), size(swe,1),1);
+            swe(swe<0) = 0;
         Xt      = TOPOinput;
         X       = [ones(size(Xt,1),1), Xt];
 
@@ -213,14 +215,17 @@ for ss = nn
         % BASIC LR        
 
         swe	    = WBinput(:,1);
+            swe     = swe + normrnd( 0, options.zzstd(g), size(swe,1),1);
+            swe(swe<0) = 0;
         Xt      = TOPOinput;
         X       = [ones(size(Xt,1),1), Xt];
-        display([swe,X])
         
         coeffs = regress(swe, X);
-        display(coeffs)
-        pause
         coeffsLR_rand(ss).(namesP{p})(mc).(glacier)   = coeffs;
+        
+%         display([swe,X])
+%         display(coeffs)
+%         pause
 
         swe_pred = repmat(coeffs(1), options.mapsize(g,:));
         betaCoeff = coeffs(2:end);    topoCoeff = fieldnames(topo_full.G4);
@@ -263,7 +268,7 @@ end
 %% Calculate best RMSE using all data
 
 % load PaperII_FinalLRruns
-for mc = 1:num_models
+for mc = num_models
 
 %Additing noise to distributed WB
 real_measure = SampledCell(snowdist_model(mc));
@@ -284,6 +289,8 @@ end
 for g = 1:3;        glacier = char(options.glacier(g));
 
         swe	    = real_measure.(glacier)(:,1);
+            swe     = swe + normrnd( 0, options.zzstd(g), size(swe,1),1);
+            swe(swe<0) = 0;
         Xt      = struct2array(sampled_topo.(glacier));
         X       = [ones(length(Xt),1), Xt];
 
@@ -312,8 +319,24 @@ for g = 1:3;        glacier = char(options.glacier(g));
         R = corrcoef(real_snow(xNaN), syn_snow(xNaN));
         tmp_best_R2.(glacier)(mc) = R(2,1)^2;
         
-        tmp_best_rmseLR.(glacier)(mc) = sqrt(mean((real_snow(xNaN)-syn_snow(xNaN)).^2));
+%         tmp_best_rmseLR.(glacier)(mc) = sqrt(mean((real_snow(xNaN)-syn_snow(xNaN)).^2));
+        tmp_best_rmseLR.(glacier)(mc) = sqrt(nanmean(nanmean((snowdist_model(mc).(glacier)-swe_pred).^2)));
         
+%         figure(1); clf
+%         subplot(1,3,1)
+%         h=imagesc(snowdist_model(mc).(glacier));
+%         set(h,'alphadata',~isnan(snowdist_model(mc).(glacier))); caxis([0 1]); caxis(caxis); axis off 
+%         
+%         subplot(1,3,2)
+%         h=imagesc(swe_pred);
+%         set(h,'alphadata',~isnan(swe_pred)); caxis([0 1]); caxis(caxis); axis off 
+%         
+%         subplot(1,3,3)
+%         h=imagesc(abs(snowdist_model(mc).(glacier)-swe_pred));
+%         set(h,'alphadata',~isnan(snowdist_model(mc).(glacier)-swe_pred)); caxis([0 0.5]); caxis(caxis); axis off 
+%         
+%         display(tmp_best_rmseLR.(glacier)(mc))
+%         pause
 end   
 end
 
@@ -322,3 +345,7 @@ best_rmseLR.(glacier) = mean(tmp_best_rmseLR.(glacier));
 best_coeffsLR.(glacier) = mean(tmp_best_coeffsLR.(glacier));
 best_R2.(glacier) = mean(tmp_best_R2.(glacier));
 end
+
+%%
+save(file_name_save,'synBw_rand','synBw_det','R2_rand','R2_det',...
+    'synRMSE_rand','synRMSE_det','best_rmseLR','best_coeffsLR','best_R2')

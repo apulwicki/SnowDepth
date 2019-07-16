@@ -6,7 +6,7 @@ function [swe_out, topo_out] = random_uniform(subsetSWE, subsetTOPO, n)
     
     m = length(N);
     dmetric = 0;
-    trials = 10;
+    trials = 100;
 
 for k=1:trials
     pp=randperm(m);
